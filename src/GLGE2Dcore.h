@@ -33,6 +33,28 @@ struct Vertex2D
 {
     //the position of the vertex
     vec2 pos;
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * basic constructor
+     */
+    Vertex2D();
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param pos the position of the vertex
+     */
+    Vertex2D(vec2 pos);
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param x the positoin on the x axis
+     * @param y the positoin on the y axis
+     */
+    Vertex2D(float x, float y);
 };
 
 ///////////
