@@ -1,11 +1,14 @@
 //test script to check if GLGE works, no real commenting of the script
 #include "GLGE.h"
 #include "GLGE3Dcore.h"
+#include "GLGE2Dcore.h"
 
 #include <iostream>
 
 Object test;
 Camera camera;
+
+Object2D shape;
 
 float camSpeed = 0.005;
 float camRot = 0.0025;
@@ -108,8 +111,18 @@ int main(int argc, char** argv)
                       1,3,5,
                       3,7,5};
 
+    Vertex2D verts[] = {Vertex2D(0.25,0.25),
+                        Vertex2D(0.75,0.25),
+                        Vertex2D(0.75,0.75),
+                        Vertex2D(0.25,0.75)};
+
+    Triangle tris[] = {Triangle(0,1,2, vec4(1,0,0,1),vec4(0,1,0,1),vec4(0,0,1,1)),
+                       Triangle(2,1,3,vec4(1,0,0,1),vec4(0,1,0,1),vec4(0,0,1,1))};
+
     test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
     test.bindShader(GLGE_DEFAULT_3D_SHADER);
+
+    shape = Object2D(verts, tris, sizeof(verts), sizeof(tris));
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));

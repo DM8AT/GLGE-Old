@@ -37,7 +37,7 @@ struct Transform2D
     //the rotation of the object
     float rot;
     //the scaling of the object
-    vec2 size;
+    vec2 size = vec2(1,1);
 
     /**
      * @brief Construct a new Transform 2D
@@ -134,11 +134,8 @@ public:
      */
     Mesh2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces);
 
-private:
     std::vector<Triangle> faces;
-    std::vector<Vertex2D> vertices;
-
-    
+    std::vector<Vertex2D> vertices; 
 };
 
 class Object2D
@@ -159,7 +156,7 @@ public:
      * @param sizeOfVertices the size of the vertex pointer array
      * @param sizeOfFaces the size of the faces pointer array
      */
-    Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces);
+    Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief Construct a new Object 2D
@@ -167,7 +164,7 @@ public:
      * @param vertices the vertices in an std vector
      * @param faces the faces in an std vector
      */
-    Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces);
+    Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief draw the object to the screen
@@ -175,6 +172,8 @@ public:
     void draw();
 
 private:
+    //store the mesh for the object
+    Mesh2D mesh;
     //store the transform of the object
     Transform2D transf;
     //store the vertex and index buffer
@@ -189,6 +188,8 @@ private:
                         0,0,1);
     //store a texture
     GLuint texture;
+    //say if the object is static
+    bool isStatic;
 
     void createBuffers();
 };

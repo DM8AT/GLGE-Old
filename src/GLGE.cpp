@@ -59,6 +59,44 @@ Triangle::Triangle(unsigned int indices[3], vec2 texCoords[3], vec3 normal)
     this->normal = normal;
 }
 
+//constructor using single numbers
+Triangle::Triangle(unsigned int a, unsigned int b, unsigned int c, vec4 ca, vec4 cb, vec4 cc, vec3 normal)
+{
+    //store the inputed indices
+    this->indices[0] = a;
+    this->indices[1] = b;
+    this->indices[2] = c;
+
+    //store the inputed colors
+    this->colors[0] = ca;
+    this->colors[1] = cb;
+    this->colors[2] = cc;
+    //say that colors should be used
+    this->useColor = 1.f;
+
+    //store the inputed normal
+    this->normal = normal;
+}
+
+//constructor using single numbers for a texture
+Triangle::Triangle(unsigned int a, unsigned int b, unsigned int c, vec2 ta, vec2 tb, vec2 tc, vec3 normal)
+{
+    //store the inputed indices
+    this->indices[0] = a;
+    this->indices[1] = b;
+    this->indices[2] = c;
+
+    //store the inputed colors
+    this->texCoords[0] = ta;
+    this->texCoords[1] = tb;
+    this->texCoords[2] = tc;
+    //say that colors should be used
+    this->useColor = 0.f;
+
+    //store the inputed normal
+    this->normal = normal;
+}
+
 ////////////////////
 //Public functions//
 ////////////////////

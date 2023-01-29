@@ -118,3 +118,69 @@ Mesh2D::Mesh2D(std::vector<Vertex2D> vertices, std::vector<Triangle> indices)
     this->vertices = vertices;
     this->faces = indices;
 }
+
+//OBJECT 2D
+
+//default constructor
+Object2D::Object2D()
+{
+    //init the object
+}
+
+//constructor using array pointers
+Object2D::Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces, Transform2D transform, bool isStatic)
+{
+    //create an mesh from the array pointers
+    this->mesh = Mesh2D(vertices, faces, sizeOfVertices, sizeOfFaces);
+
+    //save the transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //create the buffers
+    this->createBuffers();
+}
+
+//constructor using vectors
+Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces, Transform2D transform, bool isStatic)
+{
+    //save an mesh created from the two vectors
+    this->mesh = Mesh2D(vertices, faces);
+
+    //save the transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //create the buffers
+    this->createBuffers();
+}
+
+void Object2D::draw()
+{
+    
+}
+
+void Object2D::createBuffers()
+{
+    //generate the vertex buffer for the object
+    glGenBuffers(1, &this->VBO);
+    //bind the vertex buffer object to store data
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    //store the mesh data in the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
+    //unbind the vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate the index buffer
+    glGenBuffers(1, &this->FBO);
+    //bind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->FBO);
+    //store the index information in the index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.faces[0])*((int)mesh.faces.size()), &(mesh.faces[0]), GL_STATIC_DRAW);
+    //unbind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}

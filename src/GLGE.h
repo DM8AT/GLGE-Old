@@ -84,6 +84,32 @@ public:
      */
     Triangle(unsigned int indices[3], vec2 texCoords[3], vec3 normal = vec3(0,0,0));
 
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param a the first index of the triangle
+     * @param b the second index of the triangle
+     * @param c the thired index of the triangle
+     * @param ca the first color of the triangle
+     * @param cb the second color of the triangle
+     * @param cc the thired color of the triangle
+     * @param normal the normal vector for the face
+     */
+    Triangle(unsigned int a, unsigned int b, unsigned int c, vec4 ca, vec4 cb, vec4 cc, vec3 normal = vec3(0,0,0));
+
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param a the first index of the triangle
+     * @param b the second index of the triangle
+     * @param c the thired index of the triangle
+     * @param ta the first texture coordinate for the triangle
+     * @param tb the second texture coordinate for the triangle
+     * @param tc the thired texture coordinate for the triangle
+     * @param normal the normal vector for the face
+     */
+    Triangle(unsigned int a, unsigned int b, unsigned int c, vec2 ta, vec2 tb, vec2 tc, vec3 normal = vec3(0,0,0));
+
 private:
     //three indices
     unsigned int indices[3] = {0,0,0};
