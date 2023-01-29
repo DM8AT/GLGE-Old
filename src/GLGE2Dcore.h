@@ -75,9 +75,9 @@ public:
      * @brief Construct a new Mesh 2D
      * 
      * @param vertices the vertices as an pointer array
-     * @param indices the indices as an pointer array
+     * @param faces the faces as an pointer array
      * @param sizeOfVertices the size of the vertex pointer array
-     * @param sizeOfIndices the size of the index pointer array
+     * @param sizeOfFaces the size of the faces pointer array
      */
     Mesh2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces);
 
@@ -85,7 +85,7 @@ public:
      * @brief Construct a new Mesh 2D
      * 
      * @param vertices the vertices in an std vector
-     * @param indices the indices in an std vector
+     * @param faces the faces in an std vector
      */
     Mesh2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces);
 
