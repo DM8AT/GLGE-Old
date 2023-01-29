@@ -11,10 +11,63 @@
 
 //include the main file
 #include "GLGE2Dcore.h"
+//include the GLGE dependencys
+#include "GLGE/GLGEDefines.h"
+#include "GLGE/glgePrivDefines.h"
+
+//the needed default C++ libs
+#include <math.h>
 
 ///////////
 //STRUCTS//
 ///////////
+
+//TRANSFORM
+
+//default constructor
+Transform2D::Transform2D()
+{
+    //init the object
+}
+
+//constructor with vector
+Transform2D::Transform2D(vec2 pos, float rot, vec2 scale)
+{
+    //save the inputed attributes
+    this->pos = pos;
+    this->rot = rot*GLGE_TO_RADIANS;
+    this->size = scale;
+}
+
+//constructor with floats
+Transform2D::Transform2D(float x, float y, float rot, vec2 scale)
+{
+    //save the inputed attributes and convert the floats to an vector
+    this->pos = vec2(x,y);
+    this->rot = rot*GLGE_TO_RADIANS;
+    this->size = scale;
+}
+
+mat3 Transform2D::getMatrix()
+{
+    //move everything to the position
+    mat3 moveMat(1,0,this->pos.x,
+                 0,1,this->pos.y,
+                 0,0,1);
+
+    //rotate everything correctly
+    mat3 rotaMat(std::cos(rot),-std::sin(rot),0,
+                 std::sin(rot), std::cos(rot),0,
+                 0,             0,            1);
+
+    //scale everything correctly
+    mat3 sizeMat(this->size.x, 0, 0,
+                 0, this->size.y, 0,
+                 0, 0,            1);
+
+    //return the multiplied matrices
+    return moveMat * sizeMat * rotaMat;
+}
 
 //VERTEX2D
 

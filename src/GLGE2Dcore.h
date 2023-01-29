@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-01-29
  * 
- * @copyright Copyright (c) 2023
+ * @copyright CC BY SA (see  https://creativecommons.org/licenses/by-sa/4.0/)
  */
 
 #ifndef _GLGE2DCORE_H_
@@ -55,7 +55,22 @@ struct Transform2D
      */
     Transform2D(vec2 pos, float rot = 0, vec2 scale = vec2(1,1));
 
+    /**
+     * @brief Construct a new Transform 2D
+     * 
+     * @param x the x position of the object
+     * @param y the y position of the object
+     * @param rot the rotation of the object
+     * @param scale the scale  of the object
+     */
+    Transform2D(float x, float y, float rot = 0, vec2 scale = vec2(1,1));
 
+    /**
+     * @brief Get the Matrix for transforming an object to this scale, rot and pos
+     * 
+     * @return mat3 the transformation matrix
+     */
+    mat3 getMatrix();
 };
 
 //a 2D transform
