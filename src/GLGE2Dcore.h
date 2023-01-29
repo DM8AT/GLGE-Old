@@ -141,4 +141,56 @@ private:
     
 };
 
+class Object2D
+{
+public:
+    /**
+     * @brief Construct a new Object 2D
+     * 
+     * default constructor
+     */
+    Object2D();
+
+    /**
+     * @brief Construct a new Object 2D
+     * 
+     * @param vertices the vertices for the object
+     * @param faces the Faces for the object
+     * @param sizeOfVertices the size of the vertex pointer array
+     * @param sizeOfFaces the size of the faces pointer array
+     */
+    Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces);
+
+    /**
+     * @brief Construct a new Object 2D
+     * 
+     * @param vertices the vertices in an std vector
+     * @param faces the faces in an std vector
+     */
+    Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces);
+
+    /**
+     * @brief draw the object to the screen
+     */
+    void draw();
+
+private:
+    //store the transform of the object
+    Transform2D transf;
+    //store the vertex and index buffer
+    GLuint VBO, FBO;
+    //save the shader
+    GLint shader;
+    //store the move matrix location
+    GLuint moveMatLoc;
+    //the local matrix to make the object correct
+    mat3 moveMat = mat3(1,0,0,
+                        0,1,0,
+                        0,0,1);
+    //store a texture
+    GLuint texture;
+
+    void createBuffers();
+};
+
 #endif
