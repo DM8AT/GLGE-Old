@@ -64,10 +64,35 @@ struct Vertex2D
 class Mesh2D
 {
 public:
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * default constructor
+     */
+    Mesh2D();
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices as an pointer array
+     * @param indices the indices as an pointer array
+     * @param sizeOfVertices the size of the vertex pointer array
+     * @param sizeOfIndices the size of the index pointer array
+     */
+    Mesh2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces);
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices in an std vector
+     * @param indices the indices in an std vector
+     */
+    Mesh2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces);
 
 private:
     std::vector<Triangle> faces;
     std::vector<Vertex2D> vertices;
+
 };
 
 #endif
