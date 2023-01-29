@@ -29,6 +29,36 @@
 //STRUCTS//
 ///////////
 
+//an 2D transform
+struct Transform2D
+{
+    //an 2D position argument
+    vec2 pos;
+    //the rotation of the object
+    float rot;
+    //the scaling of the object
+    vec2 size;
+
+    /**
+     * @brief Construct a new Transform 2D
+     * 
+     * default constructor
+     */
+    Transform2D();
+
+    /**
+     * @brief Construct a new Transform 2D
+     * 
+     * @param pos the posi
+     * @param rot 
+     * @param scale 
+     */
+    Transform2D(vec2 pos, float rot = 0, vec2 scale = vec2(1,1));
+
+
+};
+
+//a 2D transform
 struct Vertex2D
 {
     //the position of the vertex
@@ -93,6 +123,7 @@ private:
     std::vector<Triangle> faces;
     std::vector<Vertex2D> vertices;
 
+    
 };
 
 #endif
