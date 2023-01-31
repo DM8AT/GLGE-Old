@@ -382,4 +382,15 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
  */
 GLuint glgeCompileShader(const char* vertex, const char* fragment);
 
+/**
+ * @brief load an texture from an file
+ * 
+ * @param file the file to read the data from
+ * @param storeSize an optional place to store the size of the Picture
+ * @return GLint the compiled OpenGL texture
+ */
+GLuint glgeTextureFromFile(const char* file, vec2* storeSize = NULL);
+
+vec2 glgeGetTextureSize(const char* texture);
+
 #endif

@@ -7,6 +7,10 @@
 //include the OpenGL dependencys
 #include <GL/freeglut.h>
 
+//include stbi_image
+#define STB_IMAGE_IMPLEMENTATION
+#include "GLGE/stb_image.h"
+
 //include the standart librarys
 #include <math.h>
 #include <cstring>
@@ -813,4 +817,53 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
     glUseProgram(shaderProgram);
     //return the shader program in the GLGE Object
     return shaderProgram;
+}
+
+GLuint glgeTextureFromFile(const char* name, vec2* sP)
+{
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load and generate the texture
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(name, &width, &height, &nrChannels, 0);
+    if(data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture file: " << name << std::endl;
+    }
+
+    //store the size if the input is not NULL
+    if (sP != NULL)
+    {
+        sP->x = width;
+        sP->y = height;
+    }
+
+    //clear memory and return the texture
+    stbi_image_free(data);
+    return texture;
+}
+
+vec2 glgeGetTextureSize(const char* name)
+{
+    int w, h, c;
+    unsigned char* data = stbi_load(name, &w, &h, &c, 0);
+    if(!data)
+    {
+        std::cout << "Failed to load texture file: " << name << std::endl;
+    }
+    stbi_image_free(data);
+    return vec2(h,w);
 }

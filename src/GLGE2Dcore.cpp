@@ -435,4 +435,8 @@ void Object2D::recalculateMoveMatrix()
 
     //fix matrix bug
     this->moveMat.m[2][2] = 0;
+    //fix deformation
+    this->moveMat = mat3(1/glgeWindowAspect,0,0,
+                         0,                 1,0,
+                         0,                 0,1) * moveMat;
 }

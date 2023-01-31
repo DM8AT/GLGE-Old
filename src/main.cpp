@@ -28,6 +28,7 @@ void mainLoop()
     //test.rotate(0.5,0.131,0);
     test.update();
 
+    shape.rotate(2);
     shape.update();
 
     if (glgeGetKeys().w)
@@ -77,7 +78,7 @@ int main(int argc, char** argv)
 {
     //init functions
     glgeInit(argc, argv);
-    glgeCreateWindow("Window", 600,600);
+    glgeCreateWindow("GLGE Test Script", 600,600);
     glgeInit3DCore();
     //setup
     glgeSetClearColor(.5,.5,.5);
