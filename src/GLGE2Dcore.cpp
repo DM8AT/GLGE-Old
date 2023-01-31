@@ -78,17 +78,39 @@ Vertex2D::Vertex2D()
 }
 
 //constructor with vec
-Vertex2D::Vertex2D(vec2 p)
+Vertex2D::Vertex2D(vec2 p, vec4 color)
 {
     //set the position to the input
     this->pos = p;
+    //store the inputed color
+    this->color = color;
 }
 
 //constructor using floats
-Vertex2D::Vertex2D(float x, float y)
+Vertex2D::Vertex2D(float x, float y, vec4 color)
 {
     //set the position to the inputs
     this->pos = vec2(x,y);
+    //store the inputed color
+    this->color = color;
+}
+
+//constructor with vec
+Vertex2D::Vertex2D(vec2 p, vec2 texCoord)
+{
+    //set the position to the input
+    this->pos = p;
+    //store the inputed texture coordinate
+    this->texCoord = texCoord;
+}
+
+//constructor using floats
+Vertex2D::Vertex2D(float x, float y, vec2 texCoord)
+{
+    //set the position to the inputs
+    this->pos = vec2(x,y);
+    //store the inputed texture coordinate
+    this->texCoord = texCoord;
 }
 
 ///////////
@@ -104,19 +126,19 @@ Mesh2D::Mesh2D()
 }
 
 //constructor with pointer array
-Mesh2D::Mesh2D(Vertex2D* vertices, Triangle* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices)
+Mesh2D::Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices)
 {
     //convert the pointer arrays to vectors and save them
-    this->vertices = std::vector<Vertex2D>(vertices, vertices + sizeOfVertices);
-    this->faces = std::vector<Triangle>(indices, indices + sizeOfIndices);
+    this->vertices = std::vector<Vertex2D>(vertices, vertices + (sizeOfVertices/sizeof(vertices[0])));
+    this->indices = std::vector<unsigned int>(indices, indices + (sizeOfIndices/sizeof(indices[0])));
 }
 
 //constructor with vectors
-Mesh2D::Mesh2D(std::vector<Vertex2D> vertices, std::vector<Triangle> indices)
+Mesh2D::Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices)
 {
     //save the inputed vectors
     this->vertices = vertices;
-    this->faces = indices;
+    this->indices = indices;
 }
 
 //OBJECT 2D
@@ -128,10 +150,10 @@ Object2D::Object2D()
 }
 
 //constructor using array pointers
-Object2D::Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVertices, unsigned int sizeOfFaces, Transform2D transform, bool isStatic)
+Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfFaces, Transform2D transform, bool isStatic)
 {
     //create an mesh from the array pointers
-    this->mesh = Mesh2D(vertices, faces, sizeOfVertices, sizeOfFaces);
+    this->mesh = Mesh2D(vertices, indices, sizeOfVertices, sizeOfFaces);
 
     //save the transform
     this->transf = transform;
@@ -144,10 +166,10 @@ Object2D::Object2D(Vertex2D* vertices, Triangle* faces, unsigned int sizeOfVerti
 }
 
 //constructor using vectors
-Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces, Transform2D transform, bool isStatic)
+Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices, Transform2D transform, bool isStatic)
 {
     //save an mesh created from the two vectors
-    this->mesh = Mesh2D(vertices, faces);
+    this->mesh = Mesh2D(vertices, indices);
 
     //save the transform
     this->transf = transform;
@@ -160,8 +182,23 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<Triangle> faces, 
 }
 
 void Object2D::draw()
-{
-    
+{    
+    //bind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    //glBegin(GL_POLYGON);
+    //for (int i = 0; i < 4; i++)
+    //{
+    //    glVertex2f(this->mesh.vertices[i].pos.x,this->mesh.vertices[i].pos.y);
+    //}
+    //glEnd();
+
+    glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+
+    //unbind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Object2D::createBuffers()
@@ -176,11 +213,11 @@ void Object2D::createBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the index buffer
-    glGenBuffers(1, &this->FBO);
+    glGenBuffers(1, &this->IBO);
     //bind the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->FBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
     //store the index information in the index buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.faces[0])*((int)mesh.faces.size()), &(mesh.faces[0]), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
     //unbind the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

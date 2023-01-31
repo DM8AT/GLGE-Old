@@ -16,7 +16,7 @@ float camRot = 0.0025;
 void display()
 {
     //draw the object
-    test.draw();
+    shape.draw();
 }
 
 void mainLoop()
@@ -111,18 +111,18 @@ int main(int argc, char** argv)
                       1,3,5,
                       3,7,5};
 
-    Vertex2D verts[] = {Vertex2D(0.25,0.25),
-                        Vertex2D(0.75,0.25),
-                        Vertex2D(0.75,0.75),
-                        Vertex2D(0.25,0.75)};
+    Vertex2D verts[] = {Vertex2D(0,0),
+                        Vertex2D(1,0),
+                        Vertex2D(1,1),
+                        Vertex2D(0,1)};
 
-    Triangle tris[] = {Triangle(0,1,2, vec4(1,0,0,1),vec4(0,1,0,1),vec4(0,0,1,1)),
-                       Triangle(2,1,3,vec4(1,0,0,1),vec4(0,1,0,1),vec4(0,0,1,1))};
+    uint inds[] = {0,1,2,
+                   2,1,3};
 
-    test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
-    test.bindShader(GLGE_DEFAULT_3D_SHADER);
+    //test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
+    //test.bindShader(GLGE_DEFAULT_3D_SHADER);
 
-    shape = Object2D(verts, tris, sizeof(verts), sizeof(tris));
+    shape = Object2D(verts, inds, sizeof(verts), sizeof(inds));
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));
