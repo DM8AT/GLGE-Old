@@ -111,18 +111,19 @@ int main(int argc, char** argv)
                       1,3,5,
                       3,7,5};
 
-    Vertex2D verts[] = {Vertex2D(0,0),
-                        Vertex2D(1,0),
-                        Vertex2D(1,1),
-                        Vertex2D(0,1)};
+    Vertex2D verts[] = {Vertex2D(0,0, 1,0,0,1),
+                        Vertex2D(1,0, 0,1,0,1),
+                        Vertex2D(1,1, 0,0,1,1),
+                        Vertex2D(0,1, 1,1,0,1)};
 
     uint inds[] = {0,1,2,
-                   2,1,3};
+                   0,2,3};
 
     //test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
     //test.bindShader(GLGE_DEFAULT_3D_SHADER);
 
     shape = Object2D(verts, inds, sizeof(verts), sizeof(inds));
+    shape.setShader("src/GLGE/shaders/base2D");
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));

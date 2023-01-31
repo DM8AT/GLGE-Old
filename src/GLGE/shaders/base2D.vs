@@ -12,5 +12,5 @@ void main()
 {
     FragmentColor = color;
     FragmentTexcoord = texcoord;
-    gl_Position = vec4(vec3(pos,1)*moveMat, 1);
+    gl_Position = vec4(pos,0,1);
 }

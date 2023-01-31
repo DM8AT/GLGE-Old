@@ -95,6 +95,24 @@ Vertex2D::Vertex2D(float x, float y, vec4 color)
     this->color = color;
 }
 
+//vertex with a lot of arguments
+Vertex2D::Vertex2D(float x, float y, float r, float g, float b, float a)
+{
+    //set the position to the inputs
+    this->pos = vec2(x,y);
+    //store the inputed color
+    this->color = vec4(r,g,b,a);
+}
+
+//vertex with a lot of arguments and an position
+Vertex2D::Vertex2D(vec2 pos, float r, float g, float b, float a)
+{
+    //set the position to the inputs
+    this->pos = pos;
+    //store the inputed color
+    this->color = vec4(r,g,b,a);
+}
+
 //constructor with vec
 Vertex2D::Vertex2D(vec2 p, vec2 texCoord)
 {
@@ -187,18 +205,41 @@ void Object2D::draw()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-    //glBegin(GL_POLYGON);
-    //for (int i = 0; i < 4; i++)
-    //{
-    //    glVertex2f(this->mesh.vertices[i].pos.x,this->mesh.vertices[i].pos.y);
-    //}
-    //glEnd();
+    //activate sub elements
+    //say where the position vector is
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), 0);
+    //say where the color is
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, color));
+    //say where texture coordinates are
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, texCoord));
+
+    //bind the shader
+    glUseProgram(this->shader);
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //unbind the shader
+    glUseProgram(0);
+}
+
+void Object2D::setShader(const char* p)
+{
+    //save the inputed path in an string
+    std::string path = p;
+
+    //add the suffixes
+    std::string vs = p+std::string(".vs");
+    std::string fs = p+std::string(".fs");
+
+    //compile and save the shader
+    this->shader = glgeCompileShader(vs.c_str(), fs.c_str());
 }
 
 void Object2D::createBuffers()

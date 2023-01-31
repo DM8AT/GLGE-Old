@@ -107,7 +107,30 @@ struct Vertex2D
      */
     Vertex2D(float x, float y, vec4 color = vec4(1,1,1,1));
 
-        /**
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param x the position on the x axis
+     * @param y the position on the y axis
+     * @param r the amount of red in the color
+     * @param g the amount of green in the color
+     * @param b the amount of blue in the color
+     * @param a the transperency of the color
+     */
+    Vertex2D(float x, float y, float r, float g, float b, float a);
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param pos the position of the vertex
+     * @param r the amount of red in the color
+     * @param g the amount of green in the color
+     * @param b the amount of blue in the color
+     * @param a the transperency of the color
+     */
+    Vertex2D(vec2 pos, float r, float g, float b, float a);
+
+    /**
      * @brief Construct a new Vertex 2D
      * 
      * @param pos the position of the vertex
@@ -197,6 +220,13 @@ public:
      * @brief draw the object to the screen
      */
     void draw();
+
+    /**
+     * @brief Set the Shader object
+     * 
+     * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
+     */
+    void setShader(const char* path);
 
 private:
     //store the mesh for the object
