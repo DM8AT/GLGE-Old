@@ -15,6 +15,8 @@ float camRot = 0.0025;
 
 void display()
 {
+    test.draw();
+    
     //draw the object
     shape.draw();
 }
@@ -114,18 +116,19 @@ int main(int argc, char** argv)
                       1,3,5,
                       3,7,5};
 
-    Vertex2D verts[] = {Vertex2D(-1,-1, 1,0,0,1),
-                        Vertex2D( 1,-1, 0,1,0,1),
-                        Vertex2D( 1, 1, 0,0,1,1),
-                        Vertex2D(-1, 1, 1,1,0,1)};
+    Vertex2D verts[] = {Vertex2D(-1,-1, 1,0),
+                        Vertex2D( 1,-1, 1,1),
+                        Vertex2D( 1, 1, 0,1),
+                        Vertex2D(-1, 1, 0,0)};
 
     uint inds[] = {0,1,2,
                    0,2,3};
 
-    //test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
-    //test.bindShader(GLGE_DEFAULT_3D_SHADER);
+    test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
+    test.bindShader(GLGE_DEFAULT_3D_SHADER);
 
-    shape = Object2D(verts, inds, sizeof(verts), sizeof(inds), Transform2D(0,0, 45, vec2(0.5,0.5)));
+    shape = Object2D(verts, inds, sizeof(verts), sizeof(inds), Transform2D(-0.75,0.75, 45, vec2(0.25,0.25)));
+    shape.setTexture("src/netherite_block.png");
     shape.setShader("src/GLGE/shaders/base2D");
 
     //camera setup

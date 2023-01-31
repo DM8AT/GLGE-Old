@@ -393,6 +393,9 @@ void Object::draw()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
+    //bind the shader
+    glUseProgram(shader);
+
     //bind the sub elements
     //say where the position vector is
     glEnableVertexAttribArray(0);
@@ -413,6 +416,9 @@ void Object::draw()
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //unbind the shader
+    glUseProgram(0);
 
     //disable all bound elements
     //disable position argument

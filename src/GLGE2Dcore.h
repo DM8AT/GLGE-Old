@@ -146,6 +146,25 @@ struct Vertex2D
      * @param texCoord the texture coordinate
      */
     Vertex2D(float x, float y, vec2 texCoord);
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param pos the position for the vertex
+     * @param tX the x part for the texture sampling
+     * @param tY the y part for the texture sampling
+     */
+    Vertex2D(vec2 pos, float tX, float tY);
+
+    /**
+     * @brief Construct a new Vertex 2D
+     * 
+     * @param x the x position of the Vertex
+     * @param y the y position of the Vertex
+     * @param tX the x part for the texture sampling
+     * @param tY the y part for the texture sampling
+     */
+    Vertex2D(float x, float y, float tX, float tY);
 };
 
 ///////////
@@ -246,6 +265,27 @@ public:
      * @return GLuint the compiled shader
      */
     GLuint getShader();
+
+    /**
+     * @brief Set the Texture for the object
+     * 
+     * @param file the file to read the texture from
+     */
+    void setTexture(const char* file);
+
+    /**
+     * @brief Set the Texture for the object
+     * 
+     * @param texture the allready compiled OpenGL texture
+     */
+    void setTexture(GLuint texture);
+
+    /**
+     * @brief Get the Texture from the file
+     * 
+     * @return GLuint the allready compiled OpenGL texture
+     */
+    GLuint getTexture();
 
     /**
      * @brief Set the Transform for the object

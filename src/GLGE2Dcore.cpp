@@ -68,7 +68,7 @@ mat3 Transform2D::getMatrix()
                  0, 0,            1);
 
     //return the multiplied matrices
-    return rotaMat * moveMat * sizeMat;
+    return (moveMat * sizeMat) * rotaMat;
 }
 
 //VERTEX2D
@@ -131,6 +131,24 @@ Vertex2D::Vertex2D(float x, float y, vec2 texCoord)
     this->pos = vec2(x,y);
     //store the inputed texture coordinate
     this->texCoord = texCoord;
+}
+
+//constructor with vector and floates
+Vertex2D::Vertex2D(vec2 pos, float tX, float tY)
+{
+    //store the inputed position
+    this->pos = pos;
+    //store the inputed texture coordinate
+    this->texCoord = vec2(tX,tY);
+}
+
+//constructor with a lot of floates
+Vertex2D::Vertex2D(float x, float y, float tX, float tY)
+{
+    //store the inputed position
+    this->pos = vec2(x,y);
+    //store the inputed texture coordinate
+    this->texCoord = vec2(tX,tY);
 }
 
 ///////////
@@ -230,11 +248,17 @@ void Object2D::draw()
     //pass the move matrix to the shader
     glUniformMatrix3fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
+    //bind the texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     //deactivate the sub elements
     //deactivate the position argument
@@ -281,6 +305,24 @@ GLuint Object2D::getShader()
 {
     //return the shader
     return this->shader;    
+}
+
+void Object2D::setTexture(const char* file)
+{
+    //compile and store the texture
+    this->texture = glgeTextureFromFile(file);
+}
+
+void Object2D::setTexture(GLuint texture)
+{
+    //store the inputed texture
+    this->texture = texture;
+}
+
+GLuint Object2D::getTexture()
+{
+    //return the stored texture
+    return this->texture;
 }
 
 void Object2D::setTransform(Transform2D transform)
@@ -434,7 +476,7 @@ void Object2D::recalculateMoveMatrix()
     this->moveMat = this->transf.getMatrix();
 
     //fix matrix bug
-    this->moveMat.m[2][2] = 0;
+    this->moveMat.m[2][2] = -1;
     //fix deformation
     this->moveMat = mat3(1/glgeWindowAspect,0,0,
                          0,                 1,0,
