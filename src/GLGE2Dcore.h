@@ -222,6 +222,11 @@ public:
     void draw();
 
     /**
+     * @brief update the move matrix
+     */
+    void update();
+
+    /**
      * @brief Set the Shader object
      * 
      * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
@@ -242,13 +247,29 @@ private:
     //the local matrix to make the object correct
     mat3 moveMat = mat3(1,0,0,
                         0,1,0,
-                        0,0,1);
+                        0,0,0);
     //store a texture
     GLuint texture;
     //say if the object is static
     bool isStatic;
 
+    /**
+     * @brief Create the buffers
+     */
     void createBuffers();
+
+    /**
+     * @brief setup the shaders
+     * 
+     * @param vs the vertex shader
+     * @param fs the fragment shader
+     */
+    void shaderSetup(const char* vs, const char* fs);
+
+    /**
+     * @brief recalculate the local move matrix
+     */
+    void recalculateMoveMatrix();
 };
 
 #endif

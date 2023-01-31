@@ -14,9 +14,11 @@
 //include the GLGE dependencys
 #include "GLGE/GLGEDefines.h"
 #include "GLGE/glgePrivDefines.h"
+#include "GLGE/glgeVars.h"
 
 //the needed default C++ libs
 #include <math.h>
+#include <iostream>
 
 ///////////
 //STRUCTS//
@@ -66,7 +68,7 @@ mat3 Transform2D::getMatrix()
                  0, 0,            1);
 
     //return the multiplied matrices
-    return moveMat * sizeMat * rotaMat;
+    return rotaMat * moveMat * sizeMat;
 }
 
 //VERTEX2D
@@ -181,6 +183,9 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
 
     //create the buffers
     this->createBuffers();
+
+    //update the object
+    this->update();
 }
 
 //constructor using vectors
@@ -197,13 +202,19 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
 
     //create the buffers
     this->createBuffers();
+
+    //update the object
+    this->update();
 }
 
 void Object2D::draw()
-{    
+{
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    //bind the shader
+    glUseProgram(this->shader);
 
     //activate sub elements
     //say where the position vector is
@@ -216,8 +227,8 @@ void Object2D::draw()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, texCoord));
 
-    //bind the shader
-    glUseProgram(this->shader);
+    //pass the move matrix to the shader
+    glUniformMatrix3fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
 
@@ -225,8 +236,23 @@ void Object2D::draw()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    //deactivate the sub elements
+    //deactivate the position argument
+    glDisableVertexAttribArray(0);
+    //deactivate the color argument
+    glDisableVertexAttribArray(1);
+    //deactivate the texCoord argument
+    glDisableVertexAttribArray(2);
+
     //unbind the shader
     glUseProgram(0);
+}
+
+//update the object
+void Object2D::update()
+{
+    //update the move matrix
+    this->recalculateMoveMatrix();
 }
 
 void Object2D::setShader(const char* p)
@@ -238,8 +264,8 @@ void Object2D::setShader(const char* p)
     std::string vs = p+std::string(".vs");
     std::string fs = p+std::string(".fs");
 
-    //compile and save the shader
-    this->shader = glgeCompileShader(vs.c_str(), fs.c_str());
+    //do the shader setup
+    this->shaderSetup(vs.c_str(), fs.c_str());
 }
 
 void Object2D::createBuffers()
@@ -261,4 +287,23 @@ void Object2D::createBuffers()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
     //unbind the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Object2D::shaderSetup(const char* vs, const char* fs)
+{
+    //compile and save the shader
+    this->shader = glgeCompileShader(vs, fs);
+
+    //save the location of the move matrix
+    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
+}
+
+//move matrix update
+void Object2D::recalculateMoveMatrix()
+{
+    //get the move matrix from the transform
+    this->moveMat = this->transf.getMatrix();
+
+    //fix matrix bug
+    this->moveMat.m[2][2] = 0;
 }
