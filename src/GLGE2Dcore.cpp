@@ -194,7 +194,7 @@ void Object2D::draw()
     //}
     //glEnd();
 
-    glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);

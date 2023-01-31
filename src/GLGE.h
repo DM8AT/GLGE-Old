@@ -357,4 +357,29 @@ Keys glgeGetKeys();
  */
 float glgeGetDeltaTime();
 
+/**
+ * @brief Get a uniform variable in a shader
+ * 
+ * @param shaderProgram the program to get the variable from
+ * @param name the name of the variable
+ */
+GLint glgeGetUniformVar(GLuint shaderProgram, const char* name);
+
+/**
+ * @brief add a new shader object
+ * 
+ * @param shaderProgram the program it should be added to
+ * @param shadertext the text for the shader code
+ * @param shaderType the type of the shader
+ */
+void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
+
+/**
+ * @brief this function compiles the inputed two files into shaders
+ * 
+ * @param vertex the file for the vertex shader
+ * @param fragment the file for the fragment shader
+ */
+GLuint glgeCompileShader(const char* vertex, const char* fragment);
+
 #endif

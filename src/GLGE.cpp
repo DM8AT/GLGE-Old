@@ -9,6 +9,7 @@
 
 //include the standart librarys
 #include <math.h>
+#include <cstring>
 #include <iostream>
 
 ///////////
@@ -629,4 +630,187 @@ float glgeGetDeltaTime()
 {
     //return the delta time
     return glgeDeltaTime;
+}
+
+//add a shader to an shader program
+void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
+{
+    //create a new shader with the inputed type
+    GLuint shaderObj = glCreateShader(shaderType);
+
+    //check if the shader object could be created
+    if (shaderObj == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << std::endl;
+            //print where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //set a GLchar to the inputed text
+    const GLchar* p[1];
+    p[0] = shadertext;
+
+    //store the length of the text
+    GLint lengths[1];
+    lengths[0] = strlen(shadertext);
+
+    //set the shader source code
+    glShaderSource(shaderObj, 1, p, lengths);
+
+    //compile to the new shader object
+    glCompileShader(shaderObj);
+
+    //check for compiling errors
+    GLint success;
+    glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
+
+    //if there was an error, print a message and exit
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //create an info log to store the error created by open gl
+            GLchar InfoLog[1024];
+            glGetShaderInfoLog(shaderObj, 1024, NULL, InfoLog);
+            //print the message
+            printf(GLGE_ERROR_SHADER_COMPILE_ERROR, shaderType, InfoLog);
+            //print where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //attach the shader object to the final program
+    glAttachShader(shaderProgram, shaderObj);
+}
+
+//get a uniform variable from a shader
+GLint glgeGetUniformVar(GLuint program, const char* name)
+{
+    //create the output variable
+    GLint ret;
+    //set the output variable to the uniform variable in the shader
+    ret = glGetUniformLocation(program, name);
+    //if the id is -1, output an error
+    if (ret == -1)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
+            //say where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+    //if no error occured, return the id of the uniform variable
+    return ret;
+}
+
+//compile and add the shaders to this object
+GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
+{
+    //create a new shader program
+    GLuint shaderProgram = glCreateProgram();
+
+    //check if the shader could be created
+    if (shaderProgram == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
+            //say where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //create strings for the shaders
+    std::string vs, fs;
+
+    //read the files
+    if (!readFile(fileNameVS, vs))
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+    //add the shader program from the first file
+    glgeAddShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
+
+    //read the second file
+    if (!readFile(fileNameFS, fs))
+    {
+        //if the file can't be read, output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+    //add the shader program from the second file
+    glgeAddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+
+    //create an variable to check for success
+    GLint success = 0;
+    //setup an error log
+    GLchar ErrorLog[1024] = {0};
+
+    //link the shader program
+    glLinkProgram(shaderProgram);
+
+    //get the program iv from the shader
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    //check if the program linking was no success
+    if (success == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //check if the program is valide
+    glValidateProgram(shaderProgram);
+    //get the program iv again
+    glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
+    //check for success
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //say open GL to use the shader program
+    glUseProgram(shaderProgram);
+    //return the shader program in the GLGE Object
+    return shaderProgram;
 }
