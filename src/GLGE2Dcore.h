@@ -227,11 +227,165 @@ public:
     void update();
 
     /**
-     * @brief Set the Shader object
+     * @brief Set the Shader
      * 
      * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
      */
     void setShader(const char* path);
+
+    /**
+     * @brief Set the Shader
+     * 
+     * @param shader the allready compiled shader
+     */
+    void setShader(GLuint shader);
+
+    /**
+     * @brief Get the Shader
+     * 
+     * @return GLuint the compiled shader
+     */
+    GLuint getShader();
+
+    /**
+     * @brief Set the Transform for the object
+     * 
+     * @param transform the new transform from the object
+     */
+    void setTransform(Transform2D transform);
+
+    /**
+     * @brief Get the Transform from the object
+     * 
+     * @return Transform2D the transform from the object
+     */
+    Transform2D getTransform();
+
+    /**
+     * @brief change the position of the object
+     * 
+     * @param deltaPos the difference in position
+     */
+    void move(vec2 deltaPos);
+
+    /**
+     * @brief change the position of the object
+     * 
+     * @param deltaX the difference on the x axis
+     * @param deltaY the difference on the y axis
+     */
+    void move(float deltaX, float deltaY);
+
+    /**
+     * @brief change the position of the object in a direction
+     * 
+     * @param speedX the speed on the x axis
+     * @param speedY the speed on the y axis
+     * @param dir the direction to move the object in
+     */
+    void move(float speedX, float speedY, float dir);
+
+    /**
+     * @brief change the position of the object in the direction it is facig
+     * 
+     * @param speed the speed to move the object with
+     */
+    void move(float speed);
+
+    /**
+     * @brief Set the position of the object
+     * 
+     * @param pos the new position for the object
+     */
+    void setPos(vec2 pos);
+
+    /**
+     * @brief Set the position of the object
+     * 
+     * @param x the new x position for the object
+     * @param y the new y position for the object
+     */
+    void setPos(float x, float y);
+
+    /**
+     * @brief Get the position from the object
+     * 
+     * @return vec2 the position of the object
+     */
+    vec2 getPos();
+
+    /**
+     * @brief rotate the object
+     * 
+     * @param angle the angle of rotation in degrees
+     */
+    void rotate(float angle);
+
+    /**
+     * @brief Set the rotation of the object
+     * 
+     * @param dir the direction for the object in degrees
+     */
+    void setRotation(float dir);
+
+    /**
+     * @brief Get the Rotation from the object
+     * 
+     * @return float the rotation in degrees
+     */
+    float getRotation();
+
+    /**
+     * @brief change the scale of the object
+     * 
+     * @param scale the scale multiplier
+     */
+    void scale(vec2 scale);
+
+    /**
+     * @brief change the scale of the object
+     * 
+     * @param scaleX the scale multiplier on the x axis
+     * @param scaleY the scale multiplier on the y axis
+     */
+    void scale(float scaleX, float scaleY);
+
+    /**
+     * @brief add something to the scale
+     * 
+     * @param scale the difference in the scale
+     */
+    void scaleAdd(vec2 scale);
+
+    /**
+     * @brief add something to the scale
+     * 
+     * @param scaleX the difference in the scale on the x axis
+     * @param scaleY the difference in the scale on the y axis
+     */
+    void scaleAdd(float scaleX, float scaleY);
+
+    /**
+     * @brief Set the Scale from the object
+     * 
+     * @param scale the new scale for the object
+     */
+    void setScale(vec2 scale);
+
+    /**
+     * @brief Set the Scale from the object
+     * 
+     * @param x the new scale on the x axis
+     * @param y the new scale on the y axis
+     */
+    void setScale(float x, float y);
+
+    /**
+     * @brief Get the Scale from the object
+     * 
+     * @return vec2 the scale from the object
+     */
+    vec2 getScale();
 
 private:
     //store the mesh for the object

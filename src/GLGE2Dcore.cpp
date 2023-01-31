@@ -268,6 +268,135 @@ void Object2D::setShader(const char* p)
     this->shaderSetup(vs.c_str(), fs.c_str());
 }
 
+void Object2D::setShader(GLuint shader)
+{
+    //store the inputed shader
+    this->shader = shader;
+    
+    //get the new location for the move matrix
+    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+}
+
+GLuint Object2D::getShader()
+{
+    //return the shader
+    return this->shader;    
+}
+
+void Object2D::setTransform(Transform2D transform)
+{
+    //store the inputed argument
+    this->transf = transform;
+}
+
+Transform2D Object2D::getTransform()
+{
+    //store the inputed argument
+    return this->transf;
+}
+
+void Object2D::move(vec2 deltaPos)
+{
+    //change the position
+    this->transf.pos += deltaPos;
+}
+
+void Object2D::move(float deltaX, float deltaY)
+{
+    //change the position
+    this->transf.pos += vec2(deltaX, deltaY);
+}
+
+void Object2D::move(float speedX, float speedY, float dir)
+{
+    //change the position
+    this->transf.pos += vec2(speedX*std::sin(dir*GLGE_TO_RADIANS), speedY*std::cos(dir*GLGE_TO_RADIANS));
+}
+
+void Object2D::move(float speed)
+{
+    //change the position
+    this->transf.pos += vec2(speed*std::sin(this->transf.rot*GLGE_TO_RADIANS), speed*std::cos(this->transf.rot*GLGE_TO_RADIANS));
+}
+
+void Object2D::setPos(vec2 pos)
+{
+    //set the position to the input
+    this->transf.pos = pos;
+}
+
+void Object2D::setPos(float x, float y)
+{
+    //set the position to the input
+    this->transf.pos = vec2(x,y);
+}
+
+vec2 Object2D::getPos()
+{
+    //return the position
+    return this->transf.pos;
+}
+
+void Object2D::rotate(float angle)
+{
+    //change the rotation of the object
+    this->transf.rot += (angle*GLGE_TO_RADIANS);
+}
+
+void Object2D::setRotation(float dir)
+{
+    //set the rotation of the object
+    this->transf.rot = dir*GLGE_TO_RADIANS;
+}
+
+float Object2D::getRotation()
+{
+    //return the rotation in degrees
+    return this->transf.rot * GLGE_TO_DEGREES;
+}
+
+void Object2D::scale(vec2 scale)
+{
+    //scale the object
+    this->transf.size.scale(scale);
+}
+
+void Object2D::scale(float scaleX, float scaleY)
+{
+    //scale the object
+    this->transf.size.scale(vec2(scaleX,scaleY));
+}
+
+void Object2D::scaleAdd(vec2 scale)
+{
+    //add the input to the size
+    this->transf.size += scale;
+}
+
+void Object2D::scaleAdd(float scaleX, float scaleY)
+{
+    //add the input to the size
+    this->transf.size += vec2(scaleX, scaleY);
+}
+
+void Object2D::setScale(vec2 scale)
+{
+    //set the size of the object
+    this->transf.size = scale;
+}
+
+void Object2D::setScale(float x, float y)
+{
+    //set the size of the object
+    this->transf.size = vec2(x,y);
+}
+
+vec2 Object2D::getScale()
+{
+    //return the scale
+    return this->transf.size;
+}
+
 void Object2D::createBuffers()
 {
     //generate the vertex buffer for the object
