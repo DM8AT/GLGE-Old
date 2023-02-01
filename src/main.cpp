@@ -16,7 +16,7 @@ float camRot = 0.0025;
 void display()
 {
     test.draw();
-    
+
     //draw the object
     shape.draw();
 }
@@ -127,6 +127,8 @@ int main(int argc, char** argv)
     test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
     test.bindShader(GLGE_DEFAULT_3D_SHADER);
 
+    verts[0].color = vec4(1,0,0,0.5);
+    verts[2].color = vec4(0,0,1,0.5);
     shape = Object2D(verts, inds, sizeof(verts), sizeof(inds), Transform2D(-0.75,0.75, 45, vec2(0.25,0.25)));
     shape.setTexture("src/netherite_block.png");
     shape.setShader("src/GLGE/shaders/base2D");
