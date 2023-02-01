@@ -5,12 +5,12 @@ layout (location = 1) in vec4 color;
 layout (location = 2) in vec2 texcoord;
 uniform mat4 moveMat;
 
-layout (location = 0) out vec4 FragmentColor;
-layout (location = 1) out vec2 FragmentTexcoord;
+out vec4 fColor;
+out vec2 fTexcoord;
 
 void main()
 {
-    FragmentColor = color;
-    FragmentTexcoord = texcoord;
+    fColor = color;
+    fTexcoord = texcoord;
     gl_Position = vec4(pos ,1.0) * moveMat;
 }
