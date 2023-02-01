@@ -260,6 +260,13 @@ public:
     void recalculateIndexBuffer(Mesh2D mesh = Mesh2D());
 
     /**
+     * @brief update the complete mesh buffers
+     * 
+     * @param mesh an optional new mesh
+     */
+    void recalculateMeshBuffer(Mesh2D mesh = Mesh2D());
+
+    /**
      * @brief assign a new mesh to the object
      * 
      * @param mesh the new mesh data

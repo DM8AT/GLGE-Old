@@ -303,6 +303,19 @@ void Object2D::recalculateIndexBuffer(Mesh2D mesh)
     this->updateIndexBuffer();
 }
 
+void Object2D::recalculateMeshBuffer(Mesh2D mesh)
+{
+    //check if a new mesh should be asigned
+    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    {
+        this->mesh = mesh;
+    }
+
+    //recalculate all buffers
+    this->updateVertexBuffer();
+    this->updateIndexBuffer();
+}
+
 void Object2D::setMesh(Mesh2D mesh)
 {
     //store the inputed mesh
