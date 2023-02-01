@@ -15,6 +15,7 @@
 
 //include glew
 #include <GL/glew.h>
+#include <vector>
 
 //include the needed components from CML
 //vectors
