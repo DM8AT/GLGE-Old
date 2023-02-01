@@ -1,4 +1,4 @@
-#include "GLGEKlasses.h"
+#include "GLGEKlasses.hpp"
 
 //include freeglut
 #include <GL/freeglut.h>

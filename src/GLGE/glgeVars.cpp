@@ -1,4 +1,4 @@
-#include "glgeVars.h"
+#include "glgeVars.hpp"
 
 ///////////
 //CLASSES//

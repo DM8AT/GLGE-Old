@@ -1,5 +1,5 @@
 /**
- * @file GLGE2Dcore.h
+ * @file GLGE2Dcore.hpp
  * @author DM8AT
  * @brief the 2D core for GLGE, everything containing 2D games and GUI
  * @version 0.1
@@ -246,6 +246,34 @@ public:
     void update();
 
     /**
+     * @brief update the vertex buffer
+     * 
+     * @param mesh an optional argument to also asign a new mesh
+     */
+    void recalculateVertexBuffer(Mesh2D mesh = Mesh2D());
+
+    /**
+     * @brief update the index buffer
+     * 
+     * @param mesh an optinal argument to also asign a new mesh
+     */
+    void recalculateIndexBuffer(Mesh2D mesh = Mesh2D());
+
+    /**
+     * @brief assign a new mesh to the object
+     * 
+     * @param mesh the new mesh data
+     */
+    void setMesh(Mesh2D mesh);
+
+    /**
+     * @brief Get the Mesh from the object
+     * 
+     * @return Mesh2D the mesh from the object
+     */
+    Mesh2D getMesh();
+
+    /**
      * @brief Set the Shader
      * 
      * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
@@ -451,6 +479,16 @@ private:
      * @brief Create the buffers
      */
     void createBuffers();
+
+    /**
+     * @brief create the vertex buffer or update it
+     */
+    void updateVertexBuffer();
+
+    /**
+     * @brief create the index buffer or update it
+     */
+    void updateIndexBuffer();
 
     /**
      * @brief setup the shaders

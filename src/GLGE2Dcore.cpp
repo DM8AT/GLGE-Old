@@ -12,9 +12,9 @@
 //include the main file
 #include "GLGE2Dcore.h"
 //include the GLGE dependencys
-#include "GLGE/GLGEDefines.h"
-#include "GLGE/glgePrivDefines.h"
-#include "GLGE/glgeVars.h"
+#include "GLGE/GLGEDefines.hpp"
+#include "GLGE/glgePrivDefines.hpp"
+#include "GLGE/glgeVars.hpp"
 
 //the needed default C++ libs
 #include <math.h>
@@ -279,6 +279,42 @@ void Object2D::update()
     this->recalculateMoveMatrix();
 }
 
+void Object2D::recalculateVertexBuffer(Mesh2D mesh)
+{
+    //check if a new mesh should be asigned
+    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    {
+        this->mesh = mesh;
+    }
+
+    //recalculate the vertex buffer
+    this->updateVertexBuffer();
+}
+
+void Object2D::recalculateIndexBuffer(Mesh2D mesh)
+{
+    //check if a new mesh should be asigned
+    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    {
+        this->mesh = mesh;
+    }
+
+    //recalculate the vertex buffer
+    this->updateIndexBuffer();
+}
+
+void Object2D::setMesh(Mesh2D mesh)
+{
+    //store the inputed mesh
+    this->mesh = mesh;
+}
+
+Mesh2D Object2D::getMesh()
+{
+    //return the mesh
+    return this->mesh;
+}
+
 void Object2D::setShader(const char* p)
 {
     //save the inputed path in an string
@@ -441,6 +477,13 @@ vec2 Object2D::getScale()
 
 void Object2D::createBuffers()
 {
+    //update the buffers
+    this->updateVertexBuffer();
+    this->updateIndexBuffer();
+}
+
+void Object2D::updateVertexBuffer()
+{
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -449,7 +492,10 @@ void Object2D::createBuffers()
     glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
     //unbind the vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
+void Object2D::updateIndexBuffer()
+{
     //generate the index buffer
     glGenBuffers(1, &this->IBO);
     //bind the index buffer

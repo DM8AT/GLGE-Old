@@ -1,7 +1,7 @@
 //include the GLGE dependencys
-#include "glgeErrors.h"
-#include "glgeVars.h"
-#include "glgeDefaultFuncs.h"
+#include "glgeErrors.hpp"
+#include "glgeVars.hpp"
+#include "glgeDefaultFuncs.hpp"
 
 //include the CML dependencys
 #include "CML/CMLVec2.h"

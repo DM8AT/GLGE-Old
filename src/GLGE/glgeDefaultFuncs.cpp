@@ -1,8 +1,8 @@
 //include the GLGE dependencys
-#include "glgeErrors.h"
-#include "GLGEKlasses.h"
-#include "glgeVars.h"
-#include "glgeFuncs.h"
+#include "glgeErrors.hpp"
+#include "GLGEKlasses.hpp"
+#include "glgeVars.hpp"
+#include "glgeFuncs.hpp"
 
 //include the OpenGL dependencys
 #include <GL/glew.h>

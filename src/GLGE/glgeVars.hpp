@@ -1,5 +1,5 @@
 /**
- * @file glgeVars.h
+ * @file glgeVars.hpp
  * @author DM8AT
  * @brief this file stores all behind-the-sceens variables used by GLGE. DO NOT CHANGE OUTSIDE OF GLGE!
  * @version 0.1
@@ -14,7 +14,7 @@
 #define _GLGE_VARS_H_
 
 //include needed dependencys
-#include "GLGEKlasses.h"
+#include "GLGEKlasses.hpp"
 
 ///////////
 //CLASSES//

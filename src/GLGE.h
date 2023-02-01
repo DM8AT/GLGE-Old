@@ -49,8 +49,8 @@
 #include "GLGE/CML/CML.h"
 
 //include the public defines
-#include "GLGE/GLGEDefines.h"
-#include "GLGE/GLGEKlasses.h"
+#include "GLGE/GLGEDefines.hpp"
+#include "GLGE/GLGEKlasses.hpp"
 
 ///////////
 //CLASSES//
