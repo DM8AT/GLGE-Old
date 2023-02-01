@@ -1,0 +1,7 @@
+# Compile output
+bin/*
+*.out
+
+# IDE folders
+.vscode
+.idea
