@@ -24,6 +24,77 @@
 #include "GLGE/CML/CMLMat4.h"
 
 ///////////
+//CLASSES//
+///////////
+
+class Face
+{
+public:
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * only say that it exists
+     */
+    Face();
+
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param indices the indices for the triangle
+     * @param colors colors for each index
+     * @param normal the normal vector for the face
+     */
+    Face(unsigned int indices[3], vec4 colors[3], vec3 normal = vec3(0,0,0));
+
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param indices the indices for the triangle
+     * @param texCoords texture coordinates for each index
+     * @param normal the normal vector for the face
+     */
+    Face(unsigned int indices[3], vec2 texCoords[3], vec3 normal = vec3(0,0,0));
+
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param a the first index of the triangle
+     * @param b the second index of the triangle
+     * @param c the thired index of the triangle
+     * @param ca the first color of the triangle
+     * @param cb the second color of the triangle
+     * @param cc the thired color of the triangle
+     * @param normal the normal vector for the face
+     */
+    Face(unsigned int a, unsigned int b, unsigned int c, vec4 ca, vec4 cb, vec4 cc, vec3 normal = vec3(0,0,0));
+
+    /**
+     * @brief Construct a new Triangle
+     * 
+     * @param a the first index of the triangle
+     * @param b the second index of the triangle
+     * @param c the thired index of the triangle
+     * @param ta the first texture coordinate for the triangle
+     * @param tb the second texture coordinate for the triangle
+     * @param tc the thired texture coordinate for the triangle
+     * @param normal the normal vector for the face
+     */
+    Face(unsigned int a, unsigned int b, unsigned int c, vec2 ta, vec2 tb, vec2 tc, vec3 normal = vec3(0,0,0));
+
+private:
+    //three indices
+    unsigned int indices[3] = {0,0,0};
+    //three texture coordinates
+    vec2 texCoords[3] = {vec2(0,0),vec2(0,0),vec2(0,0)};
+    //three color arguments
+    vec4 colors[3] = {vec4(0,0,0,1),vec4(0,0,0,1),vec4(0,0,0,1)};
+    //save a normal vector
+    vec3 normal;
+    //say if color should be used
+    float useColor;
+};
+
+///////////
 //STRUCTS//
 ///////////
 
@@ -77,16 +148,10 @@ struct Transform
  */
 struct Vertex
 {
-    //information about the vertex
-
-    //the position in 3D space
+    //store the vertex position
     vec3 pos;
-    //the color of the vertex
-    vec4 color;
-    //where to sample a texture
-    vec2 texCoord;
-    //should the color or a texture be used?
-    bool useTex;
+    //store the normal of the vertex
+    vec3 normal = vec3(0,0,0);
 
     /**
      * @brief Construct a new Vertex
@@ -98,375 +163,103 @@ struct Vertex
     /**
      * @brief Construct a new Vertex
      * 
-     * using a color for the vertex
-     * 
-     * @param position the position of the vertex in 3D space
-     * @param color the color of the vertex
+     * @param pos the positon for the vertex
      */
-    Vertex(vec3 position, vec4 color=vec4(1,0,0,1));
+    Vertex(vec3 pos);
 
     /**
      * @brief Construct a new Vertex
      * 
-     * unsing a color for the vertex
-     * 
-     * @param x the x position for the vertex
-     * @param y the y position for the vertex
-     * @param z the z position for the vertex
-     * @param r the amount of red in the color
-     * @param g the amount of green in the color
-     * @param b the amount of blue in the color
-     * @param a the transparency of the vertex
+     * @param x the x positoin of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
      */
-    Vertex(float x, float y, float z, float r=1, float g=0, float b=0, float a=1);
-
-    /**
-     * @brief Construct a new Vertex
-     * 
-     * using a texture
-     * 
-     * @param position the position of the vertex in 3D space
-     * @param texturePosition where to sample the texture for this vertex
-     */
-    Vertex(vec3 position, vec2 texturePosition);
-
-    /**
-     * @brief Construct a new Vertex
-     * 
-     * @param x the x position for the vertex
-     * @param y the y position for the vertex
-     * @param z the z position for the vertex
-     * @param tX the X position for the texture sampler
-     * @param tY the Y position for the texture sampler
-     */
-    Vertex(float x, float y, float z, float tX, float tY);
+    Vertex(float x, float y, float z);
 };
 
-/**
- * @brief stores data for a 3D object
- * 
- * This variable stores the exterior data for every object. 
- */
-struct Mesh
+class Mesh
 {
-    //the vartices and how to conect them into triangles
-
-    //the vertices of the mesh
-    Vertex* vertices;
-    //how to conect the mesh
-    unsigned int* indices;
-
-    //the amount of vertices
-    unsigned int amountVertices;
-    //the length of the indices
-    unsigned int indicesLength;
-
-    //store the amount of triangles in the mesh
-    unsigned int amountTriangles;
-
+public:
     /**
-     * @brief Construct a new Mesh
-     * 
-     * the mesh stores information about the visuals of an object
+     * @brief defalut constructor
      */
     Mesh();
 
     /**
      * @brief Construct a new Mesh
      * 
-     * @param vertices the vertices for the object
-     * @param indices how to conect the vertices
-     * @param verticesLength the length of the vertices array (sizeof(vertices))
-     * @param indicesLength the length of the indices array (sizeof(indices))
+     * @param vertices a pointer array to store the vertices
+     * @param faces a pointer array to store the faces
+     * @param sizeVertices the size of the vertices pointer
+     * @param sizeFaces the size of the faces pointer
      */
-    Mesh(Vertex *vertices, unsigned int *indices, unsigned int verticesLength, unsigned int indicesLength);
+    Mesh(Vertex* vertices, Face* faces, unsigned int sizeVertices, unsigned int sizeFaces);
 
     /**
      * @brief Construct a new Mesh
      * 
-     * PRIMITIVES:
-     * - Cube : a default cube : name: "CUBE" ; define: GLGE_DEFAULT_CUBE
-     * 
-     * @param primitive the name of the primitive to use
+     * @param vertices the vertices in an std::vector
+     * @param faces the faces in an std::vector
      */
-    Mesh(const char* primitive);
-
-    /**
-     * @brief override the loaded mesh with a mesh from a file
-     * 
-     * @param filename the name of the file to get it from
-     */
-    void loadFile(const char* filename);
-
-    /**
-     * @brief deletes the data stored in the mesh
-     * 
-     * call this if the mesh is supposed to be reused or deleted
-     */
-    void clear();
-
-    /**
-     * @brief Destroy the Mesh
-     */
-    ~Mesh();
-
-    /**
-     * @brief Get the Vertices
-     * 
-     * @return Vertex* a pointer to a lot of vertices
-     */
-    Vertex* getVertices();
-
-    /**
-     * @brief Get the Indices
-     * 
-     * @return unsigned int* how the points are conected to triangles
-     */
-    unsigned int* getIndices();
+    Mesh(std::vector<Vertex> vertices, std::vector<Face> faces);
 };
 
-///////////
-//CLASSES//
-///////////
-
-/**
- * @brief a simple 3D object, used by GLGE for basically everything that has to do with 3D graphics
- */
 class Object
 {
 public:
     /**
      * @brief Construct a new Object
      * 
-     * A object is, what can be drawn to the screen. 
+     * default constructor
      */
     Object();
 
     /**
      * @brief Construct a new Object
      * 
-     * @param mesh the mesh for the object. It defines how the object looks
-     * @param transform the transform of the object. It says where the object is and how it is
+     * @param vertices a pointer array to store the vertices
+     * @param faces a pointer array to store the faces
+     * @param sizeVertices the size of the vertices pointer
+     * @param sizeFaces the size of the faces pointer
+     * @param transform an optinal transform for the object
      */
-    Object(Mesh mesh, Transform transform = Transform());
+    Object(Vertex* vertices, Face* faces, unsigned int sizeVertices, unsigned int sizeFaces, Transform transform = Transform());
 
     /**
      * @brief Construct a new Object
      * 
-     * @param vertices the vertices for the object
-     * @param indices the indices for the object
-     * @param amountVertices the amount of incoming vertices (sizeof(vertices))
-     * @param indicesLength the amount of incoming indices (sizeof(indices))
-     * @param transform the transform of the object. It says where the object is and how it is
+     * @param vertices the vertices in an std::vector
+     * @param faces the faces in an std::vector
+     * @param transform an optinal transform for the object
      */
-    Object(Vertex* vertices, unsigned int* indices, unsigned int amountVertices, unsigned int indicesLength, Transform transform = Transform());
-
-    /**
-     * @brief Construct a new Object
-     * 
-     * @param string the string contains information on where to get the object data. It can be a preset, that is also supported by the mesh Preset, or a file path.
-     * @param transform the transform of the object. It says where the object is and how it is
-     */
-    Object(const char* string, Transform transform = Transform());
-
-    /**
-     * @brief Construct a new Object
-     * 
-     * @param vertexBuffer says where the vertex buffer for this object is
-     * @param indexBuffer says where on the graphics card the index buffer for this object is
-     * @param transform the transform of the object. It says where the object is and how it is
-     */
-    Object(GLuint vertexBuffer, GLuint indexBuffer, Transform transform = Transform());
+    Object(std::vector<Vertex> vertices, std::vector<Face> faces, Transform transform = Transform());
 
     /**
      * @brief draw the object to the screen
      */
     void draw();
 
-    /**
-     * @brief compile and bind a vertex and a fragment shader to the object
-     * 
-     * @param vertexShader the path to the file that stores the vertex shader
-     * @param fragmentShader the path to the file that stores the fragment shader
-     */
-    void bindShader(const char* vertexShader, const char* fragmentShader);
-
-    /**
-     * @brief compile and bind a vertex and a fragment shader to the object
-     * 
-     * Vertx shader suffix: .vs
-     * Fragment shader suffix: .fs
-     * 
-     * @param filePrefix the path and the prefix of two files with different suffixes
-     */
-    void bindShader(const char* filePrefix);
-
-    /**
-     * @brief bind a shader program to this object
-     * 
-     * @param shaderProgram the id of the shader program
-     */
-    void bindShader(GLint shaderProgram);
-
-    /**
-     * @brief get the shader from this object and use it
-     * 
-     * @param objectForShader the object to get the shader from
-     */
-    void bindShader(Object objectForShader);
-
-    /**
-     * @brief Get the Shader id of this Object
-     * 
-     * @return GLint the id of the shader
-     */
-    GLint getShader();
-
-    /**
-     * @brief update the object
-     * CALCULATE:
-     * - move matrix
-     */
-    void update();
-
-    /**
-     * @brief Get the Transform from this object
-     * 
-     * @return Transform the transform of this object
-     */
-    Transform getTransform();
-
-    /**
-     * @brief apply a specific transform to an object
-     * 
-     * @param transform the transform to use
-     */
-    void applyTransform(Transform transform);
-
-    /**
-     * @brief rotate the object around all axis
-     * 
-     * @param angle the angle for the different axis
-     */
-    void rotate(vec3 angle);
-
-    /**
-     * @brief rotate the object around all axis
-     * 
-     * @param x rotation on x axis
-     * @param y rotation on y axis
-     * @param z rotation on z axis
-     */
-    void rotate(float x, float y, float z);
-
-    /**
-     * @brief move the object
-     * 
-     * --TODO--
-     * 
-     * @param distance the distance to move it in a direction
-     */
-    void move(float distance);
-
-    /**
-     * @brief move the object on all 3 axis
-     * 
-     * @param distance the distance for the 3 axis to move the object
-     */
-    void move(vec3 distance);
-
-    /**
-     * @brief move the object on all 3 axis
-     * 
-     * @param x the distance for the x axis
-     * @param y the distance for the y axis
-     * @param z the distance for the z axis
-     */
-    void move(float x, float y, float z);
-
-    /**
-     * @brief scale the object
-     * 
-     * @param scale the scale for all 3 axis
-     */
-    void scale(float scale);
-
-    /**
-     * @brief scall the object on all 3 axis
-     * 
-     * @param scale the scale for all 3 axis
-     */
-    void scale(vec3 scale);
-
-    /**
-     * @brief scale the object on all 3 axis
-     * 
-     * @param x the scale for the x axis
-     * @param y the scale for the y axis
-     * @param z the scale for the z axis
-     */
-    void scale(float x, float y, float z);
-
 private:
-
-    //PRIVATE VARIABLES
-
-    //store the position, rotation and scale of the object
+    //store the transform for the object
     Transform transf;
-    //store the mesch of the object
+    //store a mesh
     Mesh mesh;
-    //stores where the Vertex buffer is
-    GLuint vbo;
-    //stores where the index buffer is
-    GLuint ibo;
-    //store the compiled fragment and vertex shader
-    GLuint shader;
-    //store the location of the move matrix for the shader
-    GLint moveMatLoc;
-    //store the final movement matrix
-    mat4 moveMatrix = mat4(1,0,0,0,
-                           0,1,0,0,
-                           0,0,1,0,
-                           0,0,0,1);
+    //store the vertex and index buffer
+    GLuint VBO, IBO;
+    //save the shader
+    GLint shader;
+    //store the move matrix location
+    GLuint moveMatLoc;
+    //the local matrix to make the object correct
+    mat4 moveMat = mat4(1,0,0,0,
+                        0,1,0,0,
+                        0,0,1,0,
+                        0,0,0,1);
+    //store a texture
+    GLuint texture;
 
-    //PRIVATE FUNCTIONS
-
-    /**
-     * @brief this function compiles an inputed mesh into the vertex and index shader
-     * 
-     * @param mesh the mesh for the shaders
-     */
-    void generateBuffers(Mesh mesh);
-
-    /**
-     * @brief recalculate the move matrix
-     */
-    void calculateMoveMatrix();
-
-    /**
-     * @brief Get a uniform variable in a shader
-     * 
-     * @param shaderProgram the program to get the variable from
-     * @param name the name of the variable
-     */
-    GLint getUniformVar(GLuint shaderProgram, const char* name);
-
-    /**
-     * @brief add a new shader object
-     * 
-     * @param shaderProgram the program it should be added to
-     * @param shadertext the text for the shader code
-     * @param shaderType the type of the shader
-     */
-    void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
-
-    /**
-     * @brief this function compiles the inputed two files into shaders
-     * 
-     * @param vertex the file for the vertex shader
-     * @param fragment the file for the fragment shader
-     */
-    void compileShader(const char* vertex, const char* fragment);
+    //recalculate and reload the buffers
+    void updateBuffers();
 };
 
 /**

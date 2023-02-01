@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cstdlib>
 
-Object test;
 Camera camera;
 
 Object2D shape;
@@ -16,8 +15,6 @@ float camRot = 0.0025;
 
 void display()
 {
-    test.draw();
-
     //draw the object
     shape.draw();
 }
@@ -28,9 +25,6 @@ void mainLoop()
     camera.recalculateProjection();
     camera.update();
     //update the object
-    //test.rotate(0.5,0.131,0);
-    test.update();
-
     shape.rotate(2.5);
     shape.update();
 
@@ -88,35 +82,6 @@ int main(int argc, char** argv)
     glgeBindDisplayFunc(display);
     glgeBindMainFunc(mainLoop);
 
-    //object setup
-    Vertex vertices[] = {
-                         Vertex(-1,-1, 1, 1,0,0,1),
-                         Vertex( 1,-1, 1, 0,1,0,1),
-                         Vertex(-1, 1, 1, 0,0,1,0),
-                         Vertex( 1, 1, 1, 1,1,0,0),
-
-                         Vertex(-1,-1,-1, 1,1,0,1),
-                         Vertex( 1,-1,-1, 0,1,1,1),
-                         Vertex(-1, 1,-1, 1,0,1,0),
-                         Vertex( 1, 1,-1, 0,0,0,0),
-                        };
-
-    uint indices[] = {//front and back
-                      0,2,1,
-                      1,2,3,
-                      4,5,6,
-                      5,7,6,
-                      //top and bottom
-                      0,1,4,
-                      1,5,4,
-                      2,6,3,
-                      3,6,7,
-                      //left and right
-                      0,4,2,
-                      2,4,6,
-                      1,3,5,
-                      3,7,5};
-
     Vertex2D verts[] = {Vertex2D(-1,-1, 1,0),
                         Vertex2D( 1,-1, 1,1),
                         Vertex2D( 1, 1, 0,1),
@@ -125,8 +90,6 @@ int main(int argc, char** argv)
     uint inds[] = {0,1,2,
                    0,2,3};
 
-    test = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,0,0),vec3(0,0,0),1));
-    test.bindShader(GLGE_DEFAULT_3D_SHADER);
 
     verts[0].color = vec4(1,0,0,0.5);
     verts[2].color = vec4(0,0,1,0.5);
