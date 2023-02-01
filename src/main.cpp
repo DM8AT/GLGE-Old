@@ -4,6 +4,7 @@
 #include "GLGE2Dcore.h"
 
 #include <iostream>
+#include <cstdlib>
 
 Object test;
 Camera camera;
@@ -30,7 +31,7 @@ void mainLoop()
     //test.rotate(0.5,0.131,0);
     test.update();
 
-    shape.rotate(2);
+    shape.rotate(2.5);
     shape.update();
 
     if (glgeGetKeys().w)
