@@ -64,6 +64,7 @@ Camera* glgeMainCamera;
 Transform::Transform()
 {
     //initalise the object, say that it exists
+    this->scale = vec3(1,1,1);
 }
 
 //constructor using a position, rotation and a scale on 3 axis
@@ -165,7 +166,7 @@ Vertex::Vertex(float x, float y, float z, float r, float g, float b, float a)
     //store the inputed position
     this->pos = vec3(x,y,z);
     //set a white color
-    this->color = vec4(1,1,1,1);
+    this->color = vec4(r,g,b,a);
     //set the texture coordinate to 0,0
     this->texCoord = vec2(0,0);
 }
@@ -253,6 +254,9 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 
     //save if the object is static
     this->isStatic = isStatic;
+
+    //calculate the buffers
+    this->compileBuffers();
 }
 
 //constructor using vectors
@@ -266,16 +270,145 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 
     //save if the object is static
     this->isStatic = isStatic;
+
+    //calculate the buffers
+    this->compileBuffers();
 }
 
 //draw the object
 void Object::draw()
 {
-    //make the draw call
+    //bind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    //bind the shader
+    glUseProgram(this->shader);
+
+    //activate sub elements
+    //say where the position vector is
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    //say where the color is
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
+    //say where texture coordinates are
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
+
+    //pass the move matrix to the shader
+    glUniformMatrix4fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
+
+    //bind the texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
+
+    //unbind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //deactivate the sub elements
+    //deactivate the position argument
+    glDisableVertexAttribArray(0);
+    //deactivate the color argument
+    glDisableVertexAttribArray(1);
+    //deactivate the texCoord argument
+    glDisableVertexAttribArray(2);
+
+    //unbind the shader
+    glUseProgram(0);
+}
+
+void Object::update()
+{
+    //recalculate the move matrix
+    this->recalculateMoveMatrix();
+}
+
+void Object::setShader(const char* vs, const char* fs)
+{
+    //shader setup
+    this->shaderSetup(vs, fs);
+}
+
+void Object::setShader(const char* p)
+{
+    //save the inputed path in an string
+    std::string path = p;
+
+    //add the suffixes
+    std::string vs = p+std::string(".vs");
+    std::string fs = p+std::string(".fs");
+
+    //do the shader setup
+    this->shaderSetup(vs.c_str(), fs.c_str());
+}
+
+void Object::setShader(GLuint shader)
+{
+    //store the inputed shader
+    this->shader = shader;
+    
+    //get the new location for the move matrix
+    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
 }
 
 //PRIV
+void Object::compileBuffers()
+{
+    //generate the vertex buffer for the object
+    glGenBuffers(1, &this->VBO);
+    //bind the vertex buffer object to store data
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    //store the mesh data in the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
+    //unbind the vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    //save the length of the Vertex Buffer
+    this->IBOLen = mesh.vertices.size();
+
+    //generate the index buffer
+    glGenBuffers(1, &this->IBO);
+    //bind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
+    //store the index information in the index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
+    //unbind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //save the length of the Index Buffer
+    this->IBOLen = mesh.indices.size();
+}
+
+void Object::shaderSetup(const char* vs, const char* fs)
+{
+    //compile and save the shader
+    this->shader = glgeCompileShader(vs, fs);
+
+    //save the location of the move matrix
+    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
+}
+
+void Object::recalculateMoveMatrix()
+{
+    //set the move matrix to the product of 3 matrices
+    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix();
+
+    std::cout << std::endl;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            std::cout << this->moveMat.m[i][j] << ", ";
+        }
+        std::cout << std::endl;
+    }
+}
 
 //////////
 //CAMERA//

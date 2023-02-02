@@ -27,6 +27,8 @@ void mainLoop()
     camera.recalculateProjection();
     camera.update();
     //update the object
+    test.update();
+
     shape.rotate(2.5);
     shape.update();
 
@@ -90,7 +92,8 @@ int main(int argc, char** argv)
                         Vertex2D(-1, 1, 0,0)};
 
     uint inds[] = {0,1,2,
-                   0,2,3};
+                   0,2,3,
+                   };
 
 
     verts[0].color = vec4(1,0,0,0.5);
@@ -99,15 +102,36 @@ int main(int argc, char** argv)
     shape.setTexture("src/netherite_block.png");
     shape.setShader("src/GLGE/shaders/base2D");
 
-    Vertex vertices[] = {Vertex( 1, 1, 1),
-                         Vertex(-1, 1, 1),
-                         Vertex(-1,-1, 1),
-                         Vertex( 1,-1, 1),
-                         Vertex( 1,-1,-1),
-                         Vertex( 1, 1,-1),
-                         Vertex(-1, 1,-1),
-                         Vertex(-1,-1,-1)};
+    Vertex vertices[] = {
+                         Vertex(-1,-1, 1, 1,0,0,1),
+                         Vertex( 1,-1, 1, 0,1,0,1),
+                         Vertex(-1, 1, 1, 0,0,1,1),
+                         Vertex( 1, 1, 1, 1,1,0,1),
 
+                         Vertex(-1,-1,-1, 1,1,0,1),
+                         Vertex( 1,-1,-1, 0,1,1,1),
+                         Vertex(-1, 1,-1, 1,0,1,1),
+                         Vertex( 1, 1,-1, 0,0,0,1),
+                        };
+
+    uint indices[] = {//front and back
+                      0,2,1,
+                      1,2,3,
+                      4,5,6,
+                      5,7,6,
+                      //top and bottom
+                      0,1,4,
+                      1,5,4,
+                      2,6,3,
+                      3,6,7,
+                      //left and right
+                      0,4,2,
+                      2,4,6,
+                      1,3,5,
+                      3,7,5};
+
+    test = Object(vertices, indices, sizeof(vertices), sizeof(indices));
+    test.setShader("src/GLGE/shaders/base3D");
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));

@@ -24,6 +24,9 @@
 //matrices
 #include "GLGE/CML/CMLMat4.h"
 
+//include the library core
+#include "GLGE.h"
+
 ///////////
 //STRUCTS//
 ///////////
@@ -38,7 +41,7 @@ struct Transform
 {
     vec3 pos;
     vec3 rot;
-    vec3 scale;
+    vec3 scale = vec3(1,1,1);
 
     /**
      * @brief Construct a new Transform
@@ -54,7 +57,7 @@ struct Transform
      * @param rotation the rotation stored in the transform
      * @param scale the size information stored in the transform
      */
-    Transform(vec3 position, vec3 rotation, vec3 scale);
+    Transform(vec3 position, vec3 rotation, vec3 scale = vec3(1,1,1));
 
     /**
      * @brief Construct a new Transform
@@ -63,7 +66,7 @@ struct Transform
      * @param rotation the rotation of the transform
      * @param scale the scale on all axis of the transform
      */
-    Transform(vec3 position, vec3 rotation, float scale);
+    Transform(vec3 position, vec3 rotation, float scale = 1);
 
     /**
      * @brief Get the Matrix to transform an object to this
@@ -224,6 +227,40 @@ public:
      */
     void draw();
 
+    /**
+     * @brief update things like the move matrix
+     */
+    void update();
+
+    /**
+     * @brief Set the Shader for the object
+     * 
+     * @param vs the file name for the vertex shader
+     * @param fs the file name for the fragment shader
+     */
+    void setShader(const char* vs, const char* fs);
+
+    /**
+     * @brief Set the Shader for the object
+     * 
+     * @param filePrefix the prefix for the shader files (PATH+FILE PREFIX) suffixe: .vs and .fs
+     */
+    void setShader(const char* filePrefix);
+
+    /**
+     * @brief Set the Shader for the object
+     * 
+     * @param shader the allready compiled shader
+     */
+    void setShader(GLuint shader);
+
+    /**
+     * @brief Get the Shader from the object
+     * 
+     * @return GLuint the position of the shader on the graphics card
+     */
+    GLuint getShader();
+
 private:
     //store the transform for the object
     Transform transf;
@@ -244,12 +281,17 @@ private:
     GLuint texture;
     //store if the object is static
     bool isStatic;
+    //store the length of the index and vertex vuffer
+    unsigned int VBOLen, IBOLen;
 
     //compile the draw list
     void compileBuffers();
 
     //recalculate the move matrix
     void recalculateMoveMatrix();
+
+    //compile the shader and save it
+    void shaderSetup(const char* vs, const char* fs);
 };
 
 /**
