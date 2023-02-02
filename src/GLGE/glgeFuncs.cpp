@@ -85,6 +85,10 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //setup the depth buffer
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
+
+    //setup transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //read a file

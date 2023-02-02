@@ -490,13 +490,6 @@ vec2 Object2D::getScale()
 
 void Object2D::createBuffers()
 {
-    //update the buffers
-    this->updateVertexBuffer();
-    this->updateIndexBuffer();
-}
-
-void Object2D::updateVertexBuffer()
-{
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -505,10 +498,10 @@ void Object2D::updateVertexBuffer()
     glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
     //unbind the vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
 
-void Object2D::updateIndexBuffer()
-{
+    //save the length of the Vertex Buffer
+    this->IBOLen = mesh.vertices.size();
+
     //generate the index buffer
     glGenBuffers(1, &this->IBO);
     //bind the index buffer
@@ -517,6 +510,43 @@ void Object2D::updateIndexBuffer()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
     //unbind the index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //save the length of the Index Buffer
+    this->IBOLen = mesh.indices.size();
+}
+
+void Object2D::updateVertexBuffer()
+{
+    //delete the old buffer
+    glDeleteBuffers(this->VBOLen, &this->VBO);
+    //generate the vertex buffer for the object
+    glGenBuffers(1, &this->VBO);
+    //bind the vertex buffer object to store data
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    //store the mesh data in the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
+    //unbind the vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //save the length of the Vertex Buffer
+    this->IBOLen = mesh.vertices.size();
+}
+
+void Object2D::updateIndexBuffer()
+{
+    //delete the old buffer
+    glDeleteBuffers(this->IBOLen, &this->IBO);
+    //generate the index buffer
+    glGenBuffers(1, &this->IBO);
+    //bind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
+    //store the index information in the index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
+    //unbind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //save the length of the Index Buffer
+    this->IBOLen = mesh.indices.size();
 }
 
 void Object2D::shaderSetup(const char* vs, const char* fs)

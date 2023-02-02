@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 
+Object test;
 Camera camera;
 
 Object2D shape;
@@ -15,6 +16,7 @@ float camRot = 0.0025;
 
 void display()
 {
+    test.draw();
     //draw the object
     shape.draw();
 }
@@ -96,6 +98,16 @@ int main(int argc, char** argv)
     shape = Object2D(verts, inds, sizeof(verts), sizeof(inds), Transform2D(-0.75,0.75, 45, vec2(0.25,0.25)));
     shape.setTexture("src/netherite_block.png");
     shape.setShader("src/GLGE/shaders/base2D");
+
+    Vertex vertices[] = {Vertex( 1, 1, 1),
+                         Vertex(-1, 1, 1),
+                         Vertex(-1,-1, 1),
+                         Vertex( 1,-1, 1),
+                         Vertex( 1,-1,-1),
+                         Vertex( 1, 1,-1),
+                         Vertex(-1, 1,-1),
+                         Vertex(-1,-1,-1)};
+
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));

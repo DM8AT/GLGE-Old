@@ -28,6 +28,8 @@ struct vec3
 
     bool operator==(vec3 v);
 
+    bool operator!=(vec3 v);
+
     bool operator>=(vec3 v);
 
     bool operator<=(vec3 v);

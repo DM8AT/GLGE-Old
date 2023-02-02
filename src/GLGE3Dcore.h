@@ -25,77 +25,6 @@
 #include "GLGE/CML/CMLMat4.h"
 
 ///////////
-//CLASSES//
-///////////
-
-class Face
-{
-public:
-    /**
-     * @brief Construct a new Triangle
-     * 
-     * only say that it exists
-     */
-    Face();
-
-    /**
-     * @brief Construct a new Triangle
-     * 
-     * @param indices the indices for the triangle
-     * @param colors colors for each index
-     * @param normal the normal vector for the face
-     */
-    Face(unsigned int indices[3], vec4 colors[3], vec3 normal = vec3(0,0,0));
-
-    /**
-     * @brief Construct a new Triangle
-     * 
-     * @param indices the indices for the triangle
-     * @param texCoords texture coordinates for each index
-     * @param normal the normal vector for the face
-     */
-    Face(unsigned int indices[3], vec2 texCoords[3], vec3 normal = vec3(0,0,0));
-
-    /**
-     * @brief Construct a new Triangle
-     * 
-     * @param a the first index of the triangle
-     * @param b the second index of the triangle
-     * @param c the thired index of the triangle
-     * @param ca the first color of the triangle
-     * @param cb the second color of the triangle
-     * @param cc the thired color of the triangle
-     * @param normal the normal vector for the face
-     */
-    Face(unsigned int a, unsigned int b, unsigned int c, vec4 ca, vec4 cb, vec4 cc, vec3 normal = vec3(0,0,0));
-
-    /**
-     * @brief Construct a new Triangle
-     * 
-     * @param a the first index of the triangle
-     * @param b the second index of the triangle
-     * @param c the thired index of the triangle
-     * @param ta the first texture coordinate for the triangle
-     * @param tb the second texture coordinate for the triangle
-     * @param tc the thired texture coordinate for the triangle
-     * @param normal the normal vector for the face
-     */
-    Face(unsigned int a, unsigned int b, unsigned int c, vec2 ta, vec2 tb, vec2 tc, vec3 normal = vec3(0,0,0));
-
-private:
-    //three indices
-    unsigned int indices[3] = {0,0,0};
-    //three texture coordinates
-    vec2 texCoords[3] = {vec2(0,0),vec2(0,0),vec2(0,0)};
-    //three color arguments
-    vec4 colors[3] = {vec4(0,0,0,1),vec4(0,0,0,1),vec4(0,0,0,1)};
-    //save a normal vector
-    vec3 normal;
-    //say if color should be used
-    float useColor;
-};
-
-///////////
 //STRUCTS//
 ///////////
 
@@ -151,6 +80,10 @@ struct Vertex
 {
     //store the vertex position
     vec3 pos;
+    //store the texture coordinate
+    vec2 texCoord;
+    //store the vertex color
+    vec4 color;
     //store the normal of the vertex
     vec3 normal = vec3(0,0,0);
 
@@ -165,8 +98,9 @@ struct Vertex
      * @brief Construct a new Vertex
      * 
      * @param pos the positon for the vertex
+     * @param color the vertex color
      */
-    Vertex(vec3 pos);
+    Vertex(vec3 pos, vec4 color = vec4(1,1,1,1));
 
     /**
      * @brief Construct a new Vertex
@@ -174,13 +108,61 @@ struct Vertex
      * @param x the x positoin of the vertex
      * @param y the y position of the vertex
      * @param z the z position of the vertex
+     * @param color the vertex color
      */
-    Vertex(float x, float y, float z);
+    Vertex(float x, float y, float z, vec4 color = vec4(1,1,1,1));
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param x the x positoin of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param r the red part of the color
+     * @param g the green part of the color
+     * @param b the blue part of the color
+     * @param a the alpha of the color, used for transparency
+     */
+    Vertex(float x, float y, float z, float r, float g, float b, float a);
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param pos the positon for the vertex
+     * @param texCoord the texture coordinate
+     */
+    Vertex(vec3 pos, vec2 texCoord);
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param x the x positoin of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param texCoord the texture coordinate
+     */
+    Vertex(float x, float y, float z, vec2 texCoord);
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param x the x positoin of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param tX the texture x coordinate (or: s, v)
+     * @param tY the texture y coordinate (or: r, u)
+     */
+    Vertex(float x, float y, float z, float tX, float tY);
 };
 
 class Mesh
 {
 public:
+    //store the vertices for the object
+    std::vector<Vertex> vertices;
+    //store the indices for the object
+    std::vector<unsigned int> indices;
+
     /**
      * @brief defalut constructor
      */
@@ -190,19 +172,19 @@ public:
      * @brief Construct a new Mesh
      * 
      * @param vertices a pointer array to store the vertices
-     * @param faces a pointer array to store the faces
+     * @param indices a pointer array to store the indices
      * @param sizeVertices the size of the vertices pointer
-     * @param sizeFaces the size of the faces pointer
+     * @param sizeIndices the size of the indices pointer
      */
-    Mesh(Vertex* vertices, Face* faces, unsigned int sizeVertices, unsigned int sizeFaces);
+    Mesh(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices);
 
     /**
      * @brief Construct a new Mesh
      * 
      * @param vertices the vertices in an std::vector
-     * @param faces the faces in an std::vector
+     * @param indices the indices in an std::vector
      */
-    Mesh(std::vector<Vertex> vertices, std::vector<Face> faces);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 };
 
 class Object
@@ -219,21 +201,23 @@ public:
      * @brief Construct a new Object
      * 
      * @param vertices a pointer array to store the vertices
-     * @param faces a pointer array to store the faces
+     * @param indices a pointer array to store the indices
      * @param sizeVertices the size of the vertices pointer
-     * @param sizeFaces the size of the faces pointer
+     * @param sizeIndices the size of the indices pointer
      * @param transform an optinal transform for the object
+     * @param isStatic says if the object should move with the camera
      */
-    Object(Vertex* vertices, Face* faces, unsigned int sizeVertices, unsigned int sizeFaces, Transform transform = Transform());
+    Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform = Transform(), bool isStatic = false);
 
     /**
      * @brief Construct a new Object
      * 
      * @param vertices the vertices in an std::vector
-     * @param faces the faces in an std::vector
+     * @param indices the faces in an std::vector
      * @param transform an optinal transform for the object
+     * @param isStatic says if the object should move with the camera
      */
-    Object(std::vector<Vertex> vertices, std::vector<Face> faces, Transform transform = Transform());
+    Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform = Transform(), bool isStatic = false);
 
     /**
      * @brief draw the object to the screen
@@ -246,7 +230,7 @@ private:
     //store a mesh
     Mesh mesh;
     //store the vertex and index buffer
-    GLuint VBO, IBO;
+    GLuint VBO ,IBO;
     //save the shader
     GLint shader;
     //store the move matrix location
@@ -258,9 +242,14 @@ private:
                         0,0,0,1);
     //store a texture
     GLuint texture;
+    //store if the object is static
+    bool isStatic;
 
-    //recalculate and reload the buffers
-    void updateBuffers();
+    //compile the draw list
+    void compileBuffers();
+
+    //recalculate the move matrix
+    void recalculateMoveMatrix();
 };
 
 /**
@@ -330,14 +319,6 @@ public:
      * @param z the new z position for the camera
      */
     void set(float x, float y, float z);
-
-    /**
-     * @brief move the camera in a direction
-     * 
-     * @param deltaDir an angle between the camera and the vector to move it
-     * @param speed the speed to move the camera
-     */
-    void move(float deltaDir, float speed);
 
     /**
      * @brief move the camera

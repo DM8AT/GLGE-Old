@@ -139,109 +139,142 @@ Vertex::Vertex()
 }
 
 //constructor using vector
-Vertex::Vertex(vec3 pos)
+Vertex::Vertex(vec3 pos, vec4 color)
 {
     //store the inputed position
     this->pos = pos;
+    //set a white color
+    this->color = color;
+    //set the texture coordinate to 0,0
+    this->texCoord = vec2(0,0);
 }
 
 //constructor using floates
-Vertex::Vertex(float x, float y, float z)
+Vertex::Vertex(float x, float y, float z, vec4 color)
 {
     //store the inputed position
     this->pos = vec3(x,y,z);
+    //set a white color
+    this->color = color;
+    //set the texture coordinate to 0,0
+    this->texCoord = vec2(0,0);
+}
+
+Vertex::Vertex(float x, float y, float z, float r, float g, float b, float a)
+{
+    //store the inputed position
+    this->pos = vec3(x,y,z);
+    //set a white color
+    this->color = vec4(1,1,1,1);
+    //set the texture coordinate to 0,0
+    this->texCoord = vec2(0,0);
+}
+
+//constructor using vector
+Vertex::Vertex(vec3 pos, vec2 texCoord)
+{
+    //store the inputed position
+    this->pos = pos;
+    //store the inputed tex coord
+    this->texCoord = texCoord;
+    //set the color transparent
+    this->color = vec4(0,0,0,0);
+}
+
+//constructor using floates
+Vertex::Vertex(float x, float y, float z, vec2 texCoord)
+{
+    //store the inputed position
+    this->pos = vec3(x,y,z);
+    //store the inputed tex coord
+    this->texCoord = texCoord;
+    //set the color transparent
+    this->color = vec4(0,0,0,0);
+}
+
+Vertex::Vertex(float x, float y, float z, float tX, float tY)
+{
+    //store the inputed position
+    this->pos = vec3(x,y,z);
+    //store the inputed tex coord
+    this->texCoord = vec2(tX, tY);
+    //set the color transparent
+    this->color = vec4(0,0,0,0);
 }
 
 ///////////
 //CLASSES//
 ///////////
 
-//default constructor
-Face::Face()
-{
-    //say that it exists
-}
-
-//constructor using colors
-Face::Face(unsigned int indices[3], vec4 colors[3], vec3 normal)
-{
-    //store the inputed indices
-    this->indices[0] = indices[0];
-    this->indices[1] = indices[1];
-    this->indices[2] = indices[2];
-
-    //store the inputed colors
-    this->colors[0] = colors[0];
-    this->colors[1] = colors[1];
-    this->colors[2] = colors[2];
-    //say that colors should be used
-    this->useColor = 1.f;
-
-    //store the inputed normal
-    this->normal = normal;
-}
-
-//constructor using texcoords
-Face::Face(unsigned int indices[3], vec2 texCoords[3], vec3 normal)
-{
-    //store the inputed indices
-    this->indices[0] = indices[0];
-    this->indices[1] = indices[1];
-    this->indices[2] = indices[2];
-
-    //store the inputed colors
-    this->texCoords[0] = texCoords[0];
-    this->texCoords[1] = texCoords[1];
-    this->texCoords[2] = texCoords[2];
-    //say that colors should be used
-    this->useColor = 0.f;
-
-    //store the inputed normal
-    this->normal = normal;
-}
-
-//constructor using single numbers
-Face::Face(unsigned int a, unsigned int b, unsigned int c, vec4 ca, vec4 cb, vec4 cc, vec3 normal)
-{
-    //store the inputed indices
-    this->indices[0] = a;
-    this->indices[1] = b;
-    this->indices[2] = c;
-
-    //store the inputed colors
-    this->colors[0] = ca;
-    this->colors[1] = cb;
-    this->colors[2] = cc;
-    //say that colors should be used
-    this->useColor = 1.f;
-
-    //store the inputed normal
-    this->normal = normal;
-}
-
-//constructor using single numbers for a texture
-Face::Face(unsigned int a, unsigned int b, unsigned int c, vec2 ta, vec2 tb, vec2 tc, vec3 normal)
-{
-    //store the inputed indices
-    this->indices[0] = a;
-    this->indices[1] = b;
-    this->indices[2] = c;
-
-    //store the inputed colors
-    this->texCoords[0] = ta;
-    this->texCoords[1] = tb;
-    this->texCoords[2] = tc;
-    //say that colors should be used
-    this->useColor = 0.f;
-
-    //store the inputed normal
-    this->normal = normal;
-}
-
 ////////
 //MESH//
 ////////
 
+//default constructor
+Mesh::Mesh()
+{
+    //init the object
+}
+
+//pointer array constructor
+Mesh::Mesh(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices)
+{
+    //convert the pointer arrays to vectors and save them
+    this->vertices = std::vector<Vertex>(vertices, vertices + (sizeVertices/sizeof(vertices[0])));
+    this->indices = std::vector<unsigned int>(indices, indices + (sizeIndices/sizeof(indices[0])));
+}
+
+//vector constructor
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+{
+    //save the inputed vectors
+    this->vertices = vertices;
+    this->indices = indices;
+}
+
+//////////
+//OBJECT//
+//////////
+
+//default constructor
+Object::Object()
+{
+    //init the object
+}
+
+//constructor using pointer
+Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform, bool isStatic)
+{
+    //construct and save a mesh from the pointers
+    this->mesh = Mesh(vertices, indices, sizeVertices, sizeIndices);
+
+    //save the inputed transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+}
+
+//constructor using vectors
+Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform, bool isStatic)
+{
+    //construct and save a mesh from the pointers
+    this->mesh = Mesh(vertices, indices);
+
+    //save the inputed transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+}
+
+//draw the object
+void Object::draw()
+{
+    //make the draw call
+}
+
+//PRIV
 
 
 //////////

@@ -481,6 +481,8 @@ private:
     GLuint texture;
     //say if the object is static
     bool isStatic;
+    //save the length of the vertex and index buffer
+    unsigned int VBOLen, IBOLen;
 
     /**
      * @brief Create the buffers
@@ -489,11 +491,15 @@ private:
 
     /**
      * @brief create the vertex buffer or update it
+     * 
+     * @param mesh the new mesh
      */
     void updateVertexBuffer();
 
     /**
      * @brief create the index buffer or update it
+     * 
+     * @param mesh the new mesh
      */
     void updateIndexBuffer();
 
