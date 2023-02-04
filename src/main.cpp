@@ -73,6 +73,11 @@ void mainLoop()
     {
         camera.rotate(camRot*glgeGetDeltaTime(),0);
     }
+
+    if (glgeGetMouse().leftButton &! glgeGetMouse().rightButton)
+    {
+        printf("TEST\n");
+    }
 }
 
 int main(int argc, char** argv)
@@ -103,15 +108,15 @@ int main(int argc, char** argv)
     shape.setShader("src/GLGE/shaders/base2D");
 
     Vertex vertices[] = {
-                         Vertex(-1,-1, 1, 1,0,0,1),
-                         Vertex( 1,-1, 1, 0,1,0,1),
-                         Vertex(-1, 1, 1, 0,0,1,1),
-                         Vertex( 1, 1, 1, 1,1,0,1),
+                         Vertex(-1,-1, 1, 0,0),
+                         Vertex( 1,-1, 1, 1,0),
+                         Vertex(-1, 1, 1, 0,1),
+                         Vertex( 1, 1, 1, 1,1),
 
-                         Vertex(-1,-1,-1, 1,1,0,1),
-                         Vertex( 1,-1,-1, 0,1,1,1),
-                         Vertex(-1, 1,-1, 1,0,1,1),
-                         Vertex( 1, 1,-1, 0,0,0,1),
+                         Vertex(-1,-1,-1, 0,0),
+                         Vertex( 1,-1,-1, 1,0),
+                         Vertex(-1, 1,-1, 0,1),
+                         Vertex( 1, 1,-1, 1,1),
                         };
 
     uint indices[] = {//front and back
@@ -132,6 +137,7 @@ int main(int argc, char** argv)
 
     test = Object(vertices, indices, sizeof(vertices), sizeof(indices));
     test.setShader("src/GLGE/shaders/base3D");
+    test.setTexture(shape.getTexture());
 
     //camera setup
     camera = Camera(45.f, 0.1, 10.0, Transform(vec3(0,0,-5),vec3(0,0,0),1));

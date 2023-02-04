@@ -280,3 +280,57 @@ void Keys::keyUpdate(int key, bool status)
         this->arrowDown =status;
     }
 }
+
+//MOUSE
+
+Mouse::Mouse()
+{
+    //init the object
+}
+
+//update the mouse pressed buttons
+void Mouse::update(int button, int state)
+{
+    //check if the inputed button is the left mouse button
+    if (button == GLUT_LEFT_BUTTON)
+    {
+        //set the key to true if it is pressed
+        if (state == GLUT_DOWN)
+        {
+            this->leftButton = true;
+        }
+        //set the key to false if it is not pressed
+        else if (state == GLUT_UP)
+        {
+            this->leftButton = false;
+        }
+    }
+    //check if the button is the right mouse button
+    else if (button == GLUT_RIGHT_BUTTON)
+    {
+        //set the key to true if it is pressed
+        if (state == GLUT_DOWN)
+        {
+            this->rightButton = true;
+        }
+        //set the key to false if it is not pressed
+        else if (state == GLUT_UP)
+        {
+            this->rightButton = false;
+        }
+    }
+    //check if the button is the middle mouse button
+    else if (button == GLUT_MIDDLE_BUTTON)
+    {
+        //set the key to true if it is pressed
+        if (state == GLUT_DOWN)
+        {
+            this->middleButton = true;
+        }
+        //set the key to false if it is not pressed
+        else if (state == GLUT_UP)
+        {
+            this->middleButton = false;
+        }
+    }
+}

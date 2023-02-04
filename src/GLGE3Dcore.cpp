@@ -282,31 +282,27 @@ void Object::draw()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
+    //bind the texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     //bind the shader
     glUseProgram(this->shader);
 
     //activate sub elements
     //say where the position vector is
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
     //say where the color is
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
-    //say where texture coordinates are
+    //say where the texCoords are
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
-
+    
     //pass the move matrix to the shader
     glUniformMatrix4fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
-    //bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
-
-    //unbind the buffers
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -318,6 +314,10 @@ void Object::draw()
     glDisableVertexAttribArray(1);
     //deactivate the texCoord argument
     glDisableVertexAttribArray(2);
+
+    //unbind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     //unbind the shader
     glUseProgram(0);
@@ -355,6 +355,24 @@ void Object::setShader(GLuint shader)
     
     //get the new location for the move matrix
     this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+}
+
+void Object::setTexture(const char* texture)
+{
+    //load and save the texture
+    this->texture = glgeTextureFromFile(texture);
+}
+
+void Object::setTexture(GLuint texture)
+{
+    //store the ipnuted texture
+    this->texture = texture;
+}
+
+GLuint Object::getTexture()
+{
+    //return the texture
+    return this->texture;
 }
 
 //PRIV
@@ -397,17 +415,7 @@ void Object::shaderSetup(const char* vs, const char* fs)
 void Object::recalculateMoveMatrix()
 {
     //set the move matrix to the product of 3 matrices
-    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix();
-
-    std::cout << std::endl;
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            std::cout << this->moveMat.m[i][j] << ", ";
-        }
-        std::cout << std::endl;
-    }
+    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix(); 
 }
 
 //////////

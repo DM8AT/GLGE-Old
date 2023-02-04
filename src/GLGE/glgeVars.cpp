@@ -57,4 +57,8 @@ char* glgeMoveMatrix = (char*)"moveMat";
 //store the window aspect
 float glgeWindowAspect = 1.f;
 
+//store the keys
 Keys glgePressedKeys = Keys();
+
+//store the mouse information
+Mouse glgeMouse = Mouse();

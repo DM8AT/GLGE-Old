@@ -12,6 +12,9 @@
 #ifndef _GLGE_KLASSES_H_
 #define _GLGE_KLASSES_H_
 
+//include the needed var types
+#include "CML/CMLVec2.h"
+
 /**
  * @brief a Keys object stores all pressed keys
  */
@@ -44,6 +47,28 @@ public:
      * @param status the new status for the key
      */
     void keyUpdate(int key, bool status);
+};
+
+class Mouse
+{
+public:
+    //store the position of the mouse on the screen
+    vec2 pos;
+    //store the position of the mouse on the screen in pixel space
+    vec2 posPixel;
+    //store the status of the mouse buttons
+    bool leftButton, rightButton, middleButton = false;
+
+    //default constructor
+    Mouse();
+
+    /**
+     * @brief update the mouse
+     * 
+     * @param button the botton to handle
+     * @param state the button status
+     */
+    void update(int button, int state);
 };
 
 #endif

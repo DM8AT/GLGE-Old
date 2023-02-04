@@ -53,4 +53,12 @@ void glgeDefaultSpecKeyFunc(int key, int, int);
  */
 void glgeDefaultSpecKeyUpFunc(int key, int, int);
 
+/**
+ * @brief this function is called when a mouse button updates
+ * store the mouse buttons
+ * @param button the updated mouse button
+ * @param state the state for the mouse button
+ */
+void glgeDefaultMouseFunc(int button, int state, int, int);
+
 #endif

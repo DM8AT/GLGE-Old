@@ -72,4 +72,7 @@ extern float glgeWindowAspect;
 //store all pressed keys
 extern Keys glgePressedKeys;
 
+//store the mouse information
+extern Mouse glgeMouse;
+
 #endif

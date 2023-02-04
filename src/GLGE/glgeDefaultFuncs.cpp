@@ -98,3 +98,9 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int)
     //store which key is no longer pressed
     glgePressedKeys.keyUpdate(key, false);
 }
+
+void glgeDefaultMouseFunc(int button, int state, int, int)
+{
+    //update the mouse
+    glgeMouse.update(button, state);
+}

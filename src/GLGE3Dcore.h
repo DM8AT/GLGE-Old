@@ -83,12 +83,10 @@ struct Vertex
 {
     //store the vertex position
     vec3 pos;
-    //store the texture coordinate
-    vec2 texCoord;
     //store the vertex color
     vec4 color;
-    //store the normal of the vertex
-    vec3 normal = vec3(0,0,0);
+    //store the texture coordinate
+    vec2 texCoord;
 
     /**
      * @brief Construct a new Vertex
@@ -260,6 +258,27 @@ public:
      * @return GLuint the position of the shader on the graphics card
      */
     GLuint getShader();
+
+    /**
+     * @brief Set the Texture for the object
+     * 
+     * @param file the file to read the data from
+     */
+    void setTexture(const char* file);
+
+    /**
+     * @brief Set the Texture for the object
+     * 
+     * @param texture the allready compiled texture
+     */
+    void setTexture(GLuint texture);
+
+    /**
+     * @brief Get the Texture from the object
+     * 
+     * @return GLuint the compiled texture
+     */
+    GLuint getTexture();
 
 private:
     //store the transform for the object

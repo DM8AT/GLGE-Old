@@ -781,3 +781,9 @@ vec2 glgeGetTextureSize(const char* name)
     stbi_image_free(data);
     return vec2(h,w);
 }
+
+Mouse glgeGetMouse()
+{
+    //return the stored mouse data
+    return glgeMouse;
+}

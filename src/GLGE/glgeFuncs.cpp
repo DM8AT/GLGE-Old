@@ -76,6 +76,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //bind the keyboard down and up function for special keys
     glutSpecialFunc(glgeDefaultSpecKeyFunc);
     glutSpecialUpFunc(glgeDefaultSpecKeyUpFunc);
+    //bind the mouse update functions
+    glutMouseFunc(glgeDefaultMouseFunc);
 
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);

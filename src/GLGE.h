@@ -320,6 +320,19 @@ GLuint glgeCompileShader(const char* vertex, const char* fragment);
  */
 GLuint glgeTextureFromFile(const char* file, vec2* storeSize = NULL);
 
+/**
+ * @brief get the size of an texture from an file
+ * 
+ * @param texture the file for the texture
+ * @return vec2 the size of the texture (width, height)
+ */
 vec2 glgeGetTextureSize(const char* texture);
+
+/**
+ * @brief get all mouse data from glge
+ * 
+ * @return Mouse the mouse data
+ */
+Mouse glgeGetMouse();
 
 #endif
