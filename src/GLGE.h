@@ -338,7 +338,7 @@ Mouse glgeGetMouse();
 /**
  * @brief say that backface culling should be used
  */
-void glgeUseBackfaceCulling();
+void glgeEnableBackfaceCulling();
 
 /**
  * @brief say that no backface culling should be used

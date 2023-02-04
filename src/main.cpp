@@ -79,6 +79,11 @@ void mainLoop()
         printf("MX: %f, MY: %f\n", glgeGetMouse().pos.x, glgeGetMouse().pos.y);
         printf("MPX: %f, MPY: %f\n", glgeGetMouse().posPixel.x, glgeGetMouse().posPixel.y);
     }
+
+    if (glgeGetMouse().middleButton)
+    {
+        glgeSwapBackfaceCulling();
+    }
 }
 
 int main(int argc, char** argv)

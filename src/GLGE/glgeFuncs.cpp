@@ -84,6 +84,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
+    glgeUseCulling = true;
 
     //setup the depth buffer
     glEnable(GL_DEPTH_TEST);

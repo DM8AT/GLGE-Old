@@ -787,3 +787,49 @@ Mouse glgeGetMouse()
     //return the stored mouse data
     return glgeMouse;
 }
+
+void glgeEnableBackfaceCulling()
+{
+    //say that face culling is enabled
+    glEnable(GL_CULL_FACE);
+    glgeUseCulling = true;
+}
+
+void glgeDisableBackfaceCulling()
+{
+    //say that face culling is disabled
+    glDisable(GL_CULL_FACE);
+    glgeUseCulling = false;
+}
+
+void glgeSwapBackfaceCulling()
+{
+    //set the face mode to the opposite it currently is
+    if (glgeUseCulling)
+    {
+        glgeDisableBackfaceCulling();
+    }
+    else
+    {
+        glgeEnableBackfaceCulling();
+    }
+}
+
+void glgeSetBackfaceCulling(bool status)
+{
+    //set the face mode to the inputed status
+    if (status)
+    {
+        glgeDisableBackfaceCulling();
+    }
+    else
+    {
+        glgeEnableBackfaceCulling();
+    }
+}
+
+bool glgeGetBackfaceCullingStatus()
+{
+    //return the current backface culling mode
+    return glgeUseCulling;
+}

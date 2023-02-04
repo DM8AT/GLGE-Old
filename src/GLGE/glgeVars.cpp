@@ -62,3 +62,6 @@ Keys glgePressedKeys = Keys();
 
 //store the mouse information
 Mouse glgeMouse = Mouse();
+
+//store the backface culling mode
+bool glgeUseCulling = false;

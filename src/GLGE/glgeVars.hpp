@@ -75,4 +75,7 @@ extern Keys glgePressedKeys;
 //store the mouse information
 extern Mouse glgeMouse;
 
+//store the backface culling mode
+extern bool glgeUseCulling;
+
 #endif
