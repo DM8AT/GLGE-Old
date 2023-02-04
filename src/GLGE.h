@@ -90,6 +90,13 @@ void glgeCreateWindow(const char* name, vec2 size, vec2 pos = vec2(0,0));
 void glgeCreateWindow(const char* name, int width, int height, vec2 pos = vec2(0,0));
 
 /**
+ * @brief set the window title
+ * 
+ * @param title the new window title
+ */
+void glgeSetWindowTitle(const char* title);
+
+/**
  * @brief say if the GLGE errors should be outputed or not
  * 
  * this function enables or disables the error output of GLGE. For a final release it is better to disable all the errors, as they may create cunfusion, but for

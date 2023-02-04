@@ -179,6 +179,11 @@ void glgeCreateWindow(const char* name, int width, int height, vec2 pos)
     createWindow(name, vec2(width, height), pos);
 }
 
+void glgeSetWindowTitle(const char* title)
+{
+    glutSetWindowTitle(title);
+}
+
 //set if GLGE should output errors
 void glgeSetErrorOutput(bool in)
 {
