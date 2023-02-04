@@ -6,11 +6,11 @@ layout (location = 2) in vec2 texcoord;
 uniform mat4 moveMat;
 
 out vec4 fColor;
-out vec2 fTexcoord;
+out vec2 fTexCoord;
 
 void main()
 {
     fColor = color;
-    fTexcoord = texcoord;
+    fTexCoord = texcoord;
     gl_Position = vec4(pos ,1.0) * moveMat;
 }

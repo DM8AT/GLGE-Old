@@ -86,7 +86,7 @@ struct Vertex
     //store the vertex color
     vec4 color;
     //store the texture coordinate
-    vec2 texCoord;
+    vec2 texCoord = vec2(1,1);
 
     /**
      * @brief Construct a new Vertex
