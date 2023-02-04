@@ -335,4 +335,34 @@ vec2 glgeGetTextureSize(const char* texture);
  */
 Mouse glgeGetMouse();
 
+/**
+ * @brief say that backface culling should be used
+ */
+void glgeUseBackfaceCulling();
+
+/**
+ * @brief say that no backface culling should be used
+ */
+void glgeDisableBackfaceCulling();
+
+/**
+ * @brief switch the backface culling status
+ */
+void glgeSwapBackfaceCulling();
+
+/**
+ * @brief set the backwface culling status
+ * 
+ * @param status the status
+ */
+void glgeSetBackfaceCulling(bool status);
+
+/**
+ * @brief get the backface culling status
+ * 
+ * @return true backface culling is currently used | 
+ * @return false no backface culling is used
+ */
+bool glgeGetBackfaceCullingStatus();
+
 #endif

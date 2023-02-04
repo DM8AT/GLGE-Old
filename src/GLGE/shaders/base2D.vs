@@ -12,5 +12,7 @@ void main()
 {
     fColor = color;
     fTexCoord = texcoord;
-    gl_Position = vec4(vec3(pos,1)*moveMat ,1.0);
+    vec4 memPos = vec4(vec3(pos,1)*moveMat ,1.0);
+    memPos.z = 1.f;
+    gl_Position = memPos;
 }

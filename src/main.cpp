@@ -121,13 +121,13 @@ int main(int argc, char** argv)
                          Vertex( 1, 1,-1, 0,1),
 
                          //top and bottom
-                         Vertex(-1,-1, 1, 0,1),//
-                         Vertex( 1,-1, 1, 1,1),//
+                         Vertex(-1,-1, 1, 0,1),
+                         Vertex( 1,-1, 1, 1,1),
                          Vertex(-1, 1, 1, 0,0),
                          Vertex( 1, 1, 1, 1,0),
 
-                         Vertex(-1,-1,-1, 0,0),//
-                         Vertex( 1,-1,-1, 1,0),//
+                         Vertex(-1,-1,-1, 0,0),
+                         Vertex( 1,-1,-1, 1,0),
                          Vertex(-1, 1,-1, 0,1),
                          Vertex( 1, 1,-1, 1,1),
 

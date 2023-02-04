@@ -701,5 +701,7 @@ void glgeInit3DCore()
 {
     //set the depth test correctly
     glDepthMask(GL_TRUE);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_GREATER);
+    //set the clear depth correctly
+    glClearDepth(0.f);
 }
