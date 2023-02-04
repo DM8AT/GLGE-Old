@@ -99,8 +99,17 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int)
     glgePressedKeys.keyUpdate(key, false);
 }
 
-void glgeDefaultMouseFunc(int button, int state, int, int)
+void glgeDefaultMouseFunc(int button, int state, int x, int y)
 {
     //update the mouse
     glgeMouse.update(button, state);
+
+    //update the mouse positoin
+    glgeMouse.updatePos(x,y);
+}
+
+void glgeDefaultPassiveMotionFunc(int x, int y)
+{
+    //update the mouse positoin
+    glgeMouse.updatePos(x,y);
 }

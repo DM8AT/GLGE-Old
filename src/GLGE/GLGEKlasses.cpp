@@ -334,3 +334,11 @@ void Mouse::update(int button, int state)
         }
     }
 }
+
+void Mouse::updatePos(int x, int y)
+{
+    //store the inputed position as the pixel positoin
+    this->posPixel = vec2(x,y);
+    //set the normalised position to the pixel position scaled by the inverse of the screen width & height
+    this->pos = vec2((float)x / (float)glutGet(GLUT_WINDOW_WIDTH), (float )y / (float)glutGet(GLUT_WINDOW_HEIGHT));
+}

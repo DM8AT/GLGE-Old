@@ -69,6 +69,14 @@ public:
      * @param state the button status
      */
     void update(int button, int state);
+
+    /**
+     * @brief update the mouse position
+     * 
+     * @param x the x position of the mouse
+     * @param y the y position of the mouse
+     */
+    void updatePos(int x, int y);
 };
 
 #endif

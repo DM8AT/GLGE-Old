@@ -58,7 +58,17 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int);
  * store the mouse buttons
  * @param button the updated mouse button
  * @param state the state for the mouse button
+ * @param x the mouse x position
+ * @param y the mouse y position
  */
-void glgeDefaultMouseFunc(int button, int state, int, int);
+void glgeDefaultMouseFunc(int button, int state, int x, int y);
+
+/**
+ * @brief this function is called when the mouse moves
+ * store the mouse possition
+ * @param x the mouse x position
+ * @param y the mouse y position
+ */
+void glgeDefaultPassiveMotionFunc(int x, int y);
 
 #endif

@@ -78,6 +78,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glutSpecialUpFunc(glgeDefaultSpecKeyUpFunc);
     //bind the mouse update functions
     glutMouseFunc(glgeDefaultMouseFunc);
+    glutPassiveMotionFunc(glgeDefaultPassiveMotionFunc);
 
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);
