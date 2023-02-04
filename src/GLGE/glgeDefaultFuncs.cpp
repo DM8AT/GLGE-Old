@@ -102,7 +102,7 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int)
 void glgeDefaultMouseFunc(int button, int state, int x, int y)
 {
     //update the mouse
-    glgeMouse.update(button, state);
+    glgeMouse.update(button, state, x, y);
 
     //update the mouse positoin
     glgeMouse.updatePos(x,y);

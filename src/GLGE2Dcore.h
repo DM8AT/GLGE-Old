@@ -517,4 +517,84 @@ private:
     void recalculateMoveMatrix();
 };
 
+class Camera2D
+{
+public:
+    /**
+     * @brief Construct a new Camera 2D
+     * default constructor
+     */
+    Camera2D();
+
+    /**
+     * @brief Construct a new Camera 2D
+     * 
+     * @param transform the transform for the camera
+     */
+    Camera2D(Transform2D transform = Transform2D());
+
+    /**
+     * @brief Construct a new Camera 2D
+     * 
+     * @param pos 
+     * @param rot 
+     * @param size 
+     */
+    Camera2D(vec2 pos, float rot = 0, vec2 size = vec2(1,1));
+
+    /**
+     * @brief Construct a new Camera 2D
+     * 
+     * @param x the x position for the camera
+     * @param y the y position for the camera
+     * @param rot the rotation of the camera
+     * @param size the global scaling
+     */
+    Camera2D(float x, float y, float rot = 0, vec2 size = vec2(1,1));
+
+    /**
+     * @brief Construct a new Camera 2D
+     * 
+     * @param pos the position for the camera
+     * @param sX the global scaling on the x axis
+     * @param sY the global scaling on the y axis
+     * @param rot the camera rotation
+     */
+    Camera2D(vec2 pos, float sX, float sY, float rot = 0);
+
+    /**
+     * @brief Construct a new Camera 2D
+     * 
+     * @param x the x position for the camera
+     * @param y the y position for the camera
+     * @param sX the global scaling on the x axis
+     * @param sY the global scaling on the y axis
+     * @param rot the camera rotation
+     */
+    Camera2D(float x, float y, float sX, float sY, float rot = 0);
+
+    /**
+     * @brief update the camera matrix
+     */
+    void update();
+
+    /**
+     * @brief Get the camera matrix
+     * 
+     * @return mat3 the camera matrix
+     */
+    mat3 getMatrix();
+
+private:
+    //store the camera transform
+    Transform2D transf;
+    //store the camera matrix
+    mat3 camMat();
+
+    /**
+     * @brief recalculate the camera matrix
+     */
+    void recalculateMatrix();
+};
+
 #endif

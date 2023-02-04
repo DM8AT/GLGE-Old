@@ -3,6 +3,8 @@
 //include freeglut
 #include <GL/freeglut.h>
 
+#include <iostream>
+
 /////////////
 //KEY CLASS//
 /////////////
@@ -289,7 +291,7 @@ Mouse::Mouse()
 }
 
 //update the mouse pressed buttons
-void Mouse::update(int button, int state)
+void Mouse::update(int button, int state, int, int)
 {
     //check if the inputed button is the left mouse button
     if (button == GLUT_LEFT_BUTTON)
@@ -332,6 +334,21 @@ void Mouse::update(int button, int state)
         {
             this->middleButton = false;
         }
+    }
+    //neglate the button up
+    else if (state == GLUT_UP)
+    {
+        return;
+    }
+    //if the button is the mouse scroll up, increase the scroll count
+    else if (button == 3)
+    {
+        this->mouseWeel++;
+    }
+    //if the button is the mouse scroll down, decrease the scroll count
+    else if (button == 4)
+    {
+        this->mouseWeel--;
     }
 }
 

@@ -58,6 +58,8 @@ public:
     vec2 posPixel;
     //store the status of the mouse buttons
     bool leftButton, rightButton, middleButton = false;
+    //store the amoung of scrolles from the mouse wheel
+    int mouseWeel;
 
     //default constructor
     Mouse();
@@ -68,7 +70,7 @@ public:
      * @param button the botton to handle
      * @param state the button status
      */
-    void update(int button, int state);
+    void update(int button, int state, int x, int y);
 
     /**
      * @brief update the mouse position

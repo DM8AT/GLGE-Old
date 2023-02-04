@@ -571,3 +571,48 @@ void Object2D::recalculateMoveMatrix()
                          0,                 1,0,
                          0,                 0,1) * moveMat;
 }
+
+Camera2D::Camera2D()
+{
+
+}
+
+Camera2D::Camera2D(Transform2D transform)
+{
+
+}
+
+Camera2D::Camera2D(vec2 pos, float rot, vec2 size)
+{
+
+}
+
+Camera2D::Camera2D(float x, float y, float rot, vec2 size)
+{
+
+}
+
+Camera2D::Camera2D(vec2 pos, float sX, float sY, float rot)
+{
+
+}
+
+Camera2D::Camera2D(float x, float y, float sX, float sY, float rot)
+{
+
+}
+
+void Camera2D::update()
+{
+
+}
+
+mat3 Camera2D::getMatrix()
+{
+
+}
+
+void Camera2D::recalculateMatrix()
+{
+
+}

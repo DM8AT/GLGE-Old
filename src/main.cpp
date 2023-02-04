@@ -84,6 +84,11 @@ void mainLoop()
     {
         glgeSwapBackfaceCulling();
     }
+
+    if (glgeGetMouse().rightButton)
+    {
+        printf("SCROLL: %d\n", glgeGetMouse().mouseWeel);
+    }
 }
 
 int main(int argc, char** argv)
