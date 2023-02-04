@@ -109,10 +109,33 @@ int main(int argc, char** argv)
     shape.setShader("src/GLGE/shaders/base2D");
 
     Vertex vertices[] = {
+                         //front and back
                          Vertex(-1,-1, 1, 0,0),
                          Vertex( 1,-1, 1, 1,0),
                          Vertex(-1, 1, 1, 0,1),
                          Vertex( 1, 1, 1, 1,1),
+
+                         Vertex(-1,-1,-1, 1,0),
+                         Vertex( 1,-1,-1, 0,0),
+                         Vertex(-1, 1,-1, 1,1),
+                         Vertex( 1, 1,-1, 0,1),
+
+                         //top and bottom
+                         Vertex(-1,-1, 1, 0,1),//
+                         Vertex( 1,-1, 1, 1,1),//
+                         Vertex(-1, 1, 1, 0,0),
+                         Vertex( 1, 1, 1, 1,0),
+
+                         Vertex(-1,-1,-1, 0,0),//
+                         Vertex( 1,-1,-1, 1,0),//
+                         Vertex(-1, 1,-1, 0,1),
+                         Vertex( 1, 1,-1, 1,1),
+
+                         //left and right
+                         Vertex(-1,-1, 1, 1,0),
+                         Vertex( 1,-1, 1, 0,0),
+                         Vertex(-1, 1, 1, 1,1),
+                         Vertex( 1, 1, 1, 0,1),
 
                          Vertex(-1,-1,-1, 0,0),
                          Vertex( 1,-1,-1, 1,0),
@@ -120,21 +143,22 @@ int main(int argc, char** argv)
                          Vertex( 1, 1,-1, 1,1),
                         };
 
-    uint indices[] = {//front and back
+    uint indices[] = {
+                      //front and back
                       0,2,1,
                       1,2,3,
                       4,5,6,
                       5,7,6,
                       //top and bottom
-                      0,1,4,
-                      1,5,4,
-                      2,6,3,
-                      3,6,7,
+                      0+8,1+8,4+8,
+                      1+8,5+8,4+8,
+                      2+8,6+8,3+8,
+                      3+8,6+8,7+8,
                       //left and right
-                      0,4,2,
-                      2,4,6,
-                      1,3,5,
-                      3,7,5};
+                      0+16,4+16,2+16,
+                      2+16,4+16,6+16,
+                      1+16,3+16,5+16,
+                      3+16,7+16,5+16};
 
     test = Object(vertices, indices, sizeof(vertices), sizeof(indices));
     test.setShader("src/GLGE/shaders/base3D");
