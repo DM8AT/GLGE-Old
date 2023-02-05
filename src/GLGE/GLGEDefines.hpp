@@ -14,11 +14,6 @@
 #define _GLGE_DEFINES_H_
 
 /**
- * input this to a mesh or an object and it will automatically generate a cube mesh
- */
-#define GLGE_DEFAULT_CUBE "CUBE"
-
-/**
  * an input to say where the default shader for 3D is
  */
 #define GLGE_DEFAULT_3D_SHADER "src/GLGE/shaders/base3D"

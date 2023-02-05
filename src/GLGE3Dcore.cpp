@@ -257,6 +257,9 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 
     //calculate the buffers
     this->compileBuffers();
+
+    //update the object
+    this->update();
 }
 
 //constructor using vectors
@@ -273,6 +276,9 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 
     //calculate the buffers
     this->compileBuffers();
+
+    //update the object
+    this->update();
 }
 
 //draw the object
@@ -355,6 +361,11 @@ void Object::setShader(GLuint shader)
     
     //get the new location for the move matrix
     this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+}
+
+GLuint Object::getShader()
+{
+    return this->shader;
 }
 
 void Object::setTexture(const char* texture)
@@ -537,6 +548,12 @@ void Camera::applyTransform(Transform t)
     this->transf = t;
 }
 
+Transform Camera::getTransform()
+{
+    //return the transform
+    return this->transf;
+}
+
 //set the position of the camera
 void Camera::set(vec3 p)
 {
@@ -563,6 +580,12 @@ void Camera::move(float x, float y, float z)
 {
     //change the position of the camera
     this->transf.pos += vec3(x,y,z);
+}
+
+vec3 Camera::getPos()
+{
+    //return the camera position
+    return this->transf.pos;
 }
 
 //set the rotation of the camera
@@ -593,6 +616,12 @@ void Camera::rotate(float x, float y)
     this->transf.rot += vec3(x,y,0);
 }
 
+vec3 Camera::getRotation()
+{
+    //return the rotation
+    return this->transf.rot;
+}
+
 //set the field of view from the camera
 void Camera::setFOV(float f)
 {
@@ -607,8 +636,11 @@ void Camera::sizeFOV(float df)
     this->fov += (df*GLGE_TO_RADIANS);
 }
 
-//change the fov
-
+float Camera::getFOV()
+{
+    //return the fov
+    return this->fov;
+}
 
 //PRIVATE
 

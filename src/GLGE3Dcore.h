@@ -366,6 +366,13 @@ public:
     void applyTransform(Transform transform);
 
     /**
+     * @brief Get the Transform from the camera
+     * 
+     * @return Transform the current transform of the camera
+     */
+    Transform getTransform();
+
+    /**
      * @brief position the camera new
      * 
      * @param position the new position for the camera
@@ -398,6 +405,13 @@ public:
     void move(float dX, float dY, float dZ);
 
     /**
+     * @brief Get the position from the camera
+     * 
+     * @return vec3 the position of the camera
+     */
+    vec3 getPos();
+
+    /**
      * @brief Set the Rotation of the camera
      * 
      * @param rotation the new rotation for the camera
@@ -428,6 +442,13 @@ public:
     void rotate(float dX, float dY);
 
     /**
+     * @brief Get the rotation from the camera
+     * 
+     * @return vec3 the rotation from the camera
+     */
+    vec3 getRotation();
+
+    /**
      * @brief set the field of view of the camera
      * 
      * @param fov the new field of view for the camera
@@ -440,6 +461,13 @@ public:
      * @param deltaFOV the difference in the size of the field of view
      */
     void sizeFOV(float deltaFOV);
+
+    /**
+     * @brief get the field of view from the camera
+     * 
+     * @return float the current fov from the camera
+     */
+    float getFOV();
 
 private:
     //store the right direction of the camera
