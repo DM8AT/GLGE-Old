@@ -20,6 +20,12 @@
 #include <math.h>
 #include <iostream>
 
+//////////////
+//Local Vars//
+//////////////
+
+Camera2D* mainCam = NULL;
+
 ///////////
 //STRUCTS//
 ///////////
@@ -564,6 +570,12 @@ void Object2D::recalculateMoveMatrix()
     //get the move matrix from the transform
     this->moveMat = this->transf.getMatrix();
 
+    //if the object is not static, get the camera matrix, if it is available
+    if (!this->isStatic && (mainCam != NULL))
+    {
+        this->moveMat = mainCam->getMatrix() * this->moveMat;
+    }
+
     //fix matrix bug
     this->moveMat.m[2][2] = -1;
     //fix deformation
@@ -572,47 +584,205 @@ void Object2D::recalculateMoveMatrix()
                          0,                 0,1) * moveMat;
 }
 
+//////////
+//CAMERA//
+//////////
+
+//default constructor
 Camera2D::Camera2D()
 {
-
+    //init the object
 }
 
+//cam from transform
 Camera2D::Camera2D(Transform2D transform)
 {
-
+    //store the inputed transform
+    this->transf = transform;
 }
 
 Camera2D::Camera2D(vec2 pos, float rot, vec2 size)
 {
-
+    //store the inputed values
+    this->transf = Transform2D(pos, rot, size);
 }
 
 Camera2D::Camera2D(float x, float y, float rot, vec2 size)
 {
-
+    //store the inputed values
+    this->transf = Transform2D(x,y, rot, size);
 }
 
 Camera2D::Camera2D(vec2 pos, float sX, float sY, float rot)
 {
-
+    //store the inputed values
+    this->transf = Transform2D(pos, rot, vec2(sX,sY));
 }
 
 Camera2D::Camera2D(float x, float y, float sX, float sY, float rot)
 {
-
+    //store the inputed values
+    this->transf = Transform2D(x,y, rot, vec2(sX,sY));
 }
 
 void Camera2D::update()
 {
-
+    //recaluclate the camera matrix
+    this->recalculateMatrix();
 }
 
 mat3 Camera2D::getMatrix()
 {
+    //return the current cam matrix
+    return this->camMat;
+}
 
+void Camera2D::setTransform(Transform2D transform)
+{
+    //store the inputed argument
+    this->transf = transform;
+}
+
+Transform2D Camera2D::getTransform()
+{
+    //store the inputed argument
+    return this->transf;
+}
+
+void Camera2D::move(vec2 deltaPos)
+{
+    //change the position
+    this->transf.pos += deltaPos;
+}
+
+void Camera2D::move(float deltaX, float deltaY)
+{
+    //change the position
+    this->transf.pos += vec2(deltaX, deltaY);
+}
+
+void Camera2D::move(float speedX, float speedY, float dir)
+{
+    //change the position
+    this->transf.pos += vec2(speedX*std::sin(dir*GLGE_TO_RADIANS), speedY*std::cos(dir*GLGE_TO_RADIANS));
+}
+
+void Camera2D::move(float speed)
+{
+    //change the position
+    this->transf.pos += vec2(speed*std::sin(this->transf.rot*GLGE_TO_RADIANS), speed*std::cos(this->transf.rot*GLGE_TO_RADIANS));
+}
+
+void Camera2D::setPos(vec2 pos)
+{
+    //set the position to the input
+    this->transf.pos = pos;
+}
+
+void Camera2D::setPos(float x, float y)
+{
+    //set the position to the input
+    this->transf.pos = vec2(x,y);
+}
+
+vec2 Camera2D::getPos()
+{
+    //return the position
+    return this->transf.pos;
+}
+
+void Camera2D::rotate(float angle)
+{
+    //change the rotation of the object
+    this->transf.rot += (angle*GLGE_TO_RADIANS);
+}
+
+void Camera2D::setRotation(float dir)
+{
+    //set the rotation of the object
+    this->transf.rot = dir*GLGE_TO_RADIANS;
+}
+
+float Camera2D::getRotation()
+{
+    //return the rotation in degrees
+    return this->transf.rot * GLGE_TO_DEGREES;
+}
+
+void Camera2D::scale(vec2 scale)
+{
+    //scale the object
+    this->transf.size.scale(scale);
+}
+
+void Camera2D::scale(float scaleX, float scaleY)
+{
+    //scale the object
+    this->transf.size.scale(vec2(scaleX,scaleY));
+}
+
+void Camera2D::scaleAdd(vec2 scale)
+{
+    //add the input to the size
+    this->transf.size += scale;
+}
+
+void Camera2D::scaleAdd(float scaleX, float scaleY)
+{
+    //add the input to the size
+    this->transf.size += vec2(scaleX, scaleY);
+}
+
+void Camera2D::setScale(vec2 scale)
+{
+    //set the size of the object
+    this->transf.size = scale;
+}
+
+void Camera2D::setScale(float x, float y)
+{
+    //set the size of the object
+    this->transf.size = vec2(x,y);
+}
+
+vec2 Camera2D::getScale()
+{
+    //return the scale
+    return this->transf.size;
 }
 
 void Camera2D::recalculateMatrix()
 {
+    //calculate the rotation matrix
+    mat3 rotMat = mat3(std::cos(this->transf.rot),-std::sin(this->transf.rot),0,
+                       std::sin(this->transf.rot), std::cos(this->transf.rot),0,
+                       0,                          0,                         1);
+    //calculate the scale matrix
+    mat3 scaMat = mat3(this->transf.size.x,0,0,
+                       0,this->transf.size.y,0,
+                       0,0,1);
 
+    //calculate the move matrix
+    mat3 movMat = mat3(1,0,this->transf.pos.x,
+                       0,1,this->transf.pos.y,
+                       0,0,1);
+
+    //set the cam mat to an product of the matrices
+    this->camMat = rotMat * scaMat * movMat;
+}
+
+/////////////
+//FUNCTIONS//
+/////////////
+
+void glgeBindMain2DCamera(Camera2D* camera)
+{
+    //store the inputed pointer
+    mainCam = camera;
+}
+
+Camera2D* glgeGetMain2DCamera()
+{
+    //return the stored camera
+    return mainCam;
 }

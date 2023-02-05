@@ -10,6 +10,7 @@ Object test;
 Camera camera;
 
 Object2D shape;
+Camera2D cam;
 
 float camSpeed = 0.005;
 float camRot = 0.0025;
@@ -26,11 +27,14 @@ void mainLoop()
     //update the projection matrix
     camera.recalculateProjection();
     camera.update();
+
     //update the object
     test.update();
 
     shape.rotate(2.5);
     shape.update();
+
+    cam.update();
 
     if (glgeGetKeys().w)
     {
@@ -117,6 +121,10 @@ int main(int argc, char** argv)
     shape = Object2D(verts, inds, sizeof(verts), sizeof(inds), Transform2D(-0.75,0.75, 45, vec2(0.25,0.25)));
     shape.setTexture("src/netherite_block.png");
     shape.setShader("src/GLGE/shaders/base2D");
+
+    cam = Camera2D(0,0);
+    cam.update();
+    glgeBindMain2DCamera(&cam);
 
     Vertex vertices[] = {
                          //front and back

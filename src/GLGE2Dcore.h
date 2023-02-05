@@ -531,7 +531,7 @@ public:
      * 
      * @param transform the transform for the camera
      */
-    Camera2D(Transform2D transform = Transform2D());
+    Camera2D(Transform2D transform);
 
     /**
      * @brief Construct a new Camera 2D
@@ -585,16 +585,174 @@ public:
      */
     mat3 getMatrix();
 
+    /**
+     * @brief Set the Transform for the camera
+     * 
+     * @param transform the new transform from the camera
+     */
+    void setTransform(Transform2D transform);
+
+    /**
+     * @brief Get the Transform from the camera
+     * 
+     * @return Transform2D the transform from the camera
+     */
+    Transform2D getTransform();
+
+    /**
+     * @brief change the position of the camera
+     * 
+     * @param deltaPos the difference in position
+     */
+    void move(vec2 deltaPos);
+
+    /**
+     * @brief change the position of the camera
+     * 
+     * @param deltaX the difference on the x axis
+     * @param deltaY the difference on the y axis
+     */
+    void move(float deltaX, float deltaY);
+
+    /**
+     * @brief change the position of the camera in a direction
+     * 
+     * @param speedX the speed on the x axis
+     * @param speedY the speed on the y axis
+     * @param dir the direction to move the camera in
+     */
+    void move(float speedX, float speedY, float dir);
+
+    /**
+     * @brief change the position of the camera in the direction it is facig
+     * 
+     * @param speed the speed to move the camera with
+     */
+    void move(float speed);
+
+    /**
+     * @brief Set the position of the camera
+     * 
+     * @param pos the new position for the camera
+     */
+    void setPos(vec2 pos);
+
+    /**
+     * @brief Set the position of the camera
+     * 
+     * @param x the new x position for the camera
+     * @param y the new y position for the camera
+     */
+    void setPos(float x, float y);
+
+    /**
+     * @brief Get the position from the camera
+     * 
+     * @return vec2 the position of the camera
+     */
+    vec2 getPos();
+
+    /**
+     * @brief rotate the camera
+     * 
+     * @param angle the angle of rotation in degrees
+     */
+    void rotate(float angle);
+
+    /**
+     * @brief Set the rotation of the camera
+     * 
+     * @param dir the direction for the camera in degrees
+     */
+    void setRotation(float dir);
+
+    /**
+     * @brief Get the Rotation from the camera
+     * 
+     * @return float the rotation in degrees
+     */
+    float getRotation();
+
+    /**
+     * @brief change the scale of the camera
+     * 
+     * @param scale the scale multiplier
+     */
+    void scale(vec2 scale);
+
+    /**
+     * @brief change the scale of the camera
+     * 
+     * @param scaleX the scale multiplier on the x axis
+     * @param scaleY the scale multiplier on the y axis
+     */
+    void scale(float scaleX, float scaleY);
+
+    /**
+     * @brief add something to the scale
+     * 
+     * @param scale the difference in the scale
+     */
+    void scaleAdd(vec2 scale);
+
+    /**
+     * @brief add something to the scale
+     * 
+     * @param scaleX the difference in the scale on the x axis
+     * @param scaleY the difference in the scale on the y axis
+     */
+    void scaleAdd(float scaleX, float scaleY);
+
+    /**
+     * @brief Set the Scale from the camera
+     * 
+     * @param scale the new scale for the camera
+     */
+    void setScale(vec2 scale);
+
+    /**
+     * @brief Set the Scale from the camera
+     * 
+     * @param x the new scale on the x axis
+     * @param y the new scale on the y axis
+     */
+    void setScale(float x, float y);
+
+    /**
+     * @brief Get the Scale from the camera
+     * 
+     * @return vec2 the scale from the camera
+     */
+    vec2 getScale();
+
 private:
     //store the camera transform
     Transform2D transf;
     //store the camera matrix
-    mat3 camMat();
+    mat3 camMat = mat3(1,0,0,
+                       0,1,0,
+                       0,0,1);
 
     /**
      * @brief recalculate the camera matrix
      */
     void recalculateMatrix();
 };
+
+//FUNCTIONS
+
+/**
+ * @brief bind the camera for 2D objects
+ * 
+ * @param camera a pointer to the camera to use
+ */
+void glgeBindMain2DCamera(Camera2D* camera);
+
+/**
+ * @brief get a pointer to the used 2D camera
+ * 
+ * @return Camera2D* a pointer to the used 2D camera
+ */
+Camera2D* glgeGetMain2DCamera();
 
 #endif
