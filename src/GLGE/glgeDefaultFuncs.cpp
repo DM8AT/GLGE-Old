@@ -67,6 +67,9 @@ void glgeDefaultTimer(int)
         ((void(*)())glgeMainCallback)();
     }
 
+    //set the mouse wheel to 0
+    glgeMouse.mouseWeel = 0;
+
     //recall this function so that it is calld {glgeMaxFPS} times a second
     glutTimerFunc(1000/glgeMaxFPS,glgeDefaultTimer,0);
 }

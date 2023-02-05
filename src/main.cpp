@@ -89,8 +89,6 @@ void mainLoop()
     {
         printf("SCROLL: %d\n", glgeGetMouse().mouseWeel);
     }
-
-    
 }
 
 int main(int argc, char** argv)
