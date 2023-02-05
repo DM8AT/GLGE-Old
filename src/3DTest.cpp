@@ -1,10 +1,31 @@
+/**
+ * @file 3DTest.cpp
+ * @author DM8AT
+ * 
+ * @brief show how the GLGE library works for 3D
+ * 
+ * @version 0.1
+ * @date 2023-02-05
+ * 
+ * @copyright Copyright (c) 2023
+ */
+
+//include the header file, so it can be run from the main file
 #include "3DTest.hpp"
 
+//include the library core, needed for 3D and 2D
+//used for first initalisation, keyboard functions, mouse functions and simple display things like creating and updating a windows
 #include "GLGE.h"
+//include the 3D core, needed for:
+//  - creating 3D things
+//  - creating a 3D camera
+//  - creating a 3D world
 #include "GLGE3Dcore.h"
 
+//include math, used to make the camera movement relative to the player
 #include <math.h>
 
+//create the main camera, an instance of the 
 Camera camera;
 
 Object cube;
@@ -86,16 +107,18 @@ void tick()
 void floorSetup()
 {
     float floorSize = 200;
-    Vertex vertices[] = {Vertex( floorSize, 0, floorSize, vec4(0,1,0,1)),
-                         Vertex(-floorSize, 0, floorSize, vec4(0,1,0,1)),
-                         Vertex(-floorSize, 0,-floorSize, vec4(0,1,0,1)),
-                         Vertex( floorSize, 0,-floorSize, vec4(0,1,0,1))};
+    float texturesize = 2;
+    Vertex vertices[] = {Vertex( floorSize, 0, floorSize, floorSize*texturesize, floorSize*texturesize),
+                         Vertex(-floorSize, 0, floorSize,-floorSize*texturesize, floorSize*texturesize),
+                         Vertex(-floorSize, 0,-floorSize,-floorSize*texturesize,-floorSize*texturesize),
+                         Vertex( floorSize, 0,-floorSize, floorSize*texturesize,-floorSize*texturesize)};
 
     uint indices[] = {0,1,2,
                       0,2,3};
 
     grassFloor = Object(vertices, indices, sizeof(vertices), sizeof(indices));
     grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
+    grassFloor.setTexture("assets/grass.png");
 }
 
 void cubeSetup()
