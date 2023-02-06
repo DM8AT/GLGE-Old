@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     else if (inp == 1)
     {
         //launch the 2D core
+        printf("\nCurrently, there is no 2D example\n");
     }
     else
     {

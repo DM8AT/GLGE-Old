@@ -258,6 +258,7 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
     //calculate the buffers
     this->compileBuffers();
 
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
     this->update();
 }
@@ -277,6 +278,7 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     //calculate the buffers
     this->compileBuffers();
 
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
     this->update();
 }
