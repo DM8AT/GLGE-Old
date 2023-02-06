@@ -276,8 +276,8 @@ void cubeSetup()
                       3+16,7+16,5+16};
 
     //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
-    //stuck in there and that would not look good. 
-    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1,0),vec3(0,0,0),1));
+    //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
+    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.001,0),vec3(0,0,0),1));
     //then, the same shader as used for the grass floor (Basic 3D shader) is asigned. It is inputed as shown to avoid dupication on the graphics card. 
     //this methode can create problems, if objects are created dynamicaly, because if the shader is deleted in one object, It is deleted for all objects. 
     //because of this issue, only the default constructor is existing for all classes contained in the library, so the buffers, shaders and textures are
