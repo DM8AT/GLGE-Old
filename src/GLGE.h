@@ -33,7 +33,7 @@
  * @version 0.1
  * @date 2022-12-17
  * 
- * @copyright Copyright (c) 2022
+ * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
  * 
  */
 
