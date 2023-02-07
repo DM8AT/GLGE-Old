@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-01-29
  * 
- * @copyright Copyright (c) 2023
+ * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
  * 
  */
 
