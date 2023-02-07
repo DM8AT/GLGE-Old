@@ -1,13 +1,13 @@
 # GLGE
 A simple graphics library for 3D and 2D in C++ 
 
-## Examples for GLGE
+## Examples
 example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3D.cpp. 
 The test code is commented, especaly the 3D code, because it is very similar to the
 2D code you need to write to create, draw and setup an Object. The differences are
 outlined in the comments. 
 
-## Documentation for GLGE
+## Documentation
 the code is documented using doxygen, in the future an documentation should be in
 the files. But the documentation can allready be created like normal using doxygen. 
 
