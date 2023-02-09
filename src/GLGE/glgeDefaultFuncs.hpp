@@ -7,7 +7,7 @@
  * 
  * @date 2022-12-23
  * 
- * @copyright Copyright (c) 2022
+ * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
  * 
  */
 #ifndef _GLGE_DEFAULT_FUNCS_H_

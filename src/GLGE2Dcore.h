@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-01-29
  * 
- * @copyright CC BY SA (see  https://creativecommons.org/licenses/by-sa/4.0/)
+ * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
  */
 
 #ifndef _GLGE2DCORE_H_
