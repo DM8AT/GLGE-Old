@@ -1,3 +1,14 @@
+/**
+ * @file glgeDefaultFuncs.cpp
+ * @author DM8AT
+ * @brief Define the functions for FreeGLUT to execute
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
 //include the GLGE dependencys
 #include "glgeErrors.hpp"
 #include "GLGEKlasses.hpp"

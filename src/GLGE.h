@@ -33,7 +33,7 @@
  * @version 0.1
  * @date 2022-12-17
  * 
- * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
 

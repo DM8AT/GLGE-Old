@@ -1,3 +1,14 @@
+/**
+ * @file GLGE.cpp
+ * @author DM8AT
+ * @brief declare the function for the base functions of GLGE
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
 //include the GLGE dependencys
 #include "GLGE.h"
 #include "GLGE/glgeErrors.hpp"

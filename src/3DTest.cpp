@@ -7,7 +7,7 @@
  * @version 0.1
  * @date 2023-02-05
  * 
- * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  */
 
 //include the header file, so it can be run from the main file

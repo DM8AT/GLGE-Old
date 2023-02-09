@@ -1,3 +1,15 @@
+/**
+ * @file GLGEKlasses.cpp
+ * @author DM8AT
+ * @brief define the classes for GLGE.h, this will be included without any kind of core
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
+//include the class for defining things
 #include "GLGEKlasses.hpp"
 
 //include freeglut
