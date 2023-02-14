@@ -2,7 +2,7 @@
 A simple graphics library for 3D and 2D in C++ 
 
 ## Examples
-example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3D.cpp. 
+example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3DTest.cpp. 
 The test code is commented, especaly the 3D code, because it is very similar to the
 2D code you need to write to create, draw and setup an Object. The differences are
 outlined in the comments. 
