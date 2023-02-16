@@ -2,7 +2,7 @@
 A simple graphics library for 3D and 2D in C++ 
 
 ## Examples
-example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3D.cpp. 
+example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3DTest.cpp. 
 The test code is commented, especaly the 3D code, because it is very similar to the
 2D code you need to write to create, draw and setup an Object. The differences are
 outlined in the comments. 
@@ -30,7 +30,7 @@ Technicaly, the library will run everywhere where the following librarys work:
 - all default C++ librarys
 
 ## Installation
-To install the lybrary, you need to download the source code. Then you can move the
+To install the library, you need to download the source code. Then you can move the
 folder called "GLGE" wherever you want, just make shure to change the include path in
 "GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp". 
 Else, there would be compilation errors. 
