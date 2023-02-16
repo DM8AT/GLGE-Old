@@ -46,24 +46,24 @@ include and compile with the needed librarys.
 # Upcoming
 A list of upcoming features that may be added in the future to GLGE:
 - loadable models from files
- - from .obj files
- - from .blend files
- - from other file formats
+   - from .obj files
+   - from .blend files
+   - from other file formats
 - An 3D and 2D sound function to the core
 - 2D and 3D physics
 - procedrual materials
 - procedrual shaders
 - a lighting core for 3D and 2D
- - preset of lighting shaders
- - preset for different light sources
- - different light source presets
-  - directional light
-  - point light
-  - sun
-  - light plates (some invisible shape that is emitting light)
+   - preset of lighting shaders
+   - preset for different light sources
+   - different light source presets
+    - directional light
+    - point light
+    - sun
+    - light plates (some invisible shape that is emitting light)
 - Post processing
- - Preset for post processing core
- - Preset for different effects (Bloom, distortion, usw)
+   - Preset for post processing core
+   - Preset for different effects (Bloom, distortion, usw)
 
 Upcoming changes:
 - chaneging the default shaders from files to const char* or const std::vector< std::string >
