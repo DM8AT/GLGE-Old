@@ -1,3 +1,14 @@
+/**
+ * @file GLGE.cpp
+ * @author DM8AT
+ * @brief declare the function for the base functions of GLGE
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
 //include the GLGE dependencys
 #include "GLGE.h"
 #include "GLGE/glgeErrors.hpp"
@@ -689,6 +700,79 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
     }
     //add the shader program from the second file
     glgeAddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+
+    //create an variable to check for success
+    GLint success = 0;
+    //setup an error log
+    GLchar ErrorLog[1024] = {0};
+
+    //link the shader program
+    glLinkProgram(shaderProgram);
+
+    //get the program iv from the shader
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    //check if the program linking was no success
+    if (success == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //check if the program is valide
+    glValidateProgram(shaderProgram);
+    //get the program iv again
+    glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
+    //check for success
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //say open GL to use the shader program
+    glUseProgram(shaderProgram);
+    //return the shader program in the GLGE Object
+    return shaderProgram;
+}
+
+GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment)
+{
+    //create a new shader program
+    GLuint shaderProgram = glCreateProgram();
+
+    //check if the shader could be created
+    if (shaderProgram == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
+            //say where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //add the shader program from the first file
+    glgeAddShader(shaderProgram, fileDataVertex.c_str(), GL_VERTEX_SHADER);
+
+    //add the shader program from the second file
+    glgeAddShader(shaderProgram, fileDataFragment.c_str(), GL_FRAGMENT_SHADER);
 
     //create an variable to check for success
     GLint success = 0;

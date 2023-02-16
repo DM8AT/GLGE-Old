@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-02-06
  * 
- * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
 
@@ -120,8 +120,6 @@ void triangleSetup()
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
     triangle = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0,0,0,vec2(0.5,0.5)));
-    //set the shader for the triangle
-    triangle.setShader("src/GLGE/shaders/base2D");
 }
 
 //setup the square
@@ -174,6 +172,9 @@ void run2Dexample(int argc, char** argv)
 
     //create an window named "2D GLGE Example" and with the size of 1000px*1000px
     glgeCreateWindow("2D GLGE Example", 1000, 1000);
+
+    //initalise the 2D core
+    glgeInit2DCore();
 
     //disable the backface culling, it is stupid for 2D
     glgeDisableBackfaceCulling();

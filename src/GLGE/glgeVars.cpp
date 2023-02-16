@@ -1,3 +1,14 @@
+/**
+ * @file glgeVars.cpp
+ * @author DM8AT
+ * @brief In this file, all behind-the-scenes variables for GLGE are created
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
 #include "glgeVars.hpp"
 
 ///////////

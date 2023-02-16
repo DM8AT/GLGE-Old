@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-01-29
  * 
- * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  */
 
 #ifndef _GLGE2DCORE_H_
@@ -740,6 +740,11 @@ private:
 };
 
 //FUNCTIONS
+
+/**
+ * @brief initalise the 2D core functions
+ */
+void glgeInit2DCore();
 
 /**
  * @brief bind the camera for 2D objects

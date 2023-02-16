@@ -1,3 +1,14 @@
+/**
+ * @file glgeFuncs.cpp
+ * @author DM8AT
+ * @brief define the behind-the-sceenes functions
+ * @version 0.1
+ * @date 2023-02-09
+ * 
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
+
 //include the GLGE dependencys
 #include "glgeErrors.hpp"
 #include "glgeVars.hpp"

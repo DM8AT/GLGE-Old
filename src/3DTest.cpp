@@ -7,7 +7,7 @@
  * @version 0.1
  * @date 2023-02-05
  * 
- * @copyright CC BY (see  https://creativecommons.org/licenses/by/4.0/)
+ * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  */
 
 //include the header file, so it can be run from the main file
@@ -209,8 +209,9 @@ void floorSetup()
     //then, the arrays are inputed to the Object constructor to create an new object, overwriting the data temporeraly assigned to the grass floor in the
     //default constructor. to use pointer arrays, it is also important to input the size of them, like shown below
     grassFloor = Object(vertices, indices, sizeof(vertices), sizeof(indices));
-    //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
-    grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
+    //OUTDATED: an shader can be asigned to the object, but it is no longer necesery. 
+        //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
+        //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then the texture for the grass floor is loaded from an png file. 
     grassFloor.setTexture("assets/grass.png");
 }
