@@ -8,8 +8,8 @@ The test code is commented, especaly the 3D code, because it is very similar to 
 outlined in the comments. 
 
 ## Documentation
-the code is documented using doxygen, in the future an documentation should be in
-the files. But the documentation can allready be created like normal using doxygen. 
+the code is documented using doxygen, the documentation can be found in the folder "documentation". 
+All files in the folder are created by doxygen automaticaly, I changed nothing in there. 
 
 ## Debugging
 If you get an error, reading it can help you find the cause of it. The error outputs
