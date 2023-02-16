@@ -57,10 +57,10 @@ A list of upcoming features that may be added in the future to GLGE:
    - preset of lighting shaders
    - preset for different light sources
    - different light source presets
-    - directional light
-    - point light
-    - sun
-    - light plates (some invisible shape that is emitting light)
+      - directional light
+      - point light
+      - sun
+      - light plates (some invisible shape that is emitting light)
 - Post processing
    - Preset for post processing core
    - Preset for different effects (Bloom, distortion, usw)
