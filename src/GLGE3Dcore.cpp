@@ -52,6 +52,11 @@ vec3 rotateVector(float angle, vec3 v, vec3 target)
 //store the camera GLGE is using
 Camera* glgeMainCamera;
 
+//store the default 3D shader
+GLuint glgeShaderDefault;
+//the position of the shader 
+GLint glgeMoveMatDefaulLoc;
+
 ////////////////////////////
 //Decalrations for Structs//
 ////////////////////////////
@@ -258,6 +263,11 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
     //calculate the buffers
     this->compileBuffers();
 
+    //bind the default 3D shader
+    this->shader = glgeShaderDefault;
+    //store the move matrix location
+    this->moveMatLoc = glgeMoveMatDefaulLoc;
+
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
     this->update();
@@ -277,6 +287,11 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 
     //calculate the buffers
     this->compileBuffers();
+
+    //bind the default 3D shader
+    this->shader = glgeShaderDefault;
+    //store the move matrix location
+    this->moveMatLoc = glgeMoveMatDefaulLoc;
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -306,7 +321,7 @@ void Object::draw()
     //say where the texCoords are
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
-    
+
     //pass the move matrix to the shader
     glUniformMatrix4fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
@@ -738,4 +753,9 @@ void glgeInit3DCore()
     glDepthFunc(GL_GREATER);
     //set the clear depth correctly
     glClearDepth(0.f);
+
+    //load the default 3D shaders
+    glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
+    //store the location of the move matrix in the default shader
+    glgeMoveMatDefaulLoc = glgeGetUniformVar(glgeShaderDefault, glgeMoveMatrix);
 }

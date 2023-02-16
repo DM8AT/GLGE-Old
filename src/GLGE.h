@@ -7,17 +7,6 @@
  * you have glew and freeglut installed. 
  * To make developement easyer, it is inspired by the structure of the Unity game engine, but for C++ and without an viewport to drag the objects around. 
  * 
- * FEATURES:
- * - initalisation
- * - Window creation
- * - binding of own additional functions for mor flexebility in programming
- * - easy way to limit the FPS
- * 
- * PLANED:
- * - Objects (glgeObject)
- * - simple 2D features
- * - shaders
- * 
  * DEPENDENCIS:
  * - Freeglut
  * - Glew
@@ -317,6 +306,15 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
  * @param fragment the file for the fragment shader
  */
 GLuint glgeCompileShader(const char* vertex, const char* fragment);
+
+/**
+ * @brief this file loads the two inputed std::vectors of strings as shader
+ * 
+ * @param fileDataVertex the data of the vertex shader
+ * @param fileDataFragment the data of the fragment shader
+ * @return GLuint the compiled shader
+ */
+GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment);
 
 /**
  * @brief load an texture from an file
