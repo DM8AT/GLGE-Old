@@ -742,6 +742,11 @@ private:
 //FUNCTIONS
 
 /**
+ * @brief initalise the 2D core functions
+ */
+void glgeInit2DCore();
+
+/**
  * @brief bind the camera for 2D objects
  * 
  * @param camera a pointer to the camera to use

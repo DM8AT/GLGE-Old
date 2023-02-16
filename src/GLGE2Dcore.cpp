@@ -24,7 +24,12 @@
 //Local Vars//
 //////////////
 
+//an pointer to the camera
 Camera2D* mainCam = NULL;
+//store the default 2D shader
+GLuint glgeDefault2DShader;
+//store the move matrix location in the default glge 2D shader
+GLint glgeDefaultMoveMatLoc;
 
 ///////////
 //STRUCTS//
@@ -208,6 +213,11 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
     //create the buffers
     this->createBuffers();
 
+    //set the base 2D shader
+    this->shader = glgeDefault2DShader;
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+
     //update the object
     this->update();
 }
@@ -226,6 +236,11 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
 
     //create the buffers
     this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeDefault2DShader;
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
 
     //update the object
     this->update();
@@ -774,6 +789,14 @@ void Camera2D::recalculateMatrix()
 /////////////
 //FUNCTIONS//
 /////////////
+
+void glgeInit2DCore()
+{
+    //initalise the 2D base shader
+    glgeDefault2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
+    //get the move matrix location from the default shader
+    glgeDefaultMoveMatLoc = glgeGetUniformVar(glgeDefault2DShader, glgeMoveMatrix);
+}
 
 void glgeBindMain2DCamera(Camera2D* camera)
 {

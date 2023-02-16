@@ -206,7 +206,7 @@
 /**
  * this message is printed if an error occures in the function for getting uniform variables out of shader scripts
  */
-#define GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE "[GLGE ERROR RETURN]: shader occured in function Object::getUniformVar"
+#define GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE "[GLGE ERROR RETURN]: error occured in function Object::getUniformVar"
 
 /**
  * this message is outputed if an error occures in the function for compiling shaders in the object
