@@ -66,9 +66,9 @@ A list of upcoming features that may be added in the future to GLGE:
    - Preset for different effects (Bloom, distortion, usw)
 
 # Changelogs
-latest:
+## Latest:
 - added possibility for creating shaders from source code as std::strings
-other:
+## Other:
 - deleted doxygen documentation, it was broken
 - changed default shader to std::string instead of external file
 - started logging the changelogs
