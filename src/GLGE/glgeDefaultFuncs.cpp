@@ -30,13 +30,52 @@
 //the default display callback for GLGE
 void glgeDefaultDisplay()
 {
+    //bind the custom framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
+    //clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
+    //call the custom drawing function
     if(glgeHasDisplayCallback)
     {
         ((void(*)())glgeDisplayCallback)();
     }
 
+    //switch to the default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //disable depth testing
+    glDisable(GL_DEPTH_TEST);
+
+    //bind the post processing shader
+    glUseProgram(glgePostProcessingShader);
+    //bind the vertex array
+    glBindVertexArray(glgeScreenVAO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+    //activate the vertex attribute for the position
+    glEnableVertexAttribArray(0);
+    //load the position into the shader
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    //activate the vertex attrivute for the texture coordinate
+    glEnableVertexAttribArray(1);
+    //load the texture coordinate into the shader
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    //bind the framebuffer texture
+    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
+    //draw the screen
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //unbind the shader
+    glUseProgram(0);
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //update the window
     glutSwapBuffers();
 }
 
@@ -77,6 +116,23 @@ void glgeDefaultTimer(int)
     {
         ((void(*)())glgeMainCallback)();
     }
+
+    //update the stored window size
+    glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+
+    //update the window size of the frame buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+    //unbind the renderbuffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    //update the render texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 
     //set the mouse wheel to 0
     glgeMouse.mouseWeel = 0;

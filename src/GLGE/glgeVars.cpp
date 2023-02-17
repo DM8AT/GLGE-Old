@@ -10,6 +10,7 @@
  */
 
 #include "glgeVars.hpp"
+#include <GL/freeglut.h>
 
 ///////////
 //CLASSES//
@@ -76,3 +77,24 @@ Mouse glgeMouse = Mouse();
 
 //store the backface culling mode
 bool glgeUseCulling = false;
+
+//store the frame buffer, default is 0
+unsigned int glgeFBO = 0;
+
+//store the texture for the frame buffer
+unsigned int glgeFrameBufferTexture = 0;
+
+//store the RBO
+unsigned int glgeRBO = 0;
+
+//store the window size
+vec2 glgeWindowSize = vec2(0,0);
+
+//set the screen VBO to default 0
+unsigned int glgeScreenVBO = 0;
+
+//set the screen VAO to default 0
+unsigned int glgeScreenVAO = 0;
+
+//set the default post processing shader to 0
+int glgePostProcessingShader = 0;

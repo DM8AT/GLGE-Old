@@ -78,4 +78,22 @@ extern Mouse glgeMouse;
 //store the backface culling mode
 extern bool glgeUseCulling;
 
+//store the custom frame buffer
+extern unsigned int glgeFBO;
+
+//store the frame buffer texture
+extern unsigned int glgeFrameBufferTexture;
+
+//store the RBO
+extern unsigned int glgeRBO;
+
+//store the window size
+extern vec2 glgeWindowSize;
+
+//store the rectangle that covers the whole screen
+extern unsigned int glgeScreenVBO, glgeScreenVAO;
+
+//store the shader for the screen(Post processing shader)
+extern int glgePostProcessingShader;
+
 #endif

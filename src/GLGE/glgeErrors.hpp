@@ -15,6 +15,17 @@
 #ifndef _GLGE_ERRORS_H_
 #define _GLGE_ERRORS_H_
 
+////////////////////////////////////////////////////////
+//Defines for importand errors (allways crash & print)//
+////////////////////////////////////////////////////////
+
+//these errors will always be printed, even if normal errors aren't. If one of them occures, the program is very broken. 
+
+/**
+ * this error occures if the frame buffer could not be created. 
+ */
+#define GLGE_STRONG_ERROR_FRAMEBUFFER_NOT_COMPILED "[GLGE STRONG ERROR] could not compile the Framebuffer. Error code by OpenGL: "
+
 ////////////////////////
 //Error string defines//
 ////////////////////////

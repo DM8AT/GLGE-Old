@@ -20,11 +20,236 @@
 //include the default librarys
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 //include the OpenGL dependencys
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+//read a file
+bool readFile(const char* filename, std::string& output)
+{
+    //create a new ifstream object containing the file
+    std::ifstream f(filename);
+
+    //check if the file can be read
+    bool ret = false;
+
+    //check if the file is opend
+    if(f.is_open())
+    {
+        //create a variable to store a single line
+        std::string line;
+        //loop over all lines in the file and store them
+        while(getline(f, line))
+        {
+            //add the lines to the output
+            output.append(line);
+            //add a new line character to the output
+            output.append("\n");
+        }
+        //close the file
+        f.close();
+
+        //say that the file could be opend
+        ret = true;
+    }
+    else
+    {
+        //else print an error message
+        if(glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_FILE_NOT_FOUND, filename);
+        }
+    }
+
+    //return if the file could be read
+    return ret;
+}
+
+//an copy of the shader code to make the shader handeling here easier
+
+void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
+{
+    //create a new shader with the inputed type
+    GLuint shaderObj = glCreateShader(shaderType);
+
+    //check if the shader object could be created
+    if (shaderObj == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << std::endl;
+            //print where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //set a GLchar to the inputed text
+    const GLchar* p[1];
+    p[0] = shadertext;
+
+    //store the length of the text
+    GLint lengths[1];
+    lengths[0] = strlen(shadertext);
+
+    //set the shader source code
+    glShaderSource(shaderObj, 1, p, lengths);
+
+    //compile to the new shader object
+    glCompileShader(shaderObj);
+
+    //check for compiling errors
+    GLint success;
+    glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
+
+    //if there was an error, print a message and exit
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //create an info log to store the error created by open gl
+            GLchar InfoLog[1024];
+            glGetShaderInfoLog(shaderObj, 1024, NULL, InfoLog);
+            //print the message
+            printf(GLGE_ERROR_SHADER_COMPILE_ERROR, shaderType, InfoLog);
+            //print where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //attach the shader object to the final program
+    glAttachShader(shaderProgram, shaderObj);
+}
+
+//get a uniform variable from a shader
+GLint getUniformVar(GLuint program, const char* name)
+{
+    //create the output variable
+    GLint ret;
+    //set the output variable to the uniform variable in the shader
+    ret = glGetUniformLocation(program, name);
+    //if the id is -1, output an error
+    if (ret == -1)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
+            //say where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+    //if no error occured, return the id of the uniform variable
+    return ret;
+}
+
+//compile and add the shaders to this object
+GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
+{
+    //create a new shader program
+    GLuint shaderProgram = glCreateProgram();
+
+    //check if the shader could be created
+    if (shaderProgram == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
+            //say where the error occured
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //create strings for the shaders
+    std::string vs, fs;
+
+    //read the files
+    if (!readFile(fileNameVS, vs))
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+    //add the shader program from the first file
+    addShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
+
+    //read the second file
+    if (!readFile(fileNameFS, fs))
+    {
+        //if the file can't be read, output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the program
+        exit(1);
+    }
+    //add the shader program from the second file
+    addShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+
+    //create an variable to check for success
+    GLint success = 0;
+    //setup an error log
+    GLchar ErrorLog[1024] = {0};
+
+    //link the shader program
+    glLinkProgram(shaderProgram);
+
+    //get the program iv from the shader
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    //check if the program linking was no success
+    if (success == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //check if the program is valide
+    glValidateProgram(shaderProgram);
+    //get the program iv again
+    glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
+    //check for success
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //say open GL to use the shader program
+    glUseProgram(shaderProgram);
+    //return the shader program in the GLGE Object
+    return shaderProgram;
+}
 
 /**
  * @brief Create a Window
@@ -77,6 +302,9 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //say that an window was created
     glgeHasMainWindow = true;
 
+    //store the size of the window
+    glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+
     //bind the window update function
     glutDisplayFunc(glgeDefaultDisplay);
     //bind the timer function
@@ -104,47 +332,77 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //setup transparency
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
 
-//read a file
-bool readFile(const char* filename, std::string& output)
-{
-    //create a new ifstream object containing the file
-    std::ifstream f(filename);
+    //create and bind the custom frame buffer
+    glGenFramebuffers(1, &glgeFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
 
-    //check if the file can be read
-    bool ret = false;
+    //generate the texture for the frame buffer
+    glGenTextures(1, &glgeFrameBufferTexture);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeFrameBufferTexture, 0);
 
-    //check if the file is opend
-    if(f.is_open())
+    //generate the Render Buffer
+    glGenRenderbuffers(1, &glgeRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+    //attach an depth stencil
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeRBO);
+
+    //check if the framebuffer compiled correctly
+    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
-        //create a variable to store a single line
-        std::string line;
-        //loop over all lines in the file and store them
-        while(getline(f, line))
-        {
-            //add the lines to the output
-            output.append(line);
-            //add a new line character to the output
-            output.append("\n");
-        }
-        //close the file
-        f.close();
-
-        //say that the file could be opend
-        ret = true;
-    }
-    else
-    {
-        //else print an error message
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_FILE_NOT_FOUND, filename);
-        }
+        //print an error
+        std::cerr << GLGE_STRONG_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        //stop the program
+        exit(1);
     }
 
-    //return if the file could be read
-    return ret;
+    //create an rectangle that covers the whole screen
+    float rectangleVertices[] = 
+    {
+        //Coords   //texCoords
+        1.f, -1.f, 1.f, 0.f,
+       -1.f, -1.f, 0.f, 0.f,
+       -1.f,  1.f, 0.f, 1.f,
+
+        1.f,  1.f, 1.f, 1.f,
+        1.f, -1.f, 1.f, 0.f,
+       -1.f,  1.f, 0.f, 1.f
+    };
+
+    //create two buffers, one vertex array and one array buffer
+    glGenVertexArrays(1, &glgeScreenVAO);
+    glGenBuffers(1, &glgeScreenVBO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+    //load the data into the array buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
+    //activate the vertex attribute for the position
+    //glEnableVertexAttribArray(0);
+    //load the position into the shader
+    //glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
+    //activate the vertex attrivute for the texture coordinate
+    //glEnableVertexAttribArray(1);
+    //load the texture coordinate into the shader
+    //glVertexAttribPointer(1,2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2 * sizeof(float)));
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate the shaders for the default post processing
+    glgePostProcessingShader = compileShader("src/GLGE/shaders/shader1.vs", "src/GLGE/shaders/shader2.fs");
+
+    glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
 }
 
 //convert an error code into an string

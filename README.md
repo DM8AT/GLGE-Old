@@ -8,6 +8,7 @@ The test code is commented, especaly the 3D code, because it is very similar to 
 outlined in the comments. 
 
 ## Documentation
+--Under Construction--
 the code is documented using doxygen, the documentation can be found in the folder "documentation". 
 All files in the folder are created by doxygen automaticaly, I changed nothing in there. 
 
@@ -67,8 +68,9 @@ A list of upcoming features that may be added in the future to GLGE:
 
 # Changelogs
 ## Latest:
-- added possibility for creating shaders from source code as std::strings
+- added things for post production
 ## Other:
+- added possibility for creating shaders from source code as std::strings
 - deleted doxygen documentation, it was broken
 - changed default shader to std::string instead of external file
 - started logging the changelogs
