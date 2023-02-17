@@ -64,6 +64,3 @@ A list of upcoming features that may be added in the future to GLGE:
 - Post processing
    - Preset for post processing core
    - Preset for different effects (Bloom, distortion, usw)
-
-Upcoming changes:
-- chaneging the default shaders from files to const char* or const std::vector< std::string >
