@@ -13,6 +13,7 @@
 #include "glgeErrors.hpp"
 #include "glgeVars.hpp"
 #include "glgeDefaultFuncs.hpp"
+#include "GLGEDefines.hpp"
 
 //include the CML dependencys
 #include "CML/CMLVec2.h"
@@ -153,7 +154,7 @@ GLint getUniformVar(GLuint program, const char* name)
 }
 
 //compile and add the shaders to this object
-GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
+GLuint compileShader(std::string vs, std::string fs)
 {
     //create a new shader program
     GLuint shaderProgram = glCreateProgram();
@@ -172,34 +173,9 @@ GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
         exit(1);
     }
 
-    //create strings for the shaders
-    std::string vs, fs;
-
-    //read the files
-    if (!readFile(fileNameVS, vs))
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
-        }
-        //stop the script
-        exit(1);
-    }
     //add the shader program from the first file
     addShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-    //read the second file
-    if (!readFile(fileNameFS, fs))
-    {
-        //if the file can't be read, output an error message
-        if (glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
-        }
-        //stop the program
-        exit(1);
-    }
     //add the shader program from the second file
     addShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
@@ -400,7 +376,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the shaders for the default post processing
-    glgePostProcessingShader = compileShader("src/GLGE/shaders/shader1.vs", "src/GLGE/shaders/shader2.fs");
+    glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER);
 
     glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
 }

@@ -26,6 +26,11 @@
 //the default 2D fragment shader, bound by default to all 2D shapes
 #define GLGE_DEFAULT_2D_FRAGMENT std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 fColor;in vec2 fTexCoord;uniform sampler2D Texture;void main(){FragColor = texture(Texture, fTexCoord) + fColor;}")
 
+//the default post processing vertex shader, changes nothing and pases the texture coordinates
+#define GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER std::string("#version 300 es\nlayout (location = 0) in vec2 inPos;layout (location = 1) in vec2 inTexCoord;out vec2 texCoords;void main(){gl_Position = vec4(inPos.x, inPos.y, 0, 1);texCoords = inTexCoord;}")
+//the default post processing fragment shader, just draws the processed data to the screen
+#define GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;float dist(vec2 a, vec2 b){return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));}void main(){FragColor = texture(screenTexture, texCoords);}")
+
 //a list of all keys
 
 //the keycode for the a key in glge
