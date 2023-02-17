@@ -14,6 +14,7 @@
 #include "GLGE/glgeErrors.hpp"
 #include "GLGE/glgeVars.hpp"
 #include "GLGE/glgeFuncs.hpp"
+#include "GLGE/glgePrivDefines.hpp"
 
 //include the OpenGL dependencys
 #include <GL/freeglut.h>
@@ -929,4 +930,31 @@ bool glgeGetBackfaceCullingStatus()
 {
     //return the current backface culling mode
     return glgeUseCulling;
+}
+
+void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
+{
+    //create strings for the shader
+    std::string data;
+
+    //read the files
+    if (!readFile(postProcessingShaderFile, data))
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //compile the shader and save it
+    glgePostProcessingShader = glgeCompileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, data);
+}
+
+void glgeSetPostProcessingShader(std::string postProcessingShader)
+{
+    //compile the shader and save it
+    glgePostProcessingShader = glgeCompileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, postProcessingShader);
 }

@@ -370,4 +370,18 @@ void glgeSetBackfaceCulling(bool status);
  */
 bool glgeGetBackfaceCullingStatus();
 
+/**
+ * @brief bind an shader that will be applied to the whole screen
+ * 
+ * @param postProcessingShaderFile the path to the post processing shader
+ */
+void glgeSetPostProcessingShader(const char* postProcessingShaderFile);
+
+/**
+ * @brief bind an shader that will be applied to the whole screen
+ * 
+ * @param postProcessingShader the source code for the post processing shader
+ */
+void glgeSetPostProcessingShader(std::string postProcessingShader);
+
 #endif

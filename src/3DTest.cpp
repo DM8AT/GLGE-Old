@@ -301,6 +301,9 @@ void run3Dexample(int argc, char** argv)
     //after creating the window, the 3D core is initalised. This sets all thinks like depth buffer correctly
     glgeInit3DCore();
 
+    //set the post processing shader to invert the colors
+    glgeSetPostProcessingShader("src/invertColors.fs");
+
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     glgeDisableBackfaceCulling();
 
