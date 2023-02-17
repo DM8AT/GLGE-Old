@@ -67,3 +67,7 @@ A list of upcoming features that may be added in the future to GLGE:
 
 Upcoming changes:
 - chaneging the default shaders from files to const char* or const std::vector< std::string >
+
+
+# Changelogs
+- Deleted doxygen documentation, it was broken
