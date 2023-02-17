@@ -248,6 +248,14 @@ public:
     /**
      * @brief Set the Shader for the object
      * 
+     * @param vertexShader the source code for the vertex shader
+     * @param fragmentShader the source code for the fragment shader
+     */
+    void setShader(std::string vertexShader, std::string fragmentShader);
+
+    /**
+     * @brief Set the Shader for the object
+     * 
      * @param shader the allready compiled shader
      */
     void setShader(GLuint shader);

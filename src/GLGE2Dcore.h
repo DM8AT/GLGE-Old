@@ -295,6 +295,14 @@ public:
     void setShader(GLuint shader);
 
     /**
+     * @brief Set the Shader
+     * 
+     * @param vertexShader the source code for the vertex shader
+     * @param fragmentShader the source code for the fragment shader
+     */
+    void setShader(std::string vertexShader, std::string fragmentShader);
+
+    /**
      * @brief Get the Shader
      * 
      * @return GLuint the compiled shader

@@ -380,6 +380,15 @@ void Object::setShader(GLuint shader)
     this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
 }
 
+void Object::setShader(std::string vs, std::string fs)
+{
+    //compile the shader source code and store the shader
+    this->shader = glgeCompileShader(vs, fs);
+    
+    //get the new location for the move matrix
+    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+}
+
 GLuint Object::getShader()
 {
     return this->shader;
