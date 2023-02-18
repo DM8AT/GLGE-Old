@@ -66,10 +66,15 @@ A list of upcoming features that may be added in the future to GLGE:
    - Preset for post processing core
    - Preset for different effects (Bloom, distortion, usw)
 
+## Working on
+I am currently working on creating more functionality and simplicity in the shader core, 
+so handeling shaders is simpler. 
+
 # Changelogs
 ## Latest:
-- added things for post production
+- added the abillity to create shaders from an kernal
 ## Other:
+- added things for post production
 - added possibility for creating shaders from source code as std::strings
 - deleted doxygen documentation, it was broken
 - changed default shader to std::string instead of external file
