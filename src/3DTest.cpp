@@ -21,6 +21,9 @@
 //  - creating a 3D camera
 //  - creating a 3D world
 #include "GLGE3Dcore.h"
+//include the shader core of the library
+//it is not nececeraly needed to handle shaders, but it is recomended. 
+#include "GLGEShaderCore.h"
 
 //include math, used to make the camera movement relative to the player
 #include <math.h>
@@ -301,8 +304,25 @@ void run3Dexample(int argc, char** argv)
     //after creating the window, the 3D core is initalised. This sets all thinks like depth buffer correctly
     glgeInit3DCore();
 
+    //create an kernal to generate an gausian blure
+    float kernal[] = {
+        1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f,
+        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+        6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
+        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+        1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f
+    };
+
+    //create an shader from an cernal
+    Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
+
+    //asign the shader for the gausian blure
+    glgeSetPostProcessingShader(dyn.getShader());
+
+    //create an shader object to store the shader
+    Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);
     //set the post processing shader to invert the colors
-    glgeSetPostProcessingShader("src/invertColors.fs");
+    glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     glgeDisableBackfaceCulling();

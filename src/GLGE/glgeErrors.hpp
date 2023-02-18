@@ -24,7 +24,7 @@
 /**
  * this error occures if the frame buffer could not be created. 
  */
-#define GLGE_STRONG_ERROR_FRAMEBUFFER_NOT_COMPILED "[GLGE STRONG ERROR] could not compile the Framebuffer. Error code by OpenGL: "
+#define GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED "[GLGE FATAL ERROR] could not compile the Framebuffer. Error code by OpenGL: "
 
 ////////////////////////
 //Error string defines//

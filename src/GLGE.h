@@ -384,4 +384,11 @@ void glgeSetPostProcessingShader(const char* postProcessingShaderFile);
  */
 void glgeSetPostProcessingShader(std::string postProcessingShader);
 
+/**
+ * @brief bind an shader that will be applied to the whole screen
+ * 
+ * @param shader the allready compiled OpenGL shader
+ */
+void glgeSetPostProcessingShader(GLuint shader);
+
 #endif

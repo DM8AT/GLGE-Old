@@ -27,6 +27,14 @@
  */
 #define GLGE_TO_DEGREES 57.295779513
 
-#define GLGE_EMPTY_VERTEX_SHADER std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;float dist(vec2 a, vec2 b){return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));}void main(){FragColor = texture(screenTexture, texCoords);}")
+/**
+ * a fragment shader that basicaly dose nothing
+ */
+#define GLGE_EMPTY_FRAGMENT_SHADER std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 color;void main(){FragColor = color;}")
+
+/**
+ * a vertex shader that doese nothing
+ */
+#define GLGE_EMPTY_VERTEX_SHADER std::string("#version 300 es\nlayout (location = 0) in vec2 inPos;layout (location = 1) in vec2 inTexCoord;out vec2 texCoords;void main(){gl_Position = vec4(inPos.x, inPos.y, 0, 1);texCoords = inTexCoord;}")
 
 #endif

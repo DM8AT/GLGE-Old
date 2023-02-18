@@ -19,6 +19,9 @@
 //include the CML functions
 #include "CML/CMLVec2.h"
 
+//include the glew library
+#include <GL/glew.h>
+
 /**
  * @brief Create a Window
  * 
@@ -47,5 +50,39 @@ bool readFile(const char* filename, std::string& output);
  * @return char* a string created from the error index
  */
 char* getGLErrorString(unsigned int error);
+
+/**
+ * @brief Get a uniform variable in a shader
+ * 
+ * @param shaderProgram the program to get the variable from
+ * @param name the name of the variable
+ */
+GLint getUniformVar(GLuint shaderProgram, const char* name);
+
+/**
+ * @brief add a new shader object
+ * 
+ * @param shaderProgram the program it should be added to
+ * @param shadertext the text for the shader code
+ * @param shaderType the type of the shader
+ */
+void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
+
+/**
+ * @brief this function compiles the inputed two files into shaders
+ * 
+ * @param vertex the file for the vertex shader
+ * @param fragment the file for the fragment shader
+ */
+GLuint compileShader(const char* vertex, const char* fragment);
+
+/**
+ * @brief this file loads the two inputed std::vectors of strings as shader
+ * 
+ * @param fileDataVertex the data of the vertex shader
+ * @param fileDataFragment the data of the fragment shader
+ * @return GLuint the compiled shader
+ */
+GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment);
 
 #endif

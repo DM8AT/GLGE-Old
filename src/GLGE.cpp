@@ -950,11 +950,17 @@ void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
     }
 
     //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, data);
+    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
 }
 
 void glgeSetPostProcessingShader(std::string postProcessingShader)
 {
     //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, postProcessingShader);
+    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, postProcessingShader);
+}
+
+void glgeSetPostProcessingShader(GLuint shader)
+{
+    //store the inputed shader as the post processing shader
+    glgePostProcessingShader = shader;
 }
