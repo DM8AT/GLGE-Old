@@ -1,60 +1,51 @@
 # GLGE
-A simple graphics library for 3D and 2D in C++ 
+GLGE is a C++ graphics library for creating 2D and 3D graphics. 
 
 ## Examples
-example code is in the files 2DTest.hpp, 2DTest.cpp as well as 3DTest.hpp and 3DTest.cpp. 
-The test code is commented, especaly the 3D code, because it is very similar to the
-2D code you need to write to create, draw and setup an Object. The differences are
-outlined in the comments. 
+Example code is provided in the files 2DTest.hpp, 2DTest.cpp, 3DTest.hpp, and 3DTest.cpp. 
+The code is commented, with the 3D code outlined to highlight the differences from the 2D code.
 
 ## Documentation
 --Under Construction--
-the code is documented using doxygen, the documentation can be found in the folder "documentation". 
-All files in the folder are created by doxygen automaticaly, I changed nothing in there. 
+Documentation is provided via doxygen, with the documentation files found in the "documentation" folder.
+All files in the folder are created by doxygen automaticaly, I haven't changed anything in there. 
 
 ## Debugging
-If you get an error, reading it can help you find the cause of it. The error outputs
-are defined in "GLGE/glgeErrors.hpp". If wanted, the errors can be checkted there, 
-often there is a bit more information. 
+If you encounter errors, check the error outputs defined in "GLGE/glgeErrors.hpp". 
+
 Often causes for memory acces errors:
 - Not binding an camera before creating or updating 3D objects
 - inputing wrong values to an Object constructor with pointer arrays
+
 Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
 # Use GLGE
-Below is writen how to run GLGE on Linux. 
-Technicaly, the library will run everywhere where the following librarys work:
-- OpenGL developer library
-- GLEW
-- Freeglut
-- all default C++ librarys
+To use GLGE, you need the OpenGL developer library, GLEW, Freeglut, and all default C++ libraries. 
 
 ## Installation
-To install the library, you need to download the source code. Then you can move the
-folder called "GLGE" wherever you want, just make shure to change the include path in
-"GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp". 
+To install, download the source code and move the "GLGE" folder to your preferred location,
+updating the include path in the necessary files ("GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp"). 
 Else, there would be compilation errors. 
-The files "GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and
-"GLGE3DCore.cpp" should be in the same directory as your main file, else there will be errors
-if you use the the Makefile included in the main folder. 
+
+The files mentioned should be in the same directory as your main file. 
+If they are not, there will be errors when using the Makefile included in the main folder.
 
 ## Compiling
-To compile a program that uses GLGE, the Makefile in the main folder can be used. This can
-output a few errors, and compiling it differently also works. Just make shure that the you
-include and compile with the needed librarys. 
+Compiling can be done with the Makefile provided, or with your preferred method. 
+Make sure you include and compile with all the required librarys. 
 
 # Upcoming
-A list of upcoming features that may be added in the future to GLGE:
-- loadable models from files
+Upcoming features that may be added to GLGE in the future include:
+- Loadable models from files
    - from .obj files
    - from .blend files
    - from other file formats
 - An 3D and 2D sound function to the core
 - 2D and 3D physics
-- procedrual materials
-- procedrual shaders
-- a lighting core for 3D and 2D
+- Procedrual materials
+- Procedrual shaders
+- A lighting core for 3D and 2D
    - preset of lighting shaders
    - preset for different light sources
    - different light source presets
@@ -63,16 +54,15 @@ A list of upcoming features that may be added in the future to GLGE:
       - sun
       - light plates (some invisible shape that is emitting light)
 - Post processing
-   - Preset for post processing core
-   - Preset for different effects (Bloom, distortion, usw)
+   - preset for post processing core
+   - preset for different effects (Bloom, distortion, usw)
 
 ## Working on
-I am currently working on creating more functionality and simplicity in the shader core, 
-so handeling shaders is simpler. 
+Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
 ## Latest:
-- added the abillity to create shaders from an kernal
+- added the abillity to create shaders from a kernal
 ## Other:
 - added things for post production
 - added possibility for creating shaders from source code as std::strings
