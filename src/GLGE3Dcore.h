@@ -27,6 +27,11 @@
 //include the library core
 #include "GLGE.h"
 
+//Public defines
+
+//say the type of an model file
+#define GLGE_OBJ 1
+
 ///////////
 //STRUCTS//
 ///////////
@@ -186,6 +191,28 @@ public:
      * @param indices the indices in an std::vector
      */
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats:
+     * .obj
+     * 
+     * @param data the data from an for the mesh
+     * @param type the type of the data (what file format was used)
+     */
+    Mesh(std::string data, int type);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats: 
+     * .obj
+     * 
+     * @param file the file to read the data from
+     * @param type the type of the file
+     */
+    Mesh(const char* file, int type);
 };
 
 class Object

@@ -29,6 +29,7 @@
 #include <iostream>
 #include <cstring>
 #include <math.h>
+#include <sstream>
 
 /////////////////////
 //PRIVATE FUNCTIONS//
@@ -236,6 +237,68 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
     //save the inputed vectors
     this->vertices = vertices;
     this->indices = indices;
+}
+
+Mesh::Mesh(std::string data, int type)
+{
+    //seperate the data into the lines
+    std::istringstream iss(data);
+
+    //create an std::vector of 3D vectors for the vertices
+    std::vector<vec3> verts;
+    //create an vector to store the texture coordinates
+    std::vector<vec2> tex;
+    //create an vector to store the vertex normals
+    std::vector<vec3> normals;
+
+    //loop over every line in the data
+    for (std::string line; std::getline(iss, line); )
+    {
+        //check if the line starts with an v (v stands for Vertex)
+        if (line[0] == 'v')
+        {
+            //if the line starts only with an v, it stores vertex position coordinates
+            if (line[1] == ' ')
+            {
+                //create three floats to store the position
+                float x,y,z;
+                //load the position from the string into the floats
+                sscanf(line.c_str(), "v %f %f %f", &x,&y,&z);
+                //store the float as an new vertex
+                verts.push_back(vec3(x,y,z));
+            }
+            //if the line starts with an vt it stores vertex texture coordinates
+            else if (line[1] == 't')
+            {
+                //create two floats to store the texture coordinats
+                float x,y;
+                //load the texture coordinats from the line
+                sscanf(line.c_str(), "vt %f %f", &x, &y);
+                //store the texture coordinate
+                tex.push_back(vec2(x,y));
+            }
+            //if the line starts with an vn, it stores vertex normals
+            else if (line[1] == 'n')
+            {
+                //create three floats to store the normal
+                float nx, ny, nz;
+                //load the data form the line
+                sscanf(line.c_str(), "vn %f %f %f", &nx, &ny, &nz);
+                //store the normal
+                normals.push_back(vec3(nx,ny,nz));
+            }
+        }
+        //if the line starts with an f, it is a face. 
+        else if (line[0] == 'f')
+        {
+            
+        }
+    }
+}
+
+Mesh::Mesh(const char* file, int type)
+{
+
 }
 
 //////////

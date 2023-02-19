@@ -526,3 +526,20 @@ char* getGLErrorString(unsigned int error)
         return (char*)"GLGE_UNKNOWN_GL_ERROR";
     }
 }
+
+static int count_char(std::string &str, char ch)
+{
+    //begin the counting at 0
+    int c = 0;
+    //get the length of the str and subtract one, so the for loop keeps inside the range of the string
+    int length = str.length() - 1;
+    //loop over every item in the string
+    for (int i = 0; i < length; i++)
+    {
+        //if the item of the string is equal to the specified letter, increase c by one
+        if (str[i] == ch)
+            c++;
+    }
+    //return c, that contains the amount of ch in str
+    return c;
+}

@@ -85,4 +85,13 @@ GLuint compileShader(const char* vertex, const char* fragment);
  */
 GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment);
 
+/**
+ * @brief count the number of an character in an string
+ * 
+ * @param str the string with to count the amount of characters in
+ * @param ch the symbol to count
+ * @return int the amount of symbols in the string
+ */
+static int count_char(std::string &str, char ch);
+
 #endif

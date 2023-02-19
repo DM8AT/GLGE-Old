@@ -158,7 +158,7 @@ void Shader::updateShader(std::string shaderData, unsigned int type)
 
 Shader glgeCreateKernalShader(float* kernal, int size)
 {
-    std::string header("#version 330 core\nout vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
+    std::string header("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
     std::string width = std::to_string(glgeWindowSize.x);
     std::string height = std::to_string(glgeWindowSize.y);
 
@@ -187,7 +187,7 @@ Shader glgeCreateKernalShader(float* kernal, int size)
         }
         else if (x == (float)size/2.f - 0.5f)
         {
-            offs += std::string("0,");
+            offs += std::string("0.f,");
         }
         else
         {
@@ -202,7 +202,7 @@ Shader glgeCreateKernalShader(float* kernal, int size)
         }
         else if (y == (float)size/2.f - 0.5f)
         {
-            offs += std::string("0");
+            offs += std::string("0.f");
         }
         else
         {
@@ -246,7 +246,7 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
 {
     size = std::sqrt((float)size / (float)sizeof(float));
 
-    std::string header("#version 330 core\nout vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
+    std::string header("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
     std::string width = std::to_string(glgeWindowSize.x);
     std::string height = std::to_string(glgeWindowSize.y);
 
@@ -275,7 +275,7 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
         }
         else if (x == (float)size/2.f - 0.5f)
         {
-            offs += std::string("0,");
+            offs += std::string("0.f,");
         }
         else
         {
@@ -290,7 +290,7 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
         }
         else if (y == (float)size/2.f - 0.5f)
         {
-            offs += std::string("0");
+            offs += std::string("0.f");
         }
         else
         {
@@ -323,7 +323,7 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
         }
     }
 
-    std::string body2 = std::string("void main(){vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string(size*size)+"; i++){color += vec3(texture(screenTexture, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
+    std::string body2 = std::string("void main(){vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string((int) size*size)+"; i+=1){color += vec3(texture(screenTexture, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
 
     std::string shader = header + body1 + offs + kern + body2;
 
