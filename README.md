@@ -38,7 +38,7 @@ Make sure you include and compile with all the required librarys.
 # Upcoming
 Upcoming features that may be added to GLGE in the future include:
 - Loadable models from files
-   - from .obj files
+   - from .obj files (work in progress)
    - from .blend files
    - from other file formats
 - An 3D and 2D sound function to the core
@@ -62,8 +62,9 @@ Currently working on improving the shader core to make handling shaders simpler 
 
 # Changelogs
 ## Latest:
-- added the abillity to create shaders from a kernal
+- added ability to load 3D .obj files into an mesh
 ## Other:
+- added the abillity to create shaders from a kernal
 - added things for post production
 - added possibility for creating shaders from source code as std::strings
 - deleted doxygen documentation, it was broken

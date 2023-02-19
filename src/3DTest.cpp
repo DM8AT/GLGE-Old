@@ -35,6 +35,9 @@ Camera camera;
 Object cube;
 //crate an second instance of the Object class, also only default constructor
 Object grassFloor;
+//create an instance of the Object class to store an object named thing. The default constructor is used. Named so, because it can be everything
+//that can be loaded from an .obj file
+Object thing;
 
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
@@ -50,6 +53,8 @@ void display()
     grassFloor.draw();
     //draw the cube to the screen
     cube.draw();
+    //draw the thing to the screen
+    thing.draw();
 
     //after this function is finished, the buffer gets fliped and everything is drawn to the screen
 }
@@ -170,8 +175,10 @@ void tick()
 
     //update the grass floor, to make shure the transform and projection is correct. 
     grassFloor.update();
-    //update the 
+    //update the cube
     cube.update();
+    //update the thing
+    thing.update();
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -291,6 +298,17 @@ void cubeSetup()
     cube.setTexture("assets/cubeTexture.png");
 }
 
+//setup the thing
+void thingSetup()
+{
+    //load a mesh from an file        specify the file format to be .obj
+    Mesh m = Mesh("assets/monkey.obj", GLGE_OBJ);
+    //load the mesh to an object and change the position of it
+    thing = Object(m.vertices, m.indices, Transform(vec3(0,0,-7), vec3(0,0,0), 1));
+    //set the texture for the thing
+    thing.setTexture("assets/cubeTexture.png");
+}
+
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
 void run3Dexample(int argc, char** argv)
@@ -349,6 +367,8 @@ void run3Dexample(int argc, char** argv)
     floorSetup();
     //the cube is set up, like the floor is set up
     cubeSetup();
+    //setup the thing by loading it form an .obj file
+    thingSetup();
 
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();

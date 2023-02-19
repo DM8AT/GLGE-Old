@@ -92,6 +92,6 @@ GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment);
  * @param ch the symbol to count
  * @return int the amount of symbols in the string
  */
-static int count_char(std::string &str, char ch);
+int count_char(std::string &str, char ch);
 
 #endif

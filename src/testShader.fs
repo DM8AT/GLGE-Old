@@ -7,8 +7,8 @@ in vec2 texCoords;
 
 uniform sampler2D screenTexture;
 
-const float offset_x = 1.0f / 600.0f;  
-const float offset_y = 1.0f / 600.0f;  
+const float offset_x = 1.0f / 1000.0f;  
+const float offset_y = 1.0f / 1000.0f;  
 
 vec2 offsets[9] = vec2[]
 (

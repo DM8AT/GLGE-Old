@@ -110,6 +110,22 @@ Shader::Shader(std::string data, unsigned int type)
     }
 }
 
+Shader::Shader(std::string data, const char* f)
+{
+    std::string d;
+    readFile(f, d);
+
+    *this = Shader(data, d);
+}
+
+Shader::Shader(const char* f, std::string data)
+{
+    std::string d;
+    readFile(f, d);
+
+    *this = Shader(d, data);
+}
+
 GLuint Shader::getShader()
 {
     //return the stored shader

@@ -92,6 +92,8 @@ struct Vertex
     vec4 color;
     //store the texture coordinate
     vec2 texCoord = vec2(1,1);
+    //store the normal of the vertex
+    vec3 normal = vec3(0,0,0);
 
     /**
      * @brief Construct a new Vertex
@@ -159,6 +161,23 @@ struct Vertex
      * @param tY the texture y coordinate (or: r, u)
      */
     Vertex(float x, float y, float z, float tX, float tY);
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param pos the position of the vertex
+     * @param normal the normal of the vertex
+     */
+    Vertex(vec3 pos, vec3 normal);
+
+    /**
+     * @brief Construct a new Vertex
+     * 
+     * @param pos the position of the vertex
+     * @param texCoord the texture coordinate of the vertex
+     * @param normal the normal of the vertex
+     */
+    Vertex(vec3 pos, vec2 texCoord, vec3 normal);
 };
 
 class Mesh

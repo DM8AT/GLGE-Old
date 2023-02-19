@@ -30,6 +30,7 @@
 #include <cstring>
 #include <math.h>
 #include <sstream>
+#include <map>
 
 /////////////////////
 //PRIVATE FUNCTIONS//
@@ -44,6 +45,21 @@ vec3 rotateVector(float angle, vec3 v, vec3 target)
     Quaternion W = (RotationQ * target) * ConjugateQ;
 
     return vec3(W.x,W.y,W.z);
+}
+
+bool has_double_slash(std::string &str)
+{
+    //get the length of the stringt and decreese it by 2
+    int length = str.length() - 2;
+    //loop over every element in the string, but not the last one, since the length is decreesed by two instead of one
+    for (int i = 0; i < length; i++)
+    {
+        //if the item i and the next item are boath a slash, return true
+        if (str[i] == '/' && str[i + 1] == '/')
+            return true;
+    }
+    //at this point, the loop hasn't return true, so return false
+    return false;
 }
 
 //////////////////////
@@ -209,6 +225,21 @@ Vertex::Vertex(float x, float y, float z, float tX, float tY)
     this->color = vec4(0,0,0,0);
 }
 
+Vertex::Vertex(vec3 p, vec3 n)
+{
+    //store the inputed values
+    this->pos = p;
+    this->normal = n;
+}
+
+Vertex::Vertex(vec3 p, vec2 t, vec3 n)
+{
+    //store the inputed values
+    this->pos = p;
+    this->texCoord = t;
+    this->normal = n;
+}
+
 ///////////
 //CLASSES//
 ///////////
@@ -241,6 +272,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 
 Mesh::Mesh(std::string data, int type)
 {
+    if (type != GLGE_OBJ)
+    {
+        std::cerr << "Currently, only .obj files are supported" << std::endl;
+        return;
+    }
+
     //seperate the data into the lines
     std::istringstream iss(data);
 
@@ -250,6 +287,9 @@ Mesh::Mesh(std::string data, int type)
     std::vector<vec2> tex;
     //create an vector to store the vertex normals
     std::vector<vec3> normals;
+
+    //create an dictionary to store all created vectors
+    std::map<std::string, std::pair<Vertex, unsigned int>> cverts;
 
     //loop over every line in the data
     for (std::string line; std::getline(iss, line); )
@@ -291,14 +331,155 @@ Mesh::Mesh(std::string data, int type)
         //if the line starts with an f, it is a face. 
         else if (line[0] == 'f')
         {
-            
+            //count the amount of spaces in the line and save it in edge
+            int edge = count_char(line, ' ');
+            //if the edge builds no triangle, step to the next face
+            if (edge != 3)
+            {
+                //jump to the next loop iteration
+                continue;
+            }
+            //count the amount of slashes in the line and save it in count_slash
+            int count_slash = count_char(line, '/');
+            //if there are no slashes in th eline
+            if (count_slash == 0)
+            {
+                //create 3 ints to store the face conections
+                int m[3];
+                //read the conections from the file
+                sscanf(line.c_str(), "f %d %d %d", &m[0], &m[1], &m[2]);
+                //create the three vertices
+                for (int i = 0; i < 3; i++)
+                {
+                    //check if the vertex that should be created allready exists
+                    if (cverts.count(std::to_string(m[i])))
+                    {
+                        //if the vertex allready exists, store the value in the face
+                        this->indices.push_back(cverts[std::to_string(m[i])].second);
+                    }
+                    else
+                    {
+                        //if the vertex does not exist, create the vertex
+                        this->vertices.push_back(Vertex(verts[m[i]]));
+                        //store that the vertex exists
+                        cverts[std::to_string(m[i])].first = Vertex(verts[m[i]]);
+                        cverts[std::to_string(m[i])].second = (unsigned int)this->indices.size()-1;
+                        //store the position of the vertex in the face
+                        this->indices.push_back(cverts[std::to_string(m[i])].second);
+                    }
+                }
+            }
+            //else if there are equal slashes and spaces in the line
+            else if (count_slash == edge)
+            {
+                //create 3 ints
+                int v[3];
+                //create 3 more ints
+                int t[3];
+                //read in the line using the 6 integers
+                sscanf(line.c_str(), "f %d/%d %d/%d %d/%d", &v[0], &t[0], &v[1], &t[1], &v[2], &t[2]);
+                //create the three vertices
+                for (int i = 0; i < 3; i++)
+                {
+                    //check if the vertex that should be created allready exists
+                    if (cverts.count(std::to_string(v[i])+std::string(",")+std::to_string(t[i])))
+                    {
+                        //if the vertex allready exists, store the value in the face
+                        this->indices.push_back(cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])].second);
+                    }
+                    else
+                    {
+                        //if the vertex does not exist, create the vertex
+                        this->vertices.push_back(Vertex(verts[v[i]], tex[t[i]]));
+                        //store that the vertex exists
+                        cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])].first = Vertex(verts[v[i]], tex[t[i]]);
+                        cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])].second = (unsigned int)this->vertices.size()-1;
+                        //store the position of the vertex in the face
+                        this->indices.push_back(cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])].second);
+                    }
+                }
+            }
+            //else if the count of slashes is the double of the edge variable
+            else if (count_slash == edge * 2)
+            {
+                //if has_double_slash return true
+                if (has_double_slash(line))
+                {
+                    //create 3 intigers
+                    int v[3];
+                    //create 3 intigers
+                    int n[3];
+                    //read the data from the file
+                    sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &v[0], &n[0], &v[1], &n[1], &v[2], &n[2]);
+                    //create the three vertices
+                    for (int i = 0; i < 3; i++)
+                    {
+                        //check if the vertex that should be created allready exists
+                        if (cverts.count(std::to_string(v[i])+std::string("v,/,")+std::to_string(n[i])))
+                        {
+                            //if the vertex allready exists, store the value in the face
+                            this->indices.push_back(cverts[std::to_string(v[i])+std::string("v,/,")+std::to_string(n[i])].second);
+                        }
+                        else
+                        {
+                            //if the vertex does not exist, create the vertex
+                            this->vertices.push_back(Vertex(verts[v[i]], normals[n[i]]));
+                            //store that the vertex exists
+                            cverts[std::to_string(v[i])+std::string("v,/,")+std::to_string(n[i])].first = Vertex(verts[v[i]], normals[n[i]]);
+                            cverts[std::to_string(v[i])+std::string("v,/,")+std::to_string(n[i])].second = (unsigned int)this->vertices.size()-1;
+                            //store the position of the vertex in the face
+                            this->indices.push_back(cverts[std::to_string(v[i])+std::string("v,/,")+std::to_string(n[i])].second);
+                        }
+                    }
+                }
+                //else it has no double slahs, then create an face from pos, tex and normal
+                else
+                {
+                    //create 3 intigers for the position
+                    int v0, v1, v2;
+                    //create 3 intigers for the texture
+                    int t0, t1, t2;
+                    //create 3 intigers for the normal
+                    int n0, n1, n2;
+                    //read the data from the file
+                    sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v0, &t0, &n0, &v1, &t1, &n1, &v2, &t2, &n2);
+                    //convert the integers to arrays
+                    int v[3] = {v0-1, v1-1, v2-1};
+                    int t[3] = {t0-1, t1-1, t2-1};
+                    int n[3] = {n0-1, n1-1, n2-1};
+                    //create the three vertices
+                    for (int i = 0; i < 3; i++)
+                    {
+                        //check if the vertex that should be created allready exists
+                        if (cverts.count(std::to_string(v[i])+std::string(",")+std::to_string(t[i])+std::string(",")+std::to_string(n[i])))
+                        {
+                            //if the vertex allready exists, store the value in the face
+                            this->indices.push_back(cverts[(std::to_string(v[i])+std::string("v,")+std::to_string(t[i])+std::string("t,")+std::to_string(n[i]))].second);
+                        }
+                        else
+                        {
+                            //if the vertex does not exist, create the vertex
+                            this->vertices.push_back(Vertex(verts[v[i]], tex[t[i]], normals[n[i]]));
+                            //store that the vertex exists
+                            cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])+std::string("t,")+std::to_string(n[i])].first = Vertex(verts[v[i]], normals[n[i]]);
+                            cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])+std::string("t,")+std::to_string(n[i])].second = (unsigned int)this->vertices.size()-1;
+                            //store the position of the vertex in the face
+                            this->indices.push_back(cverts[std::to_string(v[i])+std::string("v,")+std::to_string(t[i])+std::string("t,")+std::to_string(n[i])].second);
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 Mesh::Mesh(const char* file, int type)
 {
+    std::string data;
 
+    readFile(file, data);
+
+    *this = Mesh(data,type);
 }
 
 //////////

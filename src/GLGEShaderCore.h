@@ -74,6 +74,22 @@ public:
     Shader(std::string shaderData, unsigned int type);
 
     /**
+     * @brief Construct a new Shader from shader data and an preset
+     * 
+     * @param vertexShaderData the data from the vertex shader
+     * @param fragmentShaderFile the path to the fragment shader
+     */
+    Shader(std::string vertexShaderData, const char* fragmentShaderFile);
+
+    /**
+     * @brief Construct a new Shader from shader data and an preset
+     * 
+     * @param vertexShaderFile the path to the vertex shader
+     * @param fragmentShaderData the data of the fragment shader
+     */
+    Shader(const char* vertexShaderFile, std::string fragmentShaderData);
+
+    /**
      * @brief Get the Shader
      * 
      * @return GLuint the compiled OpenGL shader

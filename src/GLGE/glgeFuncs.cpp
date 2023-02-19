@@ -447,12 +447,12 @@ void createWindow(const char* n, vec2 s, vec2 p)
     float rectangleVertices[] = 
     {
         //Coords   //texCoords
-        1.f, -1.f, 1.f, 0.f,
        -1.f, -1.f, 0.f, 0.f,
+        1.f, -1.f, 1.f, 0.f,
        -1.f,  1.f, 0.f, 1.f,
 
-        1.f,  1.f, 1.f, 1.f,
         1.f, -1.f, 1.f, 0.f,
+        1.f,  1.f, 1.f, 1.f,
        -1.f,  1.f, 0.f, 1.f
     };
 
@@ -527,7 +527,7 @@ char* getGLErrorString(unsigned int error)
     }
 }
 
-static int count_char(std::string &str, char ch)
+int count_char(std::string &str, char ch)
 {
     //begin the counting at 0
     int c = 0;
