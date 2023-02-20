@@ -542,6 +542,56 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     this->update();
 }
 
+//construct an object from an mesh
+Object::Object(Mesh mesh, Transform transform, bool isStatic)
+{
+    //construct and save a mesh from the pointers
+    this->mesh = mesh;
+
+    //save the inputed transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //calculate the buffers
+    this->compileBuffers();
+
+    //bind the default 3D shader
+    this->shader = glgeShaderDefault;
+    //store the move matrix location
+    this->moveMatLoc = glgeMoveMatDefaulLoc;
+
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
+    //update the object
+    this->update();
+}
+
+//create an object from an file
+Object::Object(const char* file, int type, Transform transform, bool isStatic)
+{
+    //construct and save a mesh from the pointers
+    this->mesh = Mesh(file, type);
+
+    //save the inputed transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //calculate the buffers
+    this->compileBuffers();
+
+    //bind the default 3D shader
+    this->shader = glgeShaderDefault;
+    //store the move matrix location
+    this->moveMatLoc = glgeMoveMatDefaulLoc;
+
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
+    //update the object
+    this->update();
+}
+
 //draw the object
 void Object::draw()
 {

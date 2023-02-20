@@ -267,6 +267,25 @@ public:
     Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform = Transform(), bool isStatic = false);
 
     /**
+     * @brief Construct a new Object
+     * 
+     * @param mesh the mesh for the Object
+     * @param transform an optinal transform for the object
+     * @param isStatic says if the object should move with the camera
+     */
+    Object(Mesh mesh, Transform transform = Transform(), bool isStatic = false);
+
+    /**
+     * @brief Construct a new Object
+     * 
+     * @param file the file to load the data from
+     * @param type the type of the file
+     * @param transform an optinal transform for the object
+     * @param isStatic says if the object should move with the camera
+     */
+    Object(const char* file, int type, Transform transform = Transform(), bool isStatic = false);
+
+    /**
      * @brief draw the object to the screen
      */
     void draw();

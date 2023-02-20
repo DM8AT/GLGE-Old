@@ -304,7 +304,7 @@ void thingSetup()
     //load a mesh from an file        specify the file format to be .obj
     Mesh m = Mesh("assets/monkey.obj", GLGE_OBJ);
     //load the mesh to an object and change the position of it
-    thing = Object(m.vertices, m.indices, Transform(vec3(0,0,-7), vec3(0,0,0), 1));
+    thing = Object(m, Transform(vec3(0,0,-7), vec3(0,0,0), 1));
     //set the texture for the thing
     thing.setTexture("assets/cubeTexture.png");
 }
