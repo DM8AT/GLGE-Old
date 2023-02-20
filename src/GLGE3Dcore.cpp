@@ -751,6 +751,13 @@ void Object::setSize(float x, float y, float z)
     this->transf.scale = vec3(x,y,z);
 }
 
+//set the size of the object
+void Object::setSize(float s)
+{
+    //convert the float to an vector and store it
+    this->transf.scale = vec3(s,s,s);
+}
+
 //change the size of the object
 void Object::scale(vec3 s)
 {

@@ -441,6 +441,13 @@ public:
     void setSize(float sX, float sY, float sZ);
 
     /**
+     * @brief Set the Size of the object
+     * 
+     * @param s the size for all axes
+     */
+    void setSize(float s);
+
+    /**
      * @brief change the size of the object
      * 
      * @param size the multiplier for the size on each axis
