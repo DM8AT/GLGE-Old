@@ -424,6 +424,75 @@ public:
      */
     vec3 getRotation();
 
+    /**
+     * @brief Set the Size of the object
+     * 
+     * @param size the new size for the object
+     */
+    void setSize(vec3 size);
+
+    /**
+     * @brief Set the Size of the object
+     * 
+     * @param sX the size on the x axis
+     * @param sY the size on the y axis
+     * @param sZ the size on the z axis
+     */
+    void setSize(float sX, float sY, float sZ);
+
+    /**
+     * @brief change the size of the object
+     * 
+     * @param size the multiplier for the size on each axis
+     */
+    void scale(vec3 size);
+
+    /**
+     * @brief change the size of the object
+     * 
+     * @param dx the multiplier on the x axis
+     * @param dy the multiplier on the y axis
+     * @param dz the multiplier on the z axis
+     */
+    void scale(float dx, float dy, float dz);
+
+    /**
+     * @brief change the size of the object
+     * 
+     * @param s the multiplier for each axis
+     */
+    void scale(float s);
+
+    /**
+     * @brief add something to the scale of the object
+     * 
+     * @param deltaSize the difference in size on each axis
+     */
+    void addScale(vec3 deltaSize);
+
+    /**
+     * @brief add something to the scale of the object
+     * 
+     * @param dx the difference in scale on the x axis
+     * @param dy the difference in scale on the y axis
+     * @param dz the difference in scale on the z axis
+     */
+    void addScale(float dx, float dy, float dz);
+
+    /**
+     * @brief add something to the scale of the object
+     * 
+     * @param s added to the size on each axis
+     */
+    void addScale(float s);
+
+    /**
+     * @brief Get the Scale from the object
+     * 
+     * @return vec3 the size of the object
+     */
+    vec3 getScale();
+
 private:
     //store the transform for the object
     Transform transf;

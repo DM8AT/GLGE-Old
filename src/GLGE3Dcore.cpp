@@ -737,6 +737,69 @@ vec3 Object::getRotation()
     return this->transf.rot;
 }
 
+//set the size of the object
+void Object::setSize(vec3 s)
+{
+    //store the inputed vector
+    this->transf.scale = s;
+}
+
+//set the size of the object
+void Object::setSize(float x, float y, float z)
+{
+    //convert the floats to an vector and store it
+    this->transf.scale = vec3(x,y,z);
+}
+
+//change the size of the object
+void Object::scale(vec3 s)
+{
+    //multiply each size of the size by the input
+    this->transf.scale.scale(s);
+}
+
+//change the size of the object
+void Object::scale(float x, float y, float z)
+{
+    //scale the size by the inputs
+    this->transf.scale.scale(vec3(x,y,z));
+}
+
+//change the size of the object
+void Object::scale(float s)
+{
+    //scale the size by the input
+    this->transf.scale.scale(vec3(s,s,s));
+}
+
+//add something to the size of the Object
+void Object::addScale(vec3 s)
+{
+    //add the input to the size of the object
+    this->transf.scale += s;
+}
+
+//add something to the size of the Object
+void Object::addScale(float x, float y, float z)
+{
+    //add the input to the size of the object
+    this->transf.scale += vec3(x,y,z);
+}
+
+//add something to the size of the Object
+void Object::addScale(float s)
+{
+    //add the input to the size of the object
+    this->transf.scale += vec3(s,s,s);
+}
+
+//get the scale from the Object
+vec3 Object::getScale()
+{
+    //return the stored scale
+    return this->transf.scale;
+}
+
 //PRIV
 void Object::compileBuffers()
 {
