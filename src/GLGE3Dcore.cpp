@@ -656,6 +656,87 @@ GLuint Object::getTexture()
     return this->texture;
 }
 
+//apply a new transform to the object
+void Object::setTransform(Transform t)
+{
+    //set the transform to the inputed transform
+    this->transf = t;
+}
+
+Transform Object::getTransform()
+{
+    //return the transform
+    return this->transf;
+}
+
+//set the position of the object
+void Object::setPos(vec3 p)
+{
+    //apply the new position
+    this->transf.pos = p;
+}
+
+//set the position of the object
+void Object::setPos(float x, float y, float z)
+{
+    //apply the new position
+    this->transf.pos = vec3(x,y,z);
+}
+
+//move the object
+void Object::move(vec3 v)
+{
+    //change the position of the object
+    this->transf.pos += v;
+}
+
+//move the object
+void Object::move(float x, float y, float z)
+{
+    //change the position of the object
+    this->transf.pos += vec3(x,y,z);
+}
+
+vec3 Object::getPos()
+{
+    //return the object position
+    return this->transf.pos;
+}
+
+//set the rotation of the object
+void Object::setRotation(vec2 r)
+{
+    //apply the new rotation
+    this->transf.rot = vec3(r.x,r.y,0);
+}
+
+//set the rotation of the object
+void Object::setRotation(float x, float y)
+{
+    //apply the new rotation
+    this->transf.rot = vec3(x,y,0);
+}
+
+//rotate the object
+void Object::rotate(vec2 r)
+{
+    //rotate the object
+    this->transf.rot += vec3(r.x,r.y,0);
+}
+
+//rotate the object
+void Object::rotate(float x, float y)
+{
+    //rotate the object
+    this->transf.rot += vec3(x,y,0);
+}
+
+vec3 Object::getRotation()
+{
+    //return the rotation
+    return this->transf.rot;
+}
+
 //PRIV
 void Object::compileBuffers()
 {

@@ -334,6 +334,96 @@ public:
      */
     GLuint getTexture();
 
+    /**
+     * @brief apply a specific transform to the camera
+     * 
+     * @param transform the new transform for the camera
+     */
+    void setTransform(Transform transform);
+
+    /**
+     * @brief Get the Transform from the camera
+     * 
+     * @return Transform the current transform of the camera
+     */
+    Transform getTransform();
+
+    /**
+     * @brief position the camera new
+     * 
+     * @param position the new position for the camera
+     */
+    void setPos(vec3 position);
+
+    /**
+     * @brief position the camera new
+     * 
+     * @param x the new x position for the camera
+     * @param y the new y position for the camera
+     * @param z the new z position for the camera
+     */
+    void setPos(float x, float y, float z);
+
+    /**
+     * @brief move the camera
+     * 
+     * @param deltaPosition the difference from the old to the new position
+     */
+    void move(vec3 deltaPosition);
+
+    /**
+     * @brief move the camera
+     * 
+     * @param dX the difference on the x axis
+     * @param dY the difference on the y axis
+     * @param dZ the difference on the z axis
+     */
+    void move(float dX, float dY, float dZ);
+
+    /**
+     * @brief Get the position from the camera
+     * 
+     * @return vec3 the position of the camera
+     */
+    vec3 getPos();
+
+    /**
+     * @brief Set the Rotation of the camera
+     * 
+     * @param rotation the new rotation for the camera
+     */
+    void setRotation(vec2 rotation);
+
+    /**
+     * @brief Set the Rotation of the camera
+     * 
+     * @param x the x rotation for the camera
+     * @param y the y rotation for the camera
+     */
+    void setRotation(float x, float y);
+
+    /**
+     * @brief rotate the camera
+     * 
+     * @param deltaRotation the difference for the rotation
+     */
+    void rotate(vec2 deltaRotation);
+
+    /**
+     * @brief rotate the camera
+     * 
+     * @param dX the difference of rotation on the x axis
+     * @param dY the difference of rotation on the y axis
+     */
+    void rotate(float dX, float dY);
+
+    /**
+     * @brief Get the rotation from the camera
+     * 
+     * @return vec3 the rotation from the camera
+     */
+    vec3 getRotation();
+
 private:
     //store the transform for the object
     Transform transf;
