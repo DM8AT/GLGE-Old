@@ -216,9 +216,14 @@ void floorSetup()
     uint indices[] = {0,1,2,
                       0,2,3};
 
-    //then, the arrays are inputed to the Object constructor to create an new object, overwriting the data temporeraly assigned to the grass floor in the
-    //default constructor. to use pointer arrays, it is also important to input the size of them, like shown below
-    grassFloor = Object(vertices, indices, sizeof(vertices), sizeof(indices));
+    //then, the arrays are inputed to the Mesh constructor to create an new mesh, that can be used to create an Object. 
+    Mesh m = Mesh(vertices, indices, sizeof(vertices), sizeof(indices));
+    //the normal vectors of the mesh are recalculated, so it can be lit. 
+    m.recalculateNormals();
+    //the grass floor is constructed from the previously created mesh by overwriting the data previously stored in it with the new mesh
+    grassFloor = Object(m);
+
+    grassFloor.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
     //OUTDATED: an shader can be asigned to the object, but it is no longer necesery. 
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
@@ -233,38 +238,39 @@ void cubeSetup()
     //the cube should be textured, each point needs to be made up of 3 vertices to handle the texture data correctly. 
     //I know that this is not elegant, but it only needs 24 vertices for a cube, without indices a cube would need 36 vertices. 
     Vertex vertices[] = {
+                                //pos   //tex   //normal
                          //front and back
-                         Vertex(-1,-1, 1, 0,0),
-                         Vertex( 1,-1, 1, 1,0),
-                         Vertex(-1, 1, 1, 0,1),
-                         Vertex( 1, 1, 1, 1,1),
+                         Vertex(-1,-1, 1, 0,0,  0, 0, 1),
+                         Vertex( 1,-1, 1, 1,0,  0, 0, 1),
+                         Vertex(-1, 1, 1, 0,1,  0, 0, 1),
+                         Vertex( 1, 1, 1, 1,1,  0, 0, 1),
 
-                         Vertex(-1,-1,-1, 1,0),
-                         Vertex( 1,-1,-1, 0,0),
-                         Vertex(-1, 1,-1, 1,1),
-                         Vertex( 1, 1,-1, 0,1),
+                         Vertex(-1,-1,-1, 1,0,  0, 0,-1),
+                         Vertex( 1,-1,-1, 0,0,  0, 0,-1),
+                         Vertex(-1, 1,-1, 1,1,  0, 0,-1),
+                         Vertex( 1, 1,-1, 0,1,  0, 0,-1),
 
                          //top and bottom
-                         Vertex(-1,-1, 1, 0,1),
-                         Vertex( 1,-1, 1, 1,1),
-                         Vertex(-1, 1, 1, 0,0),
-                         Vertex( 1, 1, 1, 1,0),
+                         Vertex(-1,-1, 1, 0,1,  0,-1, 0),
+                         Vertex( 1,-1, 1, 1,1,  0,-1, 0),
+                         Vertex(-1, 1, 1, 0,0,  0, 1, 0),
+                         Vertex( 1, 1, 1, 1,0,  0, 1, 0),
 
-                         Vertex(-1,-1,-1, 0,0),
-                         Vertex( 1,-1,-1, 1,0),
-                         Vertex(-1, 1,-1, 0,1),
-                         Vertex( 1, 1,-1, 1,1),
+                         Vertex(-1,-1,-1, 0,0,  0,-1, 0),
+                         Vertex( 1,-1,-1, 1,0,  0,-1, 0),
+                         Vertex(-1, 1,-1, 0,1,  0, 1, 0),
+                         Vertex( 1, 1,-1, 1,1,  0, 1, 0),
 
                          //left and right
-                         Vertex(-1,-1, 1, 1,0),
-                         Vertex( 1,-1, 1, 0,0),
-                         Vertex(-1, 1, 1, 1,1),
-                         Vertex( 1, 1, 1, 0,1),
+                         Vertex(-1,-1, 1, 1,0, -1, 0, 0),
+                         Vertex( 1,-1, 1, 0,0,  1, 0, 0),
+                         Vertex(-1, 1, 1, 1,1, -1, 0, 0),
+                         Vertex( 1, 1, 1, 0,1,  1, 0, 0),
 
-                         Vertex(-1,-1,-1, 0,0),
-                         Vertex( 1,-1,-1, 1,0),
-                         Vertex(-1, 1,-1, 0,1),
-                         Vertex( 1, 1,-1, 1,1),
+                         Vertex(-1,-1,-1, 0,0, -1, 0, 0),
+                         Vertex( 1,-1,-1, 1,0,  1, 0, 0),
+                         Vertex(-1, 1,-1, 0,1, -1, 0, 0),
+                         Vertex( 1, 1,-1, 1,1,  1, 0, 0),
                         };
 
     //then, the indices for the cube are created. I used values in the range of 0 to 7 to say the vertex ID and then added 8 or 16, if the triangle should
@@ -288,7 +294,7 @@ void cubeSetup()
 
     //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
     //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
-    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.001,0),vec3(0,0,0),1));
+    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.001,2),vec3(0,0,0),1));
     //then, the same shader as used for the grass floor (Basic 3D shader) is asigned. It is inputed as shown to avoid dupication on the graphics card. 
     //this methode can create problems, if objects are created dynamicaly, because if the shader is deleted in one object, It is deleted for all objects. 
     //because of this issue, only the default constructor is existing for all classes contained in the library, so the buffers, shaders and textures are
@@ -304,9 +310,10 @@ void thingSetup()
     //load a mesh from an file        specify the file format to be .obj
     Mesh m = Mesh("assets/monkey.obj", GLGE_OBJ);
     //load the mesh to an object and change the position of it
-    thing = Object(m, Transform(vec3(0,0,-7), vec3(0,0,0), 1));
+    thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
     //set the texture for the thing
     thing.setTexture("assets/cubeTexture.png");
+    thing.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
 }
 
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
@@ -335,12 +342,12 @@ void run3Dexample(int argc, char** argv)
     Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
 
     //asign the shader for the gausian blure
-    glgeSetPostProcessingShader(dyn.getShader());
+    //glgeSetPostProcessingShader(dyn.getShader());
 
     //create an shader object to store the shader
     Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);
     //set the post processing shader to invert the colors
-    glgeSetPostProcessingShader(pps.getShader());
+    //glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     glgeDisableBackfaceCulling();
@@ -356,7 +363,7 @@ void run3Dexample(int argc, char** argv)
     glgeBindMainFunc(tick);
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
-    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-5),vec3(0,0,0),1));
+    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
     //then, the camera is moved one unit up
     camera.move(0,1,0);
     //after the camera is set up, the camera is bound to the library using an pointer. So, the camera can be changed and updated

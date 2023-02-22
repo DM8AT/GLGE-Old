@@ -178,6 +178,36 @@ struct Vertex
      * @param normal the normal of the vertex
      */
     Vertex(vec3 pos, vec2 texCoord, vec3 normal);
+
+    /**
+     * @brief Construct a new Vertex from a lot of floats
+     * 
+     * @param x the x position of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param tx the texture x coordinate (or: s, v)
+     * @param ty the texture y coordinate (or: r, u)
+     * @param nx the normal on the x axis
+     * @param ny the normal on the y axis
+     * @param nz the normal on the z axis
+     */
+    Vertex(float x, float y, float z, float tx, float ty, float nx, float ny, float nz);
+
+    /**
+     * @brief Construct a new Vertex from 10 floats
+     * 
+     * @param x the x position of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param r the red part of the color
+     * @param g the green part of the color
+     * @param b the blue part of the color
+     * @param a the alpha of the color, used for transparency
+     * @param nx the normal on the x axis
+     * @param ny the normal on the y axis
+     * @param nz the normal on the z axis
+     */
+    Vertex(float x, float y, float z, float r, float g, float b, float a, float nx, float ny, float nz);
 };
 
 class Mesh
@@ -232,6 +262,11 @@ public:
      * @param type the type of the file
      */
     Mesh(const char* file, int type);
+
+    /**
+     * @brief recalculate the normal vectors from the mesh in clockwise order
+     */
+    void recalculateNormals();
 };
 
 class Object
@@ -317,6 +352,14 @@ public:
      * @param fragmentShader the source code for the fragment shader
      */
     void setShader(std::string vertexShader, std::string fragmentShader);
+
+    /**
+     * @brief Set the Shader for the object
+     * 
+     * @param vertexShader the source code for the vertex shader
+     * @param fragmentShaderFile the path to the fragment shader
+     */
+    void setShader(std::string vertexShader, const char* fragmentShaderFile);
 
     /**
      * @brief Set the Shader for the object
@@ -519,6 +562,18 @@ public:
      */
     vec3 getScale();
 
+    /**
+     * @brief recalculate the normals of the mesh for the object
+     */
+    void recalculateNormals();
+
+    /**
+     * @brief Get the Mesh from the object
+     * 
+     * @return Mesh the mesh of the object
+     */
+    Mesh getMesh();
+
 private:
     //store the transform for the object
     Transform transf;
@@ -530,11 +585,18 @@ private:
     GLint shader;
     //store the move matrix location
     GLuint moveMatLoc;
+    //store the position of the model matrix, if it is found
+    GLuint modelMatLoc;
     //the local matrix to make the object correct
     mat4 moveMat = mat4(1,0,0,0,
                         0,1,0,0,
                         0,0,1,0,
                         0,0,0,1);
+    //this matrix is needed to calculate the lighting
+    mat4 modelMat = mat4(1,0,0,0,
+                         0,1,0,0,
+                         0,0,1,0,
+                         0,0,0,1);
     //store a texture
     GLuint texture;
     //store if the object is static

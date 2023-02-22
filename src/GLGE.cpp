@@ -644,8 +644,8 @@ GLint glgeGetUniformVar(GLuint program, const char* name)
             //say where the error occured
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
         }
-        //stop the program
-        exit(1);
+        //return 0
+        return 0;
     }
     //if no error occured, return the id of the uniform variable
     return ret;

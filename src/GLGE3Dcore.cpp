@@ -240,6 +240,30 @@ Vertex::Vertex(vec3 p, vec2 t, vec3 n)
     this->normal = n;
 }
 
+//a lot of floats
+Vertex::Vertex(float x, float y, float z, float tx, float ty, float nx, float ny, float nz)
+{
+    //store the inputed position values
+    this->pos = vec3(x,y,z);
+    //store the inputed texture coordinats
+    this->texCoord = vec2(tx, ty);
+    //store and normalise the inputed normal
+    this->normal = vec3(nx,ny,nz);
+    this->normal.normalize();
+}
+
+//10 floats
+Vertex::Vertex(float x, float y, float z, float r, float g, float b, float a, float nx, float ny, float nz)
+{
+    //store the inputed position values
+    this->pos = vec3(x,y,z);
+    //store the inputed color
+    this->color = vec4(r,g,b,a);
+    //store and normalise the inputed normal
+    this->normal = vec3(nx,ny,nz);
+    this->normal.normalize();
+}
+
 ///////////
 //CLASSES//
 ///////////
@@ -482,6 +506,36 @@ Mesh::Mesh(const char* file, int type)
     *this = Mesh(data,type);
 }
 
+void Mesh::recalculateNormals()
+{
+    for (int i = 0; i < (int)this->indices.size()/3; i++)
+    {
+        vec3 normal = this->vertices[indices[i+1]].pos.cross(this->vertices[indices[i]].pos);
+        normal.normalize();
+
+        if (normal == vec3(1/0.f,1/0.f,1/0.f))
+        {
+            normal = vec3(0,0,0);
+        }
+        
+        for (int j = 0; j < 3; j++)
+        {
+            bool is0 = this->vertices[indices[i+j]].normal == vec3(0,0,0);            
+
+            if (is0)
+            {
+                this->vertices[indices[i+j]].normal = normal;
+            }
+            else
+            {
+                this->vertices[indices[i+j]].normal.normalize();
+                this->vertices[indices[i+j]].normal = (this->vertices[indices[i+j]].normal + normal);
+                this->vertices[indices[i+j]].normal.normalize();
+            }
+        }
+    }
+}
+
 //////////
 //OBJECT//
 //////////
@@ -615,9 +669,17 @@ void Object::draw()
     //say where the texCoords are
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
+    //say where the normals are
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
 
     //pass the move matrix to the shader
     glUniformMatrix4fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
+    //pass the model matrix to the shader, if it has one
+    if (modelMatLoc != 0)
+    {
+        glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
+    }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
@@ -672,6 +734,8 @@ void Object::setShader(GLuint shader)
     
     //get the new location for the move matrix
     this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+    //save the location of the model matrix
+    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
 }
 
 void Object::setShader(std::string vs, std::string fs)
@@ -681,6 +745,23 @@ void Object::setShader(std::string vs, std::string fs)
     
     //get the new location for the move matrix
     this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+    //save the location of the model matrix
+    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+}
+
+void Object::setShader(std::string vs, const char* file)
+{
+    //create a variable to store the fragment shader
+    std::string fs;
+    //load the fragment shader
+    readFile(file, fs);
+    //compile the shader source code and store the shader
+    this->shader = glgeCompileShader(vs, fs);
+    
+    //get the new location for the move matrix
+    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
+    //save the location of the model matrix
+    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
 }
 
 GLuint Object::getShader()
@@ -857,6 +938,12 @@ vec3 Object::getScale()
     return this->transf.scale;
 }
 
+void Object::recalculateNormals()
+{
+    //recalculate the nromals of the mesh
+    this->mesh.recalculateNormals();
+}
+
 //PRIV
 void Object::compileBuffers()
 {
@@ -892,10 +979,14 @@ void Object::shaderSetup(const char* vs, const char* fs)
 
     //save the location of the move matrix
     this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
+    //save the location of the model matrix
+    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
 }
 
 void Object::recalculateMoveMatrix()
 {
+    //save the model matrix
+    this->modelMat = this->transf.getMatrix();
     //set the move matrix to the product of 3 matrices
     this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix(); 
 }
