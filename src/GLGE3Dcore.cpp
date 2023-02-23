@@ -371,7 +371,7 @@ Mesh::Mesh(std::string data, int type)
                 //create 3 ints to store the face conections
                 int m[3];
                 //read the conections from the file
-                sscanf(line.c_str(), "f %d %d %d", &m[0], &m[1], &m[2]);
+                sscanf(line.c_str(), "f %d %d %d", &m[2], &m[1], &m[0]);
                 //create the three vertices
                 for (int i = 0; i < 3; i++)
                 {
@@ -401,7 +401,7 @@ Mesh::Mesh(std::string data, int type)
                 //create 3 more ints
                 int t[3];
                 //read in the line using the 6 integers
-                sscanf(line.c_str(), "f %d/%d %d/%d %d/%d", &v[0], &t[0], &v[1], &t[1], &v[2], &t[2]);
+                sscanf(line.c_str(), "f %d/%d %d/%d %d/%d", &v[2], &t[2], &v[1], &t[1], &v[0], &t[0]);
                 //create the three vertices
                 for (int i = 0; i < 3; i++)
                 {
@@ -434,7 +434,7 @@ Mesh::Mesh(std::string data, int type)
                     //create 3 intigers
                     int n[3];
                     //read the data from the file
-                    sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &v[0], &n[0], &v[1], &n[1], &v[2], &n[2]);
+                    sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &v[2], &n[2], &v[1], &n[1], &v[0], &n[0]);
                     //create the three vertices
                     for (int i = 0; i < 3; i++)
                     {
@@ -468,9 +468,9 @@ Mesh::Mesh(std::string data, int type)
                     //read the data from the file
                     sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v0, &t0, &n0, &v1, &t1, &n1, &v2, &t2, &n2);
                     //convert the integers to arrays
-                    int v[3] = {v0-1, v1-1, v2-1};
-                    int t[3] = {t0-1, t1-1, t2-1};
-                    int n[3] = {n0-1, n1-1, n2-1};
+                    int v[3] = {v2-1, v1-1, v0-1};
+                    int t[3] = {t2-1, t1-1, t0-1};
+                    int n[3] = {n2-1, n1-1, n0-1};
                     //create the three vertices
                     for (int i = 0; i < 3; i++)
                     {

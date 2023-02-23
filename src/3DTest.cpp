@@ -25,6 +25,8 @@
 //it is not nececeraly needed to handle shaders, but it is recomended. 
 #include "GLGEShaderCore.h"
 
+#include "GLGEMaterialCore.h"
+
 //include math, used to make the camera movement relative to the player
 #include <math.h>
 
@@ -53,6 +55,7 @@ void display()
     grassFloor.draw();
     //draw the cube to the screen
     cube.draw();
+
     //draw the thing to the screen
     thing.draw();
 
@@ -308,7 +311,7 @@ void cubeSetup()
 void thingSetup()
 {
     //load a mesh from an file        specify the file format to be .obj
-    Mesh m = Mesh("assets/monkey.obj", GLGE_OBJ);
+    Mesh m = Mesh("assets/Vertices.obj", GLGE_OBJ);
     //load the mesh to an object and change the position of it
     thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
     //set the texture for the thing
@@ -350,7 +353,7 @@ void run3Dexample(int argc, char** argv)
     //glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
-    glgeDisableBackfaceCulling();
+    //glgeDisableBackfaceCulling();
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

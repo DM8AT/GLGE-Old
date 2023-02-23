@@ -31,4 +31,6 @@ vec4 calculateLighting(vec4 col)
 void main()
 {
     FragColor = calculateLighting(texture(Texture, texCoord)+color);
+
+    FragColor = min(max(FragColor, vec4(0,0,0,0)), vec4(1,1,1,1));
 }
