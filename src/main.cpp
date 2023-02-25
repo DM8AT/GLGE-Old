@@ -16,9 +16,13 @@
 //for input and printing, iostream is included
 #include <iostream>
 
+// Atlas
+#include "textureAtlas.h"
+
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main(int argc, char** argv)
 {
+    /*
     //first, write information on what to input to start the examples
     printf("Write 0 to run the 3D example\n");
     printf("Write 1 to run the 2D example\n");
@@ -55,6 +59,26 @@ int main(int argc, char** argv)
     {
         printf("The value %d dose not name an example\n", inp);
     }
+    */
+
+    // texture atlas demo code
+
+    // create new atlas object
+    atlas x;
+
+    // add file
+    x.add("assets/Crosshair.png");
+
+
+    // dump contents of path vector and print it
+    std::vector<const char*> tmp = x.dump();
+    std::cout << "Size of vector: " << tmp.size() << "\n";
+
+    for (long unsigned int i = 0; i <= tmp.size(); i++) {
+        std::cout << tmp[i] << "\n";
+    }
+
+    x.build();
 
     return 0;
 }

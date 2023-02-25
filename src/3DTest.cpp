@@ -347,7 +347,7 @@ void run3Dexample(int argc, char** argv)
     //Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
 
     //asign the shader for the gausian blure
-    //glgeSetPostProcessingShader(dyn.getShader());
+    glgeSetPostProcessingShader(dyn.getShader());
 
     //create an shader object to store the shader
     //Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);

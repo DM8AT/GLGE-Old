@@ -24,7 +24,7 @@
 /**
  * this error occures if the frame buffer could not be created. 
  */
-#define GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED "[GLGE FATAL ERROR] could not compile the Framebuffer. Error code by OpenGL: "
+#define GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED "[GLGE FATAL ERROR] could not compile the framebuffer. Error code by OpenGL: "
 
 ////////////////////////
 //Error string defines//
@@ -34,7 +34,7 @@
  * this error occures if an window was allready created but a second one should be created. 
  * GLGE supports only a single window. 
 */
-#define GLGE_ERROR_TWO_WINDOWS "[GLGE ERROR] GLGE allready has an window, two windows are not supported\n"
+#define GLGE_ERROR_TWO_WINDOWS "[GLGE ERROR] GLGE allready has a window, two windows are not supported\n"
 
 /**
  * this error is outputed if the initalisation of glew failes. 
