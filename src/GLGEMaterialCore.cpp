@@ -86,7 +86,7 @@ void Material::addImage(const char* image, unsigned int type)
     else if (type == GLGE_NORMAL_MAP)
     {
         //store an empty string in the unifrom
-        this->uniformNames.push_back("");
+        this->uniformNames.push_back(NULL);
 
         //store the location of the normal map
         this->normalMapLoc = (unsigned int)this->uniformNames.size()-1;
@@ -95,7 +95,7 @@ void Material::addImage(const char* image, unsigned int type)
     else if (type == GLGE_SPECULAR_MAP)
     {
         //store an empty string in the unifrom
-        this->uniformNames.push_back("");
+        this->uniformNames.push_back(NULL);
 
         //store the location of the specular map
         this->specularMapLoc = (unsigned int)this->uniformNames.size()-1;
@@ -104,7 +104,7 @@ void Material::addImage(const char* image, unsigned int type)
     else if (type == GLGE_OFFSET_MAP)
     {
         //store an empty string in the unifrom
-        this->uniformNames.push_back("");
+        this->uniformNames.push_back(NULL);
 
         //store the location of the offset map
         this->offsetMapLoc = (unsigned int)this->uniformNames.size()-1;
@@ -151,13 +151,16 @@ void Material::applyShader(GLuint shader)
     for (int i = 0; i < (int)this->textures.size(); i++)
     {
         //check if the image has an uniform
-        if (this->uniformNames[i] == "")
+        printf("B: %d\n", this->uniformNames[i] == NULL);
+        if (this->uniformNames[i] == NULL)
         {
             continue;
         }
-
-        //else, load the image uniform
-        this->imageLocs[i] = glgeGetUniformVar(shader, this->uniformNames[i]);
+        else
+        {
+            //else, load the image uniform
+            this->imageLocs[i] = glgeGetUniformVar(shader, this->uniformNames[i]);
+        }
     }
 }
 
@@ -176,10 +179,12 @@ void Material::applyMaterial()
     int boundTextures = 0;
 
     //check if the normal map exists
-    if (this->normalMapLoc != 0)
+    if (this->normalMapLoc != -1)
     {
         //bind the normal map to an texture sampler
         glActiveTexture(GL_TEXTURE0 + boundTextures);
+        //add the bound texture
+        this->boundTextures.push_back(GL_TEXTURE0 + boundTextures);
         //pass the normal map to the shader
         glUniform1i(this->textures[this->normalMapLoc], boundTextures);
         //change the amout of bound textures by 1
@@ -187,10 +192,12 @@ void Material::applyMaterial()
     }
 
     //check if the specular map exists
-    if (this->specularMapLoc != 0)
+    if (this->specularMapLoc != -1)
     {
         //bind the specular map to an texture sampler
         glActiveTexture(GL_TEXTURE0 + boundTextures);
+        //add the bound texture
+        this->boundTextures.push_back(GL_TEXTURE0 + boundTextures);
         //pass the specular map to the shader
         glUniform1i(this->textures[this->specularMapLoc], boundTextures);
         //change the amout of bound textures by 1
@@ -198,14 +205,23 @@ void Material::applyMaterial()
     }
 
     //check if the offset map exists
-    if (this->offsetMapLoc != 0)
+    if (this->offsetMapLoc != -1)
     {
         //bind the offset map to an texture sampler
         glActiveTexture(GL_TEXTURE0 + boundTextures);
+        //add the bound texture
+        this->boundTextures.push_back(GL_TEXTURE0 + boundTextures);
         //pass the offset map to the shader
         glUniform1i(this->textures[this->offsetMapLoc], boundTextures);
         //change the amout of bound textures by 1
         boundTextures++;
+    }
+
+    //check if there are textures to load
+    if ((int)this->textures.size() == 0)
+    {
+        //if there are no textures to load, stop
+        return;
     }
 
     //load the rest of the textures
@@ -220,9 +236,25 @@ void Material::applyMaterial()
 
         //else, activate the new texture
         glActiveTexture(GL_TEXTURE0 + boundTextures);
+        //add the bound texture
+        this->boundTextures.push_back(GL_TEXTURE0 + boundTextures);
         //pass the texture to the shader
         glUniform1i(this->textures[i], boundTextures);
         //increase the amount of bound textures
         boundTextures++;
     }
+}
+
+void Material::removeMaterial()
+{
+    //loop over all created textures
+    for (GLenum texture : this->boundTextures)
+    {
+        //unbind the texture
+        glBindTexture(0, texture-GL_TEXTURE0);
+        //deactivate the texture
+        //gl
+    }
+    //clear the vector of bound textures, they are all unbound
+    this->boundTextures.clear();
 }

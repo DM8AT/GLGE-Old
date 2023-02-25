@@ -408,6 +408,48 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // Enables Multisampling
+	glEnable(GL_MULTISAMPLE);
+
+    //create and bind the custom frame buffer
+    glGenFramebuffers(1, &glgeMultFBO);
+    //bind the new framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeMultFBO);
+
+    //generate the texture for the frame buffer
+    glGenTextures(1, &glgeFrameBufferMultisampleTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture, 0);
+
+    //generate the Render Buffer
+    glGenRenderbuffers(1, &glgeMultRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeMultRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, glgeSamples, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+    //attach an depth stencil
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeMultRBO);
+
+    //check if the framebuffer compiled correctly
+    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        //stop the program
+        exit(1);
+    }
+
+    //unbind the multi sample framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //unbind the multi sample render buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    //create a second framebuffer for post processing
+
     //create and bind the custom frame buffer
     glGenFramebuffers(1, &glgeFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
@@ -431,9 +473,11 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
     //attach an depth stencil
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeRBO);
+    //unbind the render buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     //check if the framebuffer compiled correctly
-    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -463,14 +507,6 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
     //load the data into the array buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
-    //activate the vertex attribute for the position
-    //glEnableVertexAttribArray(0);
-    //load the position into the shader
-    //glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
-    //activate the vertex attrivute for the texture coordinate
-    //glEnableVertexAttribArray(1);
-    //load the texture coordinate into the shader
-    //glVertexAttribPointer(1,2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2 * sizeof(float)));
     //unbind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

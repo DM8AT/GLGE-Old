@@ -587,6 +587,10 @@ private:
     GLuint moveMatLoc;
     //store the position of the model matrix, if it is found
     GLuint modelMatLoc;
+    //store the position of the camera position vector, if it is found
+    GLuint camPosLoc;
+    //store the position of the camera rotation vector, if it is found
+    GLuint camRotLoc;
     //the local matrix to make the object correct
     mat4 moveMat = mat4(1,0,0,0,
                         0,1,0,0,
@@ -612,6 +616,9 @@ private:
 
     //compile the shader and save it
     void shaderSetup(const char* vs, const char* fs);
+
+    //get all uniforms from the shader
+    void getUniforms();
 };
 
 /**

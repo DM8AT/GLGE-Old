@@ -45,7 +45,7 @@
 //define the default name for a offset map
 #define GLGE_OFFSET_MAP_NAME "offsetMap"
 //define the default name for the color
-#define GLGE_COLOR_NAME "color"
+#define GLGE_COLOR_NAME "col"
 
 //include the needed math librarys
 #include "GLGE/CML/CMLVec4.h"
@@ -119,10 +119,17 @@ public:
      */
     void setUniformName(const char* name, unsigned int item = 0);
 
+    void setCustomUniformVector3();
+
     /**
      * @brief apply the material for drawing
      */
     void applyMaterial();
+
+    /**
+     * @brief the material will no longer be used
+     */
+    void removeMaterial();
 
 private:
     //store the positon of the roughness in the shader
@@ -153,6 +160,8 @@ private:
     const char* offsetUniform;
     //store the names for the color uniform
     const char* colorUniform;
+    //store the bound textures
+    std::vector<GLenum> boundTextures;
 };
 
 //end the file

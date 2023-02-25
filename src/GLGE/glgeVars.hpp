@@ -81,14 +81,26 @@ extern bool glgeUseCulling;
 //store the custom frame buffer
 extern unsigned int glgeFBO;
 
+//store the custom multi sample frame buffer
+extern unsigned int glgeMultFBO;
+
+//store the custom multi sample render buffer
+extern unsigned int glgeMultRBO;
+
 //store the frame buffer texture
 extern unsigned int glgeFrameBufferTexture;
+
+//store the multi sample frame buffer texture
+extern unsigned int glgeFrameBufferMultisampleTexture;
 
 //store the RBO
 extern unsigned int glgeRBO;
 
 //store the window size
 extern vec2 glgeWindowSize;
+
+//store the amount of samples for GLGE
+extern unsigned int glgeSamples;
 
 //store the rectangle that covers the whole screen
 extern unsigned int glgeScreenVBO, glgeScreenVAO;
