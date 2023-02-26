@@ -69,6 +69,8 @@ void glgeDefaultDisplay()
     glEnableVertexAttribArray(1);
     //load the texture coordinate into the shader
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    //activate the uniform texture array
+    glActiveTexture(GL_TEXTURE0);
     //bind the framebuffer texture
     glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
     //draw the screen

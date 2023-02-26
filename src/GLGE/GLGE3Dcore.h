@@ -24,6 +24,9 @@
 //matrices
 #include "GLGE/CML/CMLMat4.h"
 
+//Needed GLGE cores
+#include "GLGEMaterialCore.h"
+
 //include the library core
 #include "GLGE.h"
 
@@ -376,27 +379,6 @@ public:
     GLuint getShader();
 
     /**
-     * @brief Set the Texture for the object
-     * 
-     * @param file the file to read the data from
-     */
-    void setTexture(const char* file);
-
-    /**
-     * @brief Set the Texture for the object
-     * 
-     * @param texture the allready compiled texture
-     */
-    void setTexture(GLuint texture);
-
-    /**
-     * @brief Get the Texture from the object
-     * 
-     * @return GLuint the compiled texture
-     */
-    GLuint getTexture();
-
-    /**
      * @brief apply a specific transform to the camera
      * 
      * @param transform the new transform for the camera
@@ -574,6 +556,20 @@ public:
      */
     Mesh getMesh();
 
+    /**
+     * @brief Set the Material for the object
+     * 
+     * @param material the new material for the object
+     */
+    void setMaterial(Material material);
+
+    /**
+     * @brief Get the Material from the object
+     * 
+     * @return Material the material of the object
+     */
+    Material getMaterial();
+
 private:
     //store the transform for the object
     Transform transf;
@@ -601,12 +597,12 @@ private:
                          0,1,0,0,
                          0,0,1,0,
                          0,0,0,1);
-    //store a texture
-    GLuint texture;
     //store if the object is static
     bool isStatic;
     //store the length of the index and vertex vuffer
     unsigned int VBOLen, IBOLen;
+    //store the material of the object
+    Material mat;
 
     //compile the draw list
     void compileBuffers();

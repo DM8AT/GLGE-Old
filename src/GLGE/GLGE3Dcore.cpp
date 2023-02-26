@@ -654,10 +654,13 @@ void Object::draw()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
     //bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture);
+    //glBindTexture(GL_TEXTURE_2D, texture);
 
     //bind the shader
     glUseProgram(this->shader);
+
+    //Bind the material
+    this->mat.applyMaterial();
 
     //activate sub elements
     //say where the position vector is
@@ -692,6 +695,9 @@ void Object::draw()
     }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+
+    //unbind the material
+    this->mat.removeMaterial();
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -771,24 +777,6 @@ void Object::setShader(std::string vs, const char* file)
 GLuint Object::getShader()
 {
     return this->shader;
-}
-
-void Object::setTexture(const char* texture)
-{
-    //load and save the texture
-    this->texture = glgeTextureFromFile(texture);
-}
-
-void Object::setTexture(GLuint texture)
-{
-    //store the ipnuted texture
-    this->texture = texture;
-}
-
-GLuint Object::getTexture()
-{
-    //return the texture
-    return this->texture;
 }
 
 //apply a new transform to the object
@@ -948,6 +936,26 @@ void Object::recalculateNormals()
     this->mesh.recalculateNormals();
 }
 
+Mesh Object::getMesh()
+{
+    //return the stored mesh
+    return this->mesh;
+}
+
+void Object::setMaterial(Material mat)
+{
+    //store the inputed material
+    this->mat = mat;
+    //update the material of the object
+    this->mat.applyShader(this->shader);
+}
+
+Material Object::getMaterial()
+{
+    //return the material stored in the object
+    return this->mat;
+}
+
 //PRIV
 void Object::compileBuffers()
 {
@@ -1009,6 +1017,9 @@ void Object::getUniforms()
     this->camRotLoc = glgeGetUniformVar(this->shader, "cameraLook");
     //reset GLGE error output
     glgeErrorOutput = outErrs;
+
+    //recalculate the uniforms of the material
+    this->mat.applyShader(this->shader);
 }
 
 //////////

@@ -13,10 +13,11 @@
 #include "2DTest.hpp"
 
 //include the core to the library
-#include "GLGE.h"
+#include "GLGE/GLGE.h"
 //include the 2D core to have acces to all of the 2D functions
-
-#include "GLGE2Dcore.h"
+#include "GLGE/GLGE2Dcore.h"
+//include the shader core for shader opperations
+#include "GLGE/GLGEShaderCore.h"
 
 //create the camera to move around in the 2D world 
 Camera2D cam;
@@ -196,6 +197,9 @@ void run2Dexample(int argc, char** argv)
     squareSetup();
     //setup the crosshair
     setupCrosshair();
+
+    //load and set a post processing shader directly from an file
+    glgeSetPostProcessingShader("src/testShader.fs");
 
     //execute the script
     glgeRunMainLoop();

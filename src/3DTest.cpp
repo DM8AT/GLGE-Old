@@ -15,25 +15,24 @@
 
 //include the library core, needed for 3D and 2D
 //used for first initalisation, keyboard functions, mouse functions and simple display things like creating and updating a windows
-#include "GLGE.h"
+#include "GLGE/GLGE.h"
 //include the 3D core, needed for:
 //  - creating 3D things
 //  - creating a 3D camera
 //  - creating a 3D world
-#include "GLGE3Dcore.h"
+#include "GLGE/GLGE3Dcore.h"
 //include the shader core of the library
 //it is not nececeraly needed to handle shaders, but it is recomended. 
-#include "GLGEShaderCore.h"
+#include "GLGE/GLGEShaderCore.h"
 
-#include "GLGEMaterialCore.h"
+//include the light core for good lighting
+#include "GLGE/GLGELightingCore.h"
 
 //include math, used to make the camera movement relative to the player
 #include <math.h>
 
 //create the main camera, an instance of the Camera class. Default constructor is used in the moment, setup is later
 Camera camera;
-
-Material mat;
 
 //create an instance of the Object class to store an object named cube. Default constructor is used, setup is done later
 Object cube;
@@ -232,8 +231,10 @@ void floorSetup()
     //OUTDATED: an shader can be asigned to the object, but it is no longer necesery. 
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
-    //then the texture for the grass floor is loaded from an png file. 
-    grassFloor.setTexture("assets/grass.png");
+    //then create a material for the grass floor
+    Material grassFloorMat = Material("assets/grass.png", "Texture", 0.5);
+    //apply the material to the grass floor
+    grassFloor.setMaterial(grassFloorMat);
 }
 
 //in this function the cube is set up
@@ -300,13 +301,18 @@ void cubeSetup()
     //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
     //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
     cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.001,2),vec3(0,0,0),1));
+    
     //then, the same shader as used for the grass floor (Basic 3D shader) is asigned. It is inputed as shown to avoid dupication on the graphics card. 
     //this methode can create problems, if objects are created dynamicaly, because if the shader is deleted in one object, It is deleted for all objects. 
     //because of this issue, only the default constructor is existing for all classes contained in the library, so the buffers, shaders and textures are
     //left behind once it is deleted. 
     cube.setShader(grassFloor.getShader());
-    //set the texture to the cube texture, loaded from an png file
-    cube.setTexture("assets/cubeTexture.png");
+
+    //create a material for the cube
+    Material cubeMaterial = Material("assets/cubeTexture.png", "Texture", 0.1);
+
+    //apply the material to the cube
+    cube.setMaterial(cubeMaterial);
 }
 
 //setup the thing
@@ -314,10 +320,17 @@ void thingSetup()
 {
     //load a mesh from an file        specify the file format to be .obj
     Mesh m = Mesh("assets/Vertices.obj", GLGE_OBJ);
+
     //load the mesh to an object and change the position of it
     thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
-    //set the texture for the thing
-    thing.setTexture("assets/cubeTexture.png");
+
+    //create a material for the thing
+    Material thingMat = Material("assets/cubeTexture.png", "Texture", 0.2);
+
+    //apply the material to the thing
+    thing.setMaterial(thingMat);
+
+    //set the shader for the thing
     thing.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
 }
 
@@ -347,7 +360,7 @@ void run3Dexample(int argc, char** argv)
     //Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
 
     //asign the shader for the gausian blure
-    glgeSetPostProcessingShader(dyn.getShader());
+    //glgeSetPostProcessingShader(dyn.getShader());
 
     //create an shader object to store the shader
     //Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);

@@ -1,6 +1,6 @@
-#include "GLGE/glgeErrors.hpp"
-#include "GLGE/stb_image.hpp"
-#include "GLGE/glgeFuncs.hpp"
+#include "GLGE/GLGE/glgeErrors.hpp"
+#include "GLGE/GLGE/stb_image.hpp"
+#include "GLGE/GLGE/glgeFuncs.hpp"
 #include <filesystem>
 #include <iostream>
 #include <vector>

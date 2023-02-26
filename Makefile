@@ -5,8 +5,11 @@ BIN		:= bin
 SRC		:= src
 INCLUDE	:= include
 LIB		:= lib
+GLGE    := src/GLGE
+GLGELIB := src/GLGE/GLGE
+CML     := src/GLGE/GLGE/CML
 
-LIBRARIES	:= -lGL -lglut -lGLEW src/GLGE/CML/*.cpp src/GLGE/*.cpp
+LIBRARIES	:= -lGL -lglut -lGLEW
 EXECUTABLE	:= main
 
 
@@ -15,7 +18,7 @@ all: $(BIN)/$(EXECUTABLE)
 run: clean all
 	./$(BIN)/$(EXECUTABLE)
 
-$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
+$(BIN)/$(EXECUTABLE): $(CML)/*.cpp $(GLGELIB)/*.cpp $(GLGE)/*.cpp $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
 
 clean:

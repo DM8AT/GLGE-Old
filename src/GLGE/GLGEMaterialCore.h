@@ -70,9 +70,10 @@ public:
      * @brief Construct a new Material
      * 
      * @param image the image for the base texture
+     * @param uniform the name of the uniform variable in the corresponding shader
      * @param roughness the roughness for the texture
      */
-    Material(const char* image, float roughness);
+    Material(const char* image, const char* uniform, float roughness);
 
     /**
      * @brief Construct a new Material
@@ -119,8 +120,6 @@ public:
      */
     void setUniformName(const char* name, unsigned int item = 0);
 
-    void setCustomUniformVector3();
-
     /**
      * @brief apply the material for drawing
      */
@@ -153,13 +152,13 @@ private:
     //store the roughness
     float roughness;
     //store the names for the normal map uniform
-    const char* normalUniform;
+    const char* normalUniform = GLGE_NORMAL_MAP_NAME;
     //store the names for the specular map uniform
-    const char* specularUniform;
+    const char* specularUniform = GLGE_SPECULAR_MAP_NAME;
     //store the names for the offset map uniform
-    const char* offsetUniform;
+    const char* offsetUniform = GLGE_OFFSET_MAP_NAME;
     //store the names for the color uniform
-    const char* colorUniform;
+    const char* colorUniform = GLGE_COLOR_NAME;
     //store the bound textures
     std::vector<GLenum> boundTextures;
 };

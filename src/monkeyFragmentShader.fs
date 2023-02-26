@@ -2,7 +2,7 @@
 
 #define PI 3.14159265
 
-precision highp float;//highp float;
+precision highp float;
 
 out vec4 FragColor;
 
@@ -12,8 +12,8 @@ in vec3 normal;
 in vec3 currentPosition;
 
 //mesh data
-float emmission = 0.f;
-float roughness = 0.05;
+float emmission = 0.2f;
+uniform float roughness;
 
 uniform sampler2D Texture;
 
@@ -21,14 +21,14 @@ uniform vec3 cameraPos;
 
 //light data
 vec3 lightColor = vec3(1,1,1);
-float lightStrength = 10.f;
+float lightStrength = 100.f;
 vec3 lightPos = vec3(2,5,0);
 
 float gamma = 2.2f;
 
 vec3 schlickFresnel(float vDotH)
 {
-    vec3 F0 = vec3(0.04);
+    vec3 F0 = vec3(0.04f);
 
     vec3 ret = F0 + (1.f - F0) * pow(clamp(1.f - vDotH, 0.f, 1.f), 5.f);
 
@@ -66,10 +66,10 @@ vec4 calculatePBR(vec4 col)
     vec3 v = normalize(cameraPos - currentPosition);
     vec3 h = normalize(v+l);
 
-    float nDotH = max(dot(n, h), 0.005f);
-    float vDotH = max(dot(v, h), 0.005f);
-    float nDotL = max(dot(n, l), 0.005f);
-    float nDotV = max(dot(n, v), 0.005f);
+    float nDotH = max(dot(n, h), 0.f);
+    float vDotH = max(dot(v, h), 0.f);
+    float nDotL = max(dot(n, l), 0.f);
+    float nDotV = max(dot(n, v), 0.f);
 
     vec3 F = schlickFresnel(vDotH);
 
