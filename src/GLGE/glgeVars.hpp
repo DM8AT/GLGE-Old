@@ -15,6 +15,10 @@
 
 //include needed dependencys
 #include "GLGEKlasses.hpp"
+//include the lighting core
+#include "GLGELightingCore.h"
+//include the vector library
+#include <vector>
 
 ///////////
 //CLASSES//
@@ -107,5 +111,8 @@ extern unsigned int glgeScreenVBO, glgeScreenVAO;
 
 //store the shader for the screen(Post processing shader)
 extern int glgePostProcessingShader;
+
+//create a vector to store all lights
+extern std::vector<Light*> glgeLights;
 
 #endif

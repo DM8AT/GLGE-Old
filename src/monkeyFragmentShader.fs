@@ -20,11 +20,14 @@ uniform sampler2D Texture;
 uniform vec3 cameraPos;
 
 //light data
-vec3 lightColor = vec3(1,1,1);
-float lightStrength = 100.f;
-vec3 lightPos = vec3(2,5,0);
+uniform vec3 lightColor[255]; // = vec3(1,1,1);
+uniform float lightInt[255];// = float[](100.f, 100.f); // = 100.f;
+uniform vec3 lightPos[255];// = vec3(2,5,0);
+uniform float activeLights;
 
 float gamma = 2.2f;
+
+int iteration = 0;
 
 vec3 schlickFresnel(float vDotH)
 {
@@ -53,11 +56,11 @@ float ggxDistribution(float nDotH)
 
 vec4 calculatePBR(vec4 col)
 {
-    vec3 lightIntensity = lightColor * lightStrength;
+    vec3 lightIntensity = lightColor[iteration] * lightInt[iteration];
 
     vec3 l = vec3(0.f);
 
-    l = lightPos - currentPosition;
+    l = lightPos[iteration] - currentPosition;
     float lightToPixelDist = length(l);
     l = normalize(l);
     lightIntensity /= (lightToPixelDist * lightToPixelDist);
@@ -95,9 +98,15 @@ vec4 calculatePBR(vec4 col)
 
 vec4 calculateLighting(vec4 col)
 {
-    vec4 totalLight = calculatePBR(col);
+    vec4 totalLight;
+    for (int i = 0; i < min(int(activeLights), 255); i++)
+    {
+        iteration = i;
+        totalLight += calculatePBR(col);
+        totalLight = totalLight / (totalLight + vec4(1.f));
+    }
 
-    totalLight = totalLight / (totalLight + vec4(1.f));
+    totalLight /= activeLights;
 
     vec4 finalLight = vec4(pow(vec3(totalLight), vec3(1.0/2.2)), col.w);
 
@@ -107,7 +116,14 @@ vec4 calculateLighting(vec4 col)
 void main()
 {
     vec4 col = texture(Texture, texCoord)+color;
-    FragColor = calculateLighting(col);
+    if (activeLights == 0.f)
+    {
+        FragColor = col;
+    }
+    else
+    {
+        FragColor = calculateLighting(col);
+    }
 
     FragColor = min(max(FragColor, vec4(0,0,0,0)), vec4(1,1,1,1));
 }

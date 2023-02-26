@@ -662,6 +662,9 @@ void Object::draw()
     //Bind the material
     this->mat.applyMaterial();
 
+    //bind all light uniforms
+    this->loadLights();
+
     //activate sub elements
     //say where the position vector is
     glEnableVertexAttribArray(0);
@@ -722,6 +725,13 @@ void Object::update()
 {
     //recalculate the move matrix
     this->recalculateMoveMatrix();
+
+    //check if a light source was changed
+    if (this->lightPosLocs.size() != glgeLights.size())
+    {
+        //update the light uniforms
+        this->getLightUniforms();
+    }
 }
 
 void Object::setShader(const char* vs, const char* fs)
@@ -1020,6 +1030,94 @@ void Object::getUniforms()
 
     //recalculate the uniforms of the material
     this->mat.applyShader(this->shader);
+
+    //recalculate all light unifomrs
+    this->getLightUniforms();
+}
+
+void Object::getLightUniforms()
+{
+    //set the prefix for the light position
+    std::string prefixLightPos = std::string("lightPos");
+    //set the prefix for the light color
+    std::string prefixLightCol = std::string("lightColor");
+    //set the prefix for the light intensity
+    std::string prefixLightInt = std::string("lightInt");
+
+    //store the state of the GLGE error output
+    bool outErrs = glgeErrorOutput;
+    //deactivate GLGE errors
+    glgeErrorOutput = false;
+
+    //clear the light position vector
+    this->lightPosLocs.clear();
+    //clear the light color vector
+    this->lightColLocs.clear();
+    //clear the light intensity vector
+    this->lightIntLocs.clear();
+
+    for (int i = 0; i < (int)glgeLights.size(); i++)
+    {
+        //calculate the name of an uniform for the light positions
+        std::string uniform = prefixLightPos + std::string("[") + std::to_string(i) + std::string("]");
+        //get the uniform for the light position
+        this->lightPosLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+
+        //calculate the name of an uniform for the light color
+        uniform = prefixLightCol + std::string("[") + std::to_string(i) + std::string("]");
+        //get the uniform for the light color
+        this->lightColLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+
+        //calculate the name of an uniform for the light intensity
+        uniform = prefixLightInt + std::string("[") + std::to_string(i) + std::string("]");
+        //get the uniform for the light intensity
+        this->lightIntLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+    }
+
+    //get the uniform for the amount of used lights
+    this->usedLigtsPos = glgeGetUniformVar(this->shader, "activeLights");
+
+    //reset GLGE error output
+    glgeErrorOutput = outErrs;
+}
+
+void Object::loadLights()
+{
+    //load all light positions to the shader
+    for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
+    {
+        //pass the light position if it is not 0
+        if (this->lightPosLocs[i] != 0)
+        {
+            glUniform3f(this->lightPosLocs[i], glgeLights[i]->getPos().x, glgeLights[i]->getPos().y, glgeLights[i]->getPos().z);
+        }
+    }
+
+    //load all light colors to the shader
+    for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
+    {
+        //pass the light color if it is not 0
+        if (this->lightColLocs[i] != 0)
+        {
+            glUniform3f(this->lightColLocs[i], glgeLights[i]->getColor().x, glgeLights[i]->getColor().y, glgeLights[i]->getColor().z);
+        }
+    }
+
+    //load all light intensitys to the shader
+    for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
+    {
+        //pass the light intensity if it is not 0
+        if (this->lightIntLocs[i] != 0)
+        {
+            glUniform1f(this->lightIntLocs[i], glgeLights[i]->getInsensity());
+        }
+    }
+
+    //pass the amount of used lights to the shader if it is not 0
+    if (this->usedLigtsPos != 0)
+    {
+        glUniform1f(this->usedLigtsPos, (float)glgeLights.size());
+    }
 }
 
 //////////

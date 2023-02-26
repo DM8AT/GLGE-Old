@@ -110,3 +110,6 @@ unsigned int glgeScreenVAO = 0;
 
 //set the default post processing shader to 0
 int glgePostProcessingShader = 0;
+
+//create and setup the lights vector
+std::vector<Light*> glgeLights;

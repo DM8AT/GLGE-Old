@@ -567,8 +567,8 @@ int count_char(std::string &str, char ch)
 {
     //begin the counting at 0
     int c = 0;
-    //get the length of the str and subtract one, so the for loop keeps inside the range of the string
-    int length = str.length() - 1;
+    //get the length of the str
+    int length = str.length();
     //loop over every item in the string
     for (int i = 0; i < length; i++)
     {

@@ -258,6 +258,8 @@
  */
 #define GLGE_WARNING_POINTER_IS_NULLPOINTER "[GLGE WARNING] the inputed pointer is the nullpointer\n"
 
+#define GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT "[GLGE WARNING] the amount of bound light sources is bigger than the maximum supported by the default shader. Supported: 255, bound: "
+
 ////////////////////////////////
 //GLGE Warning Position String//
 ////////////////////////////////

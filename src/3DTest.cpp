@@ -42,6 +42,10 @@ Object grassFloor;
 //that can be loaded from an .obj file
 Object thing;
 
+Light light;
+
+Light l2;
+
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
 //set the rotation speed of the camera
@@ -182,7 +186,10 @@ void tick()
     //update the cube
     cube.update();
     //update the thing
-    thing.update();    
+    thing.update();
+
+    //set the position of the light source to be exactly at the player
+    light.setPos(camera.getPos()); 
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -394,6 +401,12 @@ void run3Dexample(int argc, char** argv)
     cubeSetup();
     //setup the thing by loading it form an .obj file
     thingSetup();
+
+    l2 = Light(2,5,0, 1,0,0.5, 100);
+    glgeAddGlobalLighSource(&l2);
+
+    light = Light(2,5,0, 1,1,1, 50);
+    glgeAddGlobalLighSource(&light);
 
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();
