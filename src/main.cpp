@@ -67,14 +67,16 @@ int main(int argc, char** argv)
     atlas x;
 
     // add file
-    x.add("assets/Crosshair.png");
-
+    //x.add("assets/cubeTexture.png");
+    //x.add("assets/cubeTexture.png");
+    x.add("assets/cubeTexture.png");
+    //x.add("assets/Crosshair.png");
 
     // dump contents of path vector and print it
     std::vector<const char*> tmp = x.dump();
     std::cout << "Size of vector: " << tmp.size() << "\n";
 
-    for (long unsigned int i = 0; i <= tmp.size(); i++) {
+    for (long unsigned int i = 0; i < tmp.size(); i++) {
         std::cout << tmp[i] << "\n";
     }
 
