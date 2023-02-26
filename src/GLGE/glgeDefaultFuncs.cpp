@@ -30,8 +30,9 @@
 //the default display callback for GLGE
 void glgeDefaultDisplay()
 {
+    ///////ERROR IS FRAME BUFFER/////
     //bind the custom framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeMultFBO);
     //clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -43,6 +44,10 @@ void glgeDefaultDisplay()
     {
         ((void(*)())glgeDisplayCallback)();
     }
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, glgeMultFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgeFBO);
+    glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     //switch to the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -120,10 +125,16 @@ void glgeDefaultTimer(int)
     //update the stored window size
     glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 
+    //update the window size of the frame buffer Multisample
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeMultRBO);
+    //setup the storage for the render buffer Multisample
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, glgeSamples, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
     //update the window size of the frame buffer
     glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
     //unbind the renderbuffer
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     //update the render texture parameters
@@ -133,6 +144,12 @@ void glgeDefaultTimer(int)
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    //update the render texture parameters for the MultiSample texture
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGBA, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
+    //ungind the multisample texture
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     //set the mouse wheel to 0
     glgeMouse.mouseWeel = 0;

@@ -680,6 +680,16 @@ void Object::draw()
     {
         glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
     }
+    //pass the camera position to the shader, if it has one
+    if (this->camPosLoc != 0)
+    {
+        glUniform3f(this->camPosLoc, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
+    }
+    //pass the camera position to the shader, if it has one
+    if (this->camRotLoc != 0)
+    {
+        glUniform3f(this->camRotLoc, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeMainCamera->getRotation().z);
+    }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
@@ -732,10 +742,8 @@ void Object::setShader(GLuint shader)
     //store the inputed shader
     this->shader = shader;
     
-    //get the new location for the move matrix
-    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
-    //save the location of the model matrix
-    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+    //get all uniforms
+    this->getUniforms();
 }
 
 void Object::setShader(std::string vs, std::string fs)
@@ -743,10 +751,8 @@ void Object::setShader(std::string vs, std::string fs)
     //compile the shader source code and store the shader
     this->shader = glgeCompileShader(vs, fs);
     
-    //get the new location for the move matrix
-    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
-    //save the location of the model matrix
-    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+    //get all uniforms
+    this->getUniforms();
 }
 
 void Object::setShader(std::string vs, const char* file)
@@ -758,10 +764,8 @@ void Object::setShader(std::string vs, const char* file)
     //compile the shader source code and store the shader
     this->shader = glgeCompileShader(vs, fs);
     
-    //get the new location for the move matrix
-    this->moveMatLoc = glgeGetUniformVar(shader, glgeMoveMatrix);
-    //save the location of the model matrix
-    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+    //get all uniforms
+    this->getUniforms();
 }
 
 GLuint Object::getShader()
@@ -977,10 +981,8 @@ void Object::shaderSetup(const char* vs, const char* fs)
     //compile and save the shader
     this->shader = glgeCompileShader(vs, fs);
 
-    //save the location of the move matrix
-    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
-    //save the location of the model matrix
-    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+    //get all uniforms
+    this->getUniforms();
 }
 
 void Object::recalculateMoveMatrix()
@@ -988,7 +990,25 @@ void Object::recalculateMoveMatrix()
     //save the model matrix
     this->modelMat = this->transf.getMatrix();
     //set the move matrix to the product of 3 matrices
-    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix(); 
+    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix();
+}
+
+void Object::getUniforms()
+{
+    //store the state of the GLGE error output
+    bool outErrs = glgeErrorOutput;
+    //deactivate GLGE errors
+    glgeErrorOutput = false;
+    //save the location of the move matrix
+    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
+    //save the location of the model matrix
+    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
+    //save the location of the camera position argument
+    this->camPosLoc = glgeGetUniformVar(this->shader, "cameraPos");
+    //save the location of the camera rotation argument
+    this->camRotLoc = glgeGetUniformVar(this->shader, "cameraLook");
+    //reset GLGE error output
+    glgeErrorOutput = outErrs;
 }
 
 //////////

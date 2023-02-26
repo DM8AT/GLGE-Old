@@ -84,8 +84,20 @@ unsigned int glgeFBO = 0;
 //store the texture for the frame buffer
 unsigned int glgeFrameBufferTexture = 0;
 
+//store the texture for the multi sample framebuffer
+unsigned int glgeFrameBufferMultisampleTexture = 0;
+
+//store the custom multi sample frame buffer
+unsigned int glgeMultFBO = 0;
+
+//store the custom multi sample render buffer
+unsigned int glgeMultRBO = 0;
+
 //store the RBO
 unsigned int glgeRBO = 0;
+
+//store the amount of samples for GLGE
+unsigned int glgeSamples = 1;
 
 //store the window size
 vec2 glgeWindowSize = vec2(0,0);

@@ -33,6 +33,8 @@
 //create the main camera, an instance of the Camera class. Default constructor is used in the moment, setup is later
 Camera camera;
 
+Material mat;
+
 //create an instance of the Object class to store an object named cube. Default constructor is used, setup is done later
 Object cube;
 //crate an second instance of the Object class, also only default constructor
@@ -181,7 +183,7 @@ void tick()
     //update the cube
     cube.update();
     //update the thing
-    thing.update();
+    thing.update();    
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -275,7 +277,7 @@ void cubeSetup()
                          Vertex(-1, 1,-1, 0,1, -1, 0, 0),
                          Vertex( 1, 1,-1, 1,1,  1, 0, 0),
                         };
-
+    
     //then, the indices for the cube are created. I used values in the range of 0 to 7 to say the vertex ID and then added 8 or 16, if the triangle should
     //show the top or bottom(8) or the left or right(16)
     uint indices[] = {
@@ -333,27 +335,27 @@ void run3Dexample(int argc, char** argv)
     glgeInit3DCore();
 
     //create an kernal to generate an gausian blure
-    float kernal[] = {
+    /*float kernal[] = {
         1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f,
         4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
         6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
         4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
         1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f
-    };
+    };*/
 
     //create an shader from an cernal
-    Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
+    //Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
 
     //asign the shader for the gausian blure
     glgeSetPostProcessingShader(dyn.getShader());
 
     //create an shader object to store the shader
-    Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);
+    //Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);
     //set the post processing shader to invert the colors
     //glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
-    //glgeDisableBackfaceCulling();
+    glgeDisableBackfaceCulling();
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
