@@ -1,7 +1,7 @@
 #include "textureAtlas.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "GLGE/stb_image_write.hpp"
+#include "GLGE/GLGE/stb_image_write.hpp"
 
 /////////////////////////
 // Default constructor //
