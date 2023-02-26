@@ -1,6 +1,8 @@
-#include "GLGE/glgeErrors.hpp"
-#include "GLGE/stb_image.hpp"
-#include "GLGE/glgeFuncs.hpp"
+#include "GLGE/GLGE/glgeErrors.hpp"
+#include "GLGE/GLGE/stb_image.hpp"
+#include "GLGE/GLGE/glgeFuncs.hpp"
+#include "GLGE/GLGE/CML/CMLVec3.h"
+#include "GLGE/GLGE/CML/CMLVec4.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
