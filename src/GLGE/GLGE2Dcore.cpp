@@ -12,9 +12,9 @@
 //include the main file
 #include "GLGE2Dcore.h"
 //include the GLGE dependencys
-#include "GLGE/GLGEDefines.hpp"
-#include "GLGE/glgePrivDefines.hpp"
-#include "GLGE/glgeVars.hpp"
+#include "GLGEDefines.hpp"
+#include "glgePrivDefines.hpp"
+#include "glgeVars.hpp"
 
 //the needed default C++ libs
 #include <math.h>

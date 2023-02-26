@@ -16,7 +16,7 @@
 #include "GLGE.h"
 
 //include the shared variables
-#include "GLGE/glgeVars.hpp"
+#include "glgeVars.hpp"
 
 Material::Material()
 {

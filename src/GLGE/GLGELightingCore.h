@@ -13,7 +13,7 @@
 #define _GLGE_LIGHTING_CORE_H_
 
 //include the needed math librarys
-#include "GLGE/CML/CMLVec3.h"
+#include "CML/CMLVec3.h"
 
 //declare the base lighting shaders
 

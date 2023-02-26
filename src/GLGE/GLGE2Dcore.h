@@ -18,9 +18,9 @@
 
 //CML
 //a 2D vector
-#include "GLGE/CML/CMLVec2.h"
+#include "CML/CMLVec2.h"
 //a 3x3 matrix
-#include "GLGE/CML/CMLMat3.h"
+#include "CML/CMLMat3.h"
 
 //Basic C++
 #include <vector>

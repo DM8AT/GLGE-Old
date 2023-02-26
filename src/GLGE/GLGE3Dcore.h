@@ -19,10 +19,10 @@
 
 //include the needed components from CML
 //vectors
-#include "GLGE/CML/CMLVec3.h"
-#include "GLGE/CML/CMLVec2.h"
+#include "CML/CMLVec3.h"
+#include "CML/CMLVec2.h"
 //matrices
-#include "GLGE/CML/CMLMat4.h"
+#include "CML/CMLMat4.h"
 
 //Needed GLGE cores
 #include "GLGEMaterialCore.h"

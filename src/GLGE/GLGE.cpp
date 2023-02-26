@@ -11,17 +11,17 @@
 
 //include the GLGE dependencys
 #include "GLGE.h"
-#include "GLGE/glgeErrors.hpp"
-#include "GLGE/glgeVars.hpp"
-#include "GLGE/glgeFuncs.hpp"
-#include "GLGE/glgePrivDefines.hpp"
+#include "glgeErrors.hpp"
+#include "glgeVars.hpp"
+#include "glgeFuncs.hpp"
+#include "glgePrivDefines.hpp"
 
 //include the OpenGL dependencys
 #include <GL/freeglut.h>
 
 //include stbi_image
 #define STB_IMAGE_IMPLEMENTATION
-#include "GLGE/stb_image.hpp"
+#include "stb_image.hpp"
 
 //include the standart librarys
 #include <math.h>

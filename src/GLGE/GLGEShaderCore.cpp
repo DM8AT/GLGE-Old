@@ -11,9 +11,9 @@
 #include "GLGEShaderCore.h"
 
 //include GLGE dependencys
-#include "GLGE/glgeFuncs.hpp"
-#include "GLGE/glgeVars.hpp"
-#include "GLGE/glgePrivDefines.hpp"
+#include "glgeFuncs.hpp"
+#include "glgeVars.hpp"
+#include "glgePrivDefines.hpp"
 
 //include the default librarys
 #include <iostream>

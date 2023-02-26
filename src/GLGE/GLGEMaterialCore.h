@@ -48,7 +48,7 @@
 #define GLGE_COLOR_NAME "col"
 
 //include the needed math librarys
-#include "GLGE/CML/CMLVec4.h"
+#include "CML/CMLVec4.h"
 
 //include OpenGL
 #include <GL/glew.h>

@@ -13,14 +13,14 @@
 #include "GLGE3Dcore.h"
 
 //include the GLGE dependencys
-#include "GLGE/glgeErrors.hpp"
-#include "GLGE/glgeVars.hpp"
-#include "GLGE/glgeFuncs.hpp"
-#include "GLGE/GLGEDefines.hpp"
-#include "GLGE/glgePrivDefines.hpp"
+#include "glgeErrors.hpp"
+#include "glgeVars.hpp"
+#include "glgeFuncs.hpp"
+#include "GLGEDefines.hpp"
+#include "glgePrivDefines.hpp"
 
 //include needed CML librarys
-#include "GLGE/CML/CMLQuaternion.h"
+#include "CML/CMLQuaternion.h"
 
 //include freeglut
 #include <GL/freeglut.h>

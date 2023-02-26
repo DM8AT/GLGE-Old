@@ -1,7 +1,6 @@
 #include "textureAtlas.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "GLGE/GLGE/stb_image_write.hpp"
 
 /////////////////////////
 // Default constructor //
@@ -122,7 +121,7 @@ void atlas::_constructs_atlas_same(int size) {
             vec4 arr = this->_get_pixel(img, vec2(w4, h4), vec3(w2, h2, c2));
             // write them to the atlas
             //this->_put_pixel(atlasImg, vec2(w4,h4), vec3(w, h, c), arr);
-            stbiw__write_pixel(, );
+            //stbiw__write_pixel(, );
 
             printf("R:%d G:%d B:%d A:%d\n",(int)arr.x, (int)arr.y, (int)arr.z, (int)arr.w);
         }
@@ -133,7 +132,7 @@ void atlas::_constructs_atlas_same(int size) {
 
     // save atlas
     //stbi_write_png(this->path, w, h, 4, atlasImg, 100);
-    stbi_write_png("assets/atlas.png", w, h, c, atlasImg, 100);
+    //stbi_write_png("assets/atlas.png", w, h, c, atlasImg, 100);
 
     free(atlasImg);
 }

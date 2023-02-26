@@ -35,11 +35,11 @@
 //include glew
 #include <GL/glew.h>
 //include CML
-#include "GLGE/CML/CML.h"
+#include "CML/CML.h"
 
 //include the public defines
-#include "GLGE/GLGEDefines.hpp"
-#include "GLGE/GLGEKlasses.hpp"
+#include "GLGEDefines.hpp"
+#include "GLGEKlasses.hpp"
 
 /////////////
 //FUNCTIONS//
