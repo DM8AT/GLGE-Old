@@ -28,8 +28,7 @@ To install, download the source code and move the "GLGE" folder to your preferre
 updating the include path in the necessary files ("GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp"). 
 Else, there would be compilation errors. 
 
-The files mentioned should be in the same directory as your main file. 
-If they are not, there will be errors when using the Makefile included in the main folder.
+In the make file, there is one path that need to be updated. It is called GLGE. It defines the path to the Core library. 
 
 ## Compiling
 Compiling can be done with the Makefile provided, or with your preferred method. 
