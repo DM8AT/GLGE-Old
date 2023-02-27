@@ -22,6 +22,7 @@
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main(int argc, char** argv)
 {
+    #if 0
     //first, write information on what to input to start the examples
     printf("Write 0 to run the 3D example\n");
     printf("Write 1 to run the 2D example\n");
@@ -58,17 +59,18 @@ int main(int argc, char** argv)
     {
         printf("The value %d dose not name an example\n", inp);
     }
-#if 0
+    #endif
+    #if 1
     // texture atlas demo code
 
-    // create new atlas object
+    // create new atlas object. This is for creating and using a texture atlas
     atlas x;
 
-    // add file
-    //x.add("assets/cubeTexture.png");
-    //x.add("assets/cubeTexture.png");
-    x.add("assets/cubeTexture.png");
-    //x.add("assets/Crosshair.png");
+    // add files
+    x.add("assets/grass.png");
+    x.add("assets/grass.png");
+    x.add("assets/grass.png");
+    x.add("assets/grass.png");
 
     // dump contents of path vector and print it
     std::vector<const char*> tmp = x.dump();
@@ -79,6 +81,6 @@ int main(int argc, char** argv)
     }
 
     x.build();
-#endif
+    #endif
     return 0;
 }
