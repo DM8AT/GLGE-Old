@@ -30,6 +30,7 @@
 
 //include math, used to make the camera movement relative to the player
 #include <math.h>
+#include <iostream>
 
 //create the main camera, an instance of the Camera class. Default constructor is used in the moment, setup is later
 Camera camera;
@@ -41,6 +42,8 @@ Object grassFloor;
 //create an instance of the Object class to store an object named thing. The default constructor is used. Named so, because it can be everything
 //that can be loaded from an .obj file
 Object thing;
+//this object is loaded from the file Enterpreis.obj. 
+Object enterprise;
 
 Light light;
 
@@ -64,7 +67,10 @@ void display()
     //draw the thing to the screen
     thing.draw();
 
-    //after this function is finished, the buffer gets fliped and everything is drawn to the screen
+    //draw the Enterpreis
+    enterprise.draw();
+
+    //after this function is finished, the frame buffer gets fliped and everything is drawn to the screen
 }
 
 //the tick function is called every tick. It should contain thinks like updates, but no draw calls. 
@@ -187,16 +193,21 @@ void tick()
     cube.update();
     //update the thing
     thing.update();
+    //update the enterprise
+    enterprise.update();
 
     //set the position of the light source to be exactly at the player
-    light.setPos(camera.getPos()); 
+    light.setPos(camera.getPos());
+
+    //write the current FPS
+    std::cout << "\rFPS: " << glgeGetMaxFPS();
 }
 
 //this function is used to setup the grassFloor instance of the Object class
 void floorSetup()
 {
     //the floor size is used to set the half width of the floor
-    float floorSize = 200;
+    float floorSize = 10000;
     //the texture size is used to make the texture smaler or bigger on the floor
     float texturesize = 2;
     //here, an pointer array of vertices is created to hold the vertex data for the object
@@ -341,6 +352,21 @@ void thingSetup()
     thing.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
 }
 
+void enterpriseSetup()
+{
+    //load the Enterprise object from an file, the file format is .obj
+    enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1));
+
+    //create a material for the object
+    Material mat = Material(vec4(0.25,0.25,0.25, 1.f), 0.2);
+
+    //bind the material to the enterprise
+    enterprise.setMaterial(mat);
+
+    //set the shader to the shader from the cube
+    enterprise.setShader(cube.getShader());
+}
+
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
 void run3Dexample(int argc, char** argv)
@@ -377,6 +403,9 @@ void run3Dexample(int argc, char** argv)
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     glgeDisableBackfaceCulling();
 
+    //set the FPS limit
+    glgeSetMaxFPS(INT32_MAX);
+
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
 
@@ -401,16 +430,18 @@ void run3Dexample(int argc, char** argv)
     cubeSetup();
     //setup the thing by loading it form an .obj file
     thingSetup();
+    //setup the enterprise object
+    enterpriseSetup();
 
     l2 = Light(2,5,0, 1,0,0.5, 100);
     glgeAddGlobalLighSource(&l2);
 
-    light = Light(2,5,0, 1,1,1, 50);
+    light = Light(2,5,0, 1,1,1, 250);
     glgeAddGlobalLighSource(&light);
 
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();
 
-    //this will not show up after closing the window
-    printf("This will not be printed\n");
+    //the program will continue running after closing, until the main file finishes
+    printf("\n");
 }

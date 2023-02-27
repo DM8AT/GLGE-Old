@@ -89,6 +89,12 @@ void glgeDefaultDisplay()
 //the default timer function for GLGE
 void glgeDefaultTimer(int)
 {
+    //stop, if no window exists
+    if (glutGetWindow() == 0)
+    {
+        return;
+    }
+
     //initalise the redrawing of the screen
     glutPostRedisplay();
 

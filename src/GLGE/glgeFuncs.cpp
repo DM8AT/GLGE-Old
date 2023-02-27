@@ -361,6 +361,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glutInitWindowSize(s.x,s.y);
     glutInitWindowPosition(p.x,p.y);
     glutCreateWindow(n);
+    //say that the program should continue running after the window was closed
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 
     //initalise glew
     if (glewInit() != GLEW_OK)

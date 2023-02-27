@@ -156,7 +156,7 @@ void glgeAddGlobalLighSource(Light* l)
     }
 
     //if the amount of bound light sources is bigger than the maximum supported light sources
-    if ((int)glgeLights.size() < GLGE_LIGHT_SOURCE_MAX)
+    if ((int)glgeLights.size() > GLGE_LIGHT_SOURCE_MAX)
     {
         //write a warning if warning printing is enabled
         if (glgeWarningOutput)

@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     {
         printf("The value %d dose not name an example\n", inp);
     }
-
+#if 0
     // texture atlas demo code
 
     // create new atlas object
@@ -79,6 +79,6 @@ int main(int argc, char** argv)
     }
 
     x.build();
-
+#endif
     return 0;
 }
