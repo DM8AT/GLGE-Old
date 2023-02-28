@@ -83,9 +83,9 @@ vec4 calculatePBR(vec4 col)
 
     float SpecBRDFdenom = 4.f * nDotV * nDotL + 0.0001;
 
-    float SpecBRDF = SpecBRDFnom / SpecBRDFdenom;
+    float SpecBRDF = float(SpecBRDFnom) / SpecBRDFdenom;
 
-    vec3 fLambert = vec3(0.f, 0.f, 0.f);
+    vec3 fLambert = vec3(0.f);
 
     fLambert = vec3(col);
 
