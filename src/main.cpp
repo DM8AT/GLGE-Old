@@ -22,7 +22,7 @@
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main(int argc, char** argv)
 {
-    #if 0
+    #if 1
     //first, write information on what to input to start the examples
     printf("Write 0 to run the 3D example\n");
     printf("Write 1 to run the 2D example\n");
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         printf("The value %d dose not name an example\n", inp);
     }
     #endif
-    #if 1
+    #if 0
     // texture atlas demo code
 
     // create new atlas object. This is for creating and using a texture atlas
