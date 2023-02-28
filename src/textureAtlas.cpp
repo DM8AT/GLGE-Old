@@ -105,7 +105,7 @@ void atlas::_constructs_atlas_same(int size) {
         imgsroot = w/size;
     }
 
-    //std::cout << imgs << " " << w << " " << size << "\n";
+    std::cout << imgs << " " << w << " " << size << "\n";
 
     // Allocate memory for the atlas
     size_t atlasSize = w * h * c;
@@ -150,11 +150,11 @@ void atlas::_constructs_atlas_same(int size) {
             // check if all images have been written
             if (imgCount >= (int) this->paths.size()) { break; }
         }
+        if (imgCount >= (int) this->paths.size()) { break; }
     }
 
-    // save atlas
+    // save atlas to the specefied location
     stbi_write_png(this->path, w, h, c, atlasImg, w*c);
-    //stbi_write_png("assets/atlas.png", w, h, c, atlasImg, 100);
 
     free(atlasImg);
 }

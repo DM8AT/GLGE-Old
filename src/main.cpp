@@ -67,10 +67,10 @@ int main(int argc, char** argv)
     atlas x;
 
     // add files
-    x.add("assets/grass.png");
-    x.add("assets/grass.png");
-    x.add("assets/grass.png");
-    x.add("assets/grass.png");
+    x.add("assets/ancient_debris_side.png");
+    x.add("assets/ancient_debris_top.png");
+    //x.add("assets/cubeTexture.png");
+    //x.add("assets/cubeTexture.png");
 
     // dump contents of path vector and print it
     std::vector<const char*> tmp = x.dump();
