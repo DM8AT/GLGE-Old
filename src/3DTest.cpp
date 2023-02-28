@@ -337,7 +337,7 @@ void cubeSetup()
 void thingSetup()
 {
     //load a mesh from an file        specify the file format to be .obj
-    Mesh m = Mesh("assets/unoptimizedChunk.obj", GLGE_OBJ);
+    Mesh m = Mesh("assets/Vertices.obj", GLGE_OBJ);
 
     //load the mesh to an object and change the position of it
     thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
