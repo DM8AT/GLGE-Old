@@ -97,7 +97,7 @@ unsigned int glgeMultRBO = 0;
 unsigned int glgeRBO = 0;
 
 //store the amount of samples for GLGE
-unsigned int glgeSamples = 1;
+unsigned int glgeSamples = 4;
 
 //store the window size
 vec2 glgeWindowSize = vec2(0,0);
@@ -113,3 +113,9 @@ int glgePostProcessingShader = 0;
 
 //create and setup the lights vector
 std::vector<Light*> glgeLights;
+
+//store if multisampling is enabled
+bool glgeUseMultisampling = true;
+
+//store the resolution of the shadow map
+unsigned int glgeShadowMapResolution = 1000;

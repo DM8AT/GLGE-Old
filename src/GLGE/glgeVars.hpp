@@ -115,4 +115,10 @@ extern int glgePostProcessingShader;
 //create a vector to store all lights
 extern std::vector<Light*> glgeLights;
 
+//store if multisampling is enabled
+extern bool glgeUseMultisampling;
+
+//store the resolution for the shadow map
+extern unsigned int glgeShadowMapResolution;
+
 #endif

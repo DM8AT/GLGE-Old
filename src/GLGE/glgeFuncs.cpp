@@ -410,45 +410,61 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Enables Multisampling
-	glEnable(GL_MULTISAMPLE);
-
-    //create and bind the custom frame buffer
-    glGenFramebuffers(1, &glgeMultFBO);
-    //bind the new framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, glgeMultFBO);
-
-    //generate the texture for the frame buffer
-    glGenTextures(1, &glgeFrameBufferMultisampleTexture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture, 0);
-
-    //generate the Render Buffer
-    glGenRenderbuffers(1, &glgeMultRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeMultRBO);
-    //setup the storage for the render buffer
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, glgeSamples, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-    //attach an depth stencil
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeMultRBO);
-
-    //check if the framebuffer compiled correctly
-    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    //if the amount of wanted samples is 0,
+    if (glgeSamples == 0)
     {
-        //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
-        //stop the program
-        exit(1);
+        //disable multisampleling
+        glgeUseMultisampling = false;
+    }
+    else
+    {
+        //else, enable multisampling
+        glgeUseMultisampling = true;
     }
 
-    //unbind the multi sample framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //unbind the multi sample render buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    //check if multisampling should be used
+    if (glgeUseMultisampling)
+    {
+        // Enables Multisampling
+        glEnable(GL_MULTISAMPLE);
+
+        //create and bind the custom frame buffer
+        glGenFramebuffers(1, &glgeMultFBO);
+        //bind the new framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, glgeMultFBO);
+
+        //generate the texture for the frame buffer
+        glGenTextures(1, &glgeFrameBufferMultisampleTexture);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
+        //set the texture parameters so it dosn't loop around the screen
+        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
+        //bind the texture to the frame buffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture, 0);
+
+        //generate the Render Buffer
+        glGenRenderbuffers(1, &glgeMultRBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, glgeMultRBO);
+        //setup the storage for the render buffer
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, glgeSamples, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+        //attach an depth stencil
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeMultRBO);
+
+        //check if the framebuffer compiled correctly
+        auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        //if the frame buffer compiled not correctly
+        if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+        {
+            //print an error
+            std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+            //stop the program
+            exit(1);
+        }
+
+        //unbind the multi sample framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //unbind the multi sample render buffer
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
 
     //create a second framebuffer for post processing
 
@@ -479,7 +495,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     //check if the framebuffer compiled correctly
-    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {

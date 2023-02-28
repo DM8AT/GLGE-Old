@@ -14,6 +14,8 @@
 
 //include the needed math librarys
 #include "CML/CMLVec3.h"
+//include GLEW
+#include <GL/glew.h>
 
 //declare the base lighting shaders
 
@@ -22,6 +24,28 @@
 
 //define the limit an light sources for the defalut shader
 #define GLGE_LIGHT_SOURCE_MAX 255
+
+class shadowCubeMapFBO
+{
+public:
+    shadowCubeMapFBO();
+
+    ~shadowCubeMapFBO();
+
+    bool init(unsigned int size = 0);
+
+    void bindForWriting(GLenum cubeFace);
+
+    void bindForReading(GLenum textureUnit);
+
+private:
+
+    unsigned int size = 0;
+    GLuint fbo;
+    GLuint shadowCubeMap;
+    GLuint depth;
+
+};
 
 class Light
 {
@@ -176,6 +200,9 @@ public:
      * @return float the light intensity
      */
     float getInsensity();
+
+    //store the shadow map of the light source
+    shadowCubeMapFBO shadowMap;
 
 private:
     //store the light position

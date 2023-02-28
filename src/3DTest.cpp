@@ -59,6 +59,9 @@ void display()
 {
     //before this function is called, the complete screen gets cleared. 
 
+    //draw the Enterpreis
+    enterprise.draw();
+
     //call the draw function from the grass floor object to draw it to the screen
     grassFloor.draw();
     //draw the cube to the screen
@@ -66,9 +69,6 @@ void display()
 
     //draw the thing to the screen
     thing.draw();
-
-    //draw the Enterpreis
-    enterprise.draw();
 
     //after this function is finished, the frame buffer gets fliped and everything is drawn to the screen
 }
@@ -200,7 +200,7 @@ void tick()
     light.setPos(camera.getPos());
 
     //write the current FPS
-    std::cout << "\rFPS: " << glgeGetMaxFPS();
+    std::cout << "\rFPS: " << glgeGetCurrentFPS();
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -318,7 +318,7 @@ void cubeSetup()
 
     //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
     //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
-    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.001,2),vec3(0,0,0),1));
+    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.01,2),vec3(0,0,0),1));
     
     //then, the same shader as used for the grass floor (Basic 3D shader) is asigned. It is inputed as shown to avoid dupication on the graphics card. 
     //this methode can create problems, if objects are created dynamicaly, because if the shader is deleted in one object, It is deleted for all objects. 
@@ -404,7 +404,7 @@ void run3Dexample(int argc, char** argv)
     glgeDisableBackfaceCulling();
 
     //set the FPS limit
-    glgeSetMaxFPS(INT32_MAX);
+    glgeSetMaxFPS(60);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

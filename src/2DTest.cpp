@@ -19,6 +19,9 @@
 //include the shader core for shader opperations
 #include "GLGE/GLGEShaderCore.h"
 
+//include the default librarys
+#include <iostream>
+
 //create the camera to move around in the 2D world 
 Camera2D cam;
 //create an 2D object for an triangle
@@ -106,6 +109,9 @@ void tickFunc()
     square.update();
     //update the crosshair
     crosshair.update();
+
+    //write the current FPS
+    std::cout << "\rFPS: " << glgeGetCurrentFPS();
 }
 
 //setup the triangle
@@ -176,6 +182,9 @@ void run2Dexample(int argc, char** argv)
 
     //initalise the 2D core
     glgeInit2DCore();
+
+    //set the maximal framerate
+    glgeSetMaxFPS(100000);
 
     //disable the backface culling, it is stupid for 2D
     glgeDisableBackfaceCulling();
