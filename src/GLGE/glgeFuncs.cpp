@@ -532,6 +532,12 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER);
 
     glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
+
+    //create the shader for shadow mapping
+    //glgeShadowShader = compileShader("shadowFramentShader.vs","shadowFramentShader.fs");
+
+    //get the uniform for the position of the light in the world
+    //glgeLightWorldPosUniform = getUniformVar(glgeShadowShader, "lightPos");
 }
 
 //convert an error code into an string

@@ -119,3 +119,9 @@ bool glgeUseMultisampling = true;
 
 //store the resolution of the shadow map
 unsigned int glgeShadowMapResolution = 1000;
+
+//store the shader for shadow mapping
+GLuint glgeShadowShader = 0;
+
+//store the light world position
+GLuint glgeLightWorldPosUniform = 0;

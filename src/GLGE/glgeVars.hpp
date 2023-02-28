@@ -121,4 +121,12 @@ extern bool glgeUseMultisampling;
 //store the resolution for the shadow map
 extern unsigned int glgeShadowMapResolution;
 
+//store the shader for shadow mapping
+extern GLuint glgeShadowShader;
+
+//store the uniforms for the shadow shader
+
+//store the light world position
+extern GLuint glgeLightWorldPosUniform;
+
 #endif

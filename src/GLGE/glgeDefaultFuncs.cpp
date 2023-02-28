@@ -99,15 +99,24 @@ void drawLightingPass()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void shadowPass()
+{
+
+}
+
 void drawShadowPass()
 {
     //set the clear color to the maximum of floats
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+    //bind the shadow mapping shader
+    glUseProgram(glgeShadowShader);
+
+    //bind the 
 
     //loop over all existing light sources
     for (int i = 0; i < 1/*(int)glgeLights.size()*/; i++)
     {
-
+        shadowPass();
     }
 }
 
