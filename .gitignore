@@ -5,3 +5,6 @@ bin/*
 # IDE folders
 .vscode
 .idea
+
+# Texture atlas
+assets/atlas.png
