@@ -1,3 +1,13 @@
+/**
+ * @file textureAtlas.h
+ * @author JuNi4
+ * @brief 
+ * @version 0.1
+ * @date 2023-02-27
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "GLGE/glgeErrors.hpp"
 #include "GLGE/stb_image.hpp"
 #include "GLGE/glgeFuncs.hpp"
@@ -14,12 +24,23 @@
 
 #define GLGE_ERROR_ALLOCATE_MEMORY "[GLGE] could not allocate memory for %s"
 
+#ifndef _ATLAS_H_
+#define _ATLAS_H_
+
 // texture atlas class
 class atlas {
     private:
 
         // The vector for holding all the image paths
         std::vector<const char*> paths;
+
+        /**
+         * @brief Clears any image
+         * 
+         * @param img The stb image to be
+         * @param info Information about the image - w,h,channels
+         */
+        void _clear_image(unsigned char* img, vec3 info);
 
         /**
          * @brief Puts a pixel on a stb image
@@ -83,3 +104,5 @@ class atlas {
         // Developement function
         std::vector<const char*> dump();
 };
+
+#endif
