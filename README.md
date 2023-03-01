@@ -14,7 +14,7 @@ All files in the folder are created by doxygen automaticaly, I haven't changed a
 If you encounter errors, check the error outputs defined in "GLGE/glgeErrors.hpp". 
 
 Often causes for memory acces errors:
-- Not binding an camera before creating or updating 3D objects
+- Not binding a camera before creating or updating 3D objects
 - inputing wrong values to an Object constructor with pointer arrays
 
 Often causes for GL_INVALIDE_OPERATION:
