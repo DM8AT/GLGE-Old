@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2023
  * 
  */
+#include "nlohmann/json.hpp"
 #include "glgeErrors.hpp"
 #include "stb_image.hpp"
 #include "glgeFuncs.hpp"
@@ -18,12 +19,7 @@
 #include <vector>
 #include <math.h>
 
-// Errors
-
-#define GLGE_ERROR_IMAGE_COULDNT_OPEN "[GLGE] could not open image %s\n"
-
-#define GLGE_ERROR_ALLOCATE_MEMORY "[GLGE] could not allocate memory for %s"
-
+// Include guard
 #ifndef _ATLAS_H_
 #define _ATLAS_H_
 
@@ -63,17 +59,47 @@ class atlas {
         vec4 _get_pixel(unsigned char* img, vec2 pos, vec3 info );
 
         /**
+         * @brief Checks whether or not the specified position is already occupied by an image
+         * 
+         * @param pos The target position to be checked
+         * @return true The position already is occupied
+         * @return false The position is free
+         */
+        bool _is_occupied(vec2 pos);
+
+        /**
+         * @brief Checks whether or not the specified region is already occupied by an image
+         * 
+         * @param pos The target region (x,y,w,h) to be checked
+         * @return true The region already is occupied
+         * @return false The region is free
+         */
+        bool _is_region_occupied(vec4 pos);
+
+        /**
          * @brief Constructs an atlas for square images that are all the same size
          * 
          * @param size The size of the image (ex. 32x32 -> 32)
+         * @param save_atlas Whether or not the atlas image and data file will be saved
+         * 
+         * @return The atlas image
          */
         unsigned char * _constructs_atlas_same(int size, bool save_atlas = false);
 
         /**
          * @brief Constructs an atlas for images that may be completely differently sized
          * 
+         * @param save_atlas Whether or not the atlas image and data file will be saved
+         * 
+         * @return The atlas image
          */
         unsigned char * _constructs_atlas_tetris(bool save_atlas = false);
+
+        /**
+         * @brief Optimizes the atlas by shrinking it to only the required size.
+         * WIP
+         */
+        void _optimize_atlas();
 
         /**
          * @brief Gets the info like width and height of an image
@@ -85,8 +111,14 @@ class atlas {
 
     public:
 
-        // The path of the atlas
+        // The path of the atlas if it should be saved
         const char * path = "assets/atlas.png";
+
+        // The atlas image
+        unsigned char* iAtlas;
+
+        // The information on where each texture on the atlas is and how wide and tall it is
+        nlohmann::json atlasData;
 
         /**
          * @brief Default constructor
@@ -104,10 +136,11 @@ class atlas {
         /**
          * @brief Builds the texture atlas
          * 
+         * @param save_atlas Whether or not the atlas image and data file will be saved
          */
-        unsigned char* build();
+        void build(bool save_atlas = false);
 
-        // Developement function
+        // Developement / Debug function, returns the paths vector
         std::vector<const char*> dump();
 };
 

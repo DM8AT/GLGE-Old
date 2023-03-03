@@ -156,6 +156,11 @@
  */
 #define GLGE_ERROR_CAMERA_FAR_LESS_EQUAL_NEAR "[GLGE ERROR] the far cliping plane can't be less or equal to the near cliping plane. \n"
 
+/**
+ * this message is printed when an Image could not be opened
+ */
+#define GLGE_ERROR_IMAGE_COULDNT_OPEN "[GLGE ERROR] could not open image %s\n"
+
 //////////////////////
 //Error string exits//
 //////////////////////
@@ -248,6 +253,11 @@
  * this message is printed if an error occures in the Camera constructor
  */
 #define GLGE_ERROR_STR_CAMERA_CAMERA "[GLGE ERROR RETURN]: error occured in function 'Camera::Camera'"
+
+/**
+ * this message is printed if a memory allocate call failed
+ */
+#define GLGE_ERROR_ALLOCATE_MEMORY "[GLGE ERROR RETURN] could not allocate memory for %s\n"
 
 ////////////////////////
 //GLGE Warning Strings//
