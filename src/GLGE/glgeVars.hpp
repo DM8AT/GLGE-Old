@@ -17,6 +17,8 @@
 #include "GLGEKlasses.hpp"
 //include the lighting core
 #include "GLGELightingCore.h"
+//include 4D vectors
+#include "CML/CMLVec4.h"
 //include the vector library
 #include <vector>
 
@@ -33,6 +35,9 @@ extern const char* glgePresets[];
 /////////////////////
 //Private Variables//
 /////////////////////
+
+//store the clear color
+extern vec4 glgeClearColor;
 
 //should error be outputed?
 extern bool glgeErrorOutput;

@@ -99,25 +99,43 @@ void drawLightingPass()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void shadowPass()
+void shadowPass(int index)
 {
+    //get the current light        //cast it to an light object
+    if (glgeLights.size() == 0)
+    {
+        return;
+    }
+    
+    Light light = glgeLights[index][0];
 
+    //bind the shadow mapping shader
+    //glUseProgram(glgeShadowShader);
+
+    //pass the light position to the shader
+    //glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+
+    for (uint i = 0; i < 6; i++)
+    {
+        //light.shadowMap.bindForWriting()
+
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    }
 }
 
 void drawShadowPass()
 {
     //set the clear color to the maximum of floats
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-    //bind the shadow mapping shader
-    glUseProgram(glgeShadowShader);
-
-    //bind the 
 
     //loop over all existing light sources
     for (int i = 0; i < 1/*(int)glgeLights.size()*/; i++)
     {
-        shadowPass();
+        shadowPass(i);
     }
+
+    //set the clear color to the default clear color
+    glClearColor(glgeClearColor.x, glgeClearColor.y, glgeClearColor.z, glgeClearColor.w);
 }
 
 //////////////////////////

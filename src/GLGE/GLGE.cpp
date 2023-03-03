@@ -272,6 +272,9 @@ void glgeSetClearColor(float r, float g, float b, bool normalise)
         exit(1);
     }
 
+    //store the clear color
+    glgeClearColor = vec4(r,g,b,1.f);
+
     //finaly, set the clear color
     glClearColor(r,g,b,1.f);
 }
@@ -317,6 +320,9 @@ void glgeSetClearColor(vec3 color, bool normalise)
         exit(1);
     }
 
+    //store the clear color
+    glgeClearColor = vec4(color.x,color.y,color.z,1.f);
+
     //finaly, set the clear color
     glClearColor(color.x,color.y,color.z,1.f);
 }
@@ -361,6 +367,9 @@ void glgeSetClearColor(vec4 color, bool normalise)
         }
         exit(1);
     }
+
+    //store the clear color
+    glgeClearColor = vec4(color.x,color.y,color.z,1.f);
 
     //finaly, set the clear color
     glClearColor(color.x,color.y,color.z,1.f);
