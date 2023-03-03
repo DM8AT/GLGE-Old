@@ -30,6 +30,9 @@ const char* glgePresets[] = {
 //Private Variables//
 /////////////////////
 
+//store the clear color
+vec4 glgeClearColor = vec4(1,1,1,1);
+
 //should error be outputed?
 bool glgeErrorOutput = true;
 

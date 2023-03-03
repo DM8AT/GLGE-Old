@@ -184,7 +184,7 @@ void run2Dexample(int argc, char** argv)
     glgeInit2DCore();
 
     //set the maximal framerate
-    glgeSetMaxFPS(100000);
+    glgeSetMaxFPS(60);
 
     //disable the backface culling, it is stupid for 2D
     glgeDisableBackfaceCulling();
@@ -212,4 +212,7 @@ void run2Dexample(int argc, char** argv)
 
     //execute the script
     glgeRunMainLoop();
+
+    //add a new line befor the program closes
+    printf("\n");
 }
