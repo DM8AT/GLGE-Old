@@ -7,6 +7,9 @@
  * 
  * @copyright Copyright (c) 2023
  * 
+ * @todo
+ * - "Tetris" Algorithm
+ *  - W & H are the total W & H of all images together
  */
 #include "GLGE/glgeErrors.hpp"
 #include "GLGE/stb_image.hpp"
