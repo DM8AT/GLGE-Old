@@ -8,11 +8,11 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#include "GLGE/glgeErrors.hpp"
-#include "GLGE/stb_image.hpp"
-#include "GLGE/glgeFuncs.hpp"
-#include "GLGE/CML/CMLVec3.h"
-#include "GLGE/CML/CMLVec4.h"
+#include "glgeErrors.hpp"
+#include "stb_image.hpp"
+#include "glgeFuncs.hpp"
+#include "CML/CMLVec3.h"
+#include "CML/CMLVec4.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
@@ -67,7 +67,13 @@ class atlas {
          * 
          * @param size The size of the image (ex. 32x32 -> 32)
          */
-        void _constructs_atlas_same(int size);
+        unsigned char * _constructs_atlas_same(int size, bool save_atlas = false);
+
+        /**
+         * @brief Constructs an atlas for images that may be completely differently sized
+         * 
+         */
+        unsigned char * _constructs_atlas_tetris(bool save_atlas = false);
 
         /**
          * @brief Gets the info like width and height of an image
@@ -99,7 +105,7 @@ class atlas {
          * @brief Builds the texture atlas
          * 
          */
-        void build();
+        unsigned char* build();
 
         // Developement function
         std::vector<const char*> dump();

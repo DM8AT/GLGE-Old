@@ -87,7 +87,7 @@ vec4 atlas::_get_pixel(unsigned char* img, vec2 pos, vec3 info ) {
 
 }
 
-void atlas::_constructs_atlas_same(int size) {
+unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
     // amount of images
     int imgs = this->paths.size();
     int w,h, c = 4;
@@ -153,10 +153,16 @@ void atlas::_constructs_atlas_same(int size) {
         if (imgCount >= (int) this->paths.size()) { break; }
     }
 
-    // save atlas to the specefied location
-    stbi_write_png(this->path, w, h, c, atlasImg, w*c);
+    if (save_atlas) {
+        // save atlas to the specefied location
+        stbi_write_png(this->path, w, h, c, atlasImg, w*c);
+    }
 
-    free(atlasImg);
+    return atlasImg;
+}
+
+unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
+
 }
 
 int * atlas::_img_info(const char* path) {
@@ -193,12 +199,13 @@ void atlas::add(const char* path) {
     this->paths.push_back(path);
 }
 
-void atlas::build() {
-
-    // test if all images are same size and square
+unsigned char* atlas::build() {
+    // the width that every image must be to pass the test
     int w = -1;
+    // the result of the test
     bool square_same = true;
 
+    // test if all images are same size and square
     for (long unsigned int i = 0; i < this->paths.size(); i++ ) {
         // get image info
         int * arr = this->_img_info(this->paths[i]);
@@ -219,7 +226,17 @@ void atlas::build() {
         }
     }
 
-    if (square_same) { this->_constructs_atlas_same(w); }
+    // create a placeholder variable to be returned
+    unsigned char* atlasImg;
+
+    // Construct the atlas with the correct algorithm
+    //  Square, all images are same size algorithm
+    if (square_same) { atlasImg = this->_constructs_atlas_same(w); }
+    //  "Tetris" Algorithm, more complex, potentianlly slower
+    else { atlasImg = this->_constructs_atlas_tetris(); }
+
+    // Return the atlas
+    return atlasImg;
 }
 
 
