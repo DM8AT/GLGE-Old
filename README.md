@@ -8,12 +8,12 @@ The code is commented, with the 3D code outlined to highlight the differences fr
 ## Documentation
 --Under Construction--
 Documentation is provided via doxygen, with the documentation files found in the "documentation" folder.
-All files in the folder are created by doxygen automaticaly, I haven't changed anything in there. 
+All files in the folder are created by doxygen automatically, I haven't changed anything in there. 
 
 ## Debugging
 If you encounter errors, check the error outputs defined in "GLGE/glgeErrors.hpp". 
 
-Often causes for memory acces errors:
+Often causes for memory access errors:
 - Not binding an camera before creating or updating 3D objects
 - inputing wrong values to an Object constructor with pointer arrays
 
@@ -63,7 +63,7 @@ Currently working on improving the shader core to make handling shaders simpler 
 ## Latest:
 - added ability to load 3D .obj files into an mesh
 ## Other:
-- added the abillity to create shaders from a kernal
+- added the abillity to create shaders from a kernel
 - added things for post production
 - added possibility for creating shaders from source code as std::strings
 - deleted doxygen documentation, it was broken

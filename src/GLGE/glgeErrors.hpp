@@ -39,7 +39,7 @@
 /**
  * this error is outputed if the initalisation of glew failes. 
  */
-#define GLGE_ERROR_GLEW_INIT_FAILED "[GLGE ERROR] could not initalise glew, glew error string: %s\n"
+#define GLGE_ERROR_GLEW_INIT_FAILED "[GLGE ERROR] could not initialise glew, glew error string: %s\n"
 
 /**
  * this error is printed if argc is an value that defenetly dosn't come from the main function input
@@ -59,7 +59,7 @@
 /**
  * this error is printed if the size of an window is 0
  */
-#define GLGE_ERROR_WINDOW_SIZE_ZERO "[GLGE ERROR] invalid parameters for input to window cration function, a size of 0 is not allowed for a window\n"
+#define GLGE_ERROR_WINDOW_SIZE_ZERO "[GLGE ERROR] invalid parameters for input to window cration function, a size of zero is not allowed for a window\n"
 
 /**
  * this error is outputed if the name for a window should be the nullpointer
@@ -69,7 +69,7 @@
 /**
  * this error is outputed if the position of an window is negative
  */
-#define GLGE_ERROR_WINDOW_NEGATIVE_POSITION "[GLGE ERROR] an negative window position dosn't work\n"
+#define GLGE_ERROR_WINDOW_NEGATIVE_POSITION "[GLGE ERROR] a negative window position dosn't work\n"
 
 /**
  * this error is outputed if the values inputed as color are negative
@@ -124,7 +124,7 @@
 /**
  * this error is printed if the inputed value is 0 or less, but shader id values are only one or above
  */
-#define GLGE_ERROR_INVALIDE_SHADER_INPUT "[GLGE ERROR] the inputed value is not an valide value for an shader\n"
+#define GLGE_ERROR_INVALIDE_SHADER_INPUT "[GLGE ERROR] the inputed value is not a valide value for a shader\n"
 
 /**
  * this error is outputed if an OpenGL error occures.
@@ -134,7 +134,7 @@
 /**
  * this error is outputed if an pointer inputed into an function is the nullpointer
  */
-#define GLGE_ERROR_INPUT_NULLPOINTER "[GLGE ERROR] an nullpointer is not an valide function input\n"
+#define GLGE_ERROR_INPUT_NULLPOINTER "[GLGE ERROR] a nullpointer is not a valide function input\n"
 
 /**
  * this error is outouted if the field of view is less or equal to zero
