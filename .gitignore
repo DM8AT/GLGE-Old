@@ -8,3 +8,4 @@ bin/*
 
 # Texture atlas
 assets/atlas.png
+assets/atlas_mcTest.png

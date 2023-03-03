@@ -16,6 +16,8 @@ all: $(BIN)/$(EXECUTABLE)
 run: clean all
 	./$(BIN)/$(EXECUTABLE)
 
+c: clean all
+
 $(BIN)/$(EXECUTABLE): $(GLGE)/CML/*.cpp $(GLGE)/*.cpp $(SRC)/*.cpp
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
 
