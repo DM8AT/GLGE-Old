@@ -146,8 +146,8 @@ GLint getUniformVar(GLuint program, const char* name)
             //say where the error occured
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
         }
-        //stop the program
-        exit(1);
+        //return a pointer to 0
+        return 0;
     }
     //if no error occured, return the id of the uniform variable
     return ret;
@@ -531,13 +531,23 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //generate the shaders for the default post processing
     glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER);
 
+    //get the uniform for the screen texture in the post processing shader
     glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
 
+
+    //store the status of the glge error output
+    bool err = glgeErrorOutput;
+    //disable the error output
+    glgeErrorOutput = false;
+
     //create the shader for shadow mapping
-    //glgeShadowShader = compileShader("shadowFramentShader.vs","shadowFramentShader.fs");
+    glgeShadowShader = compileShader("src/GLGE/shadowVertexShader.vs","src/GLGE/shadowFramentShader.fs");
 
     //get the uniform for the position of the light in the world
-    //glgeLightWorldPosUniform = getUniformVar(glgeShadowShader, "lightPos");
+    glgeLightWorldPosUniform = getUniformVar(glgeShadowShader, "lightPos");
+
+    //reset the error output
+    glgeErrorOutput = err;
 }
 
 //convert an error code into an string

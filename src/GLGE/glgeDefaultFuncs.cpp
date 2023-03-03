@@ -24,6 +24,9 @@
 #include <iostream>
 #include <cfloat>
 
+//Private vars
+bool draw = true;
+
 ///////////////////////////////////
 //SUB FUNCTIONS FOR THE CALLBACKS//
 ///////////////////////////////////
@@ -101,25 +104,20 @@ void drawLightingPass()
 
 void shadowPass(int index)
 {
-    //get the current light        //cast it to an light object
-    if (glgeLights.size() == 0)
-    {
-        return;
-    }
-    
+    //get the current light        //cast it to an light object    
     Light light = glgeLights[index][0];
 
     //bind the shadow mapping shader
-    //glUseProgram(glgeShadowShader);
+    glUseProgram(glgeShadowShader);
 
     //pass the light position to the shader
-    //glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+    glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
 
     for (uint i = 0; i < 6; i++)
     {
         //light.shadowMap.bindForWriting()
 
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 }
 
@@ -129,7 +127,7 @@ void drawShadowPass()
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 
     //loop over all existing light sources
-    for (int i = 0; i < 1/*(int)glgeLights.size()*/; i++)
+    for (int i = 0; i < (int)glgeLights.size(); i++)
     {
         shadowPass(i);
     }
@@ -145,14 +143,24 @@ void drawShadowPass()
 //the default display callback for GLGE
 void glgeDefaultDisplay()
 {
-    //calculate all shadows
-    drawShadowPass();
+    //say that the screen is currently drawn
+    draw = false;
+
+    //check for bound lights
+    if (glgeLights.size() != 0)
+    {
+        //calculate all shadows
+        drawShadowPass();
+    }
 
     //draw the scene for lighting
     drawLightingPass();
 
     //update the window
     glutSwapBuffers();
+
+    //say that the screen can be re-drawn
+    draw = true;
 }
 
 //the default timer function for GLGE
@@ -163,7 +171,7 @@ void glgeDefaultTimer(int)
     {
         return;
     }
-
+    
     //initalise the redrawing of the screen
     glutPostRedisplay();
 
