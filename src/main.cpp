@@ -30,12 +30,6 @@ int main(int argc, char** argv)
 
     // add files that will make up the texture atlas
     x.add("assets/cubeTexture.png");
-    x.add("assets/cubeTexture.png");
-    x.add("assets/cubeTexture.png");
-    x.add("assets/cubeTexture.png");
-    x.add("assets/cubeTexture.png");
-
-    x.add("assets/cubeTexture.png");
     x.add("assets/Crosshair.png");
     x.add("assets/grass.png");
 
@@ -51,15 +45,16 @@ int main(int argc, char** argv)
 
     // Then, build the atlas
     x.build(true);
+
     // get atlas image
     unsigned char* iAtlas = x.iAtlas;
     // get the information about the atlas
     nlohmann::json data = x.atlasData;
     // print atlas info
-    std::cout << data["w"] << "\n";
+    std::cout << "W: " << data["w"] << "\n";
 
     #endif
-    #if 0
+    #if 1
     //first, write information on what to input to start the examples
     printf("Write 0 to run the 3D example\n");
     printf("Write 1 to run the 2D example\n");
