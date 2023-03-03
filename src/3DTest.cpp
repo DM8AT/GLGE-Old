@@ -200,7 +200,7 @@ void tick()
     light.setPos(camera.getPos());
 
     //write the current FPS
-    std::cout << "\rFPS: " << glgeGetCurrentFPS();
+    std::cout << "\rFPS: " << glgeGetCurrentFPS() << "      ";
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -404,7 +404,7 @@ void run3Dexample(int argc, char** argv)
     glgeDisableBackfaceCulling();
 
     //set the FPS limit
-    glgeSetMaxFPS(60);
+    glgeSetMaxFPS(10000000);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
