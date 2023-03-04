@@ -56,7 +56,7 @@ class atlas {
          * @param info Information about the image - w,h,channels
          * @return vec4 The RGBA color information from the target pixel
          */
-        vec4 _get_pixel(unsigned char* img, vec2 pos, vec3 info );
+        vec4 _get_pixel(unsigned char* img, vec2 pos, vec3 info);
 
         /**
          * @brief Checks whether or not the specified position is already occupied by an image
@@ -97,9 +97,9 @@ class atlas {
 
         /**
          * @brief Optimizes the atlas by shrinking it to only the required size.
-         * WIP
+         * 
          */
-        void _optimize_atlas();
+        void _optimize_atlas(bool save_atlas = true);
 
         /**
          * @brief Gets the info like width and height of an image
@@ -113,6 +113,9 @@ class atlas {
 
         // The path of the atlas if it should be saved
         const char * path = "assets/atlas.png";
+
+        // The path to the missing texture, this is required
+        const char * missing_path = "assets/missing_texture.png";
 
         // The atlas image
         unsigned char* iAtlas;
@@ -139,6 +142,16 @@ class atlas {
          * @param save_atlas Whether or not the atlas image and data file will be saved
          */
         void build(bool save_atlas = false);
+
+        /**
+         * @brief Get the Tex Coord object
+         * 
+         * @param texture The texture name (including path), this will be the same as the texture string from the add function, for example 'assets/cubeTexture.png'
+         * @param corner Which corner position to return, 0 top left, 1 top right, 2 bottom left, 3 bottom right
+         * @param mode Whether or not the position will be a (0) GLGE texture position or a (1) pixel position
+         * @return vec2 The position of the texture in the atlas
+         */
+        vec2 getTexCoord(const char* texture, int corner, int mode = 0);
 
         // Developement / Debug function, returns the paths vector
         std::vector<const char*> dump();

@@ -17,7 +17,7 @@
 #include <iostream>
 
 // Atlas
-#include "GLGE/textureAtlas.h"
+#include "GLGE/GLGEtextureAtlas.h"
 
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main(int argc, char** argv)
@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     atlas x;
 
     // add files that will make up the texture atlas
+    x.add("assets/cubeTexture.png");
     x.add("assets/cubeTexture.png");
     x.add("assets/Crosshair.png");
     x.add("assets/grass.png");
@@ -52,6 +53,7 @@ int main(int argc, char** argv)
     nlohmann::json data = x.atlasData;
     // print atlas info
     std::cout << "W: " << data["w"] << "\n";
+    std::cout << "H: " << data["h"] << "\n";
 
     #endif
     #if 1

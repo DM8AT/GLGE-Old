@@ -1,4 +1,4 @@
-#include "textureAtlas.h"
+#include "GLGEtextureAtlas.h"
 #include "nlohmann/json.hpp"
 #include "fstream"
 #include <iostream>
@@ -141,42 +141,45 @@ bool atlas::_is_region_occupied(vec4 pos) {
         // image height
         int iH = iY + (int) this->atlasData["images"][img.key()]["h"];
 
+        // temp var
+        bool tmp = false;
+
         if (pos.z < iW - iX) {
             // check if x is in range of x and w
-            if ( iX < pos.x && pos.x < iW ) {
-                return true;
+            if ( iX <= pos.x && pos.x < iW ) {
+                tmp = true;
             }
             // check if x+width is in range of x and w
             if ( iX < pos.x+pos.z && pos.x+pos.z < iW ) {
-                return true;
+                tmp = true;
             }
         } else {
             // check if x is in range of x and w
-            if ( pos.x < iX && iX < pos.x+pos.z ) {
-                return true;
+            if ( pos.x <= iX && iX < pos.x+pos.z ) {
+                tmp = true;
             }
             // check if x+width is in range of x and w
             if ( pos.x < iW && iW < pos.x+pos.z ) {
-                return true;
+                tmp = true;
             }
         }
 
         if (pos.w < iH - iY) {
             // check if y is in range of y and h
-            if ( iY < pos.x && pos.y < iH) {
+            if ( iY <= pos.x && pos.y < iH && tmp == true ) {
                 return true;
             }
             // check if y+width is in range of x and w
-            if ( iY < pos.y+pos.z && pos.y+pos.z < iH ) {
+            if ( iY < pos.y+pos.z && pos.y+pos.z < iH && tmp == true ) {
                 return true;
             }
         } else {
             // check if y is in range of y and h
-            if ( pos.y < iY && iY < pos.y+pos.w ) {
+            if ( pos.y <= iY && iY < pos.y+pos.w && tmp == true ) {
                 return true;
             }
             // check if y+width is in range of x and w
-            if ( pos.y < iH && iH < pos.y+pos.w ) {
+            if ( pos.y < iH && iH < pos.y+pos.w && tmp == true ) {
                 return true;
             }
         }
@@ -211,6 +214,7 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
     // write template to atlas info data
     this->atlasData["w"] = w;
     this->atlasData["h"] = h;
+    this->atlasData["channels"] = c;
 
     // debug message
     //std::cout << imgs << " " << w << " " << size << "\n";
@@ -329,6 +333,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
     // write template to atlas info data
     this->atlasData["w"] = totalWidth;
     this->atlasData["h"] = totalHeight;
+    this->atlasData["channels"] = channelCount;
 
     // create the image
     // Calculate the size of the altas
@@ -394,7 +399,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         }
         // check if a position was not found
         if (!done) {
-            printf("[GLGE ERROR RETURN] no space for image %s was found in texture atlas while creating.\n", this->paths[i]);
+            printf(GLGE_ERROR_ATLAS_NOT_ENOUGH_IMAGE_SPACE, this->paths[i]);
         }
     }
 
@@ -410,6 +415,64 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
 
     // return atlas image
     return atlasImg;
+}
+
+void atlas::_optimize_atlas(bool save_atlas) {
+    // image vars
+    int width = 0, height = 0, channelCount = this->atlasData["channels"];
+    
+    // calculate the size
+    // go through all images and see wich one is the widest and tallest and such
+    for (nlohmann::json::iterator img = this->atlasData["images"].begin(); img != this->atlasData["images"].end(); img++) {
+        // check if x+w is bigger than width
+        if ( (int) img.value()["x"] + (int) img.value()["w"] > width ) { width = (int) img.value()["x"] + (int) img.value()["w"]; }
+        // check if y+h is bigger than height
+        if ( (int) img.value()["y"] + (int) img.value()["h"] > height ) { height = (int) img.value()["y"] + (int) img.value()["h"]; }
+    }
+
+    // create the image
+
+    // Calculate the size of the altas
+    size_t atlasSize = width * height * channelCount;
+ 
+    // try to allocate the memory for the atlas
+    unsigned char* atlasImg = (unsigned char*) malloc(atlasSize);
+    // if allocating memory failed...
+    if(atlasImg == NULL) {
+        // ..print error message...
+        printf(GLGE_ERROR_ALLOCATE_MEMORY, "texture atlas (optimize)");
+        // ...and exit
+        exit(1);
+    }
+
+    // clear atlas image. this gets rid of random pixel values that somehow happen
+    this->_clear_image(atlasImg, vec3(width,height,channelCount));
+
+    // transplant old atlas to new
+    // go through all pixels of the old atlas
+    for (int hI = 0; hI < height; hI++) {
+    for (int wI = 0; wI < width; wI++) {
+        // calculate the current position in the image and atlas
+        vec2 imgPos = vec2(wI, hI);
+        // get the colors from a pixel
+        vec4 arr = this->_get_pixel(this->iAtlas, imgPos, vec3((int)this->atlasData["w"], (int)this->atlasData["h"], (int)this->atlasData["channels"]));
+        // write them to the atlas
+        this->_put_pixel(atlasImg, imgPos, vec3(width, height, channelCount), arr);
+    }
+    }
+
+    // update width and height of atlas image data
+    this->atlasData["w"] = width;
+    this->atlasData["h"] = height;
+
+    // overwrite atlas image
+    this->iAtlas = atlasImg;
+
+    // save image if requested
+    if (save_atlas)  {
+        // save atlas to the specefied location
+        stbi_write_png(this->path, width, height, channelCount, atlasImg, width*channelCount);
+    }
 }
 
 int * atlas::_img_info(const char* path) {
@@ -447,6 +510,14 @@ void atlas::add(const char* path) {
 }
 
 void atlas::build(bool save_atlas) {
+    // add missing texture and make sure it exists
+    if (std::filesystem::is_regular_file(this->missing_path)) { this->add(this->missing_path); }
+    // if it does not exist, return error
+    else {
+        printf(GLGE_ERROR_ATLAS_NO_MISSING_TEXTURE);
+        exit(1);
+    }
+
     // the width that every image must be to pass the test
     int w = -1;
     // the result of the test
@@ -484,8 +555,21 @@ void atlas::build(bool save_atlas) {
 
     // set iAtlas to atlasImg
     this->iAtlas = atlasImg;
+
+    // optimize atlas image to shrink it to the required size
+    this->_optimize_atlas(save_atlas);
 }
 
+vec2 atlas::getTexCoord(const char* texture, int corner, int mode) {
+    // get texture atlas info
+    int aWidth = this->atlasData["w"];
+    int aHeight = this->atlasData["h"];
+    // check if atlas has the texture
+    if (this->atlasData[texture] == nullptr) {
+        printf(GLGE_WARNING_ATLAS_CHILD_TEXTURE_NOT_FOUND, texture);
+
+    }
+}
 
 std::vector<const char*> atlas::dump() {
     // return the paths vector
