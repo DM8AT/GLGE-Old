@@ -562,8 +562,8 @@ void atlas::build(bool save_atlas) {
 
 vec2 atlas::getTexCoord(const char* texture, int corner, int mode) {
     // get texture atlas info
-    int aWidth = this->atlasData["w"];
-    int aHeight = this->atlasData["h"];
+    float aWidth = this->atlasData["w"];
+    float aHeight = this->atlasData["h"];
     // check if atlas has the texture
     if (this->atlasData["images"][texture] == nullptr) {
         // Print warning message
@@ -572,31 +572,54 @@ vec2 atlas::getTexCoord(const char* texture, int corner, int mode) {
         texture = this->missing_path;
     }
     // get texture info
-    int iWidth = this->atlasData["images"][texture]["w"];
-    int iHeight = this->atlasData["images"][texture]["h"];
-    int iX = this->atlasData["images"][texture]["x"];
-    int iY = this->atlasData["images"][texture]["y"];
+    float iWidth = this->atlasData["images"][texture]["w"];
+    float iHeight = this->atlasData["images"][texture]["h"];
+    float iX = this->atlasData["images"][texture]["x"];
+    float iY = this->atlasData["images"][texture]["y"];
 
+    //  GLGE Texture Coords
     // Top left corner
-    if ( corner == 0 ) {
+    if ( corner == 0 && mode == 0 ) {
         // x/aWidth, y/aHeight
         return vec2(iX/aWidth, iY/aHeight);
     }
     // Top right corner
-    if ( corner == 1 ) {
+    if ( corner == 1 && mode == 0 ) {
         // (x+w)/aWidth, y/aHeight
         return vec2((iX+iWidth)/aWidth, iY/aHeight);
     }
     // bottom left corner
-    if ( corner == 2 ) {
+    if ( corner == 2 && mode == 0 ) {
         // x/aWidth, (y+h)/aHeight
         return vec2(iX/aWidth, (iY+iHeight)/aHeight);
     }
     // Top left corner
-    if ( corner == 3 ) {
+    if ( corner == 3 && mode == 0 ) {
         // (x+w)/aWidth, (y+h)/aHeight
         return vec2((iX+iWidth)/aWidth, (iY+iHeight)/aHeight);
     }
+    //  Pixel Coords
+    // Top left corner
+    if ( corner == 0 && mode == 1 ) {
+        // x, y
+        return vec2(iX, iY);
+    }
+    // Top right corner
+    if ( corner == 1 && mode == 1 ) {
+        // x+w, y
+        return vec2(iX+iWidth, iY);
+    }
+    // bottom left corner
+    if ( corner == 2 && mode == 1 ) {
+        // x, y+h
+        return vec2(iX, iY+iHeight);
+    }
+    // Top left corner
+    if ( corner == 3 && mode == 1 ) {
+        // x+w, y+h
+        return vec2(iX+iWidth, iY+iHeight);
+    }
+    return vec2(-1,-1);
 }
 
 std::vector<const char*> atlas::dump() {
