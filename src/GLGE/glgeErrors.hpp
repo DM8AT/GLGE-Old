@@ -268,7 +268,6 @@
  * this message is printed if the missing texture is not found.
  * HINT: Specify a missing texture by using 'myAtlas.missing_path = "path/to/your/texture";'
  */
-
 #define GLGE_ERROR_ATLAS_NO_MISSING_TEXTURE "[GLGE ERROR RETURN] no missing texture specified or not found\n"
 
 ////////////////////////
