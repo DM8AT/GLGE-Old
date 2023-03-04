@@ -565,9 +565,37 @@ vec2 atlas::getTexCoord(const char* texture, int corner, int mode) {
     int aWidth = this->atlasData["w"];
     int aHeight = this->atlasData["h"];
     // check if atlas has the texture
-    if (this->atlasData[texture] == nullptr) {
+    if (this->atlasData["images"][texture] == nullptr) {
+        // Print warning message
         printf(GLGE_WARNING_ATLAS_CHILD_TEXTURE_NOT_FOUND, texture);
+        // set texture to missing texture
+        texture = this->missing_path;
+    }
+    // get texture info
+    int iWidth = this->atlasData["images"][texture]["w"];
+    int iHeight = this->atlasData["images"][texture]["h"];
+    int iX = this->atlasData["images"][texture]["x"];
+    int iY = this->atlasData["images"][texture]["y"];
 
+    // Top left corner
+    if ( corner == 0 ) {
+        // x/aWidth, y/aHeight
+        return vec2(iX/aWidth, iY/aHeight);
+    }
+    // Top right corner
+    if ( corner == 1 ) {
+        // (x+w)/aWidth, y/aHeight
+        return vec2((iX+iWidth)/aWidth, iY/aHeight);
+    }
+    // bottom left corner
+    if ( corner == 2 ) {
+        // x/aWidth, (y+h)/aHeight
+        return vec2(iX/aWidth, (iY+iHeight)/aHeight);
+    }
+    // Top left corner
+    if ( corner == 3 ) {
+        // (x+w)/aWidth, (y+h)/aHeight
+        return vec2((iX+iWidth)/aWidth, (iY+iHeight)/aHeight);
     }
 }
 
