@@ -55,6 +55,9 @@ int main(int argc, char** argv)
     std::cout << "W: " << data["w"] << "\n";
     std::cout << "H: " << data["h"] << "\n";
 
+    // print the texture coor for cube texture, the top left corner
+    std::cout << "C: " << x.getTexCoord("assets/cubeTexture.png", 0, 1).x << " " << x.getTexCoord("assets/cubeTexture.png", 0, 1).y << "\n";
+
     #endif
     #if 1
     //first, write information on what to input to start the examples
