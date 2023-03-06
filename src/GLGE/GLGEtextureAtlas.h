@@ -56,7 +56,7 @@ class atlas {
          * @param info Information about the image - w,h,channels
          * @return vec4 The RGBA color information from the target pixel
          */
-        vec4 _get_pixel(unsigned char* img, vec2 pos, vec3 info);
+        vec4 _get_pixel(unsigned char* *img, vec2 pos, vec3 info);
 
         /**
          * @brief Checks whether or not the specified position is already occupied by an image

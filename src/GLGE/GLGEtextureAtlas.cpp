@@ -59,7 +59,7 @@ void atlas::_put_pixel(unsigned char* img, vec2 pos, vec3 info, vec4 color ) {
     }
 }
 
-vec4 atlas::_get_pixel(unsigned char* img, vec2 pos, vec3 info ) {
+vec4 atlas::_get_pixel(unsigned char* *img, vec2 pos, vec3 info ) {
     // Info:
     // - width = info.x
     // - height = info.y
@@ -78,7 +78,7 @@ vec4 atlas::_get_pixel(unsigned char* img, vec2 pos, vec3 info ) {
     int posX = pos.x * info.z;
     int posY = pos.y * info.x * info.z;
 
-    unsigned char *p = img;
+    unsigned char* p = *img;
 
     // create array for storing color values
     int arr[4] = {0, 0, 0, 255};
@@ -89,7 +89,6 @@ vec4 atlas::_get_pixel(unsigned char* img, vec2 pos, vec3 info ) {
     }
 
     return vec4(arr[0], arr[1], arr[2], arr[3]);
-
 }
 
 bool atlas::_is_occupied(vec2 pos) {
@@ -257,7 +256,7 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
                 vec2 imgPos = vec2(wI, hI);
                 vec2 atlasPos = vec2(imgPos.x+hor*size, imgPos.y+vert*size);
                 // get the colors from a pixel
-                vec4 arr = this->_get_pixel(img, imgPos, vec3(width, height, channelCount));
+                vec4 arr = this->_get_pixel(&img, imgPos, vec3(width, height, channelCount));
                 // write them to the atlas
                 this->_put_pixel(atlasImg, atlasPos, vec3(w, h, c), arr);
                 
@@ -318,7 +317,14 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         // image dimension vars
         int w, h, c;
         // load image info
-        unsigned char* img = stbi_load(paths[i], &w, &h, &c, 0);
+        unsigned char* img = stbi_load(this->paths[i], &w, &h, &c, 0);
+        // check if image got loaded
+        if (img == NULL) {
+            // print Error
+            printf(GLGE_ERROR_IMAGE_COULDNT_OPEN, this->paths[i]);
+            // continue
+            continue;
+        }
         // free image for no memoryleaks
         stbi_image_free(img);
 
@@ -359,6 +365,14 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         // load image info
         unsigned char* img = stbi_load(paths[i], &w, &h, &c, 0);
 
+        // check if image got opened
+        if (img == NULL) {
+            // print Error
+            printf(GLGE_ERROR_IMAGE_COULDNT_OPEN, this->paths[i]);
+            // continue
+            continue;
+        }
+
         // break var
         bool done = false;
 
@@ -384,7 +398,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
                 vec2 imgPos = vec2(wI, hI);
                 vec2 atlasPos = vec2(imgPos.x+x, imgPos.y+y);
                 // get the colors from a pixel
-                vec4 arr = this->_get_pixel(img, imgPos, vec3(w, h, c));
+                vec4 arr = this->_get_pixel(&img, imgPos, vec3(w, h, c));
                 // write them to the atlas
                 this->_put_pixel(atlasImg, atlasPos, vec3(totalWidth, totalHeight, channelCount), arr);
             }
@@ -397,11 +411,15 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             // if spot has been found, break out of loop
             if (done) {break;}
         }
+        // free image
+        free(img);
         // check if a position was not found
         if (!done) {
             printf(GLGE_ERROR_ATLAS_NOT_ENOUGH_IMAGE_SPACE, this->paths[i]);
+            exit(1);
         }
     }
+
 
     // save image and data if needed;
     if (save_atlas) {
@@ -455,7 +473,7 @@ void atlas::_optimize_atlas(bool save_atlas) {
         // calculate the current position in the image and atlas
         vec2 imgPos = vec2(wI, hI);
         // get the colors from a pixel
-        vec4 arr = this->_get_pixel(this->iAtlas, imgPos, vec3((int)this->atlasData["w"], (int)this->atlasData["h"], (int)this->atlasData["channels"]));
+        vec4 arr = this->_get_pixel(&this->iAtlas, imgPos, vec3((int)this->atlasData["w"], (int)this->atlasData["h"], (int)this->atlasData["channels"]));
         // write them to the atlas
         this->_put_pixel(atlasImg, imgPos, vec3(width, height, channelCount), arr);
     }
@@ -505,6 +523,15 @@ void atlas::add(const char* path) {
         //return void
         return;
     }
+    // check if file is png or jpg
+    std::string sPath = path;
+    if ( ! sPath.ends_with(".png") && ! sPath.ends_with(".jpg")) {
+        // print warning
+        printf(GLGE_WARNING_INCORRECT_FILE_TYPE, path, "png or jpg");
+        return;
+    }
+
+
     // add path to vector
     this->paths.push_back(path);
 }
@@ -544,17 +571,11 @@ void atlas::build(bool save_atlas) {
         }
     }
 
-    // create a placeholder variable to be set internally
-    unsigned char* atlasImg;
-
     // Construct the atlas with the correct algorithm
     //  Square, all images are same size algorithm
-    if (square_same) { atlasImg = this->_constructs_atlas_same(w, save_atlas); }
+    if (square_same) { this->iAtlas = this->_constructs_atlas_same(w, save_atlas); }
     //  "Tetris" Algorithm, more complex, potentianlly slower
-    else { atlasImg = this->_constructs_atlas_tetris(save_atlas); }
-
-    // set iAtlas to atlasImg
-    this->iAtlas = atlasImg;
+    else { this->iAtlas = this->_constructs_atlas_tetris(save_atlas); }
 
     // optimize atlas image to shrink it to the required size
     this->_optimize_atlas(save_atlas);
