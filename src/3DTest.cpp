@@ -44,6 +44,8 @@ Object grassFloor;
 Object thing;
 //this object is loaded from the file Enterpreis.obj. 
 Object enterprise;
+//it is a brick wall
+Object wall;
 
 Light light;
 
@@ -69,6 +71,9 @@ void display()
 
     //draw the thing to the screen
     thing.draw();
+
+    //draw the wall
+    wall.draw();
 
     //after this function is finished, the frame buffer gets fliped and everything is drawn to the screen
 }
@@ -195,9 +200,11 @@ void tick()
     thing.update();
     //update the enterprise
     enterprise.update();
+    //update the wall
+    wall.update();
 
     //set the position of the light source to be exactly at the player
-    light.setPos(camera.getPos());
+    //light.setPos(camera.getPos());
 
     //write the current FPS
     std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
@@ -367,6 +374,32 @@ void enterpriseSetup()
     enterprise.setShader(cube.getShader());
 }
 
+void wallSetup()
+{
+    //create the material for the wall
+    Material mat;
+    //load the albedo to the material
+    mat = Material("assets/WallTexture/harshbricks-albedo.png", "Texture", 0.2);
+
+    //set the wraping mode to linear, so the normal get linearly interpolated. It looks better
+    glgeSetWrapingMode(GLGE_LINEAR);
+
+    //load the normal map to the material
+    mat.addImage("assets/WallTexture/harshbricks-normal.png", "NormalMap");
+
+    //reset the wraping mode
+    glgeSetWrapingMode(GLGE_NEAREST);
+
+    //create the Wall from an file
+    wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,-25,0), 1.f));
+
+    //bind the shader of the object
+    wall.setShader(enterprise.getShader());
+
+    //apply the material to the wall
+    wall.setMaterial(mat);
+}
+
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
 void run3Dexample(int argc, char** argv)
@@ -404,7 +437,7 @@ void run3Dexample(int argc, char** argv)
     glgeDisableBackfaceCulling();
 
     //set the FPS limit
-    glgeSetMaxFPS(10000000);
+    glgeSetMaxFPS(10000);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
@@ -432,6 +465,8 @@ void run3Dexample(int argc, char** argv)
     thingSetup();
     //setup the enterprise object
     enterpriseSetup();
+    //setup the wall
+    wallSetup();
 
     l2 = Light(2,5,0, 1,0,0.5, 100);
     glgeAddGlobalLighSource(&l2);

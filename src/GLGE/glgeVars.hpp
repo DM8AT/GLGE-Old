@@ -134,4 +134,7 @@ extern GLuint glgeShadowShader;
 //store the light world position
 extern GLuint glgeLightWorldPosUniform;
 
+//store how to sample images
+extern GLenum glgeWrapingMode;
+
 #endif

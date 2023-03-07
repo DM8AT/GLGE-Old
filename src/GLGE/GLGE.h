@@ -438,4 +438,11 @@ void glgeSetMultisampeling(bool status);
  */
 bool glgeGetMultisampelinStauts();
 
+/**
+ * @brief Set the Wraping Mode for textures
+ * 
+ * @param mode the new wraping mode
+ */
+void glgeSetWrapingMode(unsigned int mode);
+
 #endif

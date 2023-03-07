@@ -32,7 +32,7 @@ public:
 
     ~shadowCubeMapFBO();
 
-    bool init(unsigned int size = 0);
+    bool init(unsigned int size = 1000);
 
     void bindForWriting(GLenum cubeFace);
 
@@ -41,10 +41,10 @@ public:
 private:
 
     unsigned int size = 0;
-    GLuint fbo;
-    GLuint shadowCubeMap;
-    GLuint depth;
-
+    GLuint fbo = 0;
+    GLuint rbo = 0;
+    GLuint shadowCubeMap  =0;
+    GLuint depth = 0;
 };
 
 class Light
@@ -202,7 +202,7 @@ public:
     float getInsensity();
 
     //store the shadow map of the light source
-    shadowCubeMapFBO shadowMap;
+    shadowCubeMapFBO shadowMap = shadowCubeMapFBO();
 
 private:
     //store the light position
