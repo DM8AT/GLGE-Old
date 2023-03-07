@@ -185,6 +185,9 @@ void Material::applyShader(GLuint shader)
         }
     }
 
+    //get the location of the var to say how many pictures are used
+    this->usedLoc = glgeGetUniformVar(shader, GLGE_USED_TEXTURES_VAR);
+
     //reset the error output
     glgeErrorOutput = err;
 
@@ -211,6 +214,9 @@ void Material::applyMaterial()
     {
         glUniform1f(this->roughnessLoc, roughness);
     }
+
+    //pass the amount of textures to the shader
+    glUniform1i(this->usedLoc, (int)this->textures.size());
 
     //store how much textures are bound
     int bTs = 0;

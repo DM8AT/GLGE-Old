@@ -9,14 +9,16 @@ out vec4 FragColor;
 in vec4 color;
 in vec2 texCoord;
 in vec3 normal;
-in vec3 currentPosition;
+in vec3 currentPos;
 
 //mesh data
 float emmission = 0.2f;
 uniform float roughness;
 
-uniform sampler2D Texture;
 uniform sampler2D NormalMap;
+uniform sampler2D Texture;
+
+uniform int usedTextures;
 
 uniform vec3 cameraPos;
 
@@ -63,13 +65,19 @@ vec4 calculatePBR(vec4 col)
 
     vec3 l = vec3(0.f);
 
-    l = lightPos[iteration] - currentPosition;
+    l = lightPos[iteration] - currentPos;
     float lightToPixelDist = length(l);
     l = normalize(l);
     lightIntensity /= (lightToPixelDist * lightToPixelDist);
 
-    vec3 n = normalize(normal + texture(NormalMap, texCoord).xyz);
-    vec3 v = normalize(cameraPos - currentPosition);
+    vec3 n = normalize(normal);
+
+    if (usedTextures > 1)
+    {
+        n = normalize(normal + texture(NormalMap, texCoord).rgb);
+    }
+
+    vec3 v = normalize(cameraPos - currentPos);
     vec3 h = normalize(v+l);
 
     float nDotH = max(dot(n, h), 0.f);

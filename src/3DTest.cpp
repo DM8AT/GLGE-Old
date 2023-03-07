@@ -356,7 +356,7 @@ void thingSetup()
     thing.setMaterial(thingMat);
 
     //set the shader for the thing
-    thing.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
+    thing.setShader(cube.getShader());
 }
 
 void enterpriseSetup()
@@ -381,6 +381,9 @@ void wallSetup()
     //load the albedo to the material
     mat = Material("assets/WallTexture/harshbricks-albedo.png", "Texture", 0.2);
 
+    //add the second texture for the ambient occlusion
+    mat.addImage("assets/WallTexture/harshbricks-ao2.png", "AmbientMap");
+
     //set the wraping mode to linear, so the normal get linearly interpolated. It looks better
     glgeSetWrapingMode(GLGE_LINEAR);
 
@@ -394,7 +397,7 @@ void wallSetup()
     wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,-25,0), 1.f));
 
     //bind the shader of the object
-    wall.setShader(enterprise.getShader());
+    wall.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
 
     //apply the material to the wall
     wall.setMaterial(mat);

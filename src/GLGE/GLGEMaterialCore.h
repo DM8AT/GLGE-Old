@@ -46,6 +46,8 @@
 #define GLGE_OFFSET_MAP_NAME "offsetMap"
 //define the default name for the color
 #define GLGE_COLOR_NAME "col"
+//define the name for the var to say the number of used textures
+#define GLGE_USED_TEXTURES_VAR "usedTextures"
 
 //include the needed math librarys
 #include "CML/CMLVec4.h"
@@ -135,6 +137,8 @@ private:
     GLuint roughnessLoc = 0;
     //store the positon of the color in the shader
     GLuint colorLoc = 0;
+    //store the position of the used textures uniform
+    GLuint usedLoc = 0;
     //store all images for the Material
     std::vector<GLuint> textures;
     //store the positons of the images

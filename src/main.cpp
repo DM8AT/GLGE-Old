@@ -22,7 +22,7 @@
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main(int argc, char** argv)
 {
-    #if 1
+    #if 0
     // texture atlas demo code
 
     // create new atlas object. This is for creating and using a texture atlas

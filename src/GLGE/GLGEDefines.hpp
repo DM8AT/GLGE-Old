@@ -17,7 +17,7 @@
 #include <string>
 
 //the default 3D vertex shader, it is bound by default to any 3D object
-#define GLGE_DEFAULT_3D_VERTEX std::string("#version 300 es\nlayout (location = 0) in vec3 pos;layout (location = 1) in vec4 vColor;layout (location = 2) in vec2 vTexcoord;layout (location = 3) in vec3 vNormal;uniform mat4 moveMat;uniform mat4 modelMat;out vec4 color;out vec2 texCoord;out vec3 normal;out vec3 currentPosition;void main(){color = vColor;texCoord = vTexcoord;normal = vNormal;currentPosition = vec3(vec4(pos, 1)*modelMat);gl_Position = vec4(pos, 1)*moveMat;}")
+#define GLGE_DEFAULT_3D_VERTEX std::string("#version 300 es\nlayout (location = 0) in vec3 pos;layout (location = 1) in vec4 vColor;layout (location = 2) in vec2 vTexcoord;layout (location = 3) in vec3 vNormal;uniform mat4 moveMat;uniform mat4 modelMat;out vec4 color;out vec2 texCoord;out vec3 normal;out vec3 currentPos;void main(){color = vColor;texCoord = vTexcoord;normal = vNormal;currentPos = vec3(vec4(pos, 1)*modelMat);gl_Position = vec4(pos, 1)*moveMat;}")
 //the default 3D fragment shader, it is bound by default to any 3D object
 #define GLGE_DEFAULT_3D_FRAGMENT std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 color;in vec2 texCoord;uniform sampler2D Texture;void main(){FragColor = texture(Texture, texCoord) + color;}")
 
