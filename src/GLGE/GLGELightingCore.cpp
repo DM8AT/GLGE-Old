@@ -23,6 +23,7 @@
 shadowCubeMapFBO::shadowCubeMapFBO()
 {
     //init the object
+    this->fbo = 0;
 }
 
 shadowCubeMapFBO::~shadowCubeMapFBO()
@@ -48,74 +49,83 @@ shadowCubeMapFBO::~shadowCubeMapFBO()
     }
 }
 
-bool shadowCubeMapFBO::init(uint size)
+bool shadowCubeMapFBO::init(unsigned int size)
 {
+    //brake, if the size is 0
+    if (size == 0)
+    {
+        return false;
+    }
+
     //store the inputed size
     this->size = size;
 
-    //if the inputed size is 0, then the default size will be used
-    if (this->size == 0)
-    {
-        this->size = glgeShadowMapResolution;
-    }
+    //Create the FBO
+    glGenFramebuffers(1, &this->fbo);
+    //bind the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 
-    //create the depth buffer
+    //Create the depth buffer
     glGenTextures(1, &this->depth);
-    //bind the depth buffer texture
+    //bind the texture
     glBindTexture(GL_TEXTURE_2D, this->depth);
-    //set the texture image
+    //set the texture to an depth buffer
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->size, this->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     //set the texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    //create the shadow map
+    //Create the cube map
     glGenTextures(1, &this->shadowCubeMap);
-    //bind the shadow map
+    //bind the texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowCubeMap);
-    //set the texture parameters
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //set the cube map texture parameters
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    //create the faces for the cube map
-    for (int i = 0; i < 6; i++)
+    //loop over all sides of the cube map
+    for (uint i = 0 ; i < 6 ; i++)
     {
+        //create the side texture
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, this->size, this->size, 0, GL_RED, GL_FLOAT, NULL);
     }
 
-    //create the FBO
-    glGenFramebuffers(1, &this->fbo);
-    //bind the FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
-    //setup the framebuffer
+    //set the framebuffer to an depth buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->depth, 0);
 
-    //disable writes to the color buffer
+    //Disable writes to the color buffer
     glDrawBuffer(GL_NONE);
 
-    //disable reads from the color buffer
+    //Disable reads from the color buffer
     glReadBuffer(GL_NONE);
 
-    //check if the framebuffer compiled correctly
-    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    //get if there was an error in the creation of the frame buffer
+    GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    //if there was an error, print an error and return false
+    if (Status != GL_FRAMEBUFFER_COMPLETE)
     {
-        //return that the initalisation was not successfull
+        printf("[GLGE ERROR] shadow FB error, status: 0x%x\n", Status);
+        //delete the frame buffer
+        //glDeleteFramebuffers(1,&this->fbo);
+        //reset the FBO to stop other actions
+        this->fbo = 0;
+        //return that the initalisation failed
         return false;
     }
 
-    //bind 0 as the frame buffer
+    //unbind the frame buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //unbind the cube map
+    //unbind the texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    //return that the initalisation was successfull
     return true;
 }
 
@@ -123,16 +133,24 @@ void shadowCubeMapFBO::bindForWriting(GLenum cubeFace)
 {
     //bind the frame buffer
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->fbo);
-    // set the width/height of the shadow map!
-    glViewport(0, 0, this->size, this->size);
+    
+    // set the width/height of the shadow map
+    //glViewport(0, 0, this->size, this->size);
     //set the texture for the framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, cubeFace, this->shadowCubeMap, 0);
+    //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, cubeFace, this->shadowCubeMap, 0);
+
     //reset the color attachment
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    //glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 void shadowCubeMapFBO::bindForReading(GLenum TextureUnit)
 {
+    //stop this script, if the FBO is 0
+    if (this->fbo == 0)
+    {
+        return;
+    }
+
     //activate the requested texture unit
     glActiveTexture(TextureUnit);
     //load in the shadow map
@@ -153,6 +171,9 @@ Light::Light(vec3 pos, vec3 col, float intensity)
     this->color = col;
     //store the inputed intensity
     this->lightIntensity = intensity;
+
+    //init the shadow map
+    this->shadowMap.init(glgeShadowMapResolution);
 }
 
 Light::Light(float x, float y, float z, float r, float g, float b, float intensity)
@@ -163,6 +184,9 @@ Light::Light(float x, float y, float z, float r, float g, float b, float intensi
     this->color = vec3(r,g,b);
     //store the inputed intensity
     this->lightIntensity = intensity;
+
+    //init the shadow map
+    this->shadowMap.init(glgeShadowMapResolution);
 }
 
 //set the position of the light source

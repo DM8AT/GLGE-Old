@@ -108,16 +108,30 @@ void shadowPass(int index)
     Light light = glgeLights[index][0];
 
     //bind the shadow mapping shader
-    glUseProgram(glgeShadowShader);
+    //glUseProgram(glgeShadowShader);
 
     //pass the light position to the shader
-    glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+    //glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+
+    //create an array to store the direction
+    GLenum cubeDirs[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                          GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                          GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
 
     for (uint i = 0; i < 6; i++)
     {
-        //light.shadowMap.bindForWriting()
+        //bind the corresponding texture to draw
+        light.shadowMap.bindForWriting(cubeDirs[i]);
 
-        //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        //clear the screen
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+        //draw the screen
+        if(glgeHasDisplayCallback)
+        {
+            //call the custom drawing function
+            //((void(*)())glgeDisplayCallback)();
+        }
     }
 }
 
@@ -134,6 +148,9 @@ void drawShadowPass()
 
     //set the clear color to the default clear color
     glClearColor(glgeClearColor.x, glgeClearColor.y, glgeClearColor.z, glgeClearColor.w);
+
+    //reset the window size
+    glViewport(0,0,glgeWindowSize.x, glgeWindowSize.y);
 }
 
 //////////////////////////
@@ -150,7 +167,7 @@ void glgeDefaultDisplay()
     if (glgeLights.size() != 0)
     {
         //calculate all shadows
-        drawShadowPass();
+        //drawShadowPass();
     }
 
     //draw the scene for lighting

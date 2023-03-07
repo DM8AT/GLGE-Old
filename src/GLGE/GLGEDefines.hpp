@@ -31,6 +31,14 @@
 //the default post processing fragment shader, just draws the processed data to the screen
 #define GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;void main(){FragColor = texture(screenTexture, texCoords);}")
 
+//define the wrap modes for the textures
+
+//sample the closest pixels
+#define GLGE_NEAREST 0x2600
+
+//sample an interpolation of the clostest pixels
+#define GLGE_LINEAR 0x2601
+
 //a list of all keys
 
 //the keycode for the a key in glge

@@ -16,6 +16,7 @@ float emmission = 0.2f;
 uniform float roughness;
 
 uniform sampler2D Texture;
+uniform sampler2D NormalMap;
 
 uniform vec3 cameraPos;
 
@@ -24,6 +25,8 @@ uniform vec3 lightColor[255]; // = vec3(1,1,1);
 uniform float lightInt[255];// = float[](100.f, 100.f); // = 100.f;
 uniform vec3 lightPos[255];// = vec3(2,5,0);
 uniform float activeLights;
+
+float ambient = 0.1;
 
 float gamma = 2.2f;
 
@@ -65,7 +68,7 @@ vec4 calculatePBR(vec4 col)
     l = normalize(l);
     lightIntensity /= (lightToPixelDist * lightToPixelDist);
 
-    vec3 n = normal;
+    vec3 n = normalize(normal + texture(NormalMap, texCoord).xyz);
     vec3 v = normalize(cameraPos - currentPosition);
     vec3 h = normalize(v+l);
 
@@ -125,5 +128,7 @@ void main()
         FragColor = calculateLighting(col);
     }
 
-    FragColor = min(max(FragColor, vec4(0,0,0,0)), vec4(1,1,1,1));
+    vec4 minColor = col * ambient;
+
+    FragColor = min(max(FragColor, minColor), vec4(1,1,1,1));
 }

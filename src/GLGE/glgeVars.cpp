@@ -128,3 +128,6 @@ GLuint glgeShadowShader = 0;
 
 //store the light world position
 GLuint glgeLightWorldPosUniform = 0;
+
+//store how to sample images
+GLenum glgeWrapingMode = GL_NEAREST;
