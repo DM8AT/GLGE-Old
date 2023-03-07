@@ -284,8 +284,12 @@
 /**
  * this warning occures if a requested texture is not found in the texture atlas
  */
-#define GLGE_WARNING_ATLAS_CHILD_TEXTURE_NOT_FOUND "[GLGE WARNING RETURN] the requested texture %s was not found in texture atlas.\n"
+#define GLGE_WARNING_ATLAS_CHILD_TEXTURE_NOT_FOUND "[GLGE WARNING] the requested texture %s was not found in texture atlas.\n"
 
+/**
+ * this warning occures if a file is not the correct type
+ */
+#define GLGE_WARNING_INCORRECT_FILE_TYPE "[GLGE WARNING] the specified file %s is not the correct file type of %s.\n"
 
 ////////////////////////////////
 //GLGE Warning Position String//
@@ -297,3 +301,4 @@
 #define GLGE_WARNING_POS_MESH_MESH "[GLGE WARNING IN] warning occured in function 'Mesh::Mesh'"
 
 #endif
+
