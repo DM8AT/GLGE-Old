@@ -54,7 +54,7 @@ Upcoming features that may be added to GLGE in the future include:
       - light plates (some invisible shape that is emitting light)
 - Post processing
    - preset for post processing core
-   - preset for different effects (Bloom, distortion, usw)
+   - preset for different effects (Bloom, distortion, etc.)
 
 ## Working on
 Currently working on improving the shader core to make handling shaders simpler and more functional.
