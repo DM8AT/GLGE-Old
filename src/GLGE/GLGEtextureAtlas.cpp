@@ -514,6 +514,29 @@ int * atlas::_img_info(const char* path) {
 // Public classes //
 ////////////////////
 
+bool endsWith(std::string string, std::string suffix)
+{
+    //check if the suffix is bigger than the string
+    if (string.length() < suffix.length())
+    {
+        //the string can't have the suffix
+        return false;
+    }
+
+    //loop over all symbols in the suffix
+    for (int i = (int)suffix.length(); i > 0; i--)
+    {
+        //check if the symbol of the suffix is correct
+        if (string[(int)string.length() - i] != suffix[(int)suffix.length()-i])
+        {
+            //return that they are not the same, if they are not the same
+            return false;
+        }
+    }
+    //if the loop is passed, they are the same
+    return true;
+}
+
 // add objects to the paths vector
 void atlas::add(const char* path) {
     // check if path exists
@@ -525,7 +548,7 @@ void atlas::add(const char* path) {
     }
     // check if file is png or jpg
     std::string sPath = path;
-    if ( ! sPath.ends_with(".png") && ! sPath.ends_with(".jpg")) {
+    if ( ! endsWith(sPath, ".png") && ! endsWith(sPath, ".jpg")) {
         // print warning
         printf(GLGE_WARNING_INCORRECT_FILE_TYPE, path, "png or jpg");
         return;
