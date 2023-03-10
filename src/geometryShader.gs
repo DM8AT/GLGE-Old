@@ -10,7 +10,6 @@ out vec3 normal;
 out vec4 color;
 out vec2 texCoord;
 out vec3 currentPos;
-out mat3 TBN;
 
 in DATA{
     vec3 normal;

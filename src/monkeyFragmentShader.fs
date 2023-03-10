@@ -27,8 +27,6 @@ uniform int usedTextures;
 uniform bool NormalMapIsActive;
 uniform bool RoughnessMapIsActive;
 
-in mat3 TBN;
-
 uniform vec3 cameraPos;
 
 //light data
@@ -44,8 +42,6 @@ float gamma = 2.2f;
 int iteration = 0;
 
 float rough;
-
-mat3 tbn;
 
 vec3 schlickFresnel(float vDotH)
 {
@@ -78,9 +74,7 @@ vec4 calculatePBR(vec4 col)
 
     vec3 l = vec3(0.f);
 
-    vec3 posTBN = tbn * currentPos;
-
-    l = (tbn*lightPos[iteration]) - posTBN;
+    l = lightPos[iteration] - currentPos;
     float lightToPixelDist = length(l);
     l = normalize(l);
     lightIntensity /= (lightToPixelDist * lightToPixelDist);
@@ -92,7 +86,7 @@ vec4 calculatePBR(vec4 col)
         n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
     }
 
-    vec3 v = normalize((tbn*cameraPos) - posTBN);
+    vec3 v = normalize((cameraPos) - currentPos);
     vec3 h = normalize(v+l);
 
     float nDotH = max(dot(n, h), 0.f);
@@ -161,15 +155,6 @@ void main()
 
     //apply tonemapping
     col = vec4(vec3(1.f) - exp(-vec3(col) * exposure),col.w);
-
-    if (TBN == mat3(0))
-    {
-        tbn = mat3(1,0,0, 0,1,0, 0,0,1);
-    }
-    else
-    {
-        tbn = TBN;
-    }
 
     if (activeLights == 0.f)
     {
