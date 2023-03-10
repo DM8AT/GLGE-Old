@@ -580,7 +580,7 @@ private:
     //save the shader
     GLint shader;
     //store the move matrix location
-    GLuint moveMatLoc;
+    GLuint camMatLoc;
     //store the position of the model matrix, if it is found
     GLuint modelMatLoc;
     //store the position of the camera position vector, if it is found
@@ -588,7 +588,7 @@ private:
     //store the position of the camera rotation vector, if it is found
     GLuint camRotLoc;
     //the local matrix to make the object correct
-    mat4 moveMat = mat4(1,0,0,0,
+    mat4 camMat = mat4(1,0,0,0,
                         0,1,0,0,
                         0,0,1,0,
                         0,0,0,1);
@@ -616,7 +616,7 @@ private:
     void compileBuffers();
 
     //recalculate the move matrix
-    void recalculateMoveMatrix();
+    void recalculateMatrices();
 
     //compile the shader and save it
     void shaderSetup(const char* vs, const char* fs);

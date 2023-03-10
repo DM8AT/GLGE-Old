@@ -27,6 +27,7 @@
 #define GLGE_VERTEX_SHADER 1
 //define GLGE_FRAGMENT_SHADER to 2, it is needed in an constructor of the Shader class
 #define GLGE_FRAGMENT_SHADER 2
+//define GLGE_GEOMETRY_SHADER to 3, it is needed in an additional function of the shader class
 
 ///////////
 //CLASSES//
@@ -102,6 +103,20 @@ public:
     void deleteShader();
 
     /**
+     * @brief adds an geometry shader to the bound shader
+     * 
+     * @param source the source code of the shader
+     */
+    void addGeometryShader(std::string source);
+
+    /**
+     * @brief adds an geometry shader to the bound shader
+     * 
+     * @param source the file that contains the shader
+     */
+    void addGeometryShader(const char* file);
+
+    /**
      * @brief change the currently stored shader
      * 
      * @param vertexShaderFile the new vertex shader file
@@ -136,6 +151,7 @@ public:
 protected:
     //store the address of the OpenGL shader
     GLuint shader = 0;
+    //store the shader source code
 };
 
 /////////////

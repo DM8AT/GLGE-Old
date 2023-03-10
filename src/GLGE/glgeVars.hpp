@@ -73,7 +73,7 @@ extern void (*glgeMainCallback)();
 extern bool glgeHasMainCallback;
 
 //store the name for the move matrix
-extern char* glgeMoveMatrix;
+extern char* glgeCamMatrix;
 
 //store the window aspect
 extern float glgeWindowAspect;

@@ -393,11 +393,16 @@ void wallSetup()
     //reset the wraping mode
     glgeSetWrapingMode(GLGE_NEAREST);
 
+    //create a shader for the wall
+    Shader shader = Shader("src/vertexShader.vs", "src/monkeyFragmentShader.fs");
+    //set a geometry shader for the wall
+    shader.addGeometryShader("src/geometryShader.gs");
+
     //create the Wall from an file
-    wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,-25,0), 1.f));
+    wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,155,0), 1.f));
 
     //bind the shader of the object
-    wall.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
+    wall.setShader(shader.getShader());
 
     //apply the material to the wall
     wall.setMaterial(mat);

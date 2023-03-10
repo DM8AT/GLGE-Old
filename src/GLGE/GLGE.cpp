@@ -545,14 +545,14 @@ void glgeSetMoveMatrixName(const char* name)
         exit(1);
     }
     //sore the name for the move matrix
-    glgeMoveMatrix = (char*)name;
+    glgeCamMatrix = (char*)name;
 }
 
 //get the momantan name of the move matrix
 char* glgeGetMoveMatrixName()
 {
     //return the name of the move matrix
-    return glgeMoveMatrix;
+    return glgeCamMatrix;
 }
 
 //get the aspect of the window

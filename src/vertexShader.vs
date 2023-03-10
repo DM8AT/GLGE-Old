@@ -1,31 +1,30 @@
 #version 300 es
 
-in DATA {
-    vec3 pos;
-    vec4 color;
-    vec2 texCoord;
-    vec3 normal;
-} dataInp[];
+layout (location = 0) in vec3 pos;
+layout (location = 1) in vec4 color;
+layout (location = 2) in vec2 texCoord;
+layout (location = 3) in vec3 normal;
 
-in vec3 pos;
-in vec4 vColor;
-in vec2 vTexCoord;
-in vec3 vNormal;
-
-uniform mat4 moveMat;
+uniform mat4 camMat;
 uniform mat4 modelMat;
 
-out vec4 color;
-out vec2 texCoord;
-out vec3 normal;
-out vec3 currentPosition;
+out DATA{
+    vec3 normal;
+    vec4 color;
+    vec2 texCoord;
+    vec3 currentPosition;
+    mat4 projection;
+    mat4 modelMat; 
+} dataOut;
 
 void main()
 {
-    color = dataInp[0].color;
-    texCoord = dataInp[0].texCoord;
-    normal = dataInp[0].normal;
-
-    currentPosition = vec3(vec4(dataInp[0].pos, 1)*modelMat);
-    gl_Position = vec4(dataInp[0].pos, 1)*moveMat;
+    dataOut.color = color;
+    dataOut.texCoord = texCoord;
+    dataOut.normal = normal;
+    dataOut.projection = camMat;
+    dataOut.modelMat = modelMat;
+    dataOut.currentPosition = vec3(vec4(pos, 1)*modelMat);
+    
+    gl_Position = vec4(pos, 1.f) * modelMat;
 }

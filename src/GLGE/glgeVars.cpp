@@ -66,8 +66,8 @@ void (*glgeMainCallback)() = nullptr;
 //is a main callback function bound?
 bool glgeHasMainCallback = false;
 
-//store the name for the move matrix
-char* glgeMoveMatrix = (char*)"moveMat";
+//store the name for the camera matrix
+char* glgeCamMatrix = (char*)"camMat";
 
 //store the window aspect
 float glgeWindowAspect = 1.f;

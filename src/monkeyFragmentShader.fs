@@ -20,12 +20,14 @@ uniform sampler2D Texture;
 
 uniform int usedTextures;
 
+in mat3 TBN;
+
 uniform vec3 cameraPos;
 
 //light data
-uniform vec3 lightColor[255]; // = vec3(1,1,1);
-uniform float lightInt[255];// = float[](100.f, 100.f); // = 100.f;
-uniform vec3 lightPos[255];// = vec3(2,5,0);
+uniform vec3 lightColor[255];
+uniform float lightInt[255];
+uniform vec3 lightPos[255];
 uniform float activeLights;
 
 float ambient = 0.1;
@@ -33,6 +35,8 @@ float ambient = 0.1;
 float gamma = 2.2f;
 
 int iteration = 0;
+
+mat3 tbn;
 
 vec3 schlickFresnel(float vDotH)
 {
@@ -65,7 +69,9 @@ vec4 calculatePBR(vec4 col)
 
     vec3 l = vec3(0.f);
 
-    l = lightPos[iteration] - currentPos;
+    vec3 posTBN = tbn * currentPos;
+
+    l = (tbn*lightPos[iteration]) - posTBN;
     float lightToPixelDist = length(l);
     l = normalize(l);
     lightIntensity /= (lightToPixelDist * lightToPixelDist);
@@ -74,10 +80,10 @@ vec4 calculatePBR(vec4 col)
 
     if (usedTextures > 1)
     {
-        n = normalize(normal + texture(NormalMap, texCoord).rgb);
+        n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
     }
 
-    vec3 v = normalize(cameraPos - currentPos);
+    vec3 v = normalize((tbn*cameraPos) - posTBN);
     vec3 h = normalize(v+l);
 
     float nDotH = max(dot(n, h), 0.f);
@@ -127,6 +133,16 @@ vec4 calculateLighting(vec4 col)
 void main()
 {
     vec4 col = texture(Texture, texCoord)+color;
+
+    if (TBN == mat3(0))
+    {
+        tbn = mat3(1,0,0, 0,1,0, 0,0,1);
+    }
+    else
+    {
+        tbn = TBN;
+    }
+
     if (activeLights == 0.f)
     {
         FragColor = col;

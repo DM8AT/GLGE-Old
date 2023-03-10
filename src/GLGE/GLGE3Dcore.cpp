@@ -72,7 +72,7 @@ Camera* glgeMainCamera;
 //store the default 3D shader
 GLuint glgeShaderDefault;
 //the position of the shader 
-GLint glgeMoveMatDefaulLoc;
+GLint glgeCamMatDefaulLoc;
 
 ////////////////////////////
 //Decalrations for Structs//
@@ -563,8 +563,8 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
-    //store the move matrix location
-    this->moveMatLoc = glgeMoveMatDefaulLoc;
+    //store the camera matrix location
+    this->camMatLoc = glgeCamMatDefaulLoc;
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -589,7 +589,7 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
     //store the move matrix location
-    this->moveMatLoc = glgeMoveMatDefaulLoc;
+    this->camMatLoc = glgeCamMatDefaulLoc;
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -614,7 +614,7 @@ Object::Object(Mesh mesh, Transform transform, bool isStatic)
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
     //store the move matrix location
-    this->moveMatLoc = glgeMoveMatDefaulLoc;
+    this->camMatLoc = glgeCamMatDefaulLoc;
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -639,7 +639,7 @@ Object::Object(const char* file, int type, Transform transform, bool isStatic)
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
     //store the move matrix location
-    this->moveMatLoc = glgeMoveMatDefaulLoc;
+    this->camMatLoc = glgeCamMatDefaulLoc;
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -680,7 +680,7 @@ void Object::draw()
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
 
     //pass the move matrix to the shader
-    glUniformMatrix4fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
+    glUniformMatrix4fv(camMatLoc, 1, GL_FALSE, &this->camMat.m[0][0]);
     //pass the model matrix to the shader, if it has one
     if (modelMatLoc != 0)
     {
@@ -724,7 +724,7 @@ void Object::draw()
 void Object::update()
 {
     //recalculate the move matrix
-    this->recalculateMoveMatrix();
+    this->recalculateMatrices();
 
     //check if a light source was changed
     if (this->lightPosLocs.size() != glgeLights.size())
@@ -1003,12 +1003,12 @@ void Object::shaderSetup(const char* vs, const char* fs)
     this->getUniforms();
 }
 
-void Object::recalculateMoveMatrix()
+void Object::recalculateMatrices()
 {
     //save the model matrix
     this->modelMat = this->transf.getMatrix();
     //set the move matrix to the product of 3 matrices
-    this->moveMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix() * this->transf.getMatrix();
+    this->camMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix();
 }
 
 void Object::getUniforms()
@@ -1018,7 +1018,7 @@ void Object::getUniforms()
     //deactivate GLGE errors
     glgeErrorOutput = false;
     //save the location of the move matrix
-    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeMoveMatrix);
+    this->camMatLoc = glgeGetUniformVar(this->shader, glgeCamMatrix);
     //save the location of the model matrix
     this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
     //save the location of the camera position argument
@@ -1430,6 +1430,6 @@ void glgeInit3DCore()
 
     //load the default 3D shaders
     glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
-    //store the location of the move matrix in the default shader
-    glgeMoveMatDefaulLoc = glgeGetUniformVar(glgeShaderDefault, glgeMoveMatrix);
+    //store the location of the camera matrix in the default shader
+    glgeCamMatDefaulLoc = glgeGetUniformVar(glgeShaderDefault, glgeCamMatrix);
 }

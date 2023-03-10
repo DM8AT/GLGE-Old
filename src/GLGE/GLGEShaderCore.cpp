@@ -14,6 +14,7 @@
 #include "glgeFuncs.hpp"
 #include "glgeVars.hpp"
 #include "glgePrivDefines.hpp"
+#include "glgeErrors.hpp"
 
 //include the default librarys
 #include <iostream>
@@ -138,6 +139,108 @@ void Shader::deleteShader()
     glDeleteProgram(this->shader);
     //set the stored shader to 0
     this->shader = 0;
+}
+
+void Shader::addGeometryShader(std::string source)
+{
+    //add the shader program from the second file
+    addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
+
+    //create an variable to check for success
+    GLint success = 0;
+    //setup an error log
+    GLchar ErrorLog[1024] = {0};
+
+    //link the shader program
+    glLinkProgram(this->shader);
+
+    //get the program iv from the shader
+    glGetProgramiv(this->shader, GL_LINK_STATUS, &success);
+    //check if the program linking was no success
+    if (success == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //check if the program is valide
+    glValidateProgram(this->shader);
+    //get the program iv again
+    glGetProgramiv(this->shader, GL_VALIDATE_STATUS, &success);
+    //check for success
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+}
+
+void Shader::addGeometryShader(const char* f)
+{
+    //store the shader source code 
+    std::string source;
+
+    //read the fiel
+    readFile(f, source);
+
+    //add the shader program from the second file
+    addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
+
+    //create an variable to check for success
+    GLint success = 0;
+    //setup an error log
+    GLchar ErrorLog[1024] = {0};
+
+    //link the shader program
+    glLinkProgram(this->shader);
+
+    //get the program iv from the shader
+    glGetProgramiv(this->shader, GL_LINK_STATUS, &success);
+    //check if the program linking was no success
+    if (success == 0)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
+
+    //check if the program is valide
+    glValidateProgram(this->shader);
+    //get the program iv again
+    glGetProgramiv(this->shader, GL_VALIDATE_STATUS, &success);
+    //check for success
+    if (!success)
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            //get the error from open gl and output it with an custom message
+            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
+            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
+        }
+        //stop the program
+        exit(1);
+    }
 }
 
 void Shader::updateShader(const char* vertexShaderFile, const char* fragmentShaderFile)
