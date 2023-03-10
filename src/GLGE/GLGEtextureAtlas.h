@@ -10,8 +10,12 @@
  */
 #include "nlohmann/json.hpp"
 #include "glgeErrors.hpp"
+#include "CML/CMLDVec2.h"
+#include "CML/CMLDVec3.h"
+#include "CML/CMLDVec4.h"
 #include "stb_image.hpp"
 #include "glgeFuncs.hpp"
+#include "CML/CMLVec2.h"
 #include "CML/CMLVec3.h"
 #include "CML/CMLVec4.h"
 #include <filesystem>
@@ -152,7 +156,7 @@ class atlas {
          * @param mode Whether or not the position will be a (0) GLGE texture position or a (1) pixel position
          * @return vec2 The position of the texture in the atlas
          */
-        vec2 getTexCoord(const char* texture, int corner, int frame = -1, int mode = 0);
+        dvec2 getTexCoord(const char* texture, int corner, int frame = -1, int mode = 0);
     
         /**
          * @brief Load an atlas from a file. The specified file must be png and there mus be a file with the same name but ending with .json
