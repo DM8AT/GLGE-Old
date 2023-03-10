@@ -148,6 +148,7 @@ class atlas {
          * 
          * @param texture The texture name (including path), this will be the same as the texture string from the add function, for example 'assets/cubeTexture.png'
          * @param corner Which corner position to return, 0 top left, 1 top right, 2 bottom left, 3 bottom right
+         * @param frame The frame of the animation from the texture. if the frame index is less than 0, it wont do anything
          * @param mode Whether or not the position will be a (0) GLGE texture position or a (1) pixel position
          * @return vec2 The position of the texture in the atlas
          */
