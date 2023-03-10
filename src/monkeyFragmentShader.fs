@@ -15,10 +15,17 @@ in vec3 currentPos;
 float emmission = 0.2f;
 uniform float roughness;
 
+uniform sampler2D AmbientMap;
 uniform sampler2D NormalMap;
+uniform sampler2D RoughnessMap;
 uniform sampler2D Texture;
 
+float exposure = 0.01;
+
 uniform int usedTextures;
+
+uniform bool NormalMapIsActive;
+uniform bool RoughnessMapIsActive;
 
 in mat3 TBN;
 
@@ -36,6 +43,8 @@ float gamma = 2.2f;
 
 int iteration = 0;
 
+float rough;
+
 mat3 tbn;
 
 vec3 schlickFresnel(float vDotH)
@@ -49,7 +58,7 @@ vec3 schlickFresnel(float vDotH)
 
 float geomSmith(float dp)
 {
-    float k = (roughness + 1.f) * (roughness + 1.f) / 8.f;
+    float k = (rough + 1.f) * (rough + 1.f) / 8.f;
     float denom = dp * (1.f - k) + k;
     return dp / denom;
 }
@@ -57,7 +66,7 @@ float geomSmith(float dp)
 
 float ggxDistribution(float nDotH)
 {
-    float alpha2 = roughness * roughness * roughness * roughness;
+    float alpha2 = rough * rough * rough * rough;
     float d = nDotH * nDotH * (alpha2 - 1.f) + 1.f;
     float ggxdistrib = alpha2 / (PI * d * d);
     return ggxdistrib;
@@ -78,7 +87,7 @@ vec4 calculatePBR(vec4 col)
 
     vec3 n = normalize(normal);
 
-    if (usedTextures > 1)
+    if (NormalMapIsActive)
     {
         n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
     }
@@ -132,7 +141,26 @@ vec4 calculateLighting(vec4 col)
 
 void main()
 {
-    vec4 col = texture(Texture, texCoord)+color;
+    vec4 col = texture(Texture, texCoord);
+
+    if (usedTextures > 1)
+    {
+        col *= texture(AmbientMap, texCoord);
+    }
+
+    col += color;
+
+    if (RoughnessMapIsActive)
+    {
+        rough = texture(RoughnessMap, texCoord);
+    }
+    else
+    {
+        rough = roughness;
+    }
+
+    //apply tonemapping
+    col = vec4(vec3(1.f) - exp(-vec3(col) * exposure),col.w);
 
     if (TBN == mat3(0))
     {

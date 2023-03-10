@@ -44,10 +44,15 @@
 #define GLGE_SPECULAR_MAP_NAME "specularMap"
 //define the default name for a offset map
 #define GLGE_OFFSET_MAP_NAME "offsetMap"
+//define the default name for a roughness map
+#define GLGE_ROUGHNESS_MAP_NAME "roughnessMap"
 //define the default name for the color
 #define GLGE_COLOR_NAME "col"
 //define the name for the var to say the number of used textures
 #define GLGE_USED_TEXTURES_VAR "usedTextures"
+
+//define the suffix for activated materials
+#define GLGE_SUFFIX_IS_ACTIVE_TEXTURE "IsActive"
 
 //include the needed math librarys
 #include "CML/CMLVec4.h"
@@ -94,12 +99,20 @@ public:
     void setDefaultUnifromName(const char* newName, unsigned int type);
 
     /**
-     * @brief add an image for an default uniform
-     * 
-     * @param image the path to the image
-     * @param type the type of the default uniform
+     * @brief Set the Normal Map for a material
+     * this function stores that the material has normal maps activated
+     * @param image the image for the normal map
+     * @param uniformName the uniform for the normal map in the shader
      */
-    void addImage(const char* image, unsigned int type = GLGE_IMAGE);
+    void setNormalMap(const char* image, const char* uniformName = GLGE_NORMAL_MAP_NAME);
+
+    /**
+     * @brief Set the Roughness Map for a material
+     * this function stores that the material has roughness maps activated
+     * @param image the image for the roughness maps
+     * @param uniformName the uniform name for the roughness map
+     */
+    void setRoughnessMap(const char* image, const char* uniformName = GLGE_ROUGHNESS_MAP_NAME);
 
     /**
      * @brief add an image to a new uniform
@@ -139,6 +152,10 @@ private:
     GLuint colorLoc = 0;
     //store the position of the used textures uniform
     GLuint usedLoc = 0;
+    //store the position to say if the normal map is active
+    GLuint normIsActivLoc = 0;
+    //store the position to say if the roughness map is active
+    GLuint roughIsActivLoc = 0;
     //store all images for the Material
     std::vector<GLuint> textures;
     //store the positons of the images
@@ -147,6 +164,8 @@ private:
     std::vector<const char*> uniformNames;
     //store the location of the normal map in the image vector
     int normalMapLoc = -1;
+    //store the location of the roughness map in the image vector
+    int roughnessMapLoc = -1;
     //store the location of the specular map in the image vector
     int specularMapLoc = -1;
     //store the location of the offset map in the image vector
@@ -157,6 +176,8 @@ private:
     float roughness;
     //store the names for the normal map uniform
     const char* normalUniform = GLGE_NORMAL_MAP_NAME;
+    //store the names for the roughness map uniform
+    const char* roughnessUniform = GLGE_ROUGHNESS_MAP_NAME;
     //store the names for the specular map uniform
     const char* specularUniform = GLGE_SPECULAR_MAP_NAME;
     //store the names for the offset map uniform

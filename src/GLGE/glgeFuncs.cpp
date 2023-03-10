@@ -437,7 +437,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
         glGenTextures(1, &glgeFrameBufferMultisampleTexture);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
         //set the texture parameters so it dosn't loop around the screen
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
+        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
         //bind the texture to the frame buffer
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture, 0);
 

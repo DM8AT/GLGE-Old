@@ -7,6 +7,7 @@ layout (location = 3) in vec3 normal;
 
 uniform mat4 camMat;
 uniform mat4 modelMat;
+uniform mat4 rotMat;
 
 out DATA{
     vec3 normal;
@@ -21,7 +22,14 @@ void main()
 {
     dataOut.color = color;
     dataOut.texCoord = texCoord;
-    dataOut.normal = normal;
+    if (rotMat == mat4(0))
+    {
+        dataOut.normal = normal;
+    }
+    else
+    {
+        dataOut.normal = normalize(vec3(vec4(normal,1)*rotMat));
+    }
     dataOut.projection = camMat;
     dataOut.modelMat = modelMat;
     dataOut.currentPosition = vec3(vec4(pos, 1)*modelMat);

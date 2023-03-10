@@ -151,6 +151,30 @@ mat4 Transform::getMatrix()
     return transl * scaleMat * ((rotXMat * rotYMat) * rotZMat);
 }
 
+mat4 Transform::getRotationMatrix()
+{
+    //rotation on x axis
+    mat4 rotXMat = mat4(1, 0,                     0,                     0,
+                        0, std::cos(this->rot.x),-std::sin(this->rot.x), 0,
+                        0, std::sin(this->rot.x), std::cos(this->rot.x), 0,
+                        0, 0,                     0,                     1);
+
+    //rotation on y axis
+    mat4 rotYMat = mat4(std::cos(this->rot.y), 0, std::sin(this->rot.y), 0,
+                        0,                     1,                     0, 0,
+                       -std::sin(this->rot.y), 0, std::cos(this->rot.y), 0,
+                        0,                     0,                     0, 1);
+
+    //rotation on z axis
+    mat4 rotZMat = mat4(std::cos(this->rot.z),-std::sin(this->rot.z), 0, 0,
+                        std::sin(this->rot.z), std::cos(this->rot.z), 0, 0,
+                        0,                     0,                     1, 0,
+                        0,                     0,                     0, 1);
+
+    //return the product of the matrices
+    return (rotXMat * rotYMat) * rotZMat;
+}
+
 //////////
 //Vertex//
 //////////
@@ -686,6 +710,11 @@ void Object::draw()
     {
         glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
     }
+    //pas the rotation matrix to the shader, if it has one
+    if (this->rotMatLoc != 0)
+    {
+        glUniformMatrix4fv(rotMatLoc, 1, GL_FALSE, &this->rotMat.m[0][0]);
+    }
     //pass the camera position to the shader, if it has one
     if (this->camPosLoc != 0)
     {
@@ -1009,6 +1038,8 @@ void Object::recalculateMatrices()
     this->modelMat = this->transf.getMatrix();
     //set the move matrix to the product of 3 matrices
     this->camMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix();
+    //recalculate the rotation matrix
+    this->rotMat = this->transf.getRotationMatrix();
 }
 
 void Object::getUniforms()
@@ -1025,6 +1056,8 @@ void Object::getUniforms()
     this->camPosLoc = glgeGetUniformVar(this->shader, "cameraPos");
     //save the location of the camera rotation argument
     this->camRotLoc = glgeGetUniformVar(this->shader, "cameraLook");
+    //store the location of the rotation matrix
+    this->rotMatLoc = glgeGetUniformVar(this->shader, "rotMat");
     //reset GLGE error output
     glgeErrorOutput = outErrs;
 

@@ -72,46 +72,32 @@ void Material::setDefaultUnifromName(const char* newName, unsigned int type)
     }
 }
 
-void Material::addImage(const char* image, unsigned int type)
+void Material::setNormalMap(const char* image, const char* uniformName)
 {
-    //add the new image to the image vector
+    //store the texture in the map vector
     this->textures.push_back(glgeTextureFromFile(image));
+    //say that that image has no other name
+    this->uniformNames.push_back(uniformName);
     //store an empty image positoion
     this->imageLocs.push_back(0);
-    
-    //check if the type is the default image
-    if (type == GLGE_IMAGE)
-    {
-        //store the default name for the image in the uniform vector
-        this->uniformNames.push_back("image");
-    }
-    //else, check if the type is a normal map
-    else if (type == GLGE_NORMAL_MAP)
-    {
-        //store an empty string in the unifrom
-        this->uniformNames.push_back(NULL);
+    //store where the position is
+    this->normalMapLoc = this->textures.size() - 1;
+    //store the name of the uniform
+    this->normalUniform = uniformName;
+}
 
-        //store the location of the normal map
-        this->normalMapLoc = (unsigned int)this->uniformNames.size()-1;
-    }
-    //else, check if the type is a specular map
-    else if (type == GLGE_SPECULAR_MAP)
-    {
-        //store an empty string in the unifrom
-        this->uniformNames.push_back(NULL);
-
-        //store the location of the specular map
-        this->specularMapLoc = (unsigned int)this->uniformNames.size()-1;
-    }
-    //else, check if the type is a offset map
-    else if (type == GLGE_OFFSET_MAP)
-    {
-        //store an empty string in the unifrom
-        this->uniformNames.push_back(NULL);
-
-        //store the location of the offset map
-        this->offsetMapLoc = (unsigned int)this->uniformNames.size()-1;
-    }
+void Material::setRoughnessMap(const char* image, const char* uniformName)
+{
+    //store the texture in the map vector
+    this->textures.push_back(glgeTextureFromFile(image));
+    //say that that image has no other name
+    this->uniformNames.push_back(uniformName);
+    //store an empty image positoion
+    this->imageLocs.push_back(0);
+    //store where the position is
+    this->roughnessMapLoc = this->textures.size() - 1;
+    //store the name of the uniform
+    this->roughnessUniform = uniformName;
 }
 
 void Material::addImage(const char* image, const char* uniformName)
@@ -134,6 +120,12 @@ void Material::applyShader(GLuint shader)
     bool err = glgeErrorOutput;
     //disable the GLGE error output
     glgeErrorOutput = false;
+
+    //get the location of the signal to store if the normal map is used
+    this->normIsActivLoc = glgeGetUniformVar(shader, (std::string(this->normalUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
+
+    //get the location of the signal to store if the roughness map is used
+    this->roughIsActivLoc = glgeGetUniformVar(shader, (std::string(this->roughnessUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
 
     //get the location of the roughness variable
     this->roughnessLoc = glgeGetUniformVar(shader, "roughness");
@@ -215,48 +207,26 @@ void Material::applyMaterial()
         glUniform1f(this->roughnessLoc, roughness);
     }
 
-    //pass the amount of textures to the shader
-    glUniform1i(this->usedLoc, (int)this->textures.size());
+    //pass if a normal map is bound, but only if the uniform exists
+    if (this->normIsActivLoc != 0)
+    {
+        glUniform1i(this->normIsActivLoc, (int) this->normalMapLoc!=-1);
+    }
+
+    //pass if a roughness map is bound, but only if the uniform exists
+    if (this->roughIsActivLoc != 0)
+    {
+        glUniform1i(this->roughIsActivLoc, (int) this->roughnessMapLoc!=-1);
+    }
+
+    //pass the amount of textures to the shader, but only if the uniform exists
+    if (this->usedLoc != 0)
+    {
+        glUniform1i(this->usedLoc, (int)this->textures.size());
+    }
 
     //store how much textures are bound
     int bTs = 0;
-
-    //check if the normal map exists
-    if (this->normalMapLoc != -1)
-    {
-        //bind the normal map to an texture sampler
-        glActiveTexture(GL_TEXTURE0 + bTs);
-        //add the bound texture
-        this->boundTextures.push_back(GL_TEXTURE0 + bTs);
-        //pass the normal map to the shader
-        glUniform1i(this->textures[this->normalMapLoc], bTs);
-        //change the amout of bound textures by 1
-        bTs++;
-    }
-
-    //check if the specular map exists
-    if (this->specularMapLoc != -1)
-    {
-        //bind the specular map to an texture sampler
-        glActiveTexture(GL_TEXTURE0 + bTs);
-        //pass the specular map to the shader
-        glUniform1i(this->textures[this->specularMapLoc], bTs);
-        //change the amout of bound textures by 1
-        bTs++;
-    }
-
-    //check if the offset map exists
-    if (this->offsetMapLoc != -1)
-    {
-        //bind the offset map to an texture sampler
-        glActiveTexture(GL_TEXTURE0 + bTs);
-        //add the bound texture
-        this->boundTextures.push_back(GL_TEXTURE0 + bTs);
-        //pass the offset map to the shader
-        glUniform1i(this->textures[this->offsetMapLoc], bTs);
-        //change the amout of bound textures by 1
-        bTs++;
-    }
 
     //check if there are textures to load
     if ((int)this->textures.size() == 0)

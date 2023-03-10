@@ -82,6 +82,13 @@ struct Transform
      * @return mat4 transformation matrix
      */
     mat4 getMatrix();
+
+    /**
+     * @brief Get the Rotation Matrix
+     * 
+     * @return mat4 the rotation matrix
+     */
+    mat4 getRotationMatrix();
 };
 
 /**
@@ -583,6 +590,8 @@ private:
     GLuint camMatLoc;
     //store the position of the model matrix, if it is found
     GLuint modelMatLoc;
+    //store the rotation matrix location
+    GLuint rotMatLoc;
     //store the position of the camera position vector, if it is found
     GLuint camPosLoc;
     //store the position of the camera rotation vector, if it is found
@@ -597,6 +606,11 @@ private:
                          0,1,0,0,
                          0,0,1,0,
                          0,0,0,1);
+    //store the rotation matrix
+    mat4 rotMat = mat4(1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1);
     //store if the object is static
     bool isStatic;
     //store the length of the index and vertex vuffer
@@ -810,6 +824,11 @@ private:
     double far = 10.0;
     //store the transform of the camera
     Transform transf;
+
+    //store the location of the exposure
+    GLuint expLoc;
+    //store the exposure
+    float exposure = 0.1;
 
     //store the view matrix
     mat4 viewMatrix;

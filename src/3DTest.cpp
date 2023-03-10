@@ -381,17 +381,20 @@ void wallSetup()
     //load the albedo to the material
     mat = Material("assets/WallTexture/harshbricks-albedo.png", "Texture", 0.2);
 
-    //add the second texture for the ambient occlusion
-    mat.addImage("assets/WallTexture/harshbricks-ao2.png", "AmbientMap");
-
     //set the wraping mode to linear, so the normal get linearly interpolated. It looks better
     glgeSetWrapingMode(GLGE_LINEAR);
 
     //load the normal map to the material
-    mat.addImage("assets/WallTexture/harshbricks-normal.png", "NormalMap");
+    mat.setNormalMap("assets/WallTexture/harshbricks-normal.png", "NormalMap");
+
+    //load the roughness map
+    mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", "RoughnessMap");
 
     //reset the wraping mode
     glgeSetWrapingMode(GLGE_NEAREST);
+
+    //add the second texture for the ambient occlusion
+    mat.addImage("assets/WallTexture/harshbricks-ao2.png", "AmbientMap");
 
     //create a shader for the wall
     Shader shader = Shader("src/vertexShader.vs", "src/monkeyFragmentShader.fs");
