@@ -204,7 +204,7 @@ void tick()
     wall.update();
 
     //set the position of the light source to be exactly at the player
-    //light.setPos(camera.getPos());
+    l2.setPos(camera.getPos());
 
     //write the current FPS
     std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
@@ -390,6 +390,9 @@ void wallSetup()
     //load the roughness map
     mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", "RoughnessMap");
 
+    //load the height map
+    mat.setHeightMap("assets/WallTexture/harshbricks-height5.png");
+
     //reset the wraping mode
     glgeSetWrapingMode(GLGE_NEAREST);
 
@@ -479,7 +482,7 @@ void run3Dexample(int argc, char** argv)
     //setup the wall
     wallSetup();
 
-    l2 = Light(2,5,0, 1,0,0.5, 100);
+    l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
     glgeAddGlobalLighSource(&l2);
 
     light = Light(2,5,0, 1,1,1, 250);

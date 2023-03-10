@@ -139,7 +139,7 @@ void main()
 
     if (usedTextures > 1)
     {
-        col *= texture(AmbientMap, texCoord);
+        col = vec4(vec3(col * texture(AmbientMap, texCoord).r), col.w);
     }
 
     col += color;

@@ -33,8 +33,8 @@
 #define GLGE_NORMAL_MAP 4
 //define the image type for an specular map
 #define GLGE_SPECULAR_MAP 5
-//define the image type for an offset map
-#define GLGE_OFFSET_MAP 6
+//define the image type for an height map
+#define GLGE_HEIGHT_MAP 6
 
 //define the names for the default unifroms
 
@@ -42,8 +42,8 @@
 #define GLGE_NORMAL_MAP_NAME "normalMap"
 //define the default name for a specular map
 #define GLGE_SPECULAR_MAP_NAME "specularMap"
-//define the default name for a offset map
-#define GLGE_OFFSET_MAP_NAME "offsetMap"
+//define the default name for a height map
+#define GLGE_HEIGHT_MAP_NAME "heightMap"
 //define the default name for a roughness map
 #define GLGE_ROUGHNESS_MAP_NAME "roughnessMap"
 //define the default name for the color
@@ -115,6 +115,14 @@ public:
     void setRoughnessMap(const char* image, const char* uniformName = GLGE_ROUGHNESS_MAP_NAME);
 
     /**
+     * @brief Set the Height Map for a material
+     * this function stores that the material has height maps activated
+     * @param image the image for the height map
+     * @param uniformName the uniform name for the roughness map
+     */
+    void setHeightMap(const char* image, const char* uniformName = GLGE_HEIGHT_MAP_NAME);
+
+    /**
      * @brief add an image to a new uniform
      * 
      * @param image the path to the image
@@ -156,6 +164,8 @@ private:
     GLuint normIsActivLoc = 0;
     //store the position to say if the roughness map is active
     GLuint roughIsActivLoc = 0;
+    //store the position to say if the hight map is used
+    GLuint highIsActiveLoc = 0;
     //store all images for the Material
     std::vector<GLuint> textures;
     //store the positons of the images
@@ -168,8 +178,8 @@ private:
     int roughnessMapLoc = -1;
     //store the location of the specular map in the image vector
     int specularMapLoc = -1;
-    //store the location of the offset map in the image vector
-    int offsetMapLoc = -1;
+    //store the location of the height map in the image vector
+    int heightMapLoc = -1;
     //store the color
     vec4 color = vec4(1,1,1,1);
     //store the roughness
@@ -180,8 +190,8 @@ private:
     const char* roughnessUniform = GLGE_ROUGHNESS_MAP_NAME;
     //store the names for the specular map uniform
     const char* specularUniform = GLGE_SPECULAR_MAP_NAME;
-    //store the names for the offset map uniform
-    const char* offsetUniform = GLGE_OFFSET_MAP_NAME;
+    //store the names for the height map uniform
+    const char* heightUniform = GLGE_HEIGHT_MAP_NAME;
     //store the names for the color uniform
     const char* colorUniform = GLGE_COLOR_NAME;
     //store the bound textures

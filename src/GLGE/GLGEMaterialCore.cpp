@@ -56,9 +56,9 @@ void Material::setDefaultUnifromName(const char* newName, unsigned int type)
             this->specularUniform = newName;
             break;
 
-        //case if the new name is for a offset map
-        case GLGE_OFFSET_MAP:
-            this->offsetUniform = newName;
+        //case if the new name is for a height map
+        case GLGE_HEIGHT_MAP:
+            this->heightUniform = newName;
             break;
 
         //case if the new name is for a color
@@ -100,6 +100,20 @@ void Material::setRoughnessMap(const char* image, const char* uniformName)
     this->roughnessUniform = uniformName;
 }
 
+void Material::setHeightMap(const char* image, const char* uniformName)
+{
+    //store the texture in the map vector
+    this->textures.push_back(glgeTextureFromFile(image));
+    //say that that image has no other name
+    this->uniformNames.push_back(uniformName);
+    //store an empty image positoion
+    this->imageLocs.push_back(0);
+    //store where the position is
+    this->heightMapLoc = this->textures.size() - 1;
+    //store the name of the uniform
+    this->heightUniform = uniformName;
+}
+
 void Material::addImage(const char* image, const char* uniformName)
 {
     //store the inputed image in the image vector
@@ -127,6 +141,9 @@ void Material::applyShader(GLuint shader)
     //get the location of the signal to store if the roughness map is used
     this->roughIsActivLoc = glgeGetUniformVar(shader, (std::string(this->roughnessUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
 
+    //get the location of the signal to store if the height map is used
+    this->highIsActiveLoc = glgeGetUniformVar(shader, (std::string(this->heightUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
+
     //get the location of the roughness variable
     this->roughnessLoc = glgeGetUniformVar(shader, "roughness");
 
@@ -151,11 +168,11 @@ void Material::applyShader(GLuint shader)
         bTs++;
     }
 
-    //try get the offset map location
-    if (this->offsetMapLoc != -1)
+    //try get the height map location
+    if (this->heightMapLoc != -1)
     {
-        //load the location of the offset map
-        this->imageLocs[offsetMapLoc] = glgeGetUniformVar(shader, this->offsetUniform);
+        //load the location of the height map
+        this->imageLocs[heightMapLoc] = glgeGetUniformVar(shader, this->heightUniform);
         //pass the texture to the shader
         bTs++;
     }
@@ -219,6 +236,12 @@ void Material::applyMaterial()
         glUniform1i(this->roughIsActivLoc, (int) this->roughnessMapLoc!=-1);
     }
 
+    //pass if a height map is bound, but only if the uniform exists
+    if (this->highIsActiveLoc != 0)
+    {
+        glUniform1i(this->highIsActiveLoc, (int) this->heightMapLoc!=-1);
+    }
+
     //pass the amount of textures to the shader, but only if the uniform exists
     if (this->usedLoc != 0)
     {
@@ -239,7 +262,7 @@ void Material::applyMaterial()
     for (int i = 0; i < (int)this->textures.size(); i++)
     {
         //check if the texture could allready be bound
-        if (i == this->normalMapLoc || i == this->specularMapLoc || i == this->offsetMapLoc)
+        if (i == this->normalMapLoc || i == this->specularMapLoc || i == this->heightMapLoc)
         {
             //skip to the next iteration
             continue;
