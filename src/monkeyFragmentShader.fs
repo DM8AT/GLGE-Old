@@ -152,7 +152,7 @@ void main()
 
     if (RoughnessMapIsActive)
     {
-        rough = texture(RoughnessMap, texCoord);
+        rough = texture(RoughnessMap, texCoord).r;
     }
     else
     {
