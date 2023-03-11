@@ -166,7 +166,7 @@ void vec::operator/=(float v)
 
 float vec::length()
 {
-    float out;
+    float out = 0;
     for(int i = 0; i < this->size(); i++)
     {
         out += this->val[i]*this->val[i];

@@ -131,3 +131,6 @@ GLuint glgeLightWorldPosUniform = 0;
 
 //store how to sample images
 GLenum glgeWrapingMode = GL_NEAREST;
+
+//store if the shadow pass is currently drawing
+bool glgeIsShadowPass = false;

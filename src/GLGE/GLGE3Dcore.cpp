@@ -677,77 +677,87 @@ void Object::draw()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-    //bind the texture
-    //glBindTexture(GL_TEXTURE_2D, texture);
+    //check if the shadow pass is drawn
+    if (!glgeIsShadowPass)
+    {
+        //only do shader binding if if it is not the shadow pass
+        //bind the shader
+        glUseProgram(this->shader);
 
-    //bind the shader
-    glUseProgram(this->shader);
+        //Bind the material
+        this->mat.applyMaterial();
 
-    //Bind the material
-    this->mat.applyMaterial();
+        //bind all light uniforms
+        this->loadLights();
 
-    //bind all light uniforms
-    this->loadLights();
+        //activate sub elements
+        //say where the position vector is
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
+        //say where the color is
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
+        //say where the texCoords are
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
+        //say where the normals are
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
+    }
 
-    //activate sub elements
-    //say where the position vector is
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
-    //say where the color is
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
-    //say where the texCoords are
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
-    //say where the normals are
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
-
-    //pass the move matrix to the shader
+    //always pass the move matrix to the shader
     glUniformMatrix4fv(camMatLoc, 1, GL_FALSE, &this->camMat.m[0][0]);
-    //pass the model matrix to the shader, if it has one
-    if (modelMatLoc != 0)
+    //other uniforms are only passed if it is not the shadow pass
+    if (!glgeIsShadowPass)
     {
-        glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
-    }
-    //pas the rotation matrix to the shader, if it has one
-    if (this->rotMatLoc != 0)
-    {
-        glUniformMatrix4fv(rotMatLoc, 1, GL_FALSE, &this->rotMat.m[0][0]);
-    }
-    //pass the camera position to the shader, if it has one
-    if (this->camPosLoc != 0)
-    {
-        glUniform3f(this->camPosLoc, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
-    }
-    //pass the camera position to the shader, if it has one
-    if (this->camRotLoc != 0)
-    {
-        glUniform3f(this->camRotLoc, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeMainCamera->getRotation().z);
+        //pass the model matrix to the shader, if it has one
+        if (modelMatLoc != 0)
+        {
+            glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
+        }
+        //pas the rotation matrix to the shader, if it has one
+        if (this->rotMatLoc != 0)
+        {
+            glUniformMatrix4fv(rotMatLoc, 1, GL_FALSE, &this->rotMat.m[0][0]);
+        }
+        //pass the camera position to the shader, if it has one
+        if (this->camPosLoc != 0)
+        {
+            glUniform3f(this->camPosLoc, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
+        }
+        //pass the camera position to the shader, if it has one
+        if (this->camRotLoc != 0)
+        {
+            glUniform3f(this->camRotLoc, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeMainCamera->getRotation().z);
+        }
     }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
-    //unbind the material
-    this->mat.removeMaterial();
+    //these things are only bound if it is not the shadow pass
+    if (!glgeIsShadowPass)
+    {
+        //unbind the material
+        this->mat.removeMaterial();
 
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
 
-    //deactivate the sub elements
-    //deactivate the position argument
-    glDisableVertexAttribArray(0);
-    //deactivate the color argument
-    glDisableVertexAttribArray(1);
-    //deactivate the texCoord argument
-    glDisableVertexAttribArray(2);
+        //deactivate the sub elements
+        //deactivate the position argument
+        glDisableVertexAttribArray(0);
+        //deactivate the color argument
+        glDisableVertexAttribArray(1);
+        //deactivate the texCoord argument
+        glDisableVertexAttribArray(2);
+
+        //unbind the shader
+        glUseProgram(0);
+    }
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    //unbind the shader
-    glUseProgram(0);
 }
 
 void Object::update()

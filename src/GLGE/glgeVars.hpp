@@ -137,4 +137,7 @@ extern GLuint glgeLightWorldPosUniform;
 //store how to sample images
 extern GLenum glgeWrapingMode;
 
+//store if the shadow pass is currently drawing
+extern bool glgeIsShadowPass;
+
 #endif

@@ -20,7 +20,7 @@ uniform sampler2D NormalMap;
 uniform sampler2D RoughnessMap;
 uniform sampler2D Texture;
 
-float exposure = 0.01;
+float exposure = 0.1;
 
 uniform int usedTextures;
 

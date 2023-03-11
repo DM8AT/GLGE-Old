@@ -25,28 +25,6 @@
 //define the limit an light sources for the defalut shader
 #define GLGE_LIGHT_SOURCE_MAX 255
 
-class shadowCubeMapFBO
-{
-public:
-    shadowCubeMapFBO();
-
-    ~shadowCubeMapFBO();
-
-    bool init(unsigned int size = 1000);
-
-    void bindForWriting(GLenum cubeFace);
-
-    void bindForReading(GLenum textureUnit);
-
-private:
-
-    unsigned int size = 0;
-    GLuint fbo = 0;
-    GLuint rbo = 0;
-    GLuint shadowCubeMap  =0;
-    GLuint depth = 0;
-};
-
 class Light
 {
 public:
@@ -200,9 +178,6 @@ public:
      * @return float the light intensity
      */
     float getInsensity();
-
-    //store the shadow map of the light source
-    shadowCubeMapFBO shadowMap = shadowCubeMapFBO();
 
 private:
     //store the light position

@@ -108,10 +108,10 @@ void shadowPass(int index)
     Light light = glgeLights[index][0];
 
     //bind the shadow mapping shader
-    //glUseProgram(glgeShadowShader);
+    glUseProgram(glgeShadowShader);
 
     //pass the light position to the shader
-    //glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+    glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
 
     //create an array to store the direction
     GLenum cubeDirs[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -120,9 +120,6 @@ void shadowPass(int index)
 
     for (uint i = 0; i < 6; i++)
     {
-        //bind the corresponding texture to draw
-        light.shadowMap.bindForWriting(cubeDirs[i]);
-
         //clear the screen
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -130,9 +127,12 @@ void shadowPass(int index)
         if(glgeHasDisplayCallback)
         {
             //call the custom drawing function
-            //((void(*)())glgeDisplayCallback)();
+            ((void(*)())glgeDisplayCallback)();
         }
     }
+
+    //unbind the shader program
+    glUseProgram(0);
 }
 
 void drawShadowPass()
@@ -140,10 +140,13 @@ void drawShadowPass()
     //set the clear color to the maximum of floats
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 
+    //say that the shadow pass is drawing
+    glgeIsShadowPass = true;
+
     //loop over all existing light sources
     for (int i = 0; i < (int)glgeLights.size(); i++)
     {
-        shadowPass(i);
+        //shadowPass(i);
     }
 
     //set the clear color to the default clear color
@@ -151,6 +154,9 @@ void drawShadowPass()
 
     //reset the window size
     glViewport(0,0,glgeWindowSize.x, glgeWindowSize.y);
+
+    //end the shadow pass
+    glgeIsShadowPass = false;
 }
 
 //////////////////////////
@@ -167,7 +173,7 @@ void glgeDefaultDisplay()
     if (glgeLights.size() != 0)
     {
         //calculate all shadows
-        //drawShadowPass();
+        drawShadowPass();
     }
 
     //draw the scene for lighting
