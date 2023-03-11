@@ -1047,7 +1047,7 @@ void Object::recalculateMatrices()
     //save the model matrix
     this->modelMat = this->transf.getMatrix();
     //set the move matrix to the product of 3 matrices
-    this->camMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getViewMatrix();
+    this->camMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getRotMat() * glgeMainCamera->getTransformMat();
     //recalculate the rotation matrix
     this->rotMat = this->transf.getRotationMatrix();
 }
@@ -1248,8 +1248,8 @@ Camera::Camera(float FOV, float near, double far, Transform transform)
 //update the view matrix
 void Camera::update()
 {
-    //recalculate the view matrix
-    this->viewMatrix = this->calculateViewMatrix();
+    //recalculate the view matrices
+    this->calculateViewMatrix();
 }
 
 //update the projection matrix
@@ -1259,11 +1259,16 @@ void Camera::recalculateProjection()
     this->projectionMatrix = this->calculateProjectionMatrix();
 }
 
-//get the view matrix
-mat4 Camera::getViewMatrix()
+mat4 Camera::getRotMat()
 {
-    //return the view matrix
-    return this->viewMatrix;
+    //return the rotation matrix
+    return this->rotMat;
+}
+
+mat4 Camera::getTransformMat()
+{
+    //return the transformation matrix
+    return this->transMat;
 }
 
 //get the projection matrix
@@ -1378,7 +1383,7 @@ float Camera::getFOV()
 
 //PRIVATE
 
-mat4 Camera::calculateViewMatrix()
+void Camera::calculateViewMatrix()
 {
     //store a vector for the y axis
     vec3 yaxis = vec3(up.x,up.y,up.z);
@@ -1410,20 +1415,16 @@ mat4 Camera::calculateViewMatrix()
 
     //setup the view matrix
     //IMPORTANT: the vectors are in reversd order!
-    mat4 vRotMat = mat4(U.z,U.y,U.x,0,
+    this->rotMat = mat4(U.z,U.y,U.x,0,
                         V.z,V.y,V.x,0,
                         N.z,N.y,N.x,0,
                         0,  0,  0,  1);
 
-    mat4 vTraMat = mat4(1,0,0,-transf.pos.x,
-                        0,1,0,-transf.pos.y,
-                        0,0,1,-transf.pos.z,
-                        0,0,0,1);
+    this->transMat = mat4(1,0,0,-transf.pos.x,
+                          0,1,0,-transf.pos.y,
+                          0,0,1,-transf.pos.z,
+                          0,0,0,1);
 
-    mat4 viewMat = vRotMat * vTraMat;
-
-    //return the matrix
-    return viewMat;
 }
 
 mat4 Camera::calculateProjectionMatrix()

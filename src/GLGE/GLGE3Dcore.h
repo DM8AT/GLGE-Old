@@ -677,11 +677,18 @@ public:
     void recalculateProjection();
 
     /**
-     * @brief Get the View Matrix for the camera
+     * @brief Get the rotation matrix for the camera
      * 
-     * @return mat4 the view matrix for the camera
+     * @return mat4 the rotation matrix
      */
-    mat4 getViewMatrix();
+    mat4 getRotMat();
+
+    /**
+     * @brief Get the Transformation matrix
+     * 
+     * @return mat4 the transformation matrix
+     */
+    mat4 getTransformMat();
 
     /**
      * @brief Get the Projection Matrix for the camera
@@ -824,6 +831,16 @@ private:
     double far = 10.0;
     //store the transform of the camera
     Transform transf;
+    //store the rotation matrix
+    mat4 rotMat = mat4(1,0,0,0,
+                       0,1,0,0,
+                       0,0,1,0,
+                       0,0,0,1);
+    //store the transformation matrix
+    mat4 transMat = mat4(1,0,0,0,
+                         0,1,0,0,
+                         0,0,1,0,
+                         0,0,0,1);
 
     //store the location of the exposure
     GLuint expLoc;
@@ -836,7 +853,7 @@ private:
     mat4 projectionMatrix;
 
     //calculate the view matrix
-    mat4 calculateViewMatrix();
+    void calculateViewMatrix();
 
     //calculate the projection matrix
     mat4 calculateProjectionMatrix();
