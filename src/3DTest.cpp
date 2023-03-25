@@ -448,7 +448,7 @@ void run3Dexample(int argc, char** argv)
     //glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
-    glgeDisableBackfaceCulling();
+    //glgeDisableBackfaceCulling();
 
     //set the FPS limit
     glgeSetMaxFPS(10000);
