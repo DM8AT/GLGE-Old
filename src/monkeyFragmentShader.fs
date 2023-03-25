@@ -97,7 +97,7 @@ float ggxDistribution(float nDotH)
 
 vec4 calculatePBR(vec4 col)
 {
-    float shadow = calculateShadow();
+    float shadow = 1.f;
 
     vec3 lightIntensity = lightColor[iteration] * lightInt[iteration];
 
