@@ -210,7 +210,7 @@ void Material::setUniformName(const char* name, unsigned int item)
     this->uniformNames[item] = name;
 }
 
-void Material::applyMaterial()
+int Material::applyMaterial()
 {
     //pass the color of the material
     if (this->colorLoc != 0)
@@ -255,7 +255,7 @@ void Material::applyMaterial()
     if ((int)this->textures.size() == 0)
     {
         //if there are no textures to load, stop
-        return;
+        return 0;
     }
 
     //load the rest of the textures
@@ -278,6 +278,9 @@ void Material::applyMaterial()
         glUniform1i(this->imageLocs[i], bTs);
         bTs++;
     }
+
+    //return the amount of bound textures
+    return bTs;
 }
 
 void Material::removeMaterial()

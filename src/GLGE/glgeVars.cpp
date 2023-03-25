@@ -124,7 +124,19 @@ bool glgeUseMultisampling = true;
 unsigned int glgeShadowMapResolution = 1000;
 
 //store the shader for shadow mapping
-GLuint glgeShadowShader = 0;
+Shader glgeShadowShader;
+
+//store the uniform for the model matrix in the shadow shader
+GLuint glgeModelMatShadowLoc = 0;
+
+//store the uniform for the shdow matrices in the shadow shader
+GLuint glgeShadowMatShadowLoc = 0;
+
+//store the uniform for the far plane in the shadow shader
+GLuint glgeFarShadowLoc = 0;
+
+//store the uniform for the light position in the shadow shader
+GLuint glgeLightPosShadowLoc = 0;
 
 //store the light world position
 GLuint glgeLightWorldPosUniform = 0;
@@ -134,3 +146,6 @@ GLenum glgeWrapingMode = GL_NEAREST;
 
 //store if the shadow pass is currently drawing
 bool glgeIsShadowPass = false;
+
+//store the main camera for GLGE
+Camera* glgeMainCamera = NULL;

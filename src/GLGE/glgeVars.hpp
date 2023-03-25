@@ -17,6 +17,10 @@
 #include "GLGEKlasses.hpp"
 //include the lighting core
 #include "GLGELightingCore.h"
+//include the shader core
+#include "GLGEShaderCore.h"
+//include the 3D core
+#include "GLGE3Dcore.h"
 //include 4D vectors
 #include "CML/CMLVec4.h"
 //include the vector library
@@ -126,10 +130,20 @@ extern bool glgeUseMultisampling;
 //store the resolution for the shadow map
 extern unsigned int glgeShadowMapResolution;
 
-//store the shader for shadow mapping
-extern GLuint glgeShadowShader;
+//store the uniform for the model matrix in the shadow shader
+extern GLuint glgeModelMatShadowLoc;
 
-//store the uniforms for the shadow shader
+//store the uniform for the shdow matrices in the shadow shader
+extern GLuint glgeShadowMatShadowLoc;
+
+//store the uniform for the far plane in the shadow shader
+extern GLuint glgeFarShadowLoc;
+
+//store the uniform for the light position in the shadow shader
+extern GLuint glgeLightPosShadowLoc;
+
+//store the shader for shadow mapping
+extern Shader glgeShadowShader;
 
 //store the light world position
 extern GLuint glgeLightWorldPosUniform;
@@ -139,5 +153,8 @@ extern GLenum glgeWrapingMode;
 
 //store if the shadow pass is currently drawing
 extern bool glgeIsShadowPass;
+
+//store the main camera for GLGE
+extern Camera* glgeMainCamera;
 
 #endif

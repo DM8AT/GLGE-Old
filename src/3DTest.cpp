@@ -146,25 +146,25 @@ void tick()
     if (glgeGetKeys().arrowUp)
     {
         //if it is pressed, rotate the camera up by the rotation speed multiplied with delta time, to make it framerate independend. 
-        camera.rotate(0,camRot*glgeGetDeltaTime());
+        camera.rotate(0,camRot*glgeGetDeltaTime(),0);
     }
     //check if the arrow down is pressed
     if (glgeGetKeys().arrowDown)
     {
         //rotate the camera down by the framerate independend rotation speed
-        camera.rotate(0,-camRot*glgeGetDeltaTime());
+        camera.rotate(0,-camRot*glgeGetDeltaTime(),0);
     }
     //check if the arrow right is pressed
     if (glgeGetKeys().arrowRight)
     {
         //if it is pressed, rotate the camera right by the framerate independend rotation speed
-        camera.rotate(-camRot*glgeGetDeltaTime(),0);
+        camera.rotate(-camRot*glgeGetDeltaTime(),0,0);
     }
     //check if the arrow left is pressed
     if (glgeGetKeys().arrowLeft)
     {
         //rotate the camera left by the framerate independend rotation speed
-        camera.rotate(camRot*glgeGetDeltaTime(),0);
+        camera.rotate(camRot*glgeGetDeltaTime(),0,0);
     }
 
     //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
@@ -204,7 +204,7 @@ void tick()
     wall.update();
 
     //set the position of the light source to be exactly at the player
-    l2.setPos(camera.getPos());
+    //light.setPos(camera.getPos());
 
     //write the current FPS
     std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
@@ -391,7 +391,7 @@ void wallSetup()
     mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", "RoughnessMap");
 
     //load the height map
-    mat.setHeightMap("assets/WallTexture/harshbricks-height5.png");
+    mat.setHeightMap("assets/WallTexture/harshbricks-height5-16.png");
 
     //reset the wraping mode
     glgeSetWrapingMode(GLGE_NEAREST);
@@ -482,8 +482,8 @@ void run3Dexample(int argc, char** argv)
     //setup the wall
     wallSetup();
 
-    l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
-    glgeAddGlobalLighSource(&l2);
+    //l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
+    //glgeAddGlobalLighSource(&l2);
 
     light = Light(2,5,0, 1,1,1, 250);
     glgeAddGlobalLighSource(&light);

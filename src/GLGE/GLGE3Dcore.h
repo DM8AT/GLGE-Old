@@ -623,8 +623,14 @@ private:
     std::vector<GLuint> lightColLocs;
     //store the position of the light intensitys
     std::vector<GLuint> lightIntLocs;
+    //store the location of the shadow map
+    GLuint shadowMapLoc;
+    //store the location of the uniform for the far plane
+    GLuint farPlaneLoc;
     //store the position for the used lights
     GLuint usedLigtsPos;
+    //store the position for the shadow maps
+    GLuint shadowMapSamplerLoc;
 
     //compile the draw list
     void compileBuffers();
@@ -777,8 +783,9 @@ public:
      * 
      * @param dX the difference of rotation on the x axis
      * @param dY the difference of rotation on the y axis
+     * @param dZ the difference of rotation on the z axis
      */
-    void rotate(float dX, float dY);
+    void rotate(float dX, float dY, float dZ);
 
     /**
      * @brief Get the rotation from the camera
@@ -807,6 +814,13 @@ public:
      * @return float the current fov from the camera
      */
     float getFOV();
+
+    /**
+     * @brief Get the Far Plane of the camera
+     * 
+     * @return float the far cliping plane
+     */
+    float getFarPlane();
 
 private:
     //store the right direction of the camera

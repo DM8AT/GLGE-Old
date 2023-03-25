@@ -15,6 +15,9 @@
 #include "glgeVars.hpp"
 #include "glgeFuncs.hpp"
 
+//include math things
+#include "GLGEMath.h"
+
 //include the OpenGL dependencys
 #include <GL/glew.h>
 #include <GL/glu.h>
@@ -102,33 +105,41 @@ void drawLightingPass()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void shadowPass(int index)
+void shadowPass(int index, mat4 projMat)
 {
     //get the current light        //cast it to an light object    
     Light light = glgeLights[index][0];
 
+    //calculate all 6 matrices for rotation & projection
+    mat4 shadowTransform[] = {
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 1, 0, 0), vec3(0,-1,0)),
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3(-1, 0, 0), vec3(0,-1,0)),
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 1, 0), vec3(0,0, 1)),
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0,-1, 0), vec3(0,0,-1)),
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 0, 1), vec3(0,-1,0)),
+        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 0,-1), vec3(0,-1,0))
+    };
+
+    //resize the viewport
+    glViewport(0,0,glgeShadowMapResolution, glgeShadowMapResolution);
+
+    //bind the FBO from the light source
+    light.bindShadowMap();
+
     //bind the shadow mapping shader
-    glUseProgram(glgeShadowShader);
+    glUseProgram(glgeShadowShader.getShader());
 
-    //pass the light position to the shader
-    glUniform3f(glgeLightWorldPosUniform, light.getPos().x, light.getPos().y,light.getPos().z);
+    //pass the shadow transformation matrices to the shader
+    glUniformMatrix4fv(glgeShadowMatShadowLoc, 6, GL_FALSE, &shadowTransform[0].m[0][0]);
+    //pass the far cliping plane to the shader
+    glUniform1f(glgeFarShadowLoc, glgeMainCamera->getFarPlane());
+    //pass the location of the light to the shader
+    glUniform3f(glgeLightPosShadowLoc, light.getPos().x, light.getPos().y, light.getPos().z);
 
-    //create an array to store the direction
-    GLenum cubeDirs[6] = {GL_TEXTURE_CUBE_MAP_POSITIVE_X,GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-                          GL_TEXTURE_CUBE_MAP_POSITIVE_Y,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                          GL_TEXTURE_CUBE_MAP_POSITIVE_Z,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z};
-
-    for (uint i = 0; i < 6; i++)
+    //draw the scene
+    if(glgeHasDisplayCallback)
     {
-        //clear the screen
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-        //draw the screen
-        if(glgeHasDisplayCallback)
-        {
-            //call the custom drawing function
-            ((void(*)())glgeDisplayCallback)();
-        }
+        ((void(*)())glgeDisplayCallback)();
     }
 
     //unbind the shader program
@@ -137,6 +148,22 @@ void shadowPass(int index)
 
 void drawShadowPass()
 {
+    //define the tangens for the half fov to an constant (FOV = 90)
+    const float tHF = 1.619775f;
+    //get the current window aspect
+    const float ar = glgeWindowAspect;
+    //define the near cliping plane to 0.1
+    const float near = 0.001;
+    //get the far cliping plane from the camera
+    const float far = glgeMainCamera->getFarPlane();
+    //calculate the range of the near and far plane
+    const float zRange = far - near;
+    //calculate the projection matrix for the camera
+    mat4 projMat = mat4(1.f/(tHF*ar), 0.f, 0.f, 0.f,
+                        0.f, 1/tHF, 0.f, 0.f,
+                        0.f, 0.f, (-near - far)/zRange, (2.f*far * near) / zRange,
+                        0.f, 0.f, 1.f, 0.f);
+    
     //set the clear color to the maximum of floats
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 
@@ -146,7 +173,7 @@ void drawShadowPass()
     //loop over all existing light sources
     for (int i = 0; i < (int)glgeLights.size(); i++)
     {
-        //shadowPass(i);
+        shadowPass(i, projMat);
     }
 
     //set the clear color to the default clear color
@@ -154,6 +181,9 @@ void drawShadowPass()
 
     //reset the window size
     glViewport(0,0,glgeWindowSize.x, glgeWindowSize.y);
+
+    //unbind the FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //end the shadow pass
     glgeIsShadowPass = false;
@@ -169,12 +199,13 @@ void glgeDefaultDisplay()
     //say that the screen is currently drawn
     draw = false;
 
+    //SHADOWS DON'T WORK IN THE MOMENT
     //check for bound lights
-    if (glgeLights.size() != 0)
+    /*if (glgeLights.size() != 0)
     {
         //calculate all shadows
         drawShadowPass();
-    }
+    }*/
 
     //draw the scene for lighting
     drawLightingPass();

@@ -20,6 +20,8 @@ uniform sampler2D NormalMap;
 uniform sampler2D RoughnessMap;
 uniform sampler2D Texture;
 
+uniform samplerCube shadowMap;
+
 float exposure = 0.1;
 
 uniform int usedTextures;
@@ -28,6 +30,7 @@ uniform bool NormalMapIsActive;
 uniform bool RoughnessMapIsActive;
 
 uniform vec3 cameraPos;
+uniform float farPlane;
 
 //light data
 uniform vec3 lightColor[255];
@@ -42,6 +45,30 @@ float gamma = 2.2f;
 int iteration = 0;
 
 float rough;
+
+float biasAngle = 0.0005;
+
+float calculateShadow()
+{
+    vec3 lightDirection = normalize(lightPos[0] - currentPos);
+
+    float shadow = 0.0f;
+
+	vec3 fragToLight = lightPos[0] - currentPos;
+
+	float currentDepth = length(fragToLight);
+
+	float bias = max(0.5f * (1.0f - dot(normal, lightDirection)), biasAngle); 
+
+    float closestDepth = texture(shadowMap, fragToLight).r;
+    closestDepth *= farPlane;
+    if (currentDepth > closestDepth + bias)
+    {
+        shadow = 1.0f;
+    }
+
+    return shadow;
+}
 
 vec3 schlickFresnel(float vDotH)
 {
@@ -70,6 +97,8 @@ float ggxDistribution(float nDotH)
 
 vec4 calculatePBR(vec4 col)
 {
+    float shadow = calculateShadow();
+
     vec3 lightIntensity = lightColor[iteration] * lightInt[iteration];
 
     vec3 l = vec3(0.f);
@@ -111,7 +140,7 @@ vec4 calculatePBR(vec4 col)
 
     vec3 DiffuseBRDF = kd * fLambert / PI;
 
-    vec3 FinalColor = (DiffuseBRDF + SpecBRDF) * lightIntensity * nDotL;
+    vec3 FinalColor = ((DiffuseBRDF + SpecBRDF) * lightIntensity * vec3(shadow)) * nDotL;
 
     return vec4(FinalColor, col.w);
 }

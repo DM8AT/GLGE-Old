@@ -190,7 +190,7 @@ void run2Dexample(int argc, char** argv)
     glgeDisableBackfaceCulling();
 
     //set the background color
-    glgeSetClearColor(1,1,1);
+    glgeSetClearColor(0,0,0);
 
     //bind the function to display thinks to the screen
     glgeBindDisplayFunc(dispFunc);

@@ -1,17 +1,12 @@
-#version 330
+#version 300 es
 
-layout (location = 0) in vec3 Position;
-layout (location = 1) in vec2 TexCoord;
-layout (location = 2) in vec3 Normal;
+precision highp float;
 
-uniform mat4 gWVP;
-uniform mat4 gWorld;
+layout (location = 0) in vec3 aPos;
 
-out vec3 WorldPos;
-                  
+uniform mat4 model;
+
 void main()
 {
-    vec4 Pos4 = vec4(Position, 1.0);
-    gl_Position = gWVP * Pos4;
-    WorldPos = (gWorld * Pos4).xyz;    
+    gl_Position = model * vec4(aPos, 1.0);
 }

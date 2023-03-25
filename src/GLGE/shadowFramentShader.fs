@@ -1,14 +1,14 @@
-#version 330
+#version 300 es
 
-in vec3 WorldPos;
+precision highp float;
 
-uniform vec3 gLightWorldPos;
+in vec4 FragPos;
 
-out float LightToPixelDistance;
+uniform vec3 lightPos;
+uniform float farPlane;
 
 void main()
 {
-    vec3 LightToVertex = WorldPos - gLightWorldPos;
-
-    LightToPixelDistance = length(LightToVertex);
+    // Manually sets depth map in the range [0, 1]
+    gl_FragDepth = length(FragPos.xyz - lightPos) / farPlane;
 }

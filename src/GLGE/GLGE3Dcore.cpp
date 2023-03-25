@@ -36,17 +36,6 @@
 //PRIVATE FUNCTIONS//
 /////////////////////
 
-vec3 rotateVector(float angle, vec3 v, vec3 target)
-{
-    Quaternion RotationQ = Quaternion(angle, v);
-
-    Quaternion ConjugateQ = RotationQ.conjugate();
-
-    Quaternion W = (RotationQ * target) * ConjugateQ;
-
-    return vec3(W.x,W.y,W.z);
-}
-
 bool has_double_slash(std::string &str)
 {
     //get the length of the stringt and decreese it by 2
@@ -65,9 +54,6 @@ bool has_double_slash(std::string &str)
 //////////////////////
 //PRIAVATE VAIRABLES//
 //////////////////////
-
-//store the camera GLGE is using
-Camera* glgeMainCamera;
 
 //store the default 3D shader
 GLuint glgeShaderDefault;
@@ -677,6 +663,9 @@ void Object::draw()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
+    //store how much texture units are used
+    int textures;
+
     //check if the shadow pass is drawn
     if (!glgeIsShadowPass)
     {
@@ -685,15 +674,19 @@ void Object::draw()
         glUseProgram(this->shader);
 
         //Bind the material
-        this->mat.applyMaterial();
+        textures = this->mat.applyMaterial();
 
         //bind all light uniforms
         this->loadLights();
+    }
 
-        //activate sub elements
-        //say where the position vector is
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
+    //always input the color argument
+    //activate sub elements
+    //say where the position vector is
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
+    if (!glgeIsShadowPass)
+    {
         //say where the color is
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
@@ -730,6 +723,22 @@ void Object::draw()
         {
             glUniform3f(this->camRotLoc, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeMainCamera->getRotation().z);
         }
+        //pass the far plane to the shader, if it exists
+        if (this->farPlaneLoc != 0)
+        {
+            glUniform1f(this->farPlaneLoc, glgeMainCamera->getFarPlane());
+        }
+
+        //bind the shadow map
+        glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
+        //pass the sampler to the shader
+        glUniform1i(this->shadowMapLoc, textures + 1);
+    }
+    //if it is not the shadow pass
+    else
+    {
+        //pass the model matrix to the shader
+        glUniformMatrix4fv(glgeModelMatShadowLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
     }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
@@ -737,11 +746,11 @@ void Object::draw()
     //these things are only bound if it is not the shadow pass
     if (!glgeIsShadowPass)
     {
+        //unbind the texture for the shadow map
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
         //unbind the material
         this->mat.removeMaterial();
-
-        //unbind the texture
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         //deactivate the sub elements
         //deactivate the position argument
@@ -1068,6 +1077,12 @@ void Object::getUniforms()
     this->camRotLoc = glgeGetUniformVar(this->shader, "cameraLook");
     //store the location of the rotation matrix
     this->rotMatLoc = glgeGetUniformVar(this->shader, "rotMat");
+    //store the location for the shadow map
+    this->shadowMapLoc = glgeGetUniformVar(this->shader, "shadowMap");
+    //store the location of the far plane
+    this->farPlaneLoc = glgeGetUniformVar(this->shader, "farPlane");
+    //store the uniform for the shadow map
+    this->shadowMapSamplerLoc = glgeGetUniformVar(this->shader, "shadowMap");
     //reset GLGE error output
     glgeErrorOutput = outErrs;
 
@@ -1349,10 +1364,10 @@ void Camera::rotate(vec2 r)
 }
 
 //rotate the camera
-void Camera::rotate(float x, float y)
+void Camera::rotate(float x, float y, float z)
 {
     //rotate the camera
-    this->transf.rot += vec3(x,y,0);
+    this->transf.rot += vec3(x,y,z);
 }
 
 vec3 Camera::getRotation()
@@ -1381,6 +1396,12 @@ float Camera::getFOV()
     return this->fov;
 }
 
+float Camera::getFarPlane()
+{
+    //return the far cliping plane
+    return this->far;
+}
+
 //PRIVATE
 
 void Camera::calculateViewMatrix()
@@ -1392,7 +1413,7 @@ void Camera::calculateViewMatrix()
     //setup the vector to face right
     vec3 view = vec3(right.x,right.y,right.z);
     //rotathe the vector around the y axis by the x rotation amount
-    view = rotateVector(transf.rot.x,yaxis, view);
+    view = glgeRotateVector(transf.rot.x,yaxis, view);
     //normaise the vector
     view.normalize();
 
@@ -1402,7 +1423,7 @@ void Camera::calculateViewMatrix()
     //normalise the U vector
     U.normalize();
     //rotate the view vector around U by the rotation on the y axis
-    view = rotateVector(transf.rot.y, U, view);
+    view = glgeRotateVector(transf.rot.y, U, view);
     
     //setup the vectors
     //N is equal to the view vector
@@ -1412,6 +1433,8 @@ void Camera::calculateViewMatrix()
 
     //V is the cross product of U and N. Both are normalised, so no normalistion needed
     vec3 V = U.cross(N);
+    V = glgeRotateVector(transf.rot.z, U, V);
+    V.normalize();
 
     //setup the view matrix
     //IMPORTANT: the vectors are in reversd order!
@@ -1419,6 +1442,9 @@ void Camera::calculateViewMatrix()
                         V.z,V.y,V.x,0,
                         N.z,N.y,N.x,0,
                         0,  0,  0,  1);
+
+    /*vec4 o = this->transf.getRotationMatrix() * vec4(1,1,1,1);
+    this->rotMat = glgeLookAt(this->transf.pos, vec3(o.x,o.y,o.z), vec3(0,1,0));*/
 
     this->transMat = mat4(1,0,0,-transf.pos.x,
                           0,1,0,-transf.pos.y,

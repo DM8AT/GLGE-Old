@@ -127,6 +127,14 @@ Shader::Shader(const char* f, std::string data)
     *this = Shader(d, data);
 }
 
+Shader::Shader(const char* vs, const char* gs, const char* fs)
+{
+    //set this to a new shader with vertex and fragment shader
+    *this = Shader(vs, fs);
+    //add the geometry shader
+    this->addGeometryShader(gs);
+}
+
 GLuint Shader::getShader()
 {
     //return the stored shader

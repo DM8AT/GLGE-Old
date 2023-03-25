@@ -604,7 +604,7 @@ void atlas::build(bool save_atlas) {
     this->_optimize_atlas(save_atlas);
 }
 
-dvec2 atlas::getTexCoord(const char* texture, int corner, int frame, int mode) {
+dvec2 atlas::getTexCoord(const char* texture, int corner, int /*frame*/, int mode) {
     // get texture atlas info
     float aWidth = this->atlasData["w"];
     float aHeight = this->atlasData["h"];

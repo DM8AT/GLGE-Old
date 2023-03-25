@@ -91,6 +91,15 @@ public:
     Shader(const char* vertexShaderFile, std::string fragmentShaderData);
 
     /**
+     * @brief Construct a new Shader that has a geometry shader
+     * 
+     * @param vertexShader the fiel for the vertex shader
+     * @param geometryShader the fiel for the geometry shader
+     * @param fragmentShader the fiel for the fragment shader
+     */
+    Shader(const char* vertexShader, const char* geometryShader, const char* fragmentShader);
+
+    /**
      * @brief Get the Shader
      * 
      * @return GLuint the compiled OpenGL shader

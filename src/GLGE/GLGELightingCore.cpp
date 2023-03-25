@@ -17,6 +17,9 @@
 //get the error strings for GLGE
 #include "glgeErrors.hpp"
 
+//include the 4D matrices
+#include "CML/CMLMat4.h"
+
 //include the defalt library
 #include <iostream>
 
@@ -34,6 +37,9 @@ Light::Light(vec3 pos, vec3 col, float intensity)
     this->color = col;
     //store the inputed intensity
     this->lightIntensity = intensity;
+
+    //setup the shadow map
+    this->setupShadowMap();
 }
 
 Light::Light(float x, float y, float z, float r, float g, float b, float intensity)
@@ -44,6 +50,9 @@ Light::Light(float x, float y, float z, float r, float g, float b, float intensi
     this->color = vec3(r,g,b);
     //store the inputed intensity
     this->lightIntensity = intensity;
+
+    //setup the shadow map
+    this->setupShadowMap();
 }
 
 //set the position of the light source
@@ -144,6 +153,54 @@ float Light::getInsensity()
 {
     //return the stored intensity
     return this->lightIntensity;
+}
+
+void Light::bindShadowMap()
+{
+    //bind the stored shadow map frambuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->shadowFBO);
+}
+
+void Light::bindShadowMapTexture(int samp)
+{
+    //activate the sampler unit
+    glActiveTexture(GL_TEXTURE0 + samp);
+    //bind the shadow map texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowMap);
+}
+
+void Light::setupShadowMap()
+{
+    //generate the frame buffer for the shadow map
+    glGenFramebuffers(1, &this->shadowFBO);
+    //bind the frame buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->shadowFBO);
+
+    //generate the shadow map texture
+    glGenTextures(1, &this->shadowMap);
+    //bind the shadow map texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowMap);
+
+    //load the faces for the shadow map
+    for (int  i = 0; i < 6; i++)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, glgeShadowMapResolution, glgeShadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }
+    //set the texture parameters
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //stop the texture from looping arround
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    //store the texture as the texture for the frame buffer
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->shadowMap, 0);
+    //disable calls to the color buffer
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    //unbind the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 

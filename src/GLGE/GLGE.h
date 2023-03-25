@@ -40,6 +40,8 @@
 //include the public defines
 #include "GLGEDefines.hpp"
 #include "GLGEKlasses.hpp"
+//include the math functions
+#include "GLGEMath.h"
 
 /////////////
 //FUNCTIONS//

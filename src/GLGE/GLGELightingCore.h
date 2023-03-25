@@ -179,6 +179,18 @@ public:
      */
     float getInsensity();
 
+    /**
+     * @brief bind the shadow map for this light
+     */
+    void bindShadowMap();
+
+    /**
+     * @brief bind the shadow map texture
+     * 
+     * @param samplerID the id of the OpenGL sampler it should be bound to
+     */
+    void bindShadowMapTexture(int samplerID);
+
 private:
     //store the light position
     vec3 pos;
@@ -186,6 +198,12 @@ private:
     vec3 color;
     //store the light intensity
     float lightIntensity;
+    //store the shadow map for the light
+    GLuint shadowFBO;
+    //store the shadow map cube texture
+    GLuint shadowMap;
+    //setup the shadow map
+    void setupShadowMap();
 };
 
 /**

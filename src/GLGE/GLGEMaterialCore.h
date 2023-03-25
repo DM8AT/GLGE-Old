@@ -145,8 +145,10 @@ public:
 
     /**
      * @brief apply the material for drawing
+     * 
+     * @return int the amount of bound textures
      */
-    void applyMaterial();
+    int applyMaterial();
 
     /**
      * @brief the material will no longer be used
