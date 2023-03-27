@@ -1049,3 +1049,9 @@ void glgeSetCursor(int style)
     //set the curser to the inputed style
     glutSetCursor(style);
 }
+
+vec2 glgeGetScreenSize()
+{
+    //return the screen size
+    return vec2(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
+}

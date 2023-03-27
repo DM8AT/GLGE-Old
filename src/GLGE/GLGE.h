@@ -527,4 +527,11 @@ void glgeWarpPointer(float x, float y, unsigned int space = GLGE_SCREEN_SPACE);
  */
 void glgeSetCursor(int style=GLGE_CURSOR_STYLE_DEFAULT);
 
+/**
+ * @brief gets the size of the users screen
+ * 
+ * @return vec2 the size of the screen(x = width, y = height)
+ */
+vec2 glgeGetScreenSize();
+
 #endif
