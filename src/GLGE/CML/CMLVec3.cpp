@@ -44,6 +44,11 @@ float vec3::operator*(vec3 v)
     return (this->x*v.x) + (this->y*v.y) + (this->z*v.z);
 }
 
+vec3 vec3::operator*(float s)
+{
+    return vec3(this->x * s, this->y * s, this->z * s);
+}
+
 void vec3::operator*=(vec3 v)
 {
     this->x *= v.x;

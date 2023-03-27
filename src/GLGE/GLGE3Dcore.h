@@ -557,6 +557,25 @@ public:
     void recalculateNormals();
 
     /**
+     * @brief Set only the mesh for the Object, not recalculates the Buffers
+     * 
+     * @param mesh the new mesh
+     */
+    void setOnlyMesh(Mesh mesh);
+
+    /**
+     * @brief recalculate the vertex and index buffer
+     */
+    void recalculateBuffers();
+
+    /**
+     * @brief Set the Mesh for the Object
+     * 
+     * @param mesh the new mesh for the Object
+     */
+    void setMesh(Mesh mesh);
+
+    /**
      * @brief Get the Mesh from the object
      * 
      * @return Mesh the mesh of the object

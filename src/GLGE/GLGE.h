@@ -43,6 +43,62 @@
 //include the math functions
 #include "GLGEMath.h"
 
+///////////
+//DEFINES//
+///////////
+
+//the screen space in pixels, from -halfWidth to halfWidth on x and from -halfHeight to halfHeight on y
+#define GLGE_SCREEN_SPACE 0
+//relative window coordinates, from 0 to 1 on both axis
+#define GLGE_WINDOW_SPACE 1
+
+//Arrow pointing up and to the right
+#define GLGE_CURSOR_STYLE_RIGHT_ARROW 0x0000
+//Arrow pointing up and to the left
+#define GLGE_CURSOR_STYLE_LEFT_ARROW 0x0001
+//Pointing hand
+#define GLGE_CURSOR_STYLE_INFO 0x0002
+//Skull & cross bones
+#define GLGE_CURSOR_STYLE_DESTROY 0x0003
+//Question mark
+#define GLGE_CURSOR_STYLE_HELP 0x0004
+//Arrows rotating in a circle
+#define GLGE_CURSOR_STYLE_CYCLE 0x0005
+//Spray can
+#define GLGE_CURSOR_STYLE_SPRAY 0x0006
+//Wrist watch
+#define GLGE_CURSOR_STYLE_WAIT 0x0007
+//Insertion point cursor for text
+#define GLGE_CURSOR_STYLE_TEXT 0x0008
+//Simple cross-hair
+#define GLGE_CURSOR_STYLE_CROSSHAIR 0x0009
+//Bi-directional pointing up & down
+#define GLGE_CURSOR_STYLE_UP_DOWN 0x000A
+//Bi-directional pointing left & right
+#define GLGE_CURSOR_STYLE_LEFT_RIGHT 0x000B
+//Arrow pointing to top side
+#define GLGE_CURSOR_STYLE_TOP_SIDE 0x000C
+//Arrow pointing to bottom side
+#define GLGE_CURSOR_STYLE_BOTTOM_SIDE 0x000D
+//Arrow pointing to left side
+#define GLGE_CURSOR_STYLE_LEFT_SIDE 0x000E
+//Arrow pointing to right side
+#define GLGE_CURSOR_STYLE_RIGHT_SIDE 0x000F
+//Arrow pointing to top-left corner
+#define GLGE_CURSOR_STYLE_TOP_LEFT_CORNER 0x0010
+//Arrow pointing to top-right corner
+#define GLGE_CURSOR_STYLE_TOP_RIGHT_CORNER 0x0011
+//Arrow pointing to bottom-left corner
+#define GLGE_CURSOR_STYLE_BOTTOM_RIGHT_CORNER 0x0012
+//Arrow pointing to bottom-right corner
+#define GLGE_CURSOR_STYLE_BOTTOM_LEFT_CORNER 0x0013
+//Full-screen cross-hair cursor (if possible, otherwise GLUT_CURSOR_CROSSHAIR)
+#define GLGE_CURSOR_STYLE_FULL_CROSSHAIR 0x0066
+//Invisible cursor
+#define GLGE_CURSOR_STYLE_NONE 0x0065
+//The default curser image
+#define GLGE_CURSOR_STYLE_DEFAULT 0x0064
+
 /////////////
 //FUNCTIONS//
 /////////////
@@ -446,5 +502,29 @@ bool glgeGetMultisampelinStauts();
  * @param mode the new wraping mode
  */
 void glgeSetWrapingMode(unsigned int mode);
+
+/**
+ * @brief set the position of the mouse pointer
+ * 
+ * @param pointerPos the position of the pointer
+ * @param space the current space of the position (GLGE_SCREEN_SPACE or GLGE_WINDOW_SPACE are valide)
+ */
+void glgeWarpPointer(vec2 pointerPos, unsigned int space = GLGE_SCREEN_SPACE);
+
+/**
+ * @brief set the position of the mouse pointer
+ * 
+ * @param x the x position of the pointer
+ * @param y the y position of the pointer
+ * @param space the current space of the position (GLGE_SCREEN_SPACE or GLGE_WINDOW_SPACE are valide)
+ */
+void glgeWarpPointer(float x, float y, unsigned int space = GLGE_SCREEN_SPACE);
+
+/**
+ * @brief set the style for the cursor
+ * 
+ * @param style the style defined in the defines, the default is the normal cursor
+ */
+void glgeSetCursor(int style=GLGE_CURSOR_STYLE_DEFAULT);
 
 #endif

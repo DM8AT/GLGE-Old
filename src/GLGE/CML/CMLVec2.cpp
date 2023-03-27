@@ -40,6 +40,11 @@ float vec2::operator*(vec2 v)
     return (this->x*v.x) + (this->y*v.y);
 }
 
+vec2 vec2::operator*(float s)
+{
+    return vec2(this->x * s, this->y * s);
+}
+
 void vec2::operator*=(vec2 v)
 {
     this->x *= v.x;

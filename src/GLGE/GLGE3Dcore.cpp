@@ -729,10 +729,13 @@ void Object::draw()
             glUniform1f(this->farPlaneLoc, glgeMainCamera->getFarPlane());
         }
 
-        //bind the shadow map
-        glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
-        //pass the sampler to the shader
-        glUniform1i(this->shadowMapLoc, textures + 1);
+        if (glgeLights.size() != 0)
+        {
+            //bind the shadow map
+            glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
+            //pass the sampler to the shader
+            glUniform1i(this->shadowMapLoc, textures + 1);
+        }
     }
     //if it is not the shadow pass
     else
@@ -992,6 +995,30 @@ void Object::recalculateNormals()
 {
     //recalculate the nromals of the mesh
     this->mesh.recalculateNormals();
+}
+
+void Object::setOnlyMesh(Mesh mesh)
+{
+    //store the inputed mesh
+    this->mesh = mesh;
+}
+
+void Object::recalculateBuffers()
+{
+    //delete the old buffers
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteBuffers(1, &this->IBO);
+
+    //recompile the buffers
+    this->compileBuffers();
+}
+
+void Object::setMesh(Mesh m)
+{
+    //set the buffer
+    this->setOnlyMesh(m);
+    //recalculate the buffers
+    this->recalculateBuffers();
 }
 
 Mesh Object::getMesh()

@@ -20,6 +20,8 @@ struct vec3
 
     float operator*(vec3 v);
 
+    vec3 operator*(float s);
+
     void operator*=(vec3 v);
 
     vec3 operator/(vec3 v);
