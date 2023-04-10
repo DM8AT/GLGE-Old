@@ -103,6 +103,9 @@ extern unsigned int glgeMultRBO;
 //store the frame buffer texture
 extern unsigned int glgeFrameBufferTexture;
 
+//store the direction normal for post-processing
+extern unsigned int glgeFrameBufferNormalTexture;
+
 //store the multi sample frame buffer texture
 extern unsigned int glgeFrameBufferMultisampleTexture;
 

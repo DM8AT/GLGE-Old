@@ -87,6 +87,9 @@ unsigned int glgeFBO = 0;
 //store the texture for the frame buffer
 unsigned int glgeFrameBufferTexture = 0;
 
+//store the direction normal for post-processing
+unsigned int glgeFrameBufferNormalTexture = 0;
+
 //store the texture for the multi sample framebuffer
 unsigned int glgeFrameBufferMultisampleTexture = 0;
 

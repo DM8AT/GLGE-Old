@@ -4,7 +4,8 @@
 
 precision highp float;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec3 FragNormal;
 
 in vec4 color;
 in vec2 texCoord;
@@ -115,6 +116,8 @@ vec4 calculatePBR(vec4 col)
         n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
     }
 
+    FragNormal = n;
+
     vec3 v = normalize((cameraPos) - currentPos);
     vec3 h = normalize(v+l);
 
@@ -197,4 +200,6 @@ void main()
     vec4 minColor = col * ambient;
 
     FragColor = min(max(FragColor, minColor), vec4(1,1,1,1));
+
+    gl_FragDepth = gl_FragCoord.z;
 }

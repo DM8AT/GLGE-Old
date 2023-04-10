@@ -450,6 +450,9 @@ void run3Dexample(int argc, char** argv)
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     //glgeDisableBackfaceCulling();
 
+    //normal buffers currently under construction
+    //glgeSetPostProcessingShader("src/ppsDrawNormals.fs");
+
     //set the FPS limit
     glgeSetMaxFPS(10000);
 

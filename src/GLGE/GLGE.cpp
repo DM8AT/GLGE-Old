@@ -941,6 +941,10 @@ bool glgeGetBackfaceCullingStatus()
     return glgeUseCulling;
 }
 
+void getUniformsForPostProcessing()
+{
+}
+
 void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
 {
     //create strings for the shader
@@ -960,18 +964,27 @@ void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
 
     //compile the shader and save it
     glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+
+    //get the post processing uniforms
+    getUniformsForPostProcessing();
 }
 
 void glgeSetPostProcessingShader(std::string postProcessingShader)
 {
     //compile the shader and save it
     glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, postProcessingShader);
+
+    //get the post processing uniforms
+    getUniformsForPostProcessing();
 }
 
 void glgeSetPostProcessingShader(GLuint shader)
 {
     //store the inputed shader as the post processing shader
     glgePostProcessingShader = shader;
+
+    //get the post processing uniforms
+    getUniformsForPostProcessing();
 }
 
 void glgeSetSamples(unsigned int samples)

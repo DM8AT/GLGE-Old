@@ -398,6 +398,14 @@ void Object2D::setTexture(GLuint texture)
     this->texture = texture;
 }
 
+void Object2D::deleteTexture()
+{
+    //delete the stored texture
+    glDeleteTextures(1, &this->texture);
+    //set the stored texture to 0
+    this->texture = 0;
+}
+
 GLuint Object2D::getTexture()
 {
     //return the stored texture

@@ -324,6 +324,11 @@ public:
     void setTexture(GLuint texture);
 
     /**
+     * @brief deletes the own texture and sets it to 0
+     */
+    void deleteTexture();
+
+    /**
      * @brief Get the Texture from the file
      * 
      * @return GLuint the allready compiled OpenGL texture
@@ -470,7 +475,7 @@ public:
      */
     vec2 getScale();
 
-private:
+protected:
     //store the mesh for the object
     Mesh2D mesh;
     //store the transform of the object
