@@ -80,6 +80,8 @@ class atlas {
          */
         bool _is_region_occupied(vec4 pos);
 
+        std::string _get_region_occupied(vec4 pos);
+
         /**
          * @brief Constructs an atlas for square images that are all the same size
          * 

@@ -187,6 +187,71 @@ bool atlas::_is_region_occupied(vec4 pos) {
     return false;
 }
 
+std::string atlas::_get_region_occupied(vec4 pos) {
+    // check whether or not a certain position on the texture atlas is occupied. This releys on the atlasData variable
+    // check if atlas data is empty
+    if ( this->atlasData["images"].size() == 0 ) {
+        return "";
+    }
+
+    // go through eachh image in atlasData
+    for (nlohmann::json::iterator img = this->atlasData["images"].begin(); img != this->atlasData["images"].end(); img++) {
+        // image x
+        int iX = this->atlasData["images"][img.key()]["x"];
+        // image width
+        int iW = iX + (int) this->atlasData["images"][img.key()]["w"];
+        // image y
+        int iY = this->atlasData["images"][img.key()]["y"];
+        // image height
+        int iH = iY + (int) this->atlasData["images"][img.key()]["h"];
+
+        // temp var
+        bool tmp = false;
+
+        if (pos.z < iW - iX) {
+            // check if x is in range of x and w
+            if ( iX <= pos.x && pos.x < iW ) {
+                tmp = true;
+            }
+            // check if x+width is in range of x and w
+            if ( iX < pos.x+pos.z && pos.x+pos.z < iW ) {
+                tmp = true;
+            }
+        } else {
+            // check if x is in range of x and w
+            if ( pos.x <= iX && iX < pos.x+pos.z ) {
+                tmp = true;
+            }
+            // check if x+width is in range of x and w
+            if ( pos.x < iW && iW < pos.x+pos.z ) {
+                tmp = true;
+            }
+        }
+
+        if (pos.w < iH - iY) {
+            // check if y is in range of y and h
+            if ( iY <= pos.x && pos.y < iH && tmp == true ) {
+                return img.key();
+            }
+            // check if y+width is in range of x and w
+            if ( iY < pos.y+pos.z && pos.y+pos.z < iH && tmp == true ) {
+                return img.key();
+            }
+        } else {
+            // check if y is in range of y and h
+            if ( pos.y <= iY && iY < pos.y+pos.w && tmp == true ) {
+                return img.key();
+            }
+            // check if y+width is in range of x and w
+            if ( pos.y < iH && iH < pos.y+pos.w && tmp == true ) {
+                return img.key();
+            }
+        }
+    }
+
+    return "";
+}
+
 unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
     // amount of images
     int imgs = this->paths.size();
@@ -294,7 +359,7 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
 }
 
 unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
-    // The slitly slower algorithm for placing images on a blank canvas, a bit like playing tetris
+    // The slightly slower algorithm for placing images on a blank canvas, a bit like playing tetris
 
     /*
         Go through all images in the first pass
@@ -329,12 +394,12 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         stbi_image_free(img);
 
         // Add w & h to totals
-        if ( i < sqrt( this->paths.size() ) || w > totalWidth ) {
-            totalWidth += w;
-        }
-
+        totalWidth += w;
         totalHeight += h;
     }
+
+    // reduce the total width to the sqrt
+    totalWidth = sqrt(totalWidth);
 
     // write template to atlas info data
     this->atlasData["w"] = totalWidth;
@@ -411,6 +476,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             // if spot has been found, break out of loop
             if (done) {break;}
         }
+
         // free image
         free(img);
         // check if a position was not found
