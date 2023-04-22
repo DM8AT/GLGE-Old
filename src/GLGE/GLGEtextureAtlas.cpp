@@ -438,10 +438,62 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             continue;
         }
 
-        // break var
+        // find a spot to put the image //
+        // position vars
+        int x = 0, y = 0;
+        // var to check if a spot was found
         bool done = false;
 
-        // find a spot to put the image
+        while (true) {
+            // get what is occupying the spot
+            std::string occupend = this->_get_region_occupied(vec4( x, y, w, h ));
+            // if region is occupied, move position
+            if ( occupend != "" ) {
+                // get the occupend data
+                json occupendData = this->atlasData["images"][occupend];
+                // get how much the x position has to change
+                int change = (int)occupendData["w"] - (x - (int)occupendData["x"]);
+                // check if enough room is to the edge of the altas
+                std::cout << change << "\n";
+                if ( (int)this->atlasData["w"] >= x + change + w ) {
+                    // move x by change
+                    x += change;
+                    // continue
+                    continue;
+                }
+                // otherwise, go to x 0 and move y by height of the image
+                x = 0;
+                y += h;
+                continue;
+            }
+            // if occupend is nothing, place image //
+
+            // add image info to atlas data
+            this->atlasData["images"][paths[i]]["w"] = w;
+            this->atlasData["images"][paths[i]]["h"] = h;
+            this->atlasData["images"][paths[i]]["x"] = x;
+            this->atlasData["images"][paths[i]]["y"] = y;
+
+            std::cout<<this->atlasData["images"][paths[i]]<<"\n";
+
+            // go through all pixels of the image
+            for (int hI = 0; hI < h; hI++) {
+            for (int wI = 0; wI < w; wI++) {
+                // calculate the current position in the image and atlas
+                vec2 imgPos = vec2(wI, hI);
+                vec2 atlasPos = vec2(imgPos.x+x, imgPos.y+y);
+                // get the colors from a pixel
+                vec4 arr = this->_get_pixel(&img, imgPos, vec3(w, h, c));
+                // write them to the atlas
+                this->_put_pixel(atlasImg, atlasPos, vec3(totalWidth, totalHeight, channelCount), arr);
+            }
+            }
+            // break out of the loop when done
+            done = true;
+            break;
+        }
+
+        /*
         for (int y = 0; y < totalHeight-(h-1); y++) {
         for (int x = 0; x < totalWidth-(w-1); x++) {
             // check if spot is free
@@ -475,7 +527,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         }
             // if spot has been found, break out of loop
             if (done) {break;}
-        }
+        }*/
 
         // free image
         free(img);
@@ -485,7 +537,6 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             exit(1);
         }
     }
-
 
     // save image and data if needed;
     if (save_atlas) {
