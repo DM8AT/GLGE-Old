@@ -465,7 +465,7 @@ void run3Dexample(int argc, char** argv)
     glgeBindMainFunc(tick);
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
-    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
+    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,-90,0),1));
     //then, the camera is moved one unit up
     camera.move(0,1,0);
     //after the camera is set up, the camera is bound to the library using an pointer. So, the camera can be changed and updated
