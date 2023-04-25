@@ -25,6 +25,15 @@
 //define the limit an light sources for the defalut shader
 #define GLGE_LIGHT_SOURCE_MAX 255
 
+//define a light as a single point of light
+#define GLGE_POINT_LIGHT 0
+
+//define a light as a single point of light in an direction
+#define GLGE_SPOT_LIGHT 1
+
+//define a light as a light that shines in an direction
+#define GLGE_DIRECTIONAL_LIGHT 2
+
 class Light
 {
 public:
@@ -43,6 +52,16 @@ public:
      * @param intensity the strength of the light source
      */
     Light(vec3 pos, vec3 color = vec3(1,1,1), float intensity = 1.f);
+
+    /**
+     * @brief Construct a new spot Light
+     * 
+     * @param pos the position of the light
+     * @param dir the direction of the light
+     * @param color the light color
+     * @param intensity the light intensity
+     */
+    Light(vec3 pos, vec3 dir, vec3 color = vec3(1,1,1), float intensity = 1.f);
 
     /**
      * @brief Construct a new Light source

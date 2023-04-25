@@ -55,6 +55,11 @@ Light l2;
 float camSpeed = 0.005;
 //set the rotation speed of the camera
 float camRot = 0.0025;
+//set the mouse sensetivity
+float mouseSensetivity = 2.f;
+
+//say if the mouse is currently locked to the screen
+bool isActive = true;
 
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
@@ -141,37 +146,18 @@ void tick()
     }
 
     //here is the camera rotation
-
-    //check if the arrow pointing up is pressed
-    if (glgeGetKeys().arrowUp)
+    //if the cursor is locked to the window
+    if (isActive)
     {
-        //if it is pressed, rotate the camera up by the rotation speed multiplied with delta time, to make it framerate independend. 
-        camera.rotate(0,camRot*glgeGetDeltaTime(),0);
-    }
-    //check if the arrow down is pressed
-    if (glgeGetKeys().arrowDown)
-    {
-        //rotate the camera down by the framerate independend rotation speed
-        camera.rotate(0,-camRot*glgeGetDeltaTime(),0);
-    }
-    //check if the arrow right is pressed
-    if (glgeGetKeys().arrowRight)
-    {
-        //if it is pressed, rotate the camera right by the framerate independend rotation speed
-        camera.rotate(-camRot*glgeGetDeltaTime(),0,0);
-    }
-    //check if the arrow left is pressed
-    if (glgeGetKeys().arrowLeft)
-    {
-        //rotate the camera left by the framerate independend rotation speed
-        camera.rotate(camRot*glgeGetDeltaTime(),0,0);
+        //rotate the camera by the mouse position
+        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity, -(glgeGetMouse().pos.y-0.5f) * mouseSensetivity, 0);
     }
 
     //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
     camSpeed += (float)glgeGetMouse().mouseWeel / (float)1000;
 
     //clamp the camera speed in an range betwean 0.001 and 0.5
-    if (camSpeed < 0.001)
+    /*if (camSpeed < 0.001)
     {
         camSpeed = 0.001;
     }
@@ -179,7 +165,9 @@ void tick()
     if (camSpeed > 0.5)
     {
         camSpeed = 0.5;
-    }
+    }*/
+
+    camSpeed = glgeClamp(camSpeed, 0.001, 0.5);
 
     //then, update everything on screen
 
@@ -203,11 +191,31 @@ void tick()
     //update the wall
     wall.update();
 
+    //if the cursor is clicked and not locked to the window, lock it to the window
+    if (glgeGetMouse().leftButton && !isActive)
+    {
+        glgeSetCursor(GLGE_CURSOR_STYLE_NONE);
+        isActive = true;
+    }
+
+    //if the e key is pressed while the mouse is locked, unlock it
+    if (glgeGetKeys().e && isActive)
+    {
+        glgeSetCursor(GLGE_CURSOR_STYLE_DEFAULT);
+        isActive = false;
+    }
+
+    //if the mouse is locked, move it to 0,0
+    if (isActive)
+    {
+        glgeWarpPointer(0,0);
+    }
+
     //set the position of the light source to be exactly at the player
     //light.setPos(camera.getPos());
 
     //write the current FPS
-    std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
+    //std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
 }
 
 //this function is used to setup the grassFloor instance of the Object class
@@ -490,6 +498,11 @@ void run3Dexample(int argc, char** argv)
 
     light = Light(2,5,0, 1,1,1, 250);
     glgeAddGlobalLighSource(&light);
+
+    //disable the mouse pointer
+    glgeSetCursor(GLGE_CURSOR_STYLE_NONE);
+    //position the pointer in the middle of the window
+    glgeWarpPointer(0,0);
 
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();
