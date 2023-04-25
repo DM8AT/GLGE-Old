@@ -157,16 +157,6 @@ void tick()
     camSpeed += (float)glgeGetMouse().mouseWeel / (float)1000;
 
     //clamp the camera speed in an range betwean 0.001 and 0.5
-    /*if (camSpeed < 0.001)
-    {
-        camSpeed = 0.001;
-    }
-
-    if (camSpeed > 0.5)
-    {
-        camSpeed = 0.5;
-    }*/
-
     camSpeed = glgeClamp(camSpeed, 0.001, 0.5);
 
     //then, update everything on screen
