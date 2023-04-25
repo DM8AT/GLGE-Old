@@ -152,6 +152,8 @@ void tick()
         //rotate the camera by the mouse position
         camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity, -(glgeGetMouse().pos.y-0.5f) * mouseSensetivity, 0);
     }
+    //clamp the camera rotation on the y axis
+    camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
 
     //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
     camSpeed += (float)glgeGetMouse().mouseWeel / (float)1000;

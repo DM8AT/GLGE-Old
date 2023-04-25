@@ -188,4 +188,20 @@ vec3 glgeClamp(vec3 v, float min, float max);
  */
 vec4 glgeClamp(vec4 v, float min, float max);
 
+/**
+ * @brief convert an angle to radians
+ * 
+ * @param angle the angle in degrees
+ * @return float the angle in radians
+ */
+float glgeToRadians(float angle);
+
+/**
+ * @brief convert an angle to degrees
+ * 
+ * @param angle the angle in radians
+ * @return float the angle in degrees
+ */
+float glgeToDegrees(float angle);
+
 #endif

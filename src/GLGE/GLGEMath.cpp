@@ -297,3 +297,17 @@ vec4 glgeClamp(vec4 v, float min, float max)
     //clamp the x,y,z and w axes independandly
     return vec4(glgeClamp(v.x, min, max), glgeClamp(v.y, min, max), glgeClamp(v.z, min, max), glgeClamp(v.w, min, max));
 }
+
+//convert the angle a to radians
+float glgeToRadians(float a)
+{
+    //return the angle in radians
+    return a * GLGE_TO_RADIANS;
+}
+
+//convert the angle a to degrees
+float glgeToDegrees(float a)
+{
+    //return the angle in degrees
+    return a * GLGE_TO_DEGREES;
+}
