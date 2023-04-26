@@ -40,7 +40,7 @@ Upcoming features that may be added to GLGE in the future include:
    - from .obj files (work in progress)
    - from .blend files
    - from other file formats
-- An 3D and 2D sound function to the core
+- A 3D and 2D sound function to the core
 - 2D and 3D physics
 - Procedrual materials
 - Procedrual shaders
@@ -55,6 +55,7 @@ Upcoming features that may be added to GLGE in the future include:
 - Post processing
    - preset for post processing core
    - preset for different effects (Bloom, distortion, etc.)
+- Texture atleasing
 
 ## Working on
 Currently working on improving the shader core to make handling shaders simpler and more functional.
