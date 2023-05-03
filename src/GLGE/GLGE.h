@@ -327,6 +327,13 @@ char* glgeGetMoveMatrixName();
 float glgeGetWindowAspect();
 
 /**
+ * @brief get the current size of the GLGE window
+ * 
+ * @return vec2 the size of the window | WIDTH: x, HEIGHT: y
+ */
+vec2 glgeGetWindowSize();
+
+/**
  * @brief get all momentanly pressed keys
  * 
  * @return Keys a list of all pressed keys

@@ -562,6 +562,13 @@ float glgeGetWindowAspect()
     return glgeWindowAspect;
 }
 
+//get the size of the window
+vec2 glgeGetWindowSize()
+{
+    //return the window size
+    return glgeWindowSize;
+}
+
 //return the pressed keys
 Keys glgeGetKeys()
 {
@@ -1035,20 +1042,21 @@ void glgeSetWrapingMode(unsigned int mode)
 
 void glgeWarpPointer(vec2 pointerPos, unsigned int space)
 {
+    vec2 mem;
     //if the space variable is true(so it is greater than 0)
-    if (space)
+    if (space == 1)
     {
         //scale the pointer by the window size to transform it to screen space
-        pointerPos = vec2(pointerPos.x * glgeWindowSize.x, pointerPos.y * glgeWindowSize.y);
+        mem = vec2(pointerPos.x * glgeWindowSize.x, pointerPos.y * glgeWindowSize.y);
     }
     else
     {
         //add the half window size to the position
-        pointerPos += glgeWindowSize/vec2(2,2);
+        mem += glgeWindowSize/vec2(2,2);
     }
 
     //use the glut function to warp the pointer to the specified position
-    glutWarpPointer(pointerPos.x, pointerPos.y);
+    glutWarpPointer(mem.x, mem.y);
 }
 
 void glgeWarpPointer(float x, float y, unsigned int space)
