@@ -270,6 +270,12 @@
  */
 #define GLGE_ERROR_ATLAS_NO_MISSING_TEXTURE "[GLGE ERROR RETURN] no missing texture specified or not found\n"
 
+/**
+ * this error isprinted when a specific file is not found
+ * 
+ */
+#define GLGE_ERROR_ATLAS_INVALID "[GLGE ERROR RETURN] specified file %s not found or not valid.\n"
+
 ////////////////////////
 //GLGE Warning Strings//
 ////////////////////////

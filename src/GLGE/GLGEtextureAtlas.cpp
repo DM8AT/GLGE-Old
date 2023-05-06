@@ -377,6 +377,8 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
     // total w & h var
     int totalWidth = 0;
     int totalHeight = 0;
+    // the minimum width to have in order for all textures to fit
+    int minWidth = 0;
     // First pass through all images
     for ( long unsigned int i = 0; i < this->paths.size(); i++ ) {
         // image dimension vars
@@ -396,10 +398,14 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         // Add w & h to totals
         totalWidth += w;
         totalHeight += h;
+        // update minimum width
+        if ( w > minWidth ) { minWidth = w; }
     }
 
-    // reduce the total width to the sqrt
-    totalWidth = sqrt(totalWidth);
+    // reduce the total width
+    totalWidth /= 2;
+    // make sure all images will fit
+    if ( totalWidth < minWidth ) { totalWidth = minWidth; }
 
     // write template to atlas info data
     this->atlasData["w"] = totalWidth;
@@ -454,7 +460,6 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
                 // get how much the x position has to change
                 int change = (int)occupendData["w"] - (x - (int)occupendData["x"]);
                 // check if enough room is to the edge of the altas
-                std::cout << change << "\n";
                 if ( (int)this->atlasData["w"] >= x + change + w ) {
                     // move x by change
                     x += change;
@@ -463,7 +468,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
                 }
                 // otherwise, go to x 0 and move y by height of the image
                 x = 0;
-                y += h;
+                y += 1;
                 continue;
             }
             // if occupend is nothing, place image //
@@ -474,7 +479,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             this->atlasData["images"][paths[i]]["x"] = x;
             this->atlasData["images"][paths[i]]["y"] = y;
 
-            std::cout<<this->atlasData["images"][paths[i]]<<"\n";
+            std::cout << this->atlasData["images"][paths[i]] << "\n";
 
             // go through all pixels of the image
             for (int hI = 0; hI < h; hI++) {
@@ -786,4 +791,38 @@ dvec2 atlas::getTexCoord(const char* texture, int corner, int /*frame*/, int mod
 std::vector<const char*> atlas::dump() {
     // return the paths vector
     return this->paths;
+}
+
+bool atlas::loadAtlas(const char* path) {
+    // check if specified path is valid atlas
+    if (!std::filesystem::is_regular_file(path)) {
+        printf(GLGE_ERROR_ATLAS_INVALID, path);
+        return(false);
+    }
+    if (!std::filesystem::is_regular_file((std::string)path+".json")) {
+        printf(GLGE_ERROR_ATLAS_INVALID, path);
+        return(false);
+    }
+
+    // load atlas image
+    int w, h, c;
+    unsigned char* iAtlas = stbi_load(path, &w, &h, &c, 0);
+    this->iAtlas = iAtlas;
+    // load atlas data
+    // open file
+    std::ifstream file((std::string)path+".json");
+    std::string buffer;
+    std::string file_content;
+    // read content
+    file.seekg(0, std::ios::beg);
+    while (file) {
+        file >> buffer;
+        file_content += buffer;
+    }
+    file.close();
+    //std::cout << file_content.substr(0,file_content.size()-1) << "\n"; // print json string for debugging
+    // set atlas data var
+    this->atlasData = json::parse(file_content.substr(0,file_content.size()-1));
+    // return true for sucsessfull atlas loading
+    return(true);
 }
