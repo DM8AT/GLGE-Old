@@ -25,6 +25,7 @@
 #include "CML/CMLVec4.h"
 //include the vector library
 #include <vector>
+#include <ctime>
 
 ///////////
 //CLASSES//

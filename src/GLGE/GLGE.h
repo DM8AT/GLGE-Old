@@ -541,4 +541,11 @@ void glgeSetCursor(int style=GLGE_CURSOR_STYLE_DEFAULT);
  */
 vec2 glgeGetScreenSize();
 
+/**
+ * @brief get the current time since the engine started
+ * 
+ * @return float the current time since start
+ */
+float glgeGetCurrentElapsedTime();
+
 #endif

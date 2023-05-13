@@ -31,6 +31,7 @@
 //include math, used to make the camera movement relative to the player
 #include <math.h>
 #include <iostream>
+#include <time.h>
 
 //create the main camera, an instance of the Camera class. Default constructor is used in the moment, setup is later
 Camera camera;
@@ -169,6 +170,9 @@ void tick()
     camera.recalculateProjection();
     //then, update the camera to make all transform changes work correctly
     camera.update();
+
+    //recalculate the height for the cube obj
+    cube.setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
 
     //secondly, update the objects, so that 
 

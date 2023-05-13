@@ -27,6 +27,8 @@
 #include <math.h>
 #include <cstring>
 #include <iostream>
+#include <chrono>
+#include <ctime>
 
 ////////////////////
 //Public functions//
@@ -1075,4 +1077,9 @@ vec2 glgeGetScreenSize()
 {
     //return the screen size
     return vec2(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
+}
+
+float glgeGetCurrentElapsedTime()
+{
+    return glutGet(GLUT_ELAPSED_TIME);
 }
