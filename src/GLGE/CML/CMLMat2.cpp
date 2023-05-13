@@ -119,7 +119,34 @@ mat2 mat2::operator*(mat2 c)
     {
         for(int j = 0; j < 2; j++)
         {
-            out.m[i][j] = m[i][0] * c.m[0][j] + m[i][1] * c.m[1][j];
+            float tempOut = 0;
+            if (!((m[i][0] == 0) || (c.m[0][j] == 0)))
+            {
+                tempOut = m[i][0] * c.m[0][j];
+            }
+
+            if ((m[i][1] == 0) || (c.m[1][j] == 0))
+            {
+                if (tempOut != 0)
+                {
+                    out.m[i][j] = tempOut + m[i][1] * c.m[1][j];
+                }
+                else
+                {
+                    out.m[i][j] = 0;
+                }
+            }
+            else
+            {
+                if (tempOut != 0)
+                {
+                    out.m[i][j] = tempOut + m[i][1] * c.m[1][j];
+                }
+                else
+                {
+                    out.m[i][j] = m[i][1] * c.m[1][j];
+                }
+            }
         }
     }
     return out;

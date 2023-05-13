@@ -86,7 +86,10 @@ mat4 mat4::operator*(mat4 c)
             float num = 0;
             for(int k = 0; k < 4; k++)
             {
-                num += this->m[i][k]*c.m[k][j];
+                if (!(this->m[i][k] == 0) || (c.m[k][j] == 0))
+                {
+                    num += this->m[i][k]*c.m[k][j];
+                }
             }
             out.m[i][j] = num;
         }

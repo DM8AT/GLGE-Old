@@ -207,7 +207,7 @@ void tick()
     //light.setPos(camera.getPos());
 
     //write the current FPS
-    //std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
+    std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
 }
 
 //this function is used to setup the grassFloor instance of the Object class

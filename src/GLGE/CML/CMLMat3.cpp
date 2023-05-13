@@ -75,7 +75,10 @@ mat3 mat3::operator*(mat3 c)
             float num = 0;
             for(int k = 0; k < 3; k++)
             {
-                num += this->m[i][k]*c.m[k][j];
+                if (!((this->m[i][k] == 0) || (c.m[k][j] == 0)))
+                {
+                    num += this->m[i][k]*c.m[k][j];
+                }
             }
             out.m[i][j] = num;
         }
