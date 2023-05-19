@@ -2,6 +2,7 @@
 
 #extension GL_EXT_geometry_shader : enable
 #extension GL_OES_geometry_shader : enable
+#extension GL_OES_shader_io_blocks : enable
 
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
