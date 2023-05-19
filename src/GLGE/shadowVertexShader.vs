@@ -6,7 +6,7 @@ layout (location = 0) in vec3 aPos;
 
 uniform mat4 model;
 
-out vec4 fragPos;
+out vec4 FragPos;
 
 void main()
 {
