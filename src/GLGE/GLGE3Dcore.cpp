@@ -734,7 +734,7 @@ void Object::draw()
             //bind the shadow map
             glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
             //pass the sampler to the shader
-            glUniform1i(this->shadowMapLoc, textures + 1);
+            //glUniform1i(this->shadowMapLoc, textures + 1); // Error bei JuNi
         }
     }
     //if it is not the shadow pass
