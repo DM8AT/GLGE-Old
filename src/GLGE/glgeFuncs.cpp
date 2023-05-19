@@ -408,7 +408,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glgeErrorOutput = err;
 
     //create the shader for shadow mapping
-    glgeShadowShader = Shader("src/GLGE/shadowVertexShader.vs","src/GLGE/shadowGeometryShader.gs","src/GLGE/shadowFramentShader.fs");
+    glgeShadowShader = Shader("src/GLGE/shadowVertexShader.vs","src/GLGE/shadowGeometryShader.gs","src/GLGE/shadowFragmentShader.fs");
 
     //get the uniform from the shadow shader
     glgeModelMatShadowLoc = glgeGetUniformVar(glgeShadowShader.getShader(), "model");
