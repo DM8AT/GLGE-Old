@@ -404,7 +404,7 @@ void wallSetup()
     mat.addImage("assets/WallTexture/harshbricks-ao2.png", "AmbientMap");
 
     //create a shader for the wall
-    Shader shader = Shader("src/vertexShader.vs", "src/monkeyFragmentShader.fs");
+    Shader shader = Shader("src/vertexShader.vs", "src/fragmentShader330.fs");
     //set a geometry shader for the wall
     shader.addGeometryShader("src/geometryShader.gs");
 
