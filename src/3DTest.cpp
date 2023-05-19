@@ -458,7 +458,7 @@ void run3Dexample(int argc, char** argv)
     //glgeSetPostProcessingShader("src/ppsDrawNormals.fs");
 
     //set the FPS limit
-    glgeSetMaxFPS(10000);
+    glgeSetMaxFPS(60);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

@@ -161,6 +161,11 @@
  */
 #define GLGE_ERROR_IMAGE_COULDNT_OPEN "[GLGE ERROR] could not open image %s\n"
 
+/**
+ * this shows in which file a shader error occured
+ */
+#define GLGE_ERROR_OCCURED_IN_FILES "[GLGE ERROR INFO] error occured in file %s or %s\n"
+
 //////////////////////
 //Error string exits//
 //////////////////////
