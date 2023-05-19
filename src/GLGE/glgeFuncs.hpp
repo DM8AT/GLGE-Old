@@ -83,7 +83,7 @@ GLuint compileShader(const char* vertex, const char* fragment);
  * @param fileDataFragment the data of the fragment shader
  * @return GLuint the compiled shader
  */
-GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment);
+GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile");
 
 /**
  * @brief count the number of an character in an string

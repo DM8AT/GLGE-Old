@@ -154,24 +154,7 @@ GLint getUniformVar(GLuint program, const char* name)
 }
 
 //compile and add the shaders to this object
-GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
-{
-    //store the source of the vertex shader
-    std::string vs;
-    //store the source of the fragment shader
-    std::string fs;
-
-    //read the vertex shader
-    readFile(fileNameVS, vs);
-    //read the fragment shader
-    readFile(fileNameFS, fs);
-
-    //pass the info to another compilation function
-    return compileShader(vs, fs, fileNameVS, fileNameFS);
-}
-
-//compile and add the shaders to this object
-GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile")
+GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShader, const char* fileFragmentShader)
 {
     //create a new shader program
     GLuint shaderProgram = glCreateProgram();
@@ -244,6 +227,23 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
     glUseProgram(shaderProgram);
     //return the shader program in the GLGE Object
     return shaderProgram;
+}
+
+//compile and add the shaders to this object
+GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
+{
+    //store the source of the vertex shader
+    std::string vs;
+    //store the source of the fragment shader
+    std::string fs;
+
+    //read the vertex shader
+    readFile(fileNameVS, vs);
+    //read the fragment shader
+    readFile(fileNameFS, fs);
+
+    //pass the info to another compilation function
+    return compileShader(vs, fs, fileNameVS, fileNameFS);
 }
 
 /**
@@ -393,7 +393,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the shaders for the default post processing
-    glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER);
+    glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
 
     //get the uniform for the screen texture in the post processing shader
     glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
