@@ -457,53 +457,6 @@ void glgeSetPostProcessingShader(std::string postProcessingShader);
 void glgeSetPostProcessingShader(GLuint shader);
 
 /**
- * @brief change the amount of samples used for multisampeling (default = 4)
- * 
- * @warning THIS FUNCTION ONLY HAS EFFECTS IF IT IS USED, BEFORE THE WINDOW IS CREATED
- * 
- * @param samples 
- */
-void glgeSetSamples(unsigned int samples);
-
-/**
- * @brief get the amount of samples used for multisampeling
- * 
- * @return unsigned int the amount of samples
- */
-unsigned int glgeGetSamples();
-
-/**
- * @brief enable multisampeling, if the amount of samples is bigger than 0
- * 
- * @warning THIS FUNCTION ONLY HAS EFFECTS IF IT IS USED, BEFORE THE WINDOW IS CREATED
- */
-void glgeEnableMultisampeling();
-
-/**
- * @brief disable multisampeling
- * 
- * @warning THIS FUNCTION ONLY HAS EFFECTS IF IT IS USED, BEFORE THE WINDOW IS CREATED
- */
-void glgeDisableMultisampleing();
-
-/**
- * @brief set the status for multisampeling
- * 
- * @warning THIS FUNCTION ONLY HAS EFFECTS IF IT IS USED, BEFORE THE WINDOW IS CREATED
- * 
- * @param status say wheter multisampeling is used or not
- */
-void glgeSetMultisampeling(bool status);
-
-/**
- * @brief get if multisampeling is used
- * 
- * @return true: multisampeling is used | 
- * @return false: no multisampeling is used
- */
-bool glgeGetMultisampelinStauts();
-
-/**
  * @brief Set the Wraping Mode for textures
  * 
  * @param mode the new wraping mode

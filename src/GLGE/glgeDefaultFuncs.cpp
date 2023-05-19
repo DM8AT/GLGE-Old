@@ -37,7 +37,7 @@ bool draw = true;
 void drawLightingPass()
 {
     //bind the custom framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, glgeMultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
 
     //clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,10 +57,6 @@ void drawLightingPass()
         ((void(*)())glgeDisplayCallback)();
     }
 
-    //bind the multi sample buffer as a read only frambuffer
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, glgeMultFBO);
-    //bind the post processing buffer as a draw only framebuffer
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgeFBO);
     //write the data from the multi sample buffer to the post pocessing buffer
     glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
@@ -268,11 +264,6 @@ void glgeDefaultTimer(int)
     //update the stored window size
     glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 
-    //update the window size of the frame buffer Multisample
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeMultRBO);
-    //setup the storage for the render buffer Multisample
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, glgeSamples, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-
     //update the window size of the frame buffer
     glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
     //setup the storage for the render buffer
@@ -286,17 +277,6 @@ void glgeDefaultTimer(int)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    //update the render texture parameters for the MultiSample texture
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferMultisampleTexture);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGBA32F, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
-    //bind the texture for normal map storeage
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferNormalTexture);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, glgeSamples, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, GL_TRUE);
-    //ungind the multisample texture
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     //set the mouse wheel to 0
     glgeMouse.mouseWeel = 0;

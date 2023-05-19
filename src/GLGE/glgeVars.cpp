@@ -90,15 +90,6 @@ unsigned int glgeFrameBufferTexture = 0;
 //store the direction normal for post-processing
 unsigned int glgeFrameBufferNormalTexture = 0;
 
-//store the texture for the multi sample framebuffer
-unsigned int glgeFrameBufferMultisampleTexture = 0;
-
-//store the custom multi sample frame buffer
-unsigned int glgeMultFBO = 0;
-
-//store the custom multi sample render buffer
-unsigned int glgeMultRBO = 0;
-
 //store the RBO
 unsigned int glgeRBO = 0;
 
@@ -119,9 +110,6 @@ int glgePostProcessingShader = 0;
 
 //create and setup the lights vector
 std::vector<Light*> glgeLights;
-
-//store if multisampling is enabled
-bool glgeUseMultisampling = true;
 
 //store the resolution of the shadow map
 unsigned int glgeShadowMapResolution = 1000;

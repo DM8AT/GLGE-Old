@@ -996,46 +996,6 @@ void glgeSetPostProcessingShader(GLuint shader)
     getUniformsForPostProcessing();
 }
 
-void glgeSetSamples(unsigned int samples)
-{
-    //store the inputed amount of samples
-    glgeSamples = samples;
-}
-
-unsigned int glgeGetSamples()
-{
-    //return the amount of used samples
-    return glgeSamples;
-}
-
-void glgeEnableMultisampeling()
-{
-    //check if the amount of samples is not 0
-    if (glgeSamples != 0)
-    {
-        //set the bool for multisampeling to true
-        glgeUseMultisampling = true;
-    }
-}
-
-void glgeDisableMultisampleing()
-{
-    //set the bool for multisampeling to false
-    glgeUseMultisampling = false;
-}
-
-void glgeSetMultisampeling(bool status)
-{
-    //store the inputed status as the used multisampeling
-    glgeUseMultisampling = status;
-}
-
-bool glgeGetMultisampelinStauts()
-{
-    //return if multisampeling is enabled
-    return glgeUseMultisampling;
-}
-
 void glgeSetWrapingMode(unsigned int mode)
 {
     //store the inputed wraping mode
