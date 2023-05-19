@@ -44,11 +44,11 @@ void atlas::_put_pixel(unsigned char* img, vec2 pos, vec3 info, vec4 color ) {
     // pixel posX = x * channels
     // pixel posY = y * width * channels
 
-    int posX = pos.x * info.z;
-    int posY = pos.y * info.x * info.z;
+    unsigned long long posX = pos.x * info.z;
+    unsigned long long posY = pos.y * info.x * info.z;
 
     // The X and Y pos combined in one int
-    int p = posX + posY;
+    unsigned long long p = posX + posY;
 
     // create array for storing color values
     int arr[4] = {(int)color.x, (int)color.y, (int)color.z, (int)color.w};
@@ -75,8 +75,8 @@ vec4 atlas::_get_pixel(unsigned char* *img, vec2 pos, vec3 info ) {
     // pixel posX = x * channels
     // pixel posY = y * width * channels
 
-    int posX = pos.x * info.z;
-    int posY = pos.y * info.x * info.z;
+    unsigned long long posX = pos.x * info.z;
+    unsigned long long posY = pos.y * info.x * info.z;
 
     unsigned char* p = *img;
 
@@ -252,13 +252,17 @@ std::string atlas::_get_region_occupied(vec4 pos) {
     return "";
 }
 
-unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
+unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas, bool verbous) {
     // amount of images
     int imgs = this->paths.size();
     int w,h, c = 4;
 
     // get sqrt of imgs
     float imgsroot = sqrt(imgs);
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Getting size of atlas...\r";
+    }
     // if it is int and not float then the result times size is w & h
     if ( imgsroot == (int) imgsroot ) {
         // set width
@@ -280,6 +284,12 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
     this->atlasData["h"] = h;
     this->atlasData["channels"] = c;
 
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Getting size of atlas... Done!\n";
+        std::cout << "[GLGE] [Texture Atlas] Creating image...\r";
+    }
+
     // debug message
     //std::cout << imgs << " " << w << " " << size << "\n";
 
@@ -299,11 +309,21 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
     // clear atlas image. this gets rid of random pixel values that somehow happen
     this->_clear_image(atlasImg, vec3(w,h,c));
 
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Creating image... Done!\n";
+    }
+
     // counter for how many images have been processed already
     int imgCount = 0;
     // go through all images in the texture atlas
     for (int vert = 0; vert < imgsroot; vert++ ) {
         for (int hor = 0; hor < imgsroot; hor++ ) {
+            // verbal message
+            if (verbous) {
+                int percent = 100./(float)this->paths.size() * (float)imgCount;
+                std::cout << "[GLGE] [Texture Atlas] Placing images... " << percent << "%\r";
+            }
             // image values
             int width, height, channelCount;
             unsigned char *img = stbi_load(paths[imgCount], &width, &height, &channelCount, 0);
@@ -346,19 +366,27 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas) {
 
     // save the atlas if requested
     if (save_atlas) {
+        // verbal message
+        if (verbous) {
+            std::cout << "[GLGE] [Texture Atlas] Saving image...\r";
+        }
         // save atlas to the specefied location
         stbi_write_png(this->path, w, h, c, atlasImg, w*c);
         // save the atlas info
         std::ofstream dataFile ((((std::string) this->path ) + ".json" ).c_str());
         dataFile << this->atlasData.dump(4).c_str();
         dataFile.close();
+        // verbal message
+        if (verbous) {
+            std::cout << "[GLGE] [Texture Atlas] Saving image... Done!\n";
+        }
     }
 
     // return the atlas object
     return atlasImg;
 }
 
-unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
+unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous) {
     // The slightly slower algorithm for placing images on a blank canvas, a bit like playing tetris
 
     /*
@@ -379,6 +407,11 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
     int totalHeight = 0;
     // the minimum width to have in order for all textures to fit
     int minWidth = 0;
+    int minHeight = 0;
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Getting size of atlas...\r";
+    }
     // First pass through all images
     for ( long unsigned int i = 0; i < this->paths.size(); i++ ) {
         // image dimension vars
@@ -400,12 +433,20 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         totalHeight += h;
         // update minimum width
         if ( w > minWidth ) { minWidth = w; }
+        if ( h > minHeight ) { minHeight = h; }
+    }
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Getting size of atlas... Done!\n";
+        std::cout << "[GLGE] [Texture Atlas] Creating image...\r";
     }
 
     // reduce the total width
-    totalWidth /= 2;
+    totalWidth /= 6;
+    totalHeight /= 6;
     // make sure all images will fit
     if ( totalWidth < minWidth ) { totalWidth = minWidth; }
+    if ( totalHeight < minHeight ) { totalHeight = minHeight; }
 
     // write template to atlas info data
     this->atlasData["w"] = totalWidth;
@@ -429,8 +470,20 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
     // clear atlas image. this gets rid of random pixel values that somehow happen
     this->_clear_image(atlasImg, vec3(totalWidth,totalHeight,channelCount));
 
+    // position vars
+    int x = 0, y = 0;
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Creating image... Done!\n";
+    }
+
     // Second pass, it's tetris time!
     for ( long unsigned int i = 0; i < this->paths.size(); i++ ) {
+        // verbal message
+        if (verbous) {
+            int percent = 100./(float)this->paths.size() * (float)i;
+            std::cout << "[GLGE] [Texture Atlas] Placing images... " << percent << "%\r";
+        }
         // image dimension vars
         int w, h, c;
         // load image info
@@ -445,8 +498,8 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
         }
 
         // find a spot to put the image //
-        // position vars
-        int x = 0, y = 0;
+        // if the image has reached the highest point
+        bool reached_ceiling = false;
         // var to check if a spot was found
         bool done = false;
 
@@ -466,9 +519,24 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
                     // continue
                     continue;
                 }
-                // otherwise, go to x 0 and move y by height of the image
+                // reset x
                 x = 0;
-                y += 1;
+                // calculate vertical change
+                change = (int)occupendData["h"] - (x - (int)occupendData["y"]);
+                // check if enough vertical room is left
+                if ( (int)this->atlasData["h"] < y + h + change ) {
+                    // if the ceiling was reached before
+                    if (reached_ceiling) {
+                        // break out of loop
+                        break;
+                    }
+                    // otherwise set reached_ceiling to true
+                    reached_ceiling = true;
+                    // and reset x,y
+                    x = 0, y = 0;
+                }
+                // otherwise, move y by height of the image
+                y += change;
                 continue;
             }
             // if occupend is nothing, place image //
@@ -479,7 +547,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             this->atlasData["images"][paths[i]]["x"] = x;
             this->atlasData["images"][paths[i]]["y"] = y;
 
-            std::cout << this->atlasData["images"][paths[i]] << "\n";
+            //std::cout << i << " " << this->atlasData["images"][paths[i]] << "\n";
 
             // go through all pixels of the image
             for (int hI = 0; hI < h; hI++) {
@@ -498,42 +566,6 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             break;
         }
 
-        /*
-        for (int y = 0; y < totalHeight-(h-1); y++) {
-        for (int x = 0; x < totalWidth-(w-1); x++) {
-            // check if spot is free
-            if ( this->_is_region_occupied(vec4(x,y,w,h)) ) { 
-                continue;
-            }
-
-            // add image info to atlas data
-            this->atlasData["images"][paths[i]]["w"] = w;
-            this->atlasData["images"][paths[i]]["h"] = h;
-            this->atlasData["images"][paths[i]]["x"] = x;
-            this->atlasData["images"][paths[i]]["y"] = y;
-
-            // Write image to atlas
-            // go through all pixels of the image
-            for (int hI = 0; hI < h; hI++) {
-            for (int wI = 0; wI < w; wI++) {
-                // calculate the current position in the image and atlas
-                vec2 imgPos = vec2(wI, hI);
-                vec2 atlasPos = vec2(imgPos.x+x, imgPos.y+y);
-                // get the colors from a pixel
-                vec4 arr = this->_get_pixel(&img, imgPos, vec3(w, h, c));
-                // write them to the atlas
-                this->_put_pixel(atlasImg, atlasPos, vec3(totalWidth, totalHeight, channelCount), arr);
-            }
-            }
-
-            // set break var to true
-            done = true;
-            break;
-        }
-            // if spot has been found, break out of loop
-            if (done) {break;}
-        }*/
-
         // free image
         free(img);
         // check if a position was not found
@@ -542,15 +574,27 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas) {
             exit(1);
         }
     }
+    // verbal message
+    if (verbous) {
+        std::cout << "[GLGE] [Texture Atlas] Placing images... Done!\n";
+    }
 
     // save image and data if needed;
     if (save_atlas) {
+        // verbal message
+        if (verbous) {
+            std::cout << "[GLGE] [Texture Atlas] Saving image...\r";
+        }
         // save atlas to the specefied location
         stbi_write_png(this->path, totalWidth, totalHeight, channelCount, atlasImg, totalWidth*channelCount);
         // save the atlas info
         std::ofstream dataFile ((((std::string) this->path ) + ".json" ).c_str());
         dataFile << this->atlasData.dump(4).c_str();
         dataFile.close();
+        // verbal message
+        if (verbous) {
+            std::cout << "[GLGE] [Texture Atlas] Saving image... Done!\n";
+        }
     }
 
     // return atlas image
@@ -588,6 +632,8 @@ void atlas::_optimize_atlas(bool save_atlas) {
     // clear atlas image. this gets rid of random pixel values that somehow happen
     this->_clear_image(atlasImg, vec3(width,height,channelCount));
 
+    // ToDo: Make it faster
+
     // transplant old atlas to new
     // go through all pixels of the old atlas
     for (int hI = 0; hI < height; hI++) {
@@ -612,6 +658,10 @@ void atlas::_optimize_atlas(bool save_atlas) {
     if (save_atlas)  {
         // save atlas to the specefied location
         stbi_write_png(this->path, width, height, channelCount, atlasImg, width*channelCount);
+        // save the atlas info
+        std::ofstream dataFile ((((std::string) this->path ) + ".json" ).c_str());
+        dataFile << this->atlasData.dump(4).c_str();
+        dataFile.close();
     }
 }
 

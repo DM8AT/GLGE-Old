@@ -90,7 +90,7 @@ class atlas {
          * 
          * @return The atlas image
          */
-        unsigned char * _constructs_atlas_same(int size, bool save_atlas = false);
+        unsigned char * _constructs_atlas_same(int size, bool save_atlas = false, bool verbous = true);
 
         /**
          * @brief Constructs an atlas for images that may be completely differently sized
@@ -99,7 +99,7 @@ class atlas {
          * 
          * @return The atlas image
          */
-        unsigned char * _constructs_atlas_tetris(bool save_atlas = false);
+        unsigned char * _constructs_atlas_tetris(bool save_atlas = false, bool verbous = true);
 
         /**
          * @brief Optimizes the atlas by shrinking it to only the required size.
