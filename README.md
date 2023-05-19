@@ -61,12 +61,4 @@ Upcoming features that may be added to GLGE in the future include:
 Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
-## Latest:
-- added ability to load 3D .obj files into an mesh
-## Other:
-- added the abillity to create shaders from a kernel
-- added things for post production
-- added possibility for creating shaders from source code as std::strings
-- deleted doxygen documentation, it was broken
-- changed default shader to std::string instead of external file
-- started logging the changelogs
+- deleted changelog
