@@ -14,7 +14,7 @@ All files in the folder are created by doxygen automatically, I haven't changed 
 If you encounter errors, check the error outputs defined in "GLGE/glgeErrors.hpp". 
 
 Often causes for memory access errors:
-- Not binding an camera before creating or updating 3D objects
+- Not binding a camera before creating or updating 3D objects
 - inputing wrong values to an Object constructor with pointer arrays
 
 Often causes for GL_INVALIDE_OPERATION:
@@ -28,7 +28,7 @@ To install, download the source code and move the "GLGE" folder to your preferre
 updating the include path in the necessary files ("GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp"). 
 Else, there would be compilation errors. 
 
-In the make file, there is one path that need to be updated. It is called GLGE. It defines the path to the Core library. 
+In the make file, there is one path that needs to be updated. It is called GLGE. It defines the path to the Core library. 
 
 ## Compiling
 Compiling can be done with the Makefile provided, or with your preferred method. 
