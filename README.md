@@ -62,7 +62,9 @@ Currently working on improving the shader core to make handling shaders simpler 
 
 # Changelogs
 - deleted changelog (cleanup)
+## Update 0.1
 - removed old lighting code from shaders
 - added Lighting pass
 - removed post processing pass (temporearly, now used as lighting pass)
 - added access to things like the last frame
+- shader no longer nessesary for lighting (Updated default 3D shader)
