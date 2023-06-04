@@ -62,6 +62,9 @@ float mouseSensetivity = 2.f;
 //say if the mouse is currently locked to the screen
 bool isActive = true;
 
+//store the mouse pointer error
+float mousePosError = 0.f;
+
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
 {
@@ -151,7 +154,7 @@ void tick()
     if (isActive)
     {
         //rotate the camera by the mouse position
-        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity, -(glgeGetMouse().pos.y-0.5f) * mouseSensetivity, 0);
+        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity, -((glgeGetMouse().pos.y-0.5f) * mouseSensetivity)-(mousePosError*2.f), 0);
     }
     //clamp the camera rotation on the y axis
     camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
@@ -256,8 +259,7 @@ void floorSetup()
     //the grass floor is constructed from the previously created mesh by overwriting the data previously stored in it with the new mesh
     grassFloor = Object(m);
 
-    grassFloor.setShader(GLGE_DEFAULT_3D_VERTEX, "src/monkeyFragmentShader.fs");
-    //OUTDATED: an shader can be asigned to the object, but it is no longer necesery. 
+    //an shader can be asigned to the object, but it is no longer necesery. 
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then create a material for the grass floor
@@ -330,15 +332,10 @@ void cubeSetup()
     //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
     //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
     cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.01,2),vec3(0,0,0),1));
-    
-    //then, the same shader as used for the grass floor (Basic 3D shader) is asigned. It is inputed as shown to avoid dupication on the graphics card. 
-    //this methode can create problems, if objects are created dynamicaly, because if the shader is deleted in one object, It is deleted for all objects. 
-    //because of this issue, only the default constructor is existing for all classes contained in the library, so the buffers, shaders and textures are
-    //left behind once it is deleted. 
-    cube.setShader(grassFloor.getShader());
 
     //create a material for the cube
-    Material cubeMaterial = Material("assets/cubeTexture.png", "Texture", 0.1);
+    //Material cubeMaterial = Material("assets/cubeTexture.png", "Texture", 0.1);
+    Material cubeMaterial = Material(glgeGetLastFrame(), "Texture", 0.1);
 
     //apply the material to the cube
     cube.setMaterial(cubeMaterial);
@@ -358,9 +355,6 @@ void thingSetup()
 
     //apply the material to the thing
     thing.setMaterial(thingMat);
-
-    //set the shader for the thing
-    thing.setShader(cube.getShader());
 }
 
 void enterpriseSetup()
@@ -373,9 +367,6 @@ void enterpriseSetup()
 
     //bind the material to the enterprise
     enterprise.setMaterial(mat);
-
-    //set the shader to the shader from the cube
-    enterprise.setShader(cube.getShader());
 }
 
 void wallSetup()
@@ -433,11 +424,9 @@ void run3Dexample(int argc, char** argv)
 
     //create an kernal to generate an gausian blure
     /*float kernal[] = {
-        1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f,
-        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
-        6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
-        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
-        1.f / 256.f, 4.f  / 256.f,  6.f / 256.f,  4.f / 256.f, 1.f / 256.f
+        1.f/16.f, 1.f/8.f, 1.f/16.f,
+        1.f/08.f, 1.f/4.f, 1.f/08.f,
+        1.f/16.f, 1.f/8.f, 1.f/16.f,
     };*/
 
     //create an shader from an cernal
@@ -454,11 +443,10 @@ void run3Dexample(int argc, char** argv)
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
     //glgeDisableBackfaceCulling();
 
-    //normal buffers currently under construction
-    //glgeSetPostProcessingShader("src/ppsDrawNormals.fs");
+    //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
 
-    //set the FPS limit
-    glgeSetMaxFPS(60);
+    //set the FPS limit (Base Limit = 60)
+    glgeSetMaxFPS(70);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

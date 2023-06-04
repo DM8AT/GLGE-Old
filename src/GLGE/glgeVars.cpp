@@ -84,14 +84,80 @@ bool glgeUseCulling = false;
 //store the frame buffer, default is 0
 unsigned int glgeFBO = 0;
 
-//store the texture for the frame buffer
-unsigned int glgeFrameBufferTexture = 0;
+//store the color from the frame buffer in an texture
+unsigned int glgeFrameAlbedoMap = 0;
 
 //store the direction normal for post-processing
-unsigned int glgeFrameBufferNormalTexture = 0;
+unsigned int glgeFrameNormalMap = 0;
+
+//store the fragment position in a texture
+unsigned int glgeFramePositionMap = 0;
+
+//store the roughness in a texture
+unsigned int glgeFrameRoughnessMap = 0;
+
+//store the renderd image
+unsigned int glgeFrameLastTick = 0;
+
+//store a framebuffer to store the image from the last tick
+unsigned int glgeFBOLastTick = 0;
+
+//store a renderbuffer to store the image from last tick
+unsigned int glgeRBOLastTick = 0;
+
+//store a framebuffer to store the image from the lighting pass
+unsigned int glgeFBOLighintPass = 0;
+
+//store a renderbuffer to store the image from lighting pass
+unsigned int glgeFBOLightingPass = 0;
+
+//store the position of the uniform for the albedo map in the post processing shader
+int glgeAlbedoInLightingPass = -1;
+
+//store the position of the uniform for the normal map in the post processing shader
+int glgeNormalInLightingPass = -1;
+
+//store the position of the uniform for the position map in the post processing shader
+int glgePositionInLightingPass = -1;
+
+//store the position of the uniform for the roughness map in the post processing shader
+int glgeRoughnessInLightingPass = -1;
+
+//store the position of the light color uniform in the Lighting Pass shader
+std::vector<int> glgeLightColInLightingPass = {};
+
+//store the position of the light intensity uniform in the Lighting Pass shader
+std::vector<int> glgeLightIntInLightingPass = {};
+
+//store the position of the light position uniform in the Lighting Pass shader
+std::vector<int> glgeLightPosInLightingPass = {};
+
+//store the position of the active light uniform in the Lighting Pass shader
+int glgeActiveLightInLightingPass = -1;
+
+//store the position of the camera positin uniform in the Lighting Pass shader
+int glgeCamPosInLightingPass = -1;
+
+//store the position of the far plane uniform in the Lighting Pass shader
+int glgeFarPlaneInLightingPass = -1;
+
+//store the active color buffers
+GLenum glgeUsedColorBuffers[] = {GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+
+//store the length of the unsigned buffer array
+unsigned int glgeLenUsedColorBuffers = sizeof(glgeUsedColorBuffers) / sizeof(glgeUsedColorBuffers[0]);
+
+//store all the color buffers
+GLenum glgeAllUsedColorBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+
+//store the length of all used color buffers
+unsigned int glgeLenAllUsedColorBuffers = sizeof(glgeAllUsedColorBuffers) / sizeof(glgeAllUsedColorBuffers[0]);
 
 //store the RBO
 unsigned int glgeRBO = 0;
+
+//store the RBO for the normals
+unsigned int glgeRBONormal = 0;
 
 //store the amount of samples for GLGE
 unsigned int glgeSamples = 4;
@@ -106,7 +172,7 @@ unsigned int glgeScreenVBO = 0;
 unsigned int glgeScreenVAO = 0;
 
 //set the default post processing shader to 0
-int glgePostProcessingShader = 0;
+int glgeLightingShader = 0;
 
 //create and setup the lights vector
 std::vector<Light*> glgeLights;

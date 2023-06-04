@@ -32,6 +32,15 @@ Material::Material(const char* image, const char* uniform, float roughness)
     this->addImage(image, uniform);
 }
 
+Material::Material(GLuint texture, const char* uniform, float roughness)
+{
+    //store the inputed roughness
+    this->roughness = roughness;
+
+    //load the inputed image to the image vector
+    this->addImage(texture, uniform);
+}
+
 Material::Material(vec4 color, float roughness)
 {
     //store the inputed roughness
@@ -118,6 +127,16 @@ void Material::addImage(const char* image, const char* uniformName)
 {
     //store the inputed image in the image vector
     this->textures.push_back(glgeTextureFromFile(image));
+    //store an empty image positoion
+    this->imageLocs.push_back(0);
+    //store the inputed image uniform name
+    this->uniformNames.push_back(uniformName);
+}
+
+void Material::addImage(GLuint texture, const char* uniformName)
+{
+    //store the inputed image in the image vector
+    this->textures.push_back(texture);
     //store an empty image positoion
     this->imageLocs.push_back(0);
     //store the inputed image uniform name

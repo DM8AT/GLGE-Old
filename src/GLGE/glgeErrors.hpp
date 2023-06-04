@@ -166,6 +166,11 @@
  */
 #define GLGE_ERROR_OCCURED_IN_FILES "[GLGE ERROR INFO] error occured in file %s or %s\n"
 
+/**
+ * this shows in which file a shader error occured
+ */
+#define GLGE_ERROR_OCCURED_IN_FILE "[GLGE ERROR INFO] error occured in file %s\n"
+
 //////////////////////
 //Error string exits//
 //////////////////////

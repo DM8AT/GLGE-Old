@@ -950,17 +950,13 @@ bool glgeGetBackfaceCullingStatus()
     return glgeUseCulling;
 }
 
-void getUniformsForPostProcessing()
-{
-}
-
-void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
+void glgeSetLightingShader(const char* lightingShaderFile)
 {
     //create strings for the shader
     std::string data;
 
     //read the files
-    if (!readFile(postProcessingShaderFile, data))
+    if (!readFile(lightingShaderFile, data))
     {
         //output an error message
         if (glgeErrorOutput)
@@ -972,28 +968,46 @@ void glgeSetPostProcessingShader(const char* postProcessingShaderFile)
     }
 
     //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+    glgeLightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
 
     //get the post processing uniforms
-    getUniformsForPostProcessing();
+    bool albedo = getUniformsForLightingShader();
+
+    //if the albedo wasn't found, print out the filename
+    if (!albedo)
+    {
+        printf(GLGE_ERROR_OCCURED_IN_FILE, lightingShaderFile);
+    }
 }
 
-void glgeSetPostProcessingShader(std::string postProcessingShader)
+void glgeSetLightingShader(std::string LightingShader)
 {
     //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, postProcessingShader);
+    glgeLightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, LightingShader);
 
     //get the post processing uniforms
-    getUniformsForPostProcessing();
+    bool albedo = getUniformsForLightingShader();
+
+    //if the albedo wasn't found, print out the filename
+    if (!albedo)
+    {
+        printf("[GLGE ERROR INFO] Error occured in shader compiled from custom source");
+    }
 }
 
-void glgeSetPostProcessingShader(GLuint shader)
+void glgeSetLightingShader(GLuint shader)
 {
-    //store the inputed shader as the post processing shader
-    glgePostProcessingShader = shader;
+    //store the inputed shader as the Lighting shader
+    glgeLightingShader = shader;
 
     //get the post processing uniforms
-    getUniformsForPostProcessing();
+    bool albedo = getUniformsForLightingShader();
+
+    //if the albedo wasn't found, print out the filename
+    if (!albedo)
+    {
+        printf("[GLGE ERROR INFO] Error occured in shader set by shader ID. \n                 ID : %d\n", shader);
+    }
 }
 
 void glgeSetWrapingMode(unsigned int mode)
@@ -1042,4 +1056,34 @@ vec2 glgeGetScreenSize()
 float glgeGetCurrentElapsedTime()
 {
     return glutGet(GLUT_ELAPSED_TIME);
+}
+
+GLuint glgeGetMainAlbedoMap()
+{
+    //return the main albedo texture
+    return glgeFrameAlbedoMap;
+}
+
+GLuint glgeGetMainNormalMap()
+{
+    //return the main normal map
+    return glgeFrameNormalMap;
+}
+
+GLuint glgeGetMainPositionMap()
+{
+    //return the main position map
+    return glgeFramePositionMap;
+}
+
+GLuint glgeGetMainRoughnessMap()
+{
+    //return the main roughness map
+    return glgeFrameRoughnessMap;
+}
+
+GLuint glgeGetLastFrame()
+{
+    //return a pointer to the last frame map
+    return glgeFrameLastTick;
 }

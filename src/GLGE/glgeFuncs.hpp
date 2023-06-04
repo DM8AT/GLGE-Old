@@ -44,6 +44,19 @@ void createWindow(const char* n, vec2 s, vec2 p);
 bool readFile(const char* filename, std::string& output);
 
 /**
+ * @brief Get the Uniforms For current Post Processing shader
+ * 
+ * @return true: could find albedo map uniform |
+ * @return false: could not find albedo map uniform
+ */
+bool getUniformsForLightingShader();
+
+/**
+ * @brief Get the Lighting Uniforms From the post processing shader
+ */
+void getLightingUniformsFromLightingPass();
+
+/**
  * @brief convert an error code from OpenGL into an error string
  * 
  * @param error the error code

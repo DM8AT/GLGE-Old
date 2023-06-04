@@ -85,6 +85,15 @@ public:
     /**
      * @brief Construct a new Material
      * 
+     * @param texture a OpenGL pointer to the texture on the GPU
+     * @param uniform the name of the uniform variable in the corresponding shader
+     * @param roughness the roughness for the texture
+     */
+    Material(GLuint texture, const char* uniform, float roughness);
+
+    /**
+     * @brief Construct a new Material
+     * 
      * @param color the base color of the material
      * @param roughness the roughness for the texture
      */
@@ -129,6 +138,14 @@ public:
      * @param uniformName the name of the uniform
      */
     void addImage(const char* image, const char* uniformName);
+
+    /**
+     * @brief add an image to a new uniform
+     * 
+     * @param texture a OpenGL pointer to the texture on the GPU
+     * @param uniformName the name of the uniform
+     */
+    void addImage(GLuint texture, const char* uniformName);
 
     /**
      * @brief this function gets all needed data from the sader

@@ -14,6 +14,7 @@
 #include "glgeVars.hpp"
 #include "glgeDefaultFuncs.hpp"
 #include "GLGEDefines.hpp"
+#include "GLGE.h"
 
 //include the CML dependencys
 #include "CML/CMLVec2.h"
@@ -147,7 +148,7 @@ GLint getUniformVar(GLuint program, const char* name)
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
         }
         //return a pointer to 0
-        return 0;
+        return -1;
     }
     //if no error occured, return the id of the uniform variable
     return ret;
@@ -246,6 +247,63 @@ GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
     return compileShader(vs, fs, fileNameVS, fileNameFS);
 }
 
+void getLightingUniformsFromLightingPass()
+{
+    //reset the uniform list
+    glgeLightColInLightingPass.clear();
+    glgeLightIntInLightingPass.clear();
+    glgeLightPosInLightingPass.clear();
+
+    //set the prefix for the light position
+    std::string prefixLightPos = std::string("glgeLightPos[");
+    //set the prefix for the light color
+    std::string prefixLightCol = std::string("glgeLightColor[");
+    //set the prefix for the light intensity
+    std::string prefixLightInt = std::string("glgeLightInt[");
+
+    for (int i = 0; i < (int)glgeLights.size(); i++)
+    {
+        //get the uniform for the light color
+        glgeLightColInLightingPass.push_back(getUniformVar(glgeLightingShader, (prefixLightCol + std::to_string(i) + std::string("]")).c_str()));
+        //get the uniform for the light intensity
+        glgeLightIntInLightingPass.push_back(getUniformVar(glgeLightingShader, (prefixLightInt + std::to_string(i) + std::string("]")).c_str()));
+        //get the uniform for the light position
+        glgeLightPosInLightingPass.push_back(getUniformVar(glgeLightingShader, (prefixLightPos + std::to_string(i) + std::string("]")).c_str()));
+    }
+}
+
+bool getUniformsForLightingShader()
+{
+    //let the error messages set for the albedo map, you want the albedo map in most cases
+    glgeAlbedoInLightingPass = getUniformVar(glgeLightingShader, "glgeAlbedoMap");
+    //next, turn the errors temporarely off
+    //get if the errors are turned on
+    bool error = glgeGetErrorOutput();
+    //turn the errors of
+    glgeSetErrorOutput(false);
+    //get the unform for the normal map
+    glgeNormalInLightingPass = getUniformVar(glgeLightingShader, "glgeNormalMap");
+    //get the uniform for the position map
+    glgePositionInLightingPass = getUniformVar(glgeLightingShader, "glgePositionMap");
+    //get the uniform for the roughness map
+    glgeRoughnessInLightingPass = getUniformVar(glgeLightingShader, "glgeRoughnessMap");
+
+    //get the lighting uniforms
+    getLightingUniformsFromLightingPass();
+    
+    //get the uniform for the amount of active lights
+    glgeActiveLightInLightingPass = getUniformVar(glgeLightingShader, "glgeActiveLights");
+    //get the uniform for the camera position
+    glgeCamPosInLightingPass = getUniformVar(glgeLightingShader, "glgeCameraPos");
+    //get the uniform for the far plane
+    glgeFarPlaneInLightingPass = getUniformVar(glgeLightingShader, "glgeFarPlane");
+    //reset the error output
+    glgeSetErrorOutput(error);
+
+    //if the albedo LightingPass is -1, then there is no albedo map, so return false
+    return (glgeAlbedoInLightingPass != -1);
+}
+
 /**
  * @brief Create a Window
  * 
@@ -324,6 +382,11 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glCullFace(GL_BACK);
     glgeUseCulling = true;
 
+    //disable clamping in the vertex shader
+    glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
+    //disable clamping in the fragment shader
+    glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
+
     //setup the depth buffer
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
@@ -336,18 +399,6 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenFramebuffers(1, &glgeFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
 
-    //generate the texture for the frame buffer
-    glGenTextures(1, &glgeFrameBufferTexture);
-    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeFrameBufferTexture, 0);
-
     //generate the Render Buffer
     glGenRenderbuffers(1, &glgeRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
@@ -355,11 +406,108 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
     //attach an depth stencil
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeRBO);
+
+    //generate the texture for the frame buffer
+    glGenTextures(1, &glgeFrameAlbedoMap);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeFrameAlbedoMap, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //generate a texture to store the normals
+    glGenTextures(1, &glgeFrameNormalMap);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, glgeFrameNormalMap, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //generate a texture to store the fragment position
+    glGenTextures(1, &glgeFramePositionMap);
+    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, glgeFramePositionMap, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //generate a texture to store the fragment roughness
+    glGenTextures(1, &glgeFrameRoughnessMap);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, glgeFrameRoughnessMap, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     //unbind the render buffer
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+    //specify the number of used color buffers
+    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
+
     //check if the framebuffer compiled correctly
     GLuint fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        //stop the program
+        exit(1);
+    }
+
+    //create and bind the second custom frame buffer
+    glGenFramebuffers(1, &glgeFBOLastTick);
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeFBOLastTick);
+
+    //generate the second Render Buffer
+    glGenRenderbuffers(1, &glgeRBOLastTick);
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBOLastTick);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+    //attach an depth stencil
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeRBOLastTick);
+
+    //generate a texture to store the last tick image
+    glGenTextures(1, &glgeFrameLastTick);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeFrameLastTick, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -393,10 +541,20 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the shaders for the default post processing
-    glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
+    glgeLightingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
+
+    //get the uniforms form the shader
+    bool albedo = getUniformsForLightingShader();
+
+    //check if the albedo map was found
+    if (!albedo)
+    {
+        std::cerr << "Could not find albedo map in default post processing shader" << std::endl;
+        exit(1);
+    }
 
     //get the uniform for the screen texture in the post processing shader
-    glUniform1i(glGetUniformLocation(glgePostProcessingShader, "screenTexture"), 0);
+    glUniform1i(glGetUniformLocation(glgeLightingShader, "screenTexture"), 0);
 
 
     //store the status of the glge error output
@@ -409,6 +567,9 @@ void createWindow(const char* n, vec2 s, vec2 p)
 
     //create the shader for shadow mapping
     glgeShadowShader = Shader();
+
+    //load the default lighting shader
+    glgeSetLightingShader(GLGE_DEFAULT_LIGHTING_SHADER);
 }
 
 //convert an error code into an string

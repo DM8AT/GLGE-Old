@@ -16,6 +16,8 @@
 #include "glgeVars.hpp"
 //get the error strings for GLGE
 #include "glgeErrors.hpp"
+//get access to the glge functions
+#include "glgeFuncs.hpp"
 
 //include the 4D matrices
 #include "CML/CMLMat4.h"
@@ -222,4 +224,7 @@ void glgeAddGlobalLighSource(Light* l)
             std::cout << GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT << (int)glgeLights.size() << std::endl;
         }
     }
+
+    //get the needed uniforms from the pps shader
+    getLightingUniformsFromLightingPass();
 }

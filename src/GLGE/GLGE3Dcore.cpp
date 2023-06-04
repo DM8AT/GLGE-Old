@@ -57,8 +57,6 @@ bool has_double_slash(std::string &str)
 
 //store the default 3D shader
 GLuint glgeShaderDefault;
-//the position of the shader 
-GLint glgeCamMatDefaulLoc;
 
 ////////////////////////////
 //Decalrations for Structs//
@@ -573,8 +571,8 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
-    //store the camera matrix location
-    this->camMatLoc = glgeCamMatDefaulLoc;
+    //get the uniforms
+    this->getUniforms();
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -598,8 +596,8 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
-    //store the move matrix location
-    this->camMatLoc = glgeCamMatDefaulLoc;
+    //get the uniforms
+    this->getUniforms();
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -623,8 +621,8 @@ Object::Object(Mesh mesh, Transform transform, bool isStatic)
 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
-    //store the move matrix location
-    this->camMatLoc = glgeCamMatDefaulLoc;
+    //get the uniforms
+    this->getUniforms();
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -648,8 +646,8 @@ Object::Object(const char* file, int type, Transform transform, bool isStatic)
 
     //bind the default 3D shader
     this->shader = glgeShaderDefault;
-    //store the move matrix location
-    this->camMatLoc = glgeCamMatDefaulLoc;
+    //get the uniforms
+    this->getUniforms();
 
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
@@ -677,7 +675,7 @@ void Object::draw()
         textures = this->mat.applyMaterial();
 
         //bind all light uniforms
-        this->loadLights();
+        //this->loadLights();
     }
 
     //always input the color argument
@@ -734,7 +732,7 @@ void Object::draw()
             //bind the shadow map
             glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
             //pass the sampler to the shader
-            glUniform1i(this->shadowMapLoc, textures + 1);
+            //glUniform1i(this->shadowMapLoc, textures + 1); // Error bei JuNi
         }
     }
     //if it is not the shadow pass
@@ -1527,6 +1525,4 @@ void glgeInit3DCore()
 
     //load the default 3D shaders
     glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
-    //store the location of the camera matrix in the default shader
-    glgeCamMatDefaulLoc = glgeGetUniformVar(glgeShaderDefault, glgeCamMatrix);
 }

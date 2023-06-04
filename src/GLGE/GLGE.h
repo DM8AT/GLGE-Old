@@ -436,25 +436,25 @@ void glgeSetBackfaceCulling(bool status);
 bool glgeGetBackfaceCullingStatus();
 
 /**
- * @brief bind an shader that will be applied to the whole screen
+ * @brief bind an shader that will controll how light sources effect the objects
  * 
- * @param postProcessingShaderFile the path to the post processing shader
+ * @param lightingShaderFile the path to the post processing shader
  */
-void glgeSetPostProcessingShader(const char* postProcessingShaderFile);
+void glgeSetLightingShader(const char* lightingShaderFile);
 
 /**
- * @brief bind an shader that will be applied to the whole screen
+ * @brief bind an shader that will controll how light sources effect the objects
  * 
- * @param postProcessingShader the source code for the post processing shader
+ * @param lightingShader the source code for the shader
  */
-void glgeSetPostProcessingShader(std::string postProcessingShader);
+void glgeSetLightingShader(std::string lightingShader);
 
 /**
- * @brief bind an shader that will be applied to the whole screen
+ * @brief bind an shader that will controll how light sources effect the objects
  * 
  * @param shader the allready compiled OpenGL shader
  */
-void glgeSetPostProcessingShader(GLuint shader);
+void glgeSetLightingShader(GLuint shader);
 
 /**
  * @brief Set the Wraping Mode for textures
@@ -500,5 +500,40 @@ vec2 glgeGetScreenSize();
  * @return float the current time since start
  */
 float glgeGetCurrentElapsedTime();
+
+/**
+ * @brief get the albedo texture from the last frame
+ * 
+ * @return GLuint a pointer to the albedo texture on the GPU
+ */
+GLuint glgeGetMainAlbedoMap();
+
+/**
+ * @brief get the normal texture from the last frame
+ * 
+ * @return GLuint a pointer to the normal texture on the GPU
+ */
+GLuint glgeGetMainNormalMap();
+
+/**
+ * @brief get the position texture from the last frame
+ * 
+ * @return GLuint a position to the albedo texture on the GPU
+ */
+GLuint glgeGetMainPositionMap();
+
+/**
+ * @brief get the roughness texture from the last frame
+ * 
+ * @return GLuint a roughness to the albedo texture on the GPU
+ */
+GLuint glgeGetMainRoughnessMap();
+
+/**
+ * @brief get a texture that always points to the last frame
+ * 
+ * @return GLuint the OpenGL texture
+ */
+GLuint glgeGetLastFrame();
 
 #endif

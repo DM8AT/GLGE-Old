@@ -1,11 +1,11 @@
 #version 300 es
 
-#define PI 3.14159265
-
 precision highp float;
 
-layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec3 FragNormal;
+layout(location = 0) out vec4 Albedo;
+layout(location = 1) out vec4 Normal;
+layout(location = 2) out vec4 Position;
+layout(location = 3) out vec4 Roughness;
 
 in vec4 color;
 in vec2 texCoord;
@@ -33,137 +33,9 @@ uniform bool RoughnessMapIsActive;
 uniform vec3 cameraPos;
 uniform float farPlane;
 
-//light data
-uniform vec3 lightColor[255];
-uniform float lightInt[255];
-uniform vec3 lightPos[255];
-uniform float activeLights;
-
-float ambient = 0.1;
-
-float gamma = 2.2f;
-
-int iteration = 0;
-
 float rough;
 
-float biasAngle = 0.0005;
-
-float calculateShadow()
-{
-    vec3 lightDirection = normalize(lightPos[0] - currentPos);
-
-    float shadow = 0.0f;
-
-	vec3 fragToLight = lightPos[0] - currentPos;
-
-	float currentDepth = length(fragToLight);
-
-	float bias = max(0.5f * (1.0f - dot(normal, lightDirection)), biasAngle); 
-
-    float closestDepth = texture(shadowMap, fragToLight).r;
-    closestDepth *= farPlane;
-    if (currentDepth > closestDepth + bias)
-    {
-        shadow = 1.0f;
-    }
-
-    return shadow;
-}
-
-vec3 schlickFresnel(float vDotH)
-{
-    vec3 F0 = vec3(0.04f);
-
-    vec3 ret = F0 + (1.f - F0) * pow(clamp(1.f - vDotH, 0.f, 1.f), 5.f);
-
-    return ret;
-}
-
-float geomSmith(float dp)
-{
-    float k = (rough + 1.f) * (rough + 1.f) / 8.f;
-    float denom = dp * (1.f - k) + k;
-    return dp / denom;
-}
-
-
-float ggxDistribution(float nDotH)
-{
-    float alpha2 = rough * rough * rough * rough;
-    float d = nDotH * nDotH * (alpha2 - 1.f) + 1.f;
-    float ggxdistrib = alpha2 / (PI * d * d);
-    return ggxdistrib;
-}
-
-vec4 calculatePBR(vec4 col)
-{
-    float shadow = 1.f;
-
-    vec3 lightIntensity = lightColor[iteration] * lightInt[iteration];
-
-    vec3 l = vec3(0.f);
-
-    l = lightPos[iteration] - currentPos;
-    float lightToPixelDist = length(l);
-    l = normalize(l);
-    lightIntensity /= (lightToPixelDist * lightToPixelDist);
-
-    vec3 n = normalize(normal);
-
-    if (NormalMapIsActive)
-    {
-        n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
-    }
-
-    FragNormal = n;
-
-    vec3 v = normalize((cameraPos) - currentPos);
-    vec3 h = normalize(v+l);
-
-    float nDotH = max(dot(n, h), 0.f);
-    float vDotH = max(dot(v, h), 0.f);
-    float nDotL = max(dot(n, l), 0.f);
-    float nDotV = max(dot(n, v), 0.f);
-
-    vec3 F = schlickFresnel(vDotH);
-
-    vec3 ks = F;
-    vec3 kd = 1.f - ks;
-
-    vec3 SpecBRDFnom = ggxDistribution(nDotH) * F * geomSmith(nDotL) * geomSmith(nDotV);
-
-    float SpecBRDFdenom = 4.f * nDotV * nDotL + 0.0001;
-
-    float SpecBRDF = float(SpecBRDFnom) / SpecBRDFdenom;
-
-    vec3 fLambert = vec3(0.f);
-
-    fLambert = vec3(col);
-
-    vec3 DiffuseBRDF = kd * fLambert / PI;
-
-    vec3 FinalColor = ((DiffuseBRDF + SpecBRDF) * lightIntensity * vec3(shadow)) * nDotL;
-
-    return vec4(FinalColor, col.w);
-}
-
-vec4 calculateLighting(vec4 col)
-{
-    vec4 totalLight;
-    for (int i = 0; i < min(int(activeLights), 255); i++)
-    {
-        iteration = i;
-        totalLight += calculatePBR(col);
-        totalLight = totalLight / (totalLight + vec4(1.f));
-    }
-
-    totalLight /= activeLights;
-
-    vec4 finalLight = vec4(pow(vec3(totalLight), vec3(1.0/2.2)), col.w);
-
-    return finalLight;
-}
+vec3 actualNormal = vec3(0,0,0);
 
 void main()
 {
@@ -185,21 +57,23 @@ void main()
         rough = roughness;
     }
 
-    //apply tonemapping
-    col = vec4(vec3(1.f) - exp(-vec3(col) * exposure),col.w);
+    //calculate the normal
+    vec3 n = normalize(normal);
 
-    if (activeLights == 0.f)
+    if (NormalMapIsActive)
     {
-        FragColor = col;
-    }
-    else
-    {
-        FragColor = calculateLighting(col);
+        n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
     }
 
-    vec4 minColor = col * ambient;
+    actualNormal = n;
 
-    FragColor = min(max(FragColor, minColor), vec4(1,1,1,1));
+    //the final output color
+    vec4 FragColor = vec4(0,0,0,0);
+
+    Albedo = min(max(col, vec4(0,0,0,0)), vec4(1,1,1,1));
+    Normal = vec4((actualNormal + vec3(1,1,1)) / vec3(2,2,2),1);
+    Position = vec4(currentPos,1);
+    Roughness = vec4(rough,0,0,1);
 
     gl_FragDepth = gl_FragCoord.z;
 }

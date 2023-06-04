@@ -39,17 +39,29 @@ void drawLightingPass()
     //bind the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, glgeFBO);
 
+    //only clear the first color buffer
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    //set the specified clear color
+    glClearColor(glgeClearColor.x, glgeClearColor.y, glgeClearColor.z, glgeClearColor.w);
+
     //clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    //specify the color buffers
+    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
+
+    //set the clear color to black
+    glClearColor(-2,-2,-2,0);
+
+    //clear the other buffers
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //specify the color buffers to draw into
+    glDrawBuffers(glgeLenAllUsedColorBuffers, glgeAllUsedColorBuffers);
+
     //enable depth testing
     glEnable(GL_DEPTH_TEST);
-
-    //a list of the active color buffers
-    //GLenum usedColorBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-
-    //specify the number of used color buffers
-    //glDrawBuffers(sizeof(usedColorBuffers) / sizeof(usedColorBuffers[0]), usedColorBuffers);
 
     //call the custom drawing function
     if(glgeHasDisplayCallback)
@@ -57,20 +69,20 @@ void drawLightingPass()
         ((void(*)())glgeDisplayCallback)();
     }
 
-    //write the data from the multi sample buffer to the post pocessing buffer
-    glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
     //specify that the used color buffer is 0
     //glDrawBuffer(GL_NONE);
 
     //switch to the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    //clear the frame buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+
     //disable depth testing
     glDisable(GL_DEPTH_TEST);
 
     //bind the post processing shader
-    glUseProgram(glgePostProcessingShader);
+    glUseProgram(glgeLightingShader);
     //bind the vertex array
     glBindVertexArray(glgeScreenVAO);
     //bind the array buffer
@@ -86,15 +98,67 @@ void drawLightingPass()
     //activate the uniform texture array
     glActiveTexture(GL_TEXTURE0);
     //bind the framebuffer texture
-    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //activate the second texture unit
     glActiveTexture(GL_TEXTURE1);
     //bind the normal texture
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, glgeFrameBufferNormalTexture);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+    //activate the thired texture unit
+    glActiveTexture(GL_TEXTURE2);
+    //bind the position texture
+    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+    //activate the fourth texture unit
+    glActiveTexture(GL_TEXTURE3);
+    //bind the roughness texture
+    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+
+    //pass the uniforms to the shader
+    //pass the albedo map
+    glUniform1i(glgeAlbedoInLightingPass, 0);
+    //pass the normal map
+    glUniform1i(glgeNormalInLightingPass, 1);
+    //pass the position map
+    glUniform1i(glgePositionInLightingPass, 2);
+    //pass the roughness map
+    glUniform1i(glgeRoughnessInLightingPass, 3);
+    //pass the camera position
+    glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
+    //pass the far plane
+    glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
+    //pass all the lights to the shader
+    //load all light positions to the shader
+    for (int i = 0; i < (int)glgeLightPosInLightingPass.size(); i++)
+    {
+        //pass the light position
+        glUniform3f(glgeLightPosInLightingPass[i], glgeLights[i]->getPos().x, glgeLights[i]->getPos().y, glgeLights[i]->getPos().z);
+    }
+    //load all light colors to the shader
+    for (int i = 0; i < (int)glgeLightColInLightingPass.size(); i++)
+    {
+        //pass the light color
+        glUniform3f(glgeLightColInLightingPass[i], glgeLights[i]->getColor().x, glgeLights[i]->getColor().y, glgeLights[i]->getColor().z);
+    }
+    //load all light intensitys to the shader
+    for (int i = 0; i < (int)glgeLightIntInLightingPass.size(); i++)
+    {
+        //pass the light intensity
+        glUniform1f(glgeLightIntInLightingPass[i], glgeLights[i]->getInsensity());
+    }
+    //pass the amount of active lights
+    glUniform1i(glgeActiveLightInLightingPass, (int)glgeLights.size());
+
     //draw the screen
     glDrawArrays(GL_TRIANGLES, 0, 6);
     //unbind the normal texture
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //activate the thired texture unit
+    glActiveTexture(GL_TEXTURE2);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //activate the second texture unit
+    glActiveTexture(GL_TEXTURE1);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
     //activate the first texture unit
     glActiveTexture(GL_TEXTURE0);
     //unbind the texture
@@ -103,6 +167,16 @@ void drawLightingPass()
     glUseProgram(0);
     //unbind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //copy the render to another fragment shader
+    //bind the default framebuffer as read only
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    //bind the custom framebuffer as draw only
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgeFBOLastTick);
+    //copy the framebuffer
+    glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void shadowPass(int index, mat4 projMat)
@@ -269,12 +343,38 @@ void glgeDefaultTimer(int)
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
 
+    //update the window size of the second frame buffer to store the last tick
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBOLastTick);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
     //unbind the renderbuffer
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     //update the render texture parameters
-    glBindTexture(GL_TEXTURE_2D, glgeFrameBufferTexture);
+    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the normal texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the position texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the roughness texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the last tick texture
+    glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
