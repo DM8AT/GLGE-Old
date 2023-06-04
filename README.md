@@ -61,7 +61,6 @@ Upcoming features that may be added to GLGE in the future include:
 Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
-- deleted changelog (cleanup)
 ## Update 0.1
 - removed old lighting code from shaders
 - added Lighting pass
