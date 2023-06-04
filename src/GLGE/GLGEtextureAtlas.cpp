@@ -8,6 +8,8 @@
 
 using json = nlohmann::json;
 
+// FIXME(JuNi): Fix atlas images corrupting at large sizes
+
 /////////////////////////
 // Default constructor //
 /////////////////////////
@@ -477,6 +479,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous) {
         std::cout << "[GLGE] [Texture Atlas] Creating image... Done!\n";
     }
 
+    // TODO(JuNi): Make images not so spaced out
     // Second pass, it's tetris time!
     for ( long unsigned int i = 0; i < this->paths.size(); i++ ) {
         // verbal message
@@ -632,7 +635,7 @@ void atlas::_optimize_atlas(bool save_atlas) {
     // clear atlas image. this gets rid of random pixel values that somehow happen
     this->_clear_image(atlasImg, vec3(width,height,channelCount));
 
-    // ToDo: Make it faster
+    // TODO(JuNi): Make '_optimize_atlas()' faster
 
     // transplant old atlas to new
     // go through all pixels of the old atlas
