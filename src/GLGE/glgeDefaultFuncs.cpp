@@ -220,7 +220,13 @@ void drawLightingPass()
     //copy the framebuffer
     glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
+    //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //bind the default texture unit
+    glActiveTexture(GL_TEXTURE0);
+    //bind the default texture
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void shadowPass(int index, mat4 projMat)

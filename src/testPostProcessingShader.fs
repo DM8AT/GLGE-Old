@@ -11,5 +11,5 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4((vec3(1) - texture(glgeMainImage, texCoords).rgb),1);
+    FragColor = texture(glgeMainImage, texCoords);
 }
