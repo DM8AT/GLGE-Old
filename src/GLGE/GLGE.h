@@ -457,6 +457,27 @@ void glgeSetLightingShader(std::string lightingShader);
 void glgeSetLightingShader(GLuint shader);
 
 /**
+ * @brief bind an shader that will controll how light sources effect the objects
+ * 
+ * @param shaderFile the path to the post processing shader
+ */
+void glgeSetPostProcessingShader(const char* shaderFile);
+
+/**
+ * @brief bind an shader that will controll how light sources effect the objects
+ * 
+ * @param shader the source code for the shader
+ */
+void glgeSetPostProsessingShader(std::string shader);
+
+/**
+ * @brief bind an shader that will controll how light sources effect the objects
+ * 
+ * @param shader the allready compiled OpenGL shader
+ */
+void glgeSetPostProsessingShader(GLuint shader);
+
+/**
  * @brief Set the Wraping Mode for textures
  * 
  * @param mode the new wraping mode

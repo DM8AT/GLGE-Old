@@ -57,6 +57,11 @@ bool getUniformsForLightingShader();
 void getLightingUniformsFromLightingPass();
 
 /**
+ * @brief Get the Default Uniforms From the Post Processing Shader
+ */
+void getDefaultUniformsFromPostProcessingShader();
+
+/**
  * @brief convert an error code from OpenGL into an error string
  * 
  * @param error the error code

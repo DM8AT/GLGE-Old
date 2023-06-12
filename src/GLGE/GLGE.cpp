@@ -1010,6 +1010,48 @@ void glgeSetLightingShader(GLuint shader)
     }
 }
 
+void glgeSetPostProcessingShader(const char* shaderFile)
+{
+    //create strings for the shader
+    std::string data;
+
+    //read the files
+    if (!readFile(shaderFile, data))
+    {
+        //output an error message
+        if (glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+        }
+        //stop the script
+        exit(1);
+    }
+
+    //compile the shader and save it
+    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+
+    //get the default uniforms
+    getDefaultUniformsFromPostProcessingShader();
+}
+
+void glgeSetPostProcessingShader(std::string shader)
+{
+    //compile the shader and save it
+    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, shader);
+
+    //get the default uniforms
+    getDefaultUniformsFromPostProcessingShader();
+}
+
+void glgeSetPostProcessingShader(GLuint shader)
+{
+    //store the inputed shader as the Lighting shader
+    glgePostProcessingShader = shader;
+
+    //get the default uniforms
+    getDefaultUniformsFromPostProcessingShader();
+}
+
 void glgeSetWrapingMode(unsigned int mode)
 {
     //store the inputed wraping mode

@@ -179,6 +179,21 @@ extern unsigned int glgeScreenVBO, glgeScreenVAO;
 //store the shader for the lighting pass
 extern int glgeLightingShader;
 
+//store the shader for the post processing pass
+extern int glgePostProcessingShader;
+
+//store the main image in the post processing shader
+extern int glgeMainImageInPPS;
+
+//store the frame buffer for the lighting pass
+extern unsigned int glgeLightingFBO;
+
+//store the render buffer for the ligthing pass
+extern unsigned int glgeLightingRBO;
+
+//store the output image for the lighting pass
+extern unsigned int glgeLightingImageOut;
+
 //create a vector to store all lights
 extern std::vector<Light*> glgeLights;
 

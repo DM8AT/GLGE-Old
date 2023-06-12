@@ -445,6 +445,9 @@ void run3Dexample(int argc, char** argv)
 
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
 
+    //bind a post processing shader
+    glgeSetPostProcessingShader("src/testPostProcessingShader.fs");
+
     //set the FPS limit (Base Limit = 60)
     glgeSetMaxFPS(70);
 

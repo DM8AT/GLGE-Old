@@ -269,9 +269,12 @@ void Object2D::draw()
     //pass the move matrix to the shader
     glUniformMatrix3fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
+    //activate the first texture unit
+    glActiveTexture(GL_TEXTURE0);
     //bind the texture
     glBindTexture(GL_TEXTURE_2D, texture);
 
+    //draw the object
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
 
     //unbind the buffers
@@ -800,7 +803,7 @@ void Camera2D::recalculateMatrix()
                        0,0,1);
 
     //set the cam mat to an product of the matrices
-    this->camMat = rotMat * scaMat * movMat;
+    this->camMat = (rotMat * scaMat * movMat);
 }
 
 /////////////

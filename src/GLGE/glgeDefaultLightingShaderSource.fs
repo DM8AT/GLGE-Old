@@ -157,7 +157,7 @@ void main()
     pos        = texture(glgePositionMap, texCoords).xyz;
     roughness  = texture(glgeRoughnessMap, texCoords).r;
 
-    if (normal == vec3(-5,-5,-5))
+    if (normal == vec3(-5,-5,-5) || (glgeActiveLights == 0))
     {
         FragColor = color;
     }
@@ -167,7 +167,4 @@ void main()
     }
 
     FragColor = vec4(vec3(1.f) - exp(-vec3(FragColor) * exposure),FragColor.w);
-    
-    //float grey = (FragColor.r + FragColor.g + FragColor.b) / 3.f;
-    //FragColor.rgb = vec3(grey);
 }

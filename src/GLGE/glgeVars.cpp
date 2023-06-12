@@ -11,6 +11,7 @@
 
 #include "glgeVars.hpp"
 #include <GL/freeglut.h>
+#include <map>
 
 ///////////
 //CLASSES//
@@ -173,6 +174,24 @@ unsigned int glgeScreenVAO = 0;
 
 //set the default post processing shader to 0
 int glgeLightingShader = 0;
+
+//store the shader for the post processing pass
+int glgePostProcessingShader = 0;
+
+//store the main image in the post processing shader
+int glgeMainImageInPPS = 0;
+
+//store the frame buffer for the lighting pass
+unsigned int glgeLightingFBO = 0;
+
+//store the render buffer for the ligthing pass
+unsigned int glgeLightingRBO = 0;
+
+//store the output image for the lighting pass
+unsigned int glgeLightingImageOut = 0;
+
+//store the uniforms in the post processing shader
+std::map<std::string, GLuint> glgePPSUniforms = {};
 
 //create and setup the lights vector
 std::vector<Light*> glgeLights;

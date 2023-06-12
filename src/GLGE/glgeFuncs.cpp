@@ -272,6 +272,25 @@ void getLightingUniformsFromLightingPass()
     }
 }
 
+void getDefaultUniformsFromPostProcessingShader()
+{
+    //store the glge error output
+    bool glgeErr = glgeErrorOutput;
+    glgeSetErrorOutput(false);
+
+    //get the main image variable from the shader
+    glgeMainImageInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeMainImage");
+
+    //reset the glge error output
+    glgeSetErrorOutput(glgeErr);
+
+    //if the main image wasn't found, print the output
+    if ((glgeMainImageInPPS == -1) && glgeErrorOutput)
+    {
+        std::cerr << "[GLGE ERROR] couldn't find main image uniform in post processing shader" << std::endl;
+    }
+}
+
 bool getUniformsForLightingShader()
 {
     //let the error messages set for the albedo map, you want the albedo map in most cases
@@ -517,6 +536,42 @@ void createWindow(const char* n, vec2 s, vec2 p)
         exit(1);
     }
 
+    //create and bind the thired custom frame buffer
+    glGenFramebuffers(1, &glgeLightingFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeLightingFBO);
+
+    //generate the second Render Buffer
+    glGenRenderbuffers(1, &glgeLightingRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+    //attach an depth stencil
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeLightingRBO);
+
+    //generate a texture to store the lighting pass output
+    glGenTextures(1, &glgeLightingImageOut);
+    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeLightingImageOut, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        //stop the program
+        exit(1);
+    }
+
     //create an rectangle that covers the whole screen
     float rectangleVertices[] = 
     {
@@ -540,8 +595,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //unbind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    //generate the shaders for the default post processing
-    glgeLightingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
+    //generate the shaders for the default lighting shader
+    glgeLightingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
 
     //get the uniforms form the shader
     bool albedo = getUniformsForLightingShader();
@@ -549,12 +604,19 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //check if the albedo map was found
     if (!albedo)
     {
-        std::cerr << "Could not find albedo map in default post processing shader" << std::endl;
+        std::cerr << "Could not find albedo map in default lighthing shader" << std::endl;
         exit(1);
     }
 
-    //get the uniform for the screen texture in the post processing shader
+    //get the uniform for the screen texture in the lighting shader
     glUniform1i(glGetUniformLocation(glgeLightingShader, "screenTexture"), 0);
+
+
+    //generate the shaders for the default lighting shader
+    glgePostProcessingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_POST_PROCESSING_FRAGMENT_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
+
+    //get the uniform for the screen texture in the post processing shader
+    glUniform1i(glGetUniformLocation(glgePostProcessingShader, "glgeMainImage"), 0);
 
 
     //store the status of the glge error output

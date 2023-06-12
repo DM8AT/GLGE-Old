@@ -69,11 +69,8 @@ void drawLightingPass()
         ((void(*)())glgeDisplayCallback)();
     }
 
-    //specify that the used color buffer is 0
-    //glDrawBuffer(GL_NONE);
-
-    //switch to the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //switch to the lighting framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, glgeLightingFBO);
 
     //clear the frame buffer
     glClear(GL_COLOR_BUFFER_BIT);
@@ -121,10 +118,14 @@ void drawLightingPass()
     glUniform1i(glgePositionInLightingPass, 2);
     //pass the roughness map
     glUniform1i(glgeRoughnessInLightingPass, 3);
-    //pass the camera position
-    glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
-    //pass the far plane
-    glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
+    //check if a 3D camera is bound
+    if (glgeMainCamera != NULL)
+    {
+        //pass the camera position
+        glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
+        //pass the far plane
+        glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
+    }
     //pass all the lights to the shader
     //load all light positions to the shader
     for (int i = 0; i < (int)glgeLightPosInLightingPass.size(); i++)
@@ -167,6 +168,49 @@ void drawLightingPass()
     glUseProgram(0);
     //unbind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //deactivate the vertex attrib array pointers
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+    //bind the default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //clear the frame buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //bind the post processing shader
+    glUseProgram(glgePostProcessingShader);
+    //bind the vertex array
+    glBindVertexArray(glgeScreenVAO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+    //activate the vertex attribute for the position
+    glEnableVertexAttribArray(0);
+    //load the position into the shader
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    //activate the vertex attrivute for the texture coordinate
+    glEnableVertexAttribArray(1);
+    //load the texture coordinate into the shader
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    //activate the uniform texture array
+    glActiveTexture(GL_TEXTURE0);
+    //bind the framebuffer texture
+    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
+    //pass the uniform to the framebuffer
+    glUniform1i(glgeMainImageInPPS,0);
+
+    //draw the screen
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    //activate the thired texture unit
+    glActiveTexture(GL_TEXTURE2);
+    //unbind the shader
+    glUseProgram(0);
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //deactivate the vertex attrib array pointers
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 
     //copy the render to another fragment shader
     //bind the default framebuffer as read only
@@ -348,6 +392,11 @@ void glgeDefaultTimer(int)
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
 
+    //update the window size of the thierd frame buffer to store the last tick
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
     //unbind the renderbuffer
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     //update the render texture parameters
@@ -372,6 +421,11 @@ void glgeDefaultTimer(int)
 
     //update the last tick texture
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the main image texture
+    glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 

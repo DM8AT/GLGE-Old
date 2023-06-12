@@ -208,7 +208,7 @@ void run2Dexample(int argc, char** argv)
     setupCrosshair();
 
     //load and set a post processing shader directly from an file
-    glgeSetLightingShader("src/testShader.fs");
+    glgeSetPostProcessingShader("src/testShader.fs");
 
     //execute the script
     glgeRunMainLoop();
