@@ -70,3 +70,5 @@ Currently working on improving the shader core to make handling shaders simpler 
 ### Update 0.11-1
 - fixed 2D example
 - re-added post processing pass
+### Update 0.11-2
+- made default lighting better (Specular lighting)

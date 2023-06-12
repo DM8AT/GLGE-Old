@@ -25,7 +25,7 @@ uniform float glgeFarPlane;
 float ambient = 0.1;
 
 float gamma = 2.2f;
-float exposure = 1.f;
+float exposure = 5.f;
 
 int iteration = 0;
 
@@ -47,93 +47,89 @@ vec3 normal;
 vec3 pos;
 float roughness;
 
-vec3 schlickFresnel(float vDotH)
+float metallic = 0.f;
+
+// for more information on pbr-lighting see : https://learnopengl.com/PBR/Lighting
+float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
-    vec3 F0 = vec3(0.04f);
-
-    vec3 ret = F0 + (1.f - F0) * pow(clamp(1.f - vDotH, 0.f, 1.f), 5.f);
-
-    return ret;
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float num   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+	
+    return num / denom;
 }
 
-float geomSmith(float dp)
+float GeometrySchlickGGX(float NdotV, float roughness)
 {
-    float k = (rough + 1.f) * (rough + 1.f) / 8.f;
-    float denom = dp * (1.f - k) + k;
-    return dp / denom;
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
 }
-
-
-float ggxDistribution(float nDotH)
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-    float alpha2 = rough * rough * rough * rough;
-    float d = nDotH * nDotH * (alpha2 - 1.f) + 1.f;
-    float ggxdistrib = alpha2 / (PI * d * d);
-    return ggxdistrib;
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+	
+    return ggx1 * ggx2;
 }
-
-vec4 calculatePBR(vec4 col)
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
-    float shadow = 1.f;
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}  
 
-    vec3 lightIntensity = glgeLightColor[iteration] * glgeLightInt[iteration];
-
-    vec3 l = vec3(0.f);
-
-    l = glgeLightPos[iteration] - pos;
-    float lightToPixelDist = length(l);
-    l = normalize(l);
-    lightIntensity /= (lightToPixelDist * lightToPixelDist);
-
-    vec3 n = normalize(normal);
-
-    vec3 FragNormal = n;
-
-    vec3 v = normalize((glgeCameraPos) - pos);
-    vec3 h = normalize(v+l);
-
-    float nDotH = max(dot(n, h), 0.f);
-    float vDotH = max(dot(v, h), 0.f);
-    float nDotL = max(dot(n, l), 0.f);
-    float nDotV = max(dot(n, v), 0.f);
-
-    vec3 F = schlickFresnel(vDotH);
-
-    vec3 ks = F;
-    vec3 kd = 1.f - ks;
-
-    vec3 SpecBRDFnom = ggxDistribution(nDotH) * F * geomSmith(nDotL) * geomSmith(nDotV);
-
-    float SpecBRDFdenom = 4.f * nDotV * nDotL + 0.0001;
-
-    float SpecBRDF = float(SpecBRDFnom) / SpecBRDFdenom;
-
-    vec3 fLambert = vec3(0.f);
-
-    fLambert = vec3(col);
-
-    vec3 DiffuseBRDF = kd * fLambert / PI;
-
-    vec3 FinalColor = ((DiffuseBRDF + SpecBRDF) * lightIntensity * vec3(shadow)) * nDotL;
-
-    return vec4(FinalColor, col.w);
-}
-
-vec4 calculateLightingPBR(vec4 col)
+vec3 calculateLightingPBR(vec3 col)
 {
-    vec4 totalLight;
-    for (int i = 0; i < min(int(glgeActiveLights), 255); i++)
+    vec3 N = normalize(normal);
+    vec3 V = normalize(glgeCameraPos - pos);
+
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, col, metallic);
+	           
+    // reflectance equation
+    vec3 Lo = vec3(0.0);
+    for(int i = 0; i < glgeActiveLights; ++i) 
     {
-        iteration = i;
-        totalLight += calculatePBR(col);
-        totalLight = totalLight / (totalLight + vec4(1.f));
-    }
-
-    totalLight /= float(glgeActiveLights);
-
-    vec4 finalLight = vec4(pow(vec3(totalLight), vec3(1.0/2.2)), col.w);
-
-    return finalLight;
+        // calculate per-light radiance
+        vec3 L = normalize(glgeLightPos[i] - pos);
+        vec3 H = normalize(V + L);
+        float distance    = length(glgeLightPos[i] - pos);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance     = glgeLightColor[i] * attenuation;        
+        
+        // cook-torrance brdf
+        float NDF = DistributionGGX(N, H, roughness);        
+        float G   = GeometrySmith(N, V, L, roughness);      
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+        
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;	  
+        
+        vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular     = numerator / denominator;  
+            
+        // add to outgoing radiance Lo
+        float NdotL = max(dot(N, L), 0.0);                
+        Lo += (kD * col / PI + specular) * radiance * NdotL; 
+    }   
+  
+    vec3 ambient = vec3(0.03) * col * ambient;
+    vec3 color = ambient + Lo;
+	
+    color = color / (color + vec3(1.0));
+    return (pow(color, vec3(1.0/2.2)));
 }
 
 vec4 calculateLighting(vec4 color, vec3 normal, vec3 pos, float roughness)
@@ -163,8 +159,7 @@ void main()
     }
     else
     {
-        FragColor = calculateLightingPBR(color);
+        FragColor = vec4(calculateLightingPBR(color.rgb), color.w);
+        FragColor = vec4(vec3(1.f) - exp(-vec3(FragColor) * exposure),FragColor.w);
     }
-
-    FragColor = vec4(vec3(1.f) - exp(-vec3(FragColor) * exposure),FragColor.w);
 }
