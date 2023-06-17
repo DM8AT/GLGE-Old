@@ -25,7 +25,7 @@ uniform float glgeFarPlane;
 float ambient = 0.1;
 
 float gamma = 2.2f;
-float exposure = 5.f;
+float exposure = 0.1f;
 
 int iteration = 0;
 
@@ -155,11 +155,12 @@ void main()
 
     if (normal == vec3(-5,-5,-5) || (glgeActiveLights == 0))
     {
-        FragColor = color;
+        FragColor.rgb = -color.rgb;
     }
     else
     {
-        FragColor = vec4(calculateLightingPBR(color.rgb), color.w);
-        FragColor = vec4(vec3(1.f) - exp(-vec3(FragColor) * exposure),FragColor.w);
+        vec3 mapped = color.rgb / (color.rgb + vec3(1.0));
+        mapped = calculateLightingPBR(mapped);
+        FragColor = vec4(vec3(1.f) - exp(-mapped * exposure),FragColor.w);
     }
 }

@@ -72,3 +72,5 @@ Currently working on improving the shader core to make handling shaders simpler 
 - re-added post processing pass
 ### Update 0.11-2
 - made default lighting better (Specular lighting)
+### Update 0.11-3
+- fixed tonemapping, now uses correct HDR
