@@ -74,3 +74,6 @@ Currently working on improving the shader core to make handling shaders simpler 
 - made default lighting better (Specular lighting)
 ### Update 0.11-3
 - fixed tonemapping, now uses correct HDR
+### Update 0.11-4
+- added inverse square law to default lighting pass
+- fixed some floats in 2D pps shader

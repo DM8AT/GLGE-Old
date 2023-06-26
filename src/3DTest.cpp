@@ -211,7 +211,7 @@ void tick()
     }
 
     //set the position of the light source to be exactly at the player
-    //light.setPos(camera.getPos());
+    l2.setPos(camera.getPos());
 
     //write the current FPS
     std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
@@ -480,8 +480,8 @@ void run3Dexample(int argc, char** argv)
     //setup the wall
     wallSetup();
 
-    //l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
-    //glgeAddGlobalLighSource(&l2);
+    l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
+    glgeAddGlobalLighSource(&l2);
 
     light = Light(2,5,0, 1,1,1, 250);
     glgeAddGlobalLighSource(&light);

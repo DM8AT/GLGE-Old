@@ -122,7 +122,7 @@ vec3 calculateLightingPBR(vec3 col)
             
         // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);                
-        Lo += (kD * col / PI + specular) * radiance * NdotL * glgeLightInt[i]; 
+        Lo += (kD * col / PI + specular) * radiance * NdotL * (glgeLightInt[i] * inversesqrt(distance)); 
     }   
   
     vec3 ambient = vec3(0.03) * col * ambient;
