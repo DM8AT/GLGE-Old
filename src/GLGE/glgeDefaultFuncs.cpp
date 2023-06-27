@@ -78,99 +78,115 @@ void drawLightingPass()
     //disable depth testing
     glDisable(GL_DEPTH_TEST);
 
-    //bind the post processing shader
-    glUseProgram(glgeLightingShader);
-    //bind the vertex array
-    glBindVertexArray(glgeScreenVAO);
-    //bind the array buffer
-    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
-    //activate the vertex attribute for the position
-    glEnableVertexAttribArray(0);
-    //load the position into the shader
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    //activate the vertex attrivute for the texture coordinate
-    glEnableVertexAttribArray(1);
-    //load the texture coordinate into the shader
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    //activate the uniform texture array
-    glActiveTexture(GL_TEXTURE0);
-    //bind the framebuffer texture
-    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
-    //activate the second texture unit
-    glActiveTexture(GL_TEXTURE1);
-    //bind the normal texture
-    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
-    //activate the thired texture unit
-    glActiveTexture(GL_TEXTURE2);
-    //bind the position texture
-    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
-    //activate the fourth texture unit
-    glActiveTexture(GL_TEXTURE3);
-    //bind the roughness texture
-    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+    //check if lighting should be applied
+    if ((int)glgeLights.size() != 0)
+    {
+        //if it needs, apply the lighting shader
 
-    //pass the uniforms to the shader
-    //pass the albedo map
-    glUniform1i(glgeAlbedoInLightingPass, 0);
-    //pass the normal map
-    glUniform1i(glgeNormalInLightingPass, 1);
-    //pass the position map
-    glUniform1i(glgePositionInLightingPass, 2);
-    //pass the roughness map
-    glUniform1i(glgeRoughnessInLightingPass, 3);
-    //check if a 3D camera is bound
-    if (glgeMainCamera != NULL)
-    {
-        //pass the camera position
-        glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
-        //pass the far plane
-        glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
-    }
-    //pass all the lights to the shader
-    //load all light positions to the shader
-    for (int i = 0; i < (int)glgeLightPosInLightingPass.size(); i++)
-    {
-        //pass the light position
-        glUniform3f(glgeLightPosInLightingPass[i], glgeLights[i]->getPos().x, glgeLights[i]->getPos().y, glgeLights[i]->getPos().z);
-    }
-    //load all light colors to the shader
-    for (int i = 0; i < (int)glgeLightColInLightingPass.size(); i++)
-    {
-        //pass the light color
-        glUniform3f(glgeLightColInLightingPass[i], glgeLights[i]->getColor().x, glgeLights[i]->getColor().y, glgeLights[i]->getColor().z);
-    }
-    //load all light intensitys to the shader
-    for (int i = 0; i < (int)glgeLightIntInLightingPass.size(); i++)
-    {
-        //pass the light intensity
-        glUniform1f(glgeLightIntInLightingPass[i], glgeLights[i]->getInsensity());
-    }
-    //pass the amount of active lights
-    glUniform1i(glgeActiveLightInLightingPass, (int)glgeLights.size());
+        //bind the post processing shader
+        glUseProgram(glgeLightingShader);
+        //bind the vertex array
+        glBindVertexArray(glgeScreenVAO);
+        //bind the array buffer
+        glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+        //activate the vertex attribute for the position
+        glEnableVertexAttribArray(0);
+        //load the position into the shader
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        //activate the vertex attrivute for the texture coordinate
+        glEnableVertexAttribArray(1);
+        //load the texture coordinate into the shader
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE0);
+        //bind the framebuffer texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
+        //activate the second texture unit
+        glActiveTexture(GL_TEXTURE1);
+        //bind the normal texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+        //activate the thired texture unit
+        glActiveTexture(GL_TEXTURE2);
+        //bind the position texture
+        glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+        //activate the fourth texture unit
+        glActiveTexture(GL_TEXTURE3);
+        //bind the roughness texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
 
-    //draw the screen
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    //unbind the normal texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //activate the thired texture unit
-    glActiveTexture(GL_TEXTURE2);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //activate the second texture unit
-    glActiveTexture(GL_TEXTURE1);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //activate the first texture unit
-    glActiveTexture(GL_TEXTURE0);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //unbind the shader
-    glUseProgram(0);
-    //unbind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //deactivate the vertex attrib array pointers
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+        //pass the uniforms to the shader
+        //pass the albedo map
+        glUniform1i(glgeAlbedoInLightingPass, 0);
+        //pass the normal map
+        glUniform1i(glgeNormalInLightingPass, 1);
+        //pass the position map
+        glUniform1i(glgePositionInLightingPass, 2);
+        //pass the roughness map
+        glUniform1i(glgeRoughnessInLightingPass, 3);
+        //check if a 3D camera is bound
+        if (glgeMainCamera != NULL)
+        {
+            //pass the camera position
+            glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
+            //pass the far plane
+            glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
+        }
+        //pass all the lights to the shader
+        //load all light positions to the shader
+        for (int i = 0; i < (int)glgeLightPosInLightingPass.size(); i++)
+        {
+            //pass the light position
+            glUniform3f(glgeLightPosInLightingPass[i], glgeLights[i]->getPos().x, glgeLights[i]->getPos().y, glgeLights[i]->getPos().z);
+        }
+        //load all light colors to the shader
+        for (int i = 0; i < (int)glgeLightColInLightingPass.size(); i++)
+        {
+            //pass the light color
+            glUniform3f(glgeLightColInLightingPass[i], glgeLights[i]->getColor().x, glgeLights[i]->getColor().y, glgeLights[i]->getColor().z);
+        }
+        //load all light intensitys to the shader
+        for (int i = 0; i < (int)glgeLightIntInLightingPass.size(); i++)
+        {
+            //pass the light intensity
+            glUniform1f(glgeLightIntInLightingPass[i], glgeLights[i]->getInsensity());
+        }
+        //pass the amount of active lights
+        glUniform1i(glgeActiveLightInLightingPass, (int)glgeLights.size());
+
+        //draw the screen
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //unbind the normal texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+        //activate the thired texture unit
+        glActiveTexture(GL_TEXTURE2);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+        //activate the second texture unit
+        glActiveTexture(GL_TEXTURE1);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+        //activate the first texture unit
+        glActiveTexture(GL_TEXTURE0);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+        //unbind the shader
+        glUseProgram(0);
+        //unbind the buffer
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //deactivate the vertex attrib array pointers
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+    }
+    else
+    {
+        //if not, copy the framebuffer over to save a draw pass
+        //bind the default FBO for reading
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, glgeFBO);
+        //bind the light framebuffer as writing
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgeLightingFBO);
+        //copy the framebuffers
+        glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    }
 
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

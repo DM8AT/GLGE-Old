@@ -211,7 +211,7 @@ void tick()
     }
 
     //set the position of the light source to be exactly at the player
-    l2.setPos(camera.getPos());
+    light.setPos(camera.getPos());
 
     //write the current FPS
     std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
@@ -363,7 +363,7 @@ void enterpriseSetup()
     enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1));
 
     //create a material for the object
-    Material mat = Material(vec4(0.25,0.25,0.25, 1.f), 0.2);
+    Material mat = Material(vec4(0.25,0.25,0.25, 1.f), 0.2, 1.0);
 
     //bind the material to the enterprise
     enterprise.setMaterial(mat);

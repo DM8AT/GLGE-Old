@@ -77,3 +77,6 @@ Currently working on improving the shader core to make handling shaders simpler 
 ### Update 0.11-4
 - added inverse square law to default lighting pass
 - fixed some floats in 2D pps shader
+### Update 0.11-5
+- fixed single-color material
+- optimised lighting pass (no longer using a pass if no light source is active)

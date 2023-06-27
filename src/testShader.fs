@@ -5,7 +5,7 @@ precision mediump float;
 out vec4 FragColor;
 in vec2 texCoords;
 
-uniform sampler2D screenTexture;
+uniform sampler2D glgeMainImage;
 
 const float offset_x = 1.0f / 1000.0f;  
 const float offset_y = 1.0f / 1000.0f;  
@@ -26,8 +26,10 @@ float kernel[9] = float[]
 
 void main()
 {
-    vec3 color = vec3(0.0f);
+    vec3 color = vec3(0);
     for(int i = 0; i < 9; i++)
-        color += vec3(texture(screenTexture, texCoords.st + offsets[i])) * kernel[i];
+    {
+        color += vec3(texture(glgeMainImage, texCoords.st + offsets[i])) * kernel[i];
+    }
     FragColor = vec4(color, 1.0f);
 }

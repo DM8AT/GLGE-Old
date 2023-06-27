@@ -35,6 +35,8 @@
 #define GLGE_SPECULAR_MAP 5
 //define the image type for an height map
 #define GLGE_HEIGHT_MAP 6
+//define the image type for an metalic map
+#define GLGE_METALIC_MAP 7
 
 //define the names for the default unifroms
 
@@ -46,8 +48,10 @@
 #define GLGE_HEIGHT_MAP_NAME "heightMap"
 //define the default name for a roughness map
 #define GLGE_ROUGHNESS_MAP_NAME "roughnessMap"
+//define the default name for a metalic map
+#define GLGE_METALIC_MAP_NAME "metalicMap"
 //define the default name for the color
-#define GLGE_COLOR_NAME "col"
+#define GLGE_COLOR_NAME "objCol"
 //define the name for the var to say the number of used textures
 #define GLGE_USED_TEXTURES_VAR "usedTextures"
 
@@ -79,8 +83,9 @@ public:
      * @param image the image for the base texture
      * @param uniform the name of the uniform variable in the corresponding shader
      * @param roughness the roughness for the texture
+     * @param metalstore the metalicness of the object
      */
-    Material(const char* image, const char* uniform, float roughness);
+    Material(const char* image, const char* uniform, float roughness, float metal = 0);
 
     /**
      * @brief Construct a new Material
@@ -88,16 +93,18 @@ public:
      * @param texture a OpenGL pointer to the texture on the GPU
      * @param uniform the name of the uniform variable in the corresponding shader
      * @param roughness the roughness for the texture
+     * @param metal store the metalicness of the object
      */
-    Material(GLuint texture, const char* uniform, float roughness);
+    Material(GLuint texture, const char* uniform, float roughness, float metal = 0);
 
     /**
      * @brief Construct a new Material
      * 
      * @param color the base color of the material
      * @param roughness the roughness for the texture
+     * @param metal store the metalicness of the object
      */
-    Material(vec4 color, float roughness);
+    Material(vec4 color, float roughness, float metal = 0);
 
     /**
      * @brief Set the Default Name for an uniform variable 
@@ -127,9 +134,17 @@ public:
      * @brief Set the Height Map for a material
      * this function stores that the material has height maps activated
      * @param image the image for the height map
-     * @param uniformName the uniform name for the roughness map
+     * @param uniformName the uniform name for the height map
      */
     void setHeightMap(const char* image, const char* uniformName = GLGE_HEIGHT_MAP_NAME);
+
+    /**
+     * @brief Set the Metalic Map for a material
+     * 
+     * @param image the image for the metalic map
+     * @param uniformName the uniform name for the metalic map
+     */
+    void setMetalicMap(const char* image, const char* uniformName = GLGE_METALIC_MAP_NAME);
 
     /**
      * @brief add an image to a new uniform
@@ -175,6 +190,8 @@ public:
 private:
     //store the positon of the roughness in the shader
     GLuint roughnessLoc = 0;
+    //store the position of the metalic in the shader
+    GLuint metalicLoc = 0;
     //store the positon of the color in the shader
     GLuint colorLoc = 0;
     //store the position of the used textures uniform
@@ -199,10 +216,14 @@ private:
     int specularMapLoc = -1;
     //store the location of the height map in the image vector
     int heightMapLoc = -1;
+    //store the location of the metalic map in the image vector
+    int metalicMapLoc = -1;
     //store the color
-    vec4 color = vec4(1,1,1,1);
+    vec4 color = vec4(0,0,0,1);
     //store the roughness
     float roughness;
+    //store the metal value
+    float metal;
     //store the names for the normal map uniform
     const char* normalUniform = GLGE_NORMAL_MAP_NAME;
     //store the names for the roughness map uniform
@@ -213,6 +234,8 @@ private:
     const char* heightUniform = GLGE_HEIGHT_MAP_NAME;
     //store the names for the color uniform
     const char* colorUniform = GLGE_COLOR_NAME;
+    //store the names for the color uniform
+    const char* metalicUniform = GLGE_METALIC_MAP_NAME;
     //store the bound textures
     std::vector<GLenum> boundTextures;
 };

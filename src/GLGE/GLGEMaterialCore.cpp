@@ -23,28 +23,34 @@ Material::Material()
     //init the object
 }
 
-Material::Material(const char* image, const char* uniform, float roughness)
+Material::Material(const char* image, const char* uniform, float roughness, float metalic)
 {
     //store the inputed roughness
     this->roughness = roughness;
+    //store the inputed metalic value
+    this->metal = metalic;
 
     //load the inputed image to the image vector
     this->addImage(image, uniform);
 }
 
-Material::Material(GLuint texture, const char* uniform, float roughness)
+Material::Material(GLuint texture, const char* uniform, float roughness, float metalic)
 {
     //store the inputed roughness
     this->roughness = roughness;
+    //store the inputed metalic value
+    this->metal = metalic;
 
     //load the inputed image to the image vector
     this->addImage(texture, uniform);
 }
 
-Material::Material(vec4 color, float roughness)
+Material::Material(vec4 color, float roughness, float metalic)
 {
     //store the inputed roughness
     this->roughness = roughness;
+    //store the inputed metalic value
+    this->metal = metalic;
 
     //store the inputed base color
     this->color = color;
@@ -123,6 +129,21 @@ void Material::setHeightMap(const char* image, const char* uniformName)
     this->heightUniform = uniformName;
 }
 
+void Material::setMetalicMap(const char* image, const char* uniformName)
+{
+    //store the texture in the map vector
+    this->textures.push_back(glgeTextureFromFile(image));
+    //say that that image has no other name
+    this->uniformNames.push_back(uniformName);
+    //store an empty image positoion
+    this->imageLocs.push_back(0);
+    //store where the position is
+    this->metalicMapLoc = this->textures.size() - 1;
+    //store the name of the uniform
+    this->metalicUniform = uniformName;
+
+}
+
 void Material::addImage(const char* image, const char* uniformName)
 {
     //store the inputed image in the image vector
@@ -165,6 +186,9 @@ void Material::applyShader(GLuint shader)
 
     //get the location of the roughness variable
     this->roughnessLoc = glgeGetUniformVar(shader, "roughness");
+
+    //get the location of the metalic variable
+    this->metalicLoc = glgeGetUniformVar(shader, "metalic");
 
     //get the location of the color
     this->colorLoc = glgeGetUniformVar(shader, this->colorUniform);
@@ -241,6 +265,12 @@ int Material::applyMaterial()
     if (this->roughnessLoc != 0)
     {
         glUniform1f(this->roughnessLoc, roughness);
+    }
+
+    //pass the metalic value to the material
+    if (this->metalicLoc != 0)
+    {
+        glUniform1f(this->metalicLoc, metal);
     }
 
     //pass if a normal map is bound, but only if the uniform exists

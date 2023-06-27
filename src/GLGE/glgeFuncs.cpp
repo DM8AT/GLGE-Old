@@ -276,7 +276,7 @@ void getDefaultUniformsFromPostProcessingShader()
 {
     //store the glge error output
     bool glgeErr = glgeErrorOutput;
-    glgeSetErrorOutput(false);
+    //glgeSetErrorOutput(false);
 
     //get the main image variable from the shader
     glgeMainImageInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeMainImage");
