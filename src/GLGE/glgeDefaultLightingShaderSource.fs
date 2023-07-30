@@ -24,9 +24,6 @@ uniform float glgeFarPlane;
 
 float ambient = 0.1;
 
-float gamma = 2.2f;
-float exposure = 0.1f;
-
 int iteration = 0;
 
 float biasAngle = 0.0005;
@@ -103,8 +100,8 @@ vec3 calculateLightingPBR(vec3 col)
         // calculate per-light radiance
         vec3 L = normalize(glgeLightPos[i] - pos);
         vec3 H = normalize(V + L);
-        float distance    = length(glgeLightPos[i] - pos);
-        float attenuation = 1.0 / (distance * distance);
+        float dist    = length(glgeLightPos[i] - pos);
+        float attenuation = 1.0 / (dist * dist);
         vec3 radiance     = glgeLightColor[i] * attenuation;        
         
         // cook-torrance brdf
@@ -122,14 +119,13 @@ vec3 calculateLightingPBR(vec3 col)
             
         // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);                
-        Lo += (kD * col / PI + specular) * radiance * NdotL * (glgeLightInt[i] * inversesqrt(distance)); 
+        Lo += (kD * col / PI + specular) * radiance * NdotL * (glgeLightInt[i] * inversesqrt(dist)); 
     }   
   
     vec3 ambient = vec3(0.03) * col * ambient;
     vec3 color = ambient + Lo;
 	
-    color = color / (color + vec3(1.0));
-    return (pow(color, vec3(1.0/2.2)));
+    return (color);
 }
 
 vec4 calculateLighting(vec4 color, vec3 normal, vec3 pos, float roughness)
@@ -147,11 +143,11 @@ vec4 calculateLighting(vec4 color, vec3 normal, vec3 pos, float roughness)
 void main()
 {
     vec4 col = vec4(0,0,0,0);
-
-    color      = texture(glgeAlbedoMap, texCoords);
-    normal     = (texture(glgeNormalMap, texCoords).xyz - vec3(0.5,0.5,0.5)) * vec3(2,2,2);
-    pos        = texture(glgePositionMap, texCoords).xyz;
+    color = texture(glgeAlbedoMap, texCoords);
+    normal = (texture(glgeNormalMap, texCoords).xyz - vec3(0.5,0.5,0.5)) * vec3(2,2,2);
+    pos = texture(glgePositionMap, texCoords).xyz;
     roughness  = texture(glgeRoughnessMap, texCoords).r;
+    metallic = texture(glgeRoughnessMap, texCoords).g;
 
     if (normal == vec3(-5,-5,-5) || (glgeActiveLights == 0))
     {
@@ -159,8 +155,6 @@ void main()
     }
     else
     {
-        vec3 mapped = color.rgb / (color.rgb + vec3(1.0));
-        mapped = calculateLightingPBR(mapped);
-        FragColor = vec4(vec3(1.f) - exp(-mapped * exposure),FragColor.w);
+        FragColor = vec4(calculateLightingPBR(color.rgb), color.w);
     }
 }

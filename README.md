@@ -80,3 +80,5 @@ Currently working on improving the shader core to make handling shaders simpler 
 ### Update 0.11-5
 - fixed single-color material
 - optimised lighting pass (no longer using a pass if no light source is active)
+### Update 0.11-6
+- changed HDR from lighting pass to post-processing pass

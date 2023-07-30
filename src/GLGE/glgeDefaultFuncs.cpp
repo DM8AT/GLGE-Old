@@ -245,90 +245,6 @@ void drawLightingPass()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void shadowPass(int index, mat4 projMat)
-{
-    //get the current light        //cast it to an light object    
-    Light light = glgeLights[index][0];
-
-    //calculate all 6 matrices for rotation & projection
-    mat4 shadowTransform[] = {
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 1, 0, 0), vec3(0,-1,0)),
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3(-1, 0, 0), vec3(0,-1,0)),
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 1, 0), vec3(0,0, 1)),
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0,-1, 0), vec3(0,0,-1)),
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 0, 1), vec3(0,-1,0)),
-        projMat * glgeLookAt(light.getPos(), light.getPos() + vec3( 0, 0,-1), vec3(0,-1,0))
-    };
-
-    //resize the viewport
-    glViewport(0,0,glgeShadowMapResolution, glgeShadowMapResolution);
-
-    //bind the FBO from the light source
-    light.bindShadowMap();
-
-    //bind the shadow mapping shader
-    glUseProgram(glgeShadowShader.getShader());
-
-    //pass the shadow transformation matrices to the shader
-    glUniformMatrix4fv(glgeShadowMatShadowLoc, 6, GL_FALSE, &shadowTransform[0].m[0][0]);
-    //pass the far cliping plane to the shader
-    glUniform1f(glgeFarShadowLoc, glgeMainCamera->getFarPlane());
-    //pass the location of the light to the shader
-    glUniform3f(glgeLightPosShadowLoc, light.getPos().x, light.getPos().y, light.getPos().z);
-
-    //draw the scene
-    if(glgeHasDisplayCallback)
-    {
-        ((void(*)())glgeDisplayCallback)();
-    }
-
-    //unbind the shader program
-    glUseProgram(0);
-}
-
-void drawShadowPass()
-{
-    //define the tangens for the half fov to an constant (FOV = 90)
-    const float tHF = 1.619775f;
-    //get the current window aspect
-    const float ar = glgeWindowAspect;
-    //define the near cliping plane to 0.1
-    const float near = 0.001;
-    //get the far cliping plane from the camera
-    const float far = glgeMainCamera->getFarPlane();
-    //calculate the range of the near and far plane
-    const float zRange = far - near;
-    //calculate the projection matrix for the camera
-    mat4 projMat = mat4(1.f/(tHF*ar), 0.f, 0.f, 0.f,
-                        0.f, 1/tHF, 0.f, 0.f,
-                        0.f, 0.f, (-near - far)/zRange, (2.f*far * near) / zRange,
-                        0.f, 0.f, 1.f, 0.f);
-    
-    //set the clear color to the maximum of floats
-    glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-
-    //say that the shadow pass is drawing
-    glgeIsShadowPass = true;
-
-    //loop over all existing light sources
-    for (int i = 0; i < (int)glgeLights.size(); i++)
-    {
-        shadowPass(i, projMat);
-    }
-
-    //set the clear color to the default clear color
-    glClearColor(glgeClearColor.x, glgeClearColor.y, glgeClearColor.z, glgeClearColor.w);
-
-    //reset the window size
-    glViewport(0,0,glgeWindowSize.x, glgeWindowSize.y);
-
-    //unbind the FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //end the shadow pass
-    glgeIsShadowPass = false;
-}
-
 //////////////////////////
 //Default GLGE callbacks//
 //////////////////////////
@@ -338,14 +254,6 @@ void glgeDefaultDisplay()
 {
     //say that the screen is currently drawn
     draw = false;
-
-    //SHADOWS DON'T WORK IN THE MOMENT
-    //check for bound lights
-    /*if (glgeLights.size() != 0)
-    {
-        //calculate all shadows
-        drawShadowPass();
-    }*/
 
     //draw the scene for lighting
     drawLightingPass();
@@ -424,32 +332,32 @@ void glgeDefaultTimer(int)
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the normal texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the position texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the roughness texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the last tick texture
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the main image texture
     glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);

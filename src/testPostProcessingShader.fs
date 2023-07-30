@@ -9,16 +9,27 @@ in vec2 texCoords;
 
 out vec4 FragColor;
 
+const float gamma = 2.2f;
+const float exposure = 0.1f;
+
 void main()
 {
     FragColor = texture(glgeMainImage, texCoords);
 
-    if (FragColor.r < 0.f)
+    if (FragColor.w == 0.f)
     {
         FragColor.rgb *= -0.25f;
+        FragColor.w = 1.f;
     }
     else
     {
-        FragColor = texture(glgeMainImage, texCoords);
+        vec3 col = texture(glgeMainImage, texCoords).rgb;
+
+        // tone mapping
+        vec3 mapped = vec3(1.0) - exp(-col * exposure);
+        // gamma correction
+        mapped = pow(mapped, vec3(1.0 / gamma));
+
+        FragColor = vec4(mapped, 1.f);
     }
 }
