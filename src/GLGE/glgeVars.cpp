@@ -37,6 +37,9 @@ vec4 glgeClearColor = vec4(1,1,1,1);
 //should error be outputed?
 bool glgeErrorOutput = true;
 
+//should glge throw an error and crash if an normal error occures
+bool glgeExitOnError = true;
+
 //should warnings be outputed?
 bool glgeWarningOutput = true;
 
@@ -64,6 +67,10 @@ float glgeTickTime = 0.f;
 //a callback for a function called every tick
 void (*glgeMainCallback)() = nullptr;
 
+//a callback to a function, is called if the window is resize
+//int 1 = width, int 2 = height
+void (*glgeOnWindowResize)(int, int) = nullptr;
+
 //is a main callback function bound?
 bool glgeHasMainCallback = false;
 
@@ -75,6 +82,12 @@ float glgeWindowAspect = 1.f;
 
 //store the keys
 Keys glgePressedKeys = Keys();
+
+//store the keys that where pressed for one frame
+Keys glgeKeysThisTick = Keys();
+
+//store the keys that where relesd for one frame
+Keys glgeKeysRelesdThisTick = Keys();
 
 //store the mouse information
 Mouse glgeMouse = Mouse();
@@ -225,3 +238,21 @@ bool glgeIsShadowPass = false;
 
 //store the main camera for GLGE
 Camera* glgeMainCamera = NULL;
+
+//say if the down-and upsampleing should be done
+bool glgeDownUpSampeling = true;
+
+//say if the window is currently in fullscreen mode
+bool glgeFullscreen = false;
+
+//store the window size outside of the fullscreen mode
+vec2 glgeNormalWindowSize = vec2(0,0);
+
+//say if glge should allow if the window is resized
+bool glgeAllowWindowResize = true;
+
+//store the position of the window
+vec2 glgeWindowPosition = vec2(0,0);
+
+//say if it is allowed to move the window
+bool glgeAllowWindowMovement = true;

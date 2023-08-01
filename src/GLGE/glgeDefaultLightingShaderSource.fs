@@ -46,6 +46,14 @@ float roughness;
 
 float metallic = 0.f;
 
+//attenuation values for the light sources
+//constant attenuation, isn't influenced by distance
+const float constantAttenuation = 1.f;
+//linear attenuation, increases linearly as the distance increases
+const float linearAttenuation = 0.f;
+//quadratic attenuation, increses quadraticaly as the distnace increses
+const float quadraticAttenuation = 1.f;
+
 // for more information on pbr-lighting see : https://learnopengl.com/PBR/Lighting
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -83,7 +91,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}  
+}
 
 vec3 calculateLightingPBR(vec3 col)
 {
@@ -101,7 +109,7 @@ vec3 calculateLightingPBR(vec3 col)
         vec3 L = normalize(glgeLightPos[i] - pos);
         vec3 H = normalize(V + L);
         float dist    = length(glgeLightPos[i] - pos);
-        float attenuation = 1.0 / (dist * dist);
+        float attenuation = 1.f/(constantAttenuation + linearAttenuation*dist + quadraticAttenuation*(dist * dist));
         vec3 radiance     = glgeLightColor[i] * attenuation;        
         
         // cook-torrance brdf
@@ -119,7 +127,7 @@ vec3 calculateLightingPBR(vec3 col)
             
         // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);                
-        Lo += (kD * col / PI + specular) * radiance * NdotL * (glgeLightInt[i] * inversesqrt(dist)); 
+        Lo += (kD * col / PI + specular) * radiance * NdotL * (glgeLightInt[i]); 
     }   
   
     vec3 ambient = vec3(0.03) * col * ambient;

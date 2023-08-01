@@ -112,4 +112,12 @@ GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment, c
  */
 int count_char(std::string &str, char ch);
 
+/**
+ * @brief handle the resizing of the window
+ * 
+ * @param width the new width for the window
+ * @param height the new height for the window
+ */
+void resizeWindow(int width, int height);
+
 #endif

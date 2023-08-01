@@ -82,3 +82,12 @@ Currently working on improving the shader core to make handling shaders simpler 
 - optimised lighting pass (no longer using a pass if no light source is active)
 ### Update 0.11-6
 - changed HDR from lighting pass to post-processing pass
+### Update 0.12
+- added a function that will be called if the window is resized
+- added a parameter to controll if GLGE will close if an error occures
+- added funktions for handeling fullscreen mode
+- added access to keys that where toggled (bools only true if the key is pressed this tick)
+- added a function to resize the window trough code, if parameter force is true, it can be used if the window size is locked
+- the window size now can be locked, disabeling all user window size controll
+- the window can be positiond trough code after it was initalised
+- the window position cna be loced, disabeling all user window position controll

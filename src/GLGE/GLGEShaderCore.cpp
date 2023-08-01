@@ -175,7 +175,11 @@ void Shader::addGeometryShader(std::string source)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //check if the program is valide
@@ -193,7 +197,11 @@ void Shader::addGeometryShader(std::string source)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 }
 
@@ -229,7 +237,11 @@ void Shader::addGeometryShader(const char* f)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //check if the program is valide
@@ -247,7 +259,11 @@ void Shader::addGeometryShader(const char* f)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 }
 

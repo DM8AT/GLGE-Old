@@ -297,11 +297,34 @@ void glgeDefaultTimer(int)
             printf(GLGE_ERROR_OPEN_GL_ERROR, getGLErrorString(error));
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
-    //recalculate the window aspect
-    glgeWindowAspect = ((float)glutGet(GLUT_WINDOW_WIDTH))/((float)glutGet(GLUT_WINDOW_HEIGHT));
+    //check if the window size is correct
+    if ((glgeWindowSize.x != (float)glutGet(GLUT_WINDOW_WIDTH)) || (glgeWindowSize.y != (float)glutGet(GLUT_WINDOW_HEIGHT)))
+    {
+        //check if a window resize is allowed
+        if (!glgeAllowWindowResize)
+        {
+            //if a window resize is not allowed, reshape the window to the inputed valide size
+            glutReshapeWindow(glgeWindowSize.x, glgeWindowSize.y);
+        }
+    }
+
+    //check if the window was moved
+    if ((glgeWindowPosition.x != (float)glutGet(GLUT_WINDOW_X)) || (glgeWindowSize.y != (float)glutGet(GLUT_WINDOW_HEIGHT)))
+    {
+        //check if a window moevement is allowed
+        if (!glgeAllowWindowMovement)
+        {
+            //if window movement is not allowed, move the window back
+            glutPositionWindow(glgeWindowPosition.x, glgeWindowPosition.y);
+        }
+    }
 
     //if GLGE has an additional main function, call it
     if(glgeHasMainCallback)
@@ -309,61 +332,13 @@ void glgeDefaultTimer(int)
         ((void(*)())glgeMainCallback)();
     }
 
-    //update the stored window size
-    glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-
-    //update the window size of the frame buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-
-    //update the window size of the second frame buffer to store the last tick
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBOLastTick);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-
-    //update the window size of the thierd frame buffer to store the last tick
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-
-    //unbind the renderbuffer
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    //update the render texture parameters
-    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //update the normal texture parameters
-    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //update the position texture parameters
-    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //update the roughness texture parameters
-    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //update the last tick texture
-    glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //update the main image texture
-    glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     //set the mouse wheel to 0
     glgeMouse.mouseWeel = 0;
+
+    //clear the key from the last tick
+    glgeKeysThisTick.clear();
+    //clear the releasd keys
+    glgeKeysRelesdThisTick.clear();
 
     //recall this function so that it is calld {glgeMaxFPS} times a second
     glutTimerFunc(1000/glgeMaxFPS,glgeDefaultTimer,0);
@@ -372,6 +347,13 @@ void glgeDefaultTimer(int)
 //default keyboard function
 void glgeDefaultKeyFunc(unsigned char key, int, int)
 {
+    //check if the key was allready pressed
+    if (!glgeKeysRelesdThisTick.getKey(key))
+    {
+        //store the pressed key in the variable for one tick
+        glgeKeysThisTick.keyUpdate(key, true);
+    }
+
     //store the pressed key
     glgePressedKeys.keyUpdate(key, true);
 }
@@ -381,11 +363,21 @@ void glgeDefaultKeyUpFunc(unsigned char key, int, int)
 {
     //store wich key is no longer pressed
     glgePressedKeys.keyUpdate(key, false);
+
+    //store which key is relesd
+    glgeKeysRelesdThisTick.keyUpdate(key, true);
 }
 
 //special keyboard function
 void glgeDefaultSpecKeyFunc(int key, int, int)
 {
+    //check if the key was allready pressed
+    if (!glgeKeysRelesdThisTick.getKey(key))
+    {
+        //store the pressed key in the variable for one tick
+        glgeKeysThisTick.keyUpdate(key, true);
+    }
+
     //store the pressed key
     glgePressedKeys.keyUpdate(key, true);
 }
@@ -395,6 +387,9 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int)
 {
     //store which key is no longer pressed
     glgePressedKeys.keyUpdate(key, false);
+
+    //store which key is relesd
+    glgeKeysRelesdThisTick.keyUpdate(key, true);
 }
 
 void glgeDefaultMouseFunc(int button, int state, int x, int y)
@@ -410,4 +405,32 @@ void glgeDefaultPassiveMotionFunc(int x, int y)
 {
     //update the mouse positoin
     glgeMouse.updatePos(x,y);
+}
+
+void glgeDefaultResizeFunc(int width, int height)
+{
+    //check if glge is allowed to change the window size
+    if (glgeAllowWindowResize)
+    {
+        //if the window can change size, update the size
+        resizeWindow(width, height);
+    }
+
+    //after that, call the customizable function that should be called on resize
+    //check if the function is a nullpointer
+    if (!(glgeOnWindowResize == nullptr))
+    {
+        //if it is not a nullpointer, call the function
+        ((void(*)(int,int))glgeOnWindowResize)(width, height);
+    }
+}
+
+void glgeDefaultMoveFunc(int x, int y)
+{
+    //check if it is allowed to move the window
+    if (glgeAllowWindowMovement)
+    {
+        //if it is allowed, store the new window position
+        glgeWindowPosition = vec2(x,y);
+    }
 }

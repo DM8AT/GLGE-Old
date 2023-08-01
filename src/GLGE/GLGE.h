@@ -341,6 +341,13 @@ vec2 glgeGetWindowSize();
 Keys glgeGetKeys();
 
 /**
+ * @brief get all keys that where pressed this tick
+ * 
+ * @return Keys a list of all keys that where pressed this tick
+ */
+Keys glgeGetToggledKeys();
+
+/**
  * @brief get the time since last frame
  * 
  * @return float delta time
@@ -556,5 +563,153 @@ GLuint glgeGetMainRoughnessMap();
  * @return GLuint the OpenGL texture
  */
 GLuint glgeGetLastFrame();
+
+/**
+ * @brief say if GLGE should exit the application if an error occures
+ * 
+ * @param exitOnError say if the application should be closed
+ */
+void glgeSetExitOnError(bool exitOnError);
+
+/**
+ * @brief swap the current exit on error value
+ */
+void glgeToggleExitOnError();
+
+/**
+ * @brief get if glge will close if an error occures
+ * 
+ * @return true : glge will close if an error occures | 
+ * @return false : glge won't clos if an error occures
+ */
+bool glgeGetExitOnError();
+
+/**
+ * @brief say if GLGE should down and then upsample the lighted image before the post-processing pass
+ * 
+ * @param shouldUse say if the sampling chain should be used
+ */
+void glgeUseDownUpSampeling(bool shouldUse);
+
+/**
+ * @brief swap the current state of the down-upsampeling chain use
+ */
+void glgeSwapDownUpSampeling();
+
+/**
+ * @brief say if GLGE is currently using the down and upsampeling chain before the post-processing pass
+ * 
+ * @return true : GLGE will down and upsample before the post-processing pass | 
+ * @return false : GLGE won't down and upsample before the post-processing pass
+ */
+bool glgeGetDownUpSampeling();
+
+/**
+ * @brief set the function that glge calles after it has resized the window
+ * int 1 = width, int 2 = height
+ * @param func a functionpointer to call
+ */
+void glgeBindOnWindowResizeFunc(void (*func)(int, int));
+
+/**
+ * @brief set the fullscreen mode to an inputed boolean
+ * 
+ * @param isFullscreen true: the window will be a fullscreen window | false: the window will be normal
+ */
+void glgeSetFullscreenMode(bool isFullscreen);
+
+/**
+ * @brief set the current fullscreen mode to the inverse of the current fullscreen mode
+ */
+void glgeToggleFullscreen();
+
+/**
+ * @brief get if the window is currently in fullscreen mode
+ * 
+ * @return true : the window is currently in fullscreen mode | 
+ * @return false : the window is not in fullscreen mode
+ */
+bool glgeIsFullscreen();
+
+/**
+ * @brief change the window size
+ * 
+ * @param width the new width for the window
+ * @param height the new height for the window
+ * @param force say if the window reshape should also be applied if the normal window reshape is disabled | default: false
+ */
+void glgeResizeWindow(int width, int height, bool force = false);
+
+/**
+ * @brief change the window size
+ * 
+ * @param size the new size on both axis
+ * @param force say if the window reshape should also be applied if the normal window reshape is disabled | default: false
+ */
+void glgeResizeWindow(vec2 size, bool force = false);
+
+/**
+ * @brief set if the main window is resizable
+ * 
+ * @param resizable true: the window is resizable | false: the window can not be resized
+ */
+void glgeSetWindowResizable(bool resizable);
+
+/**
+ * @brief change if the window can be resized
+ */
+void glgeToggleWindowResizable();
+
+/**
+ * @brief get if the window can be resized
+ * 
+ * @return true : the window can be resized
+ * @return false : the window can't be resized
+ */
+bool glgeIsWindowResizable();
+
+/**
+ * @brief set the window position
+ * 
+ * @param position the new window position
+ * @param force say if the window positoining should also be applied if the normal window movement is disabled | default: false
+ */
+void glgeSetWindowPosition(vec2 position, bool force = false);
+
+/**
+ * @brief set the window positon
+ * 
+ * @param x the x position for the window
+ * @param y the y position for the window
+ * @param force say if the window positoining should also be applied if the normal window movement is disabled | default: false
+ */
+void glgeSetWindowPosition(int x, int y, bool force = false);
+
+/**
+ * @brief get the window position
+ * 
+ * @return vec2 the current window position
+ */
+vec2 glgeGetWindowPosition();
+
+/**
+ * @brief set if it is allowed to move the window
+ * 
+ * @param allowMovement say if the window movement is allowed
+ */
+void glgeSetWindowMoveable(bool allowMovement);
+
+/**
+ * @brief toggle if it is allowed to move the window
+ */
+void glgeToggleWindowMoveable();
+
+/**
+ * @brief get if it is allowed to move the window
+ * 
+ * @return true : it is allowed to move the window | 
+ * @return false : it is not allowed to move the window
+ */
+bool glgeGetWindowMoveable();
 
 #endif

@@ -87,7 +87,11 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
             std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //set a GLchar to the inputed text
@@ -123,7 +127,11 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
             std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //attach the shader object to the final program
@@ -171,7 +179,11 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //add the shader program from the first file
@@ -202,7 +214,11 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
             printf(GLGE_ERROR_OCCURED_IN_FILES, fileVertexShader, fileFragmentShader);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //check if the program is valide
@@ -221,7 +237,11 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
             printf(GLGE_ERROR_OCCURED_IN_FILES, fileVertexShader, fileFragmentShader);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //say open GL to use the shader program
@@ -352,7 +372,11 @@ void createWindow(const char* n, vec2 s, vec2 p)
             std::cerr << GLGE_ERROR_STR_WINDOW_SUB_FUNC<< std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //if no error occured, create the window
     glutInitWindowSize(s.x,s.y);
@@ -370,14 +394,20 @@ void createWindow(const char* n, vec2 s, vec2 p)
             std::cerr << GLGE_ERROR_STR_GLEW_INIT << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //say that an window was created
     glgeHasMainWindow = true;
 
     //store the size of the window
-    glgeWindowSize = vec2(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+    glgeWindowSize = s;
+    //store the position of the window
+    glgeWindowPosition = p;
 
     //bind the window update function
     glutDisplayFunc(glgeDefaultDisplay);
@@ -394,6 +424,10 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glutPassiveMotionFunc(glgeDefaultPassiveMotionFunc);
     //the motion func is the same as the passive motion, the mouse clicks are handled independendly
     glutMotionFunc(glgeDefaultPassiveMotionFunc);
+    //this function is called if the window is resized to resize everything according to the new size
+    glutReshapeFunc(glgeDefaultResizeFunc);
+    //bind a function to be called if the window is moved
+    glutMotionFunc(glgeDefaultMoveFunc);
 
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);
@@ -605,7 +639,11 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (!albedo)
     {
         std::cerr << "Could not find albedo map in default lighthing shader" << std::endl;
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //get the uniform for the screen texture in the lighting shader
@@ -696,4 +734,81 @@ int count_char(std::string &str, char ch)
     }
     //return c, that contains the amount of ch in str
     return c;
+}
+
+void resizeWindow(int width, int height)
+{
+    //update the internal parameters
+    //recalculate the window aspect ratio
+    glgeWindowAspect = ((float)width/(float)height);
+    //updated the stored window size
+    glgeWindowSize = vec2(width,height);
+
+    //check if the window is in fullscreen mode
+    if (!glgeFullscreen)
+    {
+        //if it is not currently fullscreen mode, store the window size in the normal window size variable too
+        glgeNormalWindowSize = glgeWindowSize;
+    }
+    
+    //update all the renderbuffer sizes
+
+    //update the window size of the frame buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
+    //update the window size of the second frame buffer to store the last tick
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeRBOLastTick);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
+    //update the window size of the thierd frame buffer to store the last tick
+    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
+    //setup the storage for the render buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
+
+    //unbind the renderbuffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    //update the render texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update all the texture sizes
+    //update the normal texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update the position texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update the roughness texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update the last tick texture
+    glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update the main image texture
+    glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //update the lighting texture
+    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //update the OpenGL viewport
+    glViewport(0,0, width,height);
 }

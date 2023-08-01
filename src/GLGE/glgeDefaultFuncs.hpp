@@ -71,4 +71,20 @@ void glgeDefaultMouseFunc(int button, int state, int x, int y);
  */
 void glgeDefaultPassiveMotionFunc(int x, int y);
 
+/**
+ * @brief this function is called if the window is resize
+ * 
+ * @param width the new width of the window
+ * @param height the new height of the window
+ */
+void glgeDefaultResizeFunc(int width, int height);
+
+/**
+ * @brief a function that is called if the window is moved
+ * 
+ * @param x the x position of the window
+ * @param y the y position of the window
+ */
+void glgeDefaultMoveFunc(int x, int y);
+
 #endif

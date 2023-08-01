@@ -1275,7 +1275,11 @@ Camera::Camera(float FOV, float near, double far, Transform transform)
             std::cerr << GLGE_ERROR_STR_CAMERA_CAMERA << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //if no error occured, store the variables
@@ -1508,7 +1512,11 @@ void glgeBindCamera(Camera* camera)
             std::cerr << GLGE_ERROR_STR_BIND_MAIN_CAMERA << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //else bind the camera
     glgeMainCamera = camera;

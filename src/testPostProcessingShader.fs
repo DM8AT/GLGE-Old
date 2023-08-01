@@ -10,7 +10,7 @@ in vec2 texCoords;
 out vec4 FragColor;
 
 const float gamma = 2.2f;
-const float exposure = 0.1f;
+const float exposure = 1.0f;
 
 void main()
 {

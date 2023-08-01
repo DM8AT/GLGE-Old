@@ -167,6 +167,13 @@ void tick()
 
     //then, update everything on screen
 
+    //check if the F11 key was pressed
+    if (glgeGetToggledKeys().f11)
+    {
+        //then toggle the fullscreen mode
+        glgeToggleFullscreen();
+    }
+
     //first, update the camera
 
     //to update the camera, recalculate the projection, this is optional, if your window will not change size
@@ -198,7 +205,7 @@ void tick()
     }
 
     //if the e key is pressed while the mouse is locked, unlock it
-    if (glgeGetKeys().e && isActive)
+    if (glgeGetToggledKeys().e && isActive)
     {
         glgeSetCursor(GLGE_CURSOR_STYLE_DEFAULT);
         isActive = false;
@@ -213,15 +220,15 @@ void tick()
     //set the position of the light source to be exactly at the player
     light.setPos(camera.getPos());
 
-    //write the current FPS
-    std::cout << "\rFPS: " << glgeGetCurrentFPS() << "             ";
+    //write the current FPS as the window title
+    glgeSetWindowTitle(std::string("3D example script for GLGE : " + std::to_string(glgeGetCurrentFPS())).c_str());
 }
 
 //this function is used to setup the grassFloor instance of the Object class
 void floorSetup()
 {
     //the floor size is used to set the half width of the floor
-    float floorSize = 10000;
+    float floorSize = 1000;
     //the texture size is used to make the texture smaler or bigger on the floor
     float texturesize = 2;
     //here, an pointer array of vertices is created to hold the vertex data for the object
@@ -263,7 +270,7 @@ void floorSetup()
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then create a material for the grass floor
-    Material grassFloorMat = Material("assets/grass.png", "Texture", 0.5);
+    Material grassFloorMat = Material("assets/grass.png", "Texture", 0.2);
     //apply the material to the grass floor
     grassFloor.setMaterial(grassFloorMat);
 }
@@ -409,6 +416,11 @@ void wallSetup()
     wall.setMaterial(mat);
 }
 
+void windowResized(int width, int height)
+{
+    printf("Window resized to: %d, %d\n", width,height);
+}
+
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
 void run3Dexample(int argc, char** argv)
@@ -417,7 +429,7 @@ void run3Dexample(int argc, char** argv)
     glgeInit(argc, argv);
 
     //as second step, a window is created. This should be done second, because it also initalises the glew library
-    glgeCreateWindow("3D example script for GLGE", 1000, 1000);
+    glgeCreateWindow("3D example script for GLGE : init...", 1000, 1000);
 
     //after creating the window, the 3D core is initalised. This sets all thinks like depth buffer correctly
     glgeInit3DCore();
@@ -460,6 +472,12 @@ void run3Dexample(int argc, char** argv)
     //then, the tick function is bound. It is like the main loop of the program and called once every tick. Before it is called, all values behind the
     //scenes are updated. 
     glgeBindMainFunc(tick);
+    //bind a function that will be called if the window is resized
+    glgeBindOnWindowResizeFunc(windowResized);
+
+    //a window is resizable by default, so no function is needed to say that it can be resized (but you can say that it can't be resized)
+
+    //a window can be moved by default, so no function is needed to say that it can be moved (but you can say that it can't be moved)
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
     camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,-90,0),1));

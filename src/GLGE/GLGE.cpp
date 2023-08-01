@@ -65,7 +65,11 @@ void glgeInit(int argc, char** argv)
             std::cerr << GLGE_ERROR_STR_GLGE_INIT_ERROR << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        }
     }
 
     glutInit(&argc, argv);
@@ -126,7 +130,11 @@ void glgeCreateWindow(const char* name, vec2 size, vec2 pos)
             std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //start the window creation
     createWindow(name, size, pos);
@@ -187,7 +195,11 @@ void glgeCreateWindow(const char* name, int width, int height, vec2 pos)
             std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //start the window creation
     createWindow(name, vec2(width, height), pos);
@@ -271,7 +283,11 @@ void glgeSetClearColor(float r, float g, float b, bool normalise)
         {
             std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
         }
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //store the clear color
@@ -319,7 +335,11 @@ void glgeSetClearColor(vec3 color, bool normalise)
         {
             std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
         }
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //store the clear color
@@ -367,7 +387,11 @@ void glgeSetClearColor(vec4 color, bool normalise)
         {
             std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
         }
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //store the clear color
@@ -402,7 +426,11 @@ void glgeBindDisplayFunc(void (*func)())
             std::cerr << GLGE_ERROR_STR_BIND_DISPLAY_CALLBACK << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //set the display callback
@@ -447,7 +475,11 @@ void glgeBindMainFunc(void (*func)())
             std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //set the display callback
@@ -492,7 +524,11 @@ void glgeSetMaxFPS(int fps)
             std::cerr << GLGE_ERROR_STR_SET_MAX_FPS << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //set the maximal frames per second
@@ -544,7 +580,11 @@ void glgeSetMoveMatrixName(const char* name)
             std::cerr << GLGE_ERROR_STR_GLGE_SET_MOV_MAT_NAME << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //sore the name for the move matrix
     glgeCamMatrix = (char*)name;
@@ -578,6 +618,12 @@ Keys glgeGetKeys()
     return glgePressedKeys;
 }
 
+Keys glgeGetToggledKeys()
+{
+    //return the keys from this tick
+    return glgeKeysThisTick;
+}
+
 //get the delta time
 float glgeGetDeltaTime()
 {
@@ -602,7 +648,11 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
             std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //set a GLchar to the inputed text
@@ -638,7 +688,11 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
             std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //attach the shader object to the final program
@@ -686,7 +740,11 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //create strings for the shaders
@@ -701,7 +759,11 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //add the shader program from the first file
     glgeAddShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
@@ -715,7 +777,11 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
     //add the shader program from the second file
     glgeAddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
@@ -741,7 +807,11 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //check if the program is valide
@@ -759,7 +829,11 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //say open GL to use the shader program
@@ -784,7 +858,11 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //add the shader program from the first file
@@ -814,7 +892,11 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //check if the program is valide
@@ -832,7 +914,11 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
             printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
         }
         //stop the program
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //say open GL to use the shader program
@@ -964,7 +1050,11 @@ void glgeSetLightingShader(const char* lightingShaderFile)
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //compile the shader and save it
@@ -1024,7 +1114,11 @@ void glgeSetPostProcessingShader(const char* shaderFile)
             std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
         }
         //stop the script
-        exit(1);
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
     }
 
     //compile the shader and save it
@@ -1128,4 +1222,187 @@ GLuint glgeGetLastFrame()
 {
     //return a pointer to the last frame map
     return glgeFrameLastTick;
+}
+
+void glgeSetExitOnError(bool exitOnError)
+{
+    //set the exit on error variable to the input
+    glgeExitOnError = exitOnError;
+}
+
+void glgeToggleExitOnError()
+{
+    //set the exit on error variable to not exit on error
+    glgeExitOnError = !glgeExitOnError;
+}
+
+bool glgeGetExitOnError()
+{
+    //return the local value to store if glge should exit on an error
+    return glgeExitOnError;
+}
+
+void glgeUseDownUpSampeling(bool shouldUse)
+{
+    //store the inputed state
+    glgeDownUpSampeling = shouldUse;
+}
+
+void glgeSwapDownUpSampeling()
+{
+    //swap the current state of use
+    glgeDownUpSampeling = !glgeDownUpSampeling;
+}
+
+bool glgeGetDownUpSampeling()
+{
+    //output the current state of use
+    return glgeDownUpSampeling;
+}
+
+void glgeBindOnWindowResizeFunc(void (*func)(int, int))
+{
+    //store the inputed function, nullpointers are catched before it is called
+    glgeOnWindowResize = func;
+}
+
+void glgeSetFullscreenMode(bool isFullscreen)
+{
+    //store the inputed variable to say if should be in fullscreen mode
+    glgeFullscreen = isFullscreen;
+
+    //check if it should be fullscreen
+    if (isFullscreen)
+    {
+        //use glut to set the fullscreen
+        glutFullScreen();
+    }
+    else
+    {
+        //use glut to set the window to the original size
+        glutReshapeWindow(glgeNormalWindowSize.x, glgeNormalWindowSize.y);
+    }
+}
+
+void glgeToggleFullscreen()
+{
+    //set the variable to store the fullscreen mode to the inverse of itself
+    glgeFullscreen = !glgeFullscreen;
+
+    //use the fullscreen toggle function implemented in freeglut
+    glutFullScreenToggle();
+}
+
+bool glgeIsFullscreen()
+{
+    //output the current fullscreen mode
+    return glgeFullscreen;
+}
+
+void glgeResizeWindow(int width, int height, bool force)
+{
+    //check if the window resize is allowed
+    if (glgeAllowWindowResize || force)
+    {
+        //change the window size using freeglut
+        glutReshapeWindow(width, height);
+        //if force is enabled, set the window size parameters
+        if (force)
+        {
+            //instantly resize the parameters
+            resizeWindow(width,height);
+        }
+    }
+}
+
+void glgeResizeWindow(vec2 size, bool force)
+{
+    //check if the window resize is allowed
+    if (glgeAllowWindowResize || force)
+    {
+        //change the window size using freeglut
+        glutReshapeWindow(size.x, size.y);
+        //if force is enabled, set the window size parameters
+        if (force)
+        {
+            //instantly resize the parameters
+            resizeWindow(size.x, size.y);
+        }
+    }
+}
+
+void glgeSetWindowResizable(bool resizable)
+{
+    //store the inputed mode
+    glgeAllowWindowResize = resizable;
+}
+
+void glgeToggleWindowResizable()
+{
+    //switch the state of the resize variable
+    glgeAllowWindowResize = !glgeAllowWindowResize;
+}
+
+bool glgeIsWindowResizable()
+{
+    //output if the window can be resized
+    return glgeAllowWindowResize;
+}
+
+void glgeSetWindowPosition(vec2 position, bool force)
+{
+    //check if the window movement is allowed
+    if (glgeAllowWindowMovement || force)
+    {
+        //use glut to set the window position
+        glutPositionWindow(position.x,position.y);
+
+        //if the movement should be forced, store the new position
+        if (force)
+        {
+            //store the new window position
+            glgeWindowPosition = position;
+        }
+    }
+}
+
+void glgeSetWindowPosition(int x, int y, bool force)
+{
+    //check if the window movement is allowed
+    if (glgeAllowWindowMovement || force)
+    {
+        //use glut to set the window position
+        glutPositionWindow(x,y);
+
+        //if the movement should be forced, store the new position
+        if (force)
+        {
+            //store the new window position
+            glgeWindowPosition = vec2(x,y);
+        }
+    }
+}
+
+vec2 glgeGetWindowPosition()
+{
+    //use glut to get the window position and return it
+    return glgeWindowPosition;
+}
+
+void glgeSetWindowMoveable(bool allowMovement)
+{
+    //store if the window is allowed to move
+    glgeAllowWindowMovement = allowMovement;
+}
+
+void glgeToggleWindowMoveable()
+{
+    //invert the allow movement
+    glgeAllowWindowMovement = !glgeAllowWindowMovement;
+}
+
+bool glgeGetWindowMoveable()
+{
+    //return if the window movement is allowed
+    return glgeAllowWindowMovement;
 }

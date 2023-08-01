@@ -47,6 +47,29 @@ public:
      * @param status the new status for the key
      */
     void keyUpdate(int key, bool status);
+
+    /**
+     * @brief set all keys to false
+     */
+    void clear();
+
+    /**
+     * @brief Get the status of one key
+     * 
+     * @param key the key to check
+     * @return true : the key is pressed | 
+     * @return false : the key is not pressed
+     */
+    bool getKey(int key);
+
+    /**
+     * @brief Get the status of one key
+     * 
+     * @param key the key to check
+     * @return true : the key is pressed | 
+     * @return false : the key is not pressed
+     */
+    bool getKey(unsigned char key);
 };
 
 class Mouse
