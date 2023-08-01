@@ -61,28 +61,9 @@ Upcoming features that may be added to GLGE in the future include:
 Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
-## Update 0.11
-- removed old lighting code from shaders
-- added Lighting pass
-- removed post processing pass (temporearly, now used as lighting pass)
-- added access to things like the last frame
-- shader no longer nessesary for lighting (Updated default 3D shader)
-### Update 0.11-1
-- fixed 2D example
-- re-added post processing pass
-### Update 0.11-2
-- made default lighting better (Specular lighting)
-### Update 0.11-3
-- fixed tonemapping, now uses correct HDR
-### Update 0.11-4
-- added inverse square law to default lighting pass
-- fixed some floats in 2D pps shader
-### Update 0.11-5
-- fixed single-color material
-- optimised lighting pass (no longer using a pass if no light source is active)
-### Update 0.11-6
-- changed HDR from lighting pass to post-processing pass
-### Update 0.12
+### Update 0.121
+- reversed update log order
+## Update 0.12
 - added a function that will be called if the window is resized
 - added a parameter to controll if GLGE will close if an error occures
 - added funktions for handeling fullscreen mode
@@ -91,3 +72,24 @@ Currently working on improving the shader core to make handling shaders simpler 
 - the window size now can be locked, disabeling all user window size controll
 - the window can be positiond trough code after it was initalised
 - the window position cna be loced, disabeling all user window position controll
+### Update 0.11-6
+- changed HDR from lighting pass to post-processing pass
+### Update 0.11-5
+- fixed single-color material
+- optimised lighting pass (no longer using a pass if no light source is active)
+### Update 0.11-4
+- added inverse square law to default lighting pass
+- fixed some floats in 2D pps shader
+### Update 0.11-3
+- fixed tonemapping, now uses correct HDR
+### Update 0.11-2
+- made default lighting better (Specular lighting)
+### Update 0.11-1
+- fixed 2D example
+- re-added post processing pass
+## Update 0.11
+- removed old lighting code from shaders
+- added Lighting pass
+- removed post processing pass (temporearly, now used as lighting pass)
+- added access to things like the last frame
+- shader no longer nessesary for lighting (Updated default 3D shader)
