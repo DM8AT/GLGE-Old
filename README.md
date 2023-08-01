@@ -61,7 +61,7 @@ Upcoming features that may be added to GLGE in the future include:
 Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
-### Update 0.121
+### Update 0.12-1
 - reversed update log order
 ## Update 0.12
 - added a function that will be called if the window is resized
