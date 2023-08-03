@@ -14,14 +14,11 @@
 #include "glgeErrors.hpp"
 #include "glgeVars.hpp"
 #include "glgeFuncs.hpp"
+#include "glgeDefaultFuncs.hpp"
 #include "glgePrivDefines.hpp"
 
-//include the OpenGL dependencys
-#include <GL/freeglut.h>
-
-//include stbi_image
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.hpp"
+//include acess to images
+#include "glgeImage.h"
 
 //include the standart librarys
 #include <math.h>
@@ -29,6 +26,8 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
+#include <fstream>
+
 
 ////////////////////
 //Public functions//
@@ -72,7 +71,16 @@ void glgeInit(int argc, char** argv)
         }
     }
 
-    glutInit(&argc, argv);
+    #if __linux__
+        glgeOperatingSystem = GLGE_OS_LINUX;
+    #elif _WIN32
+        glgeOperatingSystem = GLGE_OS_WINDOWS;
+    #else
+        glgeOperatingSystem = GLGE_OS_OTHER;
+    #endif
+
+    //initalise SDL
+    SDL_Init(SDL_INIT_EVERYTHING);
 }
 
 //first window creation methode
@@ -207,7 +215,7 @@ void glgeCreateWindow(const char* name, int width, int height, vec2 pos)
 
 void glgeSetWindowTitle(const char* title)
 {
-    glutSetWindowTitle(title);
+    SDL_SetWindowTitle(glgeMainWindow, title);
 }
 
 //set if GLGE should output errors
@@ -239,8 +247,66 @@ bool glgeGetWarningOutput()
 //start the main loop of GLGE
 void glgeRunMainLoop()
 {
-    //start the glut main loop
-    glutMainLoop();
+    //store if the file should stop
+    bool running = true;
+
+    //run the main loop while the program is not stopped
+    while (running)
+    {
+        //store the current SDL event
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_KEYDOWN:
+                    //handle the keydown
+                    glgeDefaultKeyFunc(event.key.keysym.scancode);
+                    //jump to the next event
+                    break;
+                case SDL_KEYUP:
+                    //if the key is relsed, then handle the key up
+                    glgeDefaultKeyUpFunc(event.key.keysym.scancode);
+                    //jump to the next event
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    //handle a mouse button press
+                    glgeDefaultMouseFunc(event.button.button, GLGE_MOUSE_BUTTON_PRESS);
+                    //jump to the next event
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    //handle the mouse button release
+                    glgeDefaultMouseFunc(event.button.button, GLGE_MOUSE_BUTTON_RELEASE);
+                    //jump to the next event
+                    break;
+                case SDL_MOUSEWHEEL:
+                    //handle the mouse scrolling
+                    glgeDefaultMouseFunc(GLGE_MOUSE_SCROLL, event.wheel.y);
+                    //jump to the next event
+                    break;
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_RESIZED:
+                            /* Change view port to the new window dimensions */
+                            glgeDefaultResizeFunc(event.window.data1, event.window.data2);
+                            /* Update window content */
+                            glgeDefaultDisplay();
+                            break;
+                    }
+            }
+            //check if the window should close:
+            if (event.type == SDL_QUIT)
+            {
+                //if it should close, say that the loop is nolonger running
+                running = false;
+                //break out of the switch
+                break;
+            }
+        }
+
+        //draw the screen
+        glgeDefaultDisplay();
+        //run a tick
+        glgeDefaultTimer();
+    }
 }
 
 //first function to set the clear color
@@ -941,7 +1007,7 @@ GLuint glgeTextureFromFile(const char* name, vec2* sP)
 
     // load and generate the texture
     int width, height, nrChannels;
-    unsigned char *data = stbi_load(name, &width, &height, &nrChannels, 0);
+    unsigned char *data = glgeLoad(name, &width, &height, &nrChannels);
     if(data)
     {
         if (nrChannels == 3)
@@ -968,19 +1034,19 @@ GLuint glgeTextureFromFile(const char* name, vec2* sP)
     }
 
     //clear memory and return the texture
-    stbi_image_free(data);
+    glgeImageFree(data);
     return texture;
 }
 
 vec2 glgeGetTextureSize(const char* name)
 {
     int w, h, c;
-    unsigned char* data = stbi_load(name, &w, &h, &c, 0);
+    unsigned char* data = glgeLoad(name, &w, &h, &c, 0);
     if(!data)
     {
         std::cout << "Failed to load texture file: " << name << std::endl;
     }
-    stbi_image_free(data);
+    glgeImageFree(data);
     return vec2(h,w);
 }
 
@@ -1168,7 +1234,7 @@ void glgeWarpPointer(vec2 pointerPos, unsigned int space)
     }
 
     //use the glut function to warp the pointer to the specified position
-    glutWarpPointer(mem.x, mem.y);
+    SDL_WarpMouseInWindow(glgeMainWindow, mem.x, mem.y);
 }
 
 void glgeWarpPointer(float x, float y, unsigned int space)
@@ -1177,21 +1243,50 @@ void glgeWarpPointer(float x, float y, unsigned int space)
     glgeWarpPointer(vec2(x,y), space);
 }
 
-void glgeSetCursor(int style)
+void glgeSetCursor(int curser)
 {
-    //set the curser to the inputed style
-    glutSetCursor(style);
+    //check if the curser should be invisible
+    if (curser == GLGE_CURSOR_STYLE_NONE)
+    {
+        //if it should, hide the cursor
+        SDL_ShowCursor(SDL_DISABLE);
+
+        //stop the function
+        return;
+    }
+    //else, show the cursor
+    SDL_ShowCursor(SDL_ENABLE);
+    //create the system courser
+    SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SystemCursor(curser));
+    //check if the creation was sucessfull
+    if (cursor == NULL)
+    {
+        //if not, check if errors should be printed
+        if (glgeErrorOutput)
+        {
+            //if they should, print an error
+            std::cerr << "[GLGE ERROR] couldn't create SDL system coursor, SDL error: " << SDL_GetError() << std::endl;
+        }
+        //check if GLGE should exit on an error
+        if (glgeExitOnError)
+        {
+            //if it should, close the program with an error
+            exit(1);
+        }
+    }
+    //set the curser to the inputed default
+    SDL_SetCursor(cursor);
 }
 
 vec2 glgeGetScreenSize()
 {
     //return the screen size
-    return vec2(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
+    return glgeWindowSize;
 }
 
 float glgeGetCurrentElapsedTime()
 {
-    return glutGet(GLUT_ELAPSED_TIME);
+    return SDL_GetTicks();
 }
 
 GLuint glgeGetMainAlbedoMap()
@@ -1274,23 +1369,31 @@ void glgeSetFullscreenMode(bool isFullscreen)
     //check if it should be fullscreen
     if (isFullscreen)
     {
-        //use glut to set the fullscreen
-        glutFullScreen();
+        //store the current window size
+        glgeTrueWindowSize = glgeWindowSize;
+        //set the screen size to the complete screen
+        SDL_SetWindowSize(glgeMainWindow, glgeMainDisplay.w, glgeMainDisplay.h);
+        //use SDL to set the fullscreen
+        SDL_SetWindowFullscreen(glgeMainWindow, SDL_WINDOW_FULLSCREEN);
+        //resize everything
+        glgeDefaultResizeFunc(glgeMainDisplay.w, glgeMainDisplay.h);
     }
     else
     {
-        //use glut to set the window to the original size
-        glutReshapeWindow(glgeNormalWindowSize.x, glgeNormalWindowSize.y);
+        //use SDL to set the window to the original size
+        SDL_SetWindowFullscreen(glgeMainWindow, 0);
+        //set the screen size to the complete screen
+        SDL_SetWindowSize(glgeMainWindow, glgeTrueWindowSize.x, glgeTrueWindowSize.y);
+        //resize everything
+        glgeDefaultResizeFunc(glgeMainDisplay.w, glgeMainDisplay.h);
+
     }
 }
 
 void glgeToggleFullscreen()
 {
-    //set the variable to store the fullscreen mode to the inverse of itself
-    glgeFullscreen = !glgeFullscreen;
-
-    //use the fullscreen toggle function implemented in freeglut
-    glutFullScreenToggle();
+    //use glge to set the fullscreen to the inverse of the fullscreen
+    glgeSetFullscreenMode(!glgeFullscreen);
 }
 
 bool glgeIsFullscreen()
@@ -1305,7 +1408,7 @@ void glgeResizeWindow(int width, int height, bool force)
     if (glgeAllowWindowResize || force)
     {
         //change the window size using freeglut
-        glutReshapeWindow(width, height);
+        SDL_SetWindowSize(glgeMainWindow, width, height);
         //if force is enabled, set the window size parameters
         if (force)
         {
@@ -1321,7 +1424,7 @@ void glgeResizeWindow(vec2 size, bool force)
     if (glgeAllowWindowResize || force)
     {
         //change the window size using freeglut
-        glutReshapeWindow(size.x, size.y);
+        SDL_SetWindowSize(glgeMainWindow, size.x, size.y);
         //if force is enabled, set the window size parameters
         if (force)
         {
@@ -1355,7 +1458,7 @@ void glgeSetWindowPosition(vec2 position, bool force)
     if (glgeAllowWindowMovement || force)
     {
         //use glut to set the window position
-        glutPositionWindow(position.x,position.y);
+        SDL_SetWindowPosition(glgeMainWindow, position.x,position.y);
 
         //if the movement should be forced, store the new position
         if (force)
@@ -1372,7 +1475,7 @@ void glgeSetWindowPosition(int x, int y, bool force)
     if (glgeAllowWindowMovement || force)
     {
         //use glut to set the window position
-        glutPositionWindow(x,y);
+        SDL_SetWindowPosition(glgeMainWindow, x,y);
 
         //if the movement should be forced, store the new position
         if (force)
@@ -1405,4 +1508,28 @@ bool glgeGetWindowMoveable()
 {
     //return if the window movement is allowed
     return glgeAllowWindowMovement;
+}
+
+void glgeSetWindowIcon(const char* file)
+{
+    //load the image
+    SDL_Surface* img = loadImage(file);
+    //check if the image was created sucessfully
+    if (!img)
+    {
+        //check if GLGE should print an error
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] failed to create SDL_Surface for image to change the window icon, SDL error: " << SDL_GetError() << std::endl;
+        }
+        //check if GLGE should crash on an error
+        if (glgeExitOnError)
+        {
+            //stop with an error
+            exit(1);
+        }
+    }
+    //set the current application window's icon
+    SDL_SetWindowIcon(glgeMainWindow,img);
 }

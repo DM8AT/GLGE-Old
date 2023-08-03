@@ -10,7 +10,6 @@
  */
 
 #include "glgeVars.hpp"
-#include <GL/freeglut.h>
 #include <map>
 
 ///////////
@@ -30,6 +29,18 @@ const char* glgePresets[] = {
 /////////////////////
 //Private Variables//
 /////////////////////
+
+//store the application window
+SDL_Window* glgeMainWindow = NULL;
+
+//store the OpenGL context to the main window
+SDL_GLContext glgeMainContext;
+
+//store the display mode
+SDL_DisplayMode glgeMainDisplay;
+
+//store the true window size
+vec2 glgeTrueWindowSize = vec2(0,0);
 
 //store the clear color
 vec4 glgeClearColor = vec4(1,1,1,1);
@@ -256,3 +267,6 @@ vec2 glgeWindowPosition = vec2(0,0);
 
 //say if it is allowed to move the window
 bool glgeAllowWindowMovement = true;
+
+//store the opperating system the application is compiled for
+int glgeOperatingSystem = -1;

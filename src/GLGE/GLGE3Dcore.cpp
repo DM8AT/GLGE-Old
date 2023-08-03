@@ -22,9 +22,6 @@
 //include needed CML librarys
 #include "CML/CMLQuaternion.h"
 
-//include freeglut
-#include <GL/freeglut.h>
-
 //include the default librarys
 #include <iostream>
 #include <cstring>

@@ -328,7 +328,7 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas, bool ve
             }
             // image values
             int width, height, channelCount;
-            unsigned char *img = stbi_load(paths[imgCount], &width, &height, &channelCount, 0);
+            unsigned char *img = glgeLoad(paths[imgCount], &width, &height, &channelCount);
 
             // add image info to atlas data
             this->atlasData["images"][paths[imgCount]]["w"] = width;
@@ -355,7 +355,7 @@ unsigned char * atlas::_constructs_atlas_same(int size, bool save_atlas, bool ve
             }
 
             // free image
-            stbi_image_free(img);
+            glgeImageFree(img);
 
             // Increment the image counter
             imgCount++;
@@ -419,7 +419,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous) {
         // image dimension vars
         int w, h, c;
         // load image info
-        unsigned char* img = stbi_load(this->paths[i], &w, &h, &c, 0);
+        unsigned char* img = glgeLoad(this->paths[i], &w, &h, &c);
         // check if image got loaded
         if (img == NULL) {
             // print Error
@@ -428,7 +428,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous) {
             continue;
         }
         // free image for no memoryleaks
-        stbi_image_free(img);
+        glgeImageFree(img);
 
         // Add w & h to totals
         totalWidth += w;
@@ -490,7 +490,7 @@ unsigned char * atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous) {
         // image dimension vars
         int w, h, c;
         // load image info
-        unsigned char* img = stbi_load(paths[i], &w, &h, &c, 0);
+        unsigned char* img = glgeLoad(paths[i], &w, &h, &c);
 
         // check if image got opened
         if (img == NULL) {
@@ -671,14 +671,14 @@ void atlas::_optimize_atlas(bool save_atlas) {
 int * atlas::_img_info(const char* path) {
     // load image
     int w, h, c; 
-    unsigned char *img = stbi_load(path, &w, &h, &c, 0);
+    unsigned char *img = glgeLoad(path, &w, &h, &c);
     // if image was not opened, print error
     if(img == NULL) {
-        stbi_image_free(img);
+        glgeImageFree(img);
         printf(GLGE_ERROR_IMAGE_COULDNT_OPEN, path);
         return new int[3] {-1, -1, -1};
     }
-    stbi_image_free(img);
+    glgeImageFree(img);
     // debug message
     //printf("Loaded image with a width of %dpx, a height of %dpx and %d channels\n", w, h, c);
 
@@ -859,7 +859,7 @@ bool atlas::loadAtlas(const char* path) {
 
     // load atlas image
     int w, h, c;
-    unsigned char* iAtlas = stbi_load(path, &w, &h, &c, 0);
+    unsigned char* iAtlas = glgeLoad(path, &w, &h, &c);
     this->iAtlas = iAtlas;
     // load atlas data
     // open file

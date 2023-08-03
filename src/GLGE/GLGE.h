@@ -52,52 +52,33 @@
 //relative window coordinates, from 0 to 1 on both axis
 #define GLGE_WINDOW_SPACE 1
 
-//Arrow pointing up and to the right
-#define GLGE_CURSOR_STYLE_RIGHT_ARROW 0x0000
-//Arrow pointing up and to the left
-#define GLGE_CURSOR_STYLE_LEFT_ARROW 0x0001
-//Pointing hand
-#define GLGE_CURSOR_STYLE_INFO 0x0002
-//Skull & cross bones
-#define GLGE_CURSOR_STYLE_DESTROY 0x0003
-//Question mark
-#define GLGE_CURSOR_STYLE_HELP 0x0004
-//Arrows rotating in a circle
-#define GLGE_CURSOR_STYLE_CYCLE 0x0005
-//Spray can
-#define GLGE_CURSOR_STYLE_SPRAY 0x0006
 //Wrist watch
-#define GLGE_CURSOR_STYLE_WAIT 0x0007
-//Insertion point cursor for text
-#define GLGE_CURSOR_STYLE_TEXT 0x0008
+#define GLGE_CURSOR_STYLE_WAIT 0x0002
 //Simple cross-hair
-#define GLGE_CURSOR_STYLE_CROSSHAIR 0x0009
-//Bi-directional pointing up & down
-#define GLGE_CURSOR_STYLE_UP_DOWN 0x000A
-//Bi-directional pointing left & right
-#define GLGE_CURSOR_STYLE_LEFT_RIGHT 0x000B
-//Arrow pointing to top side
-#define GLGE_CURSOR_STYLE_TOP_SIDE 0x000C
-//Arrow pointing to bottom side
-#define GLGE_CURSOR_STYLE_BOTTOM_SIDE 0x000D
-//Arrow pointing to left side
-#define GLGE_CURSOR_STYLE_LEFT_SIDE 0x000E
-//Arrow pointing to right side
-#define GLGE_CURSOR_STYLE_RIGHT_SIDE 0x000F
-//Arrow pointing to top-left corner
-#define GLGE_CURSOR_STYLE_TOP_LEFT_CORNER 0x0010
-//Arrow pointing to top-right corner
-#define GLGE_CURSOR_STYLE_TOP_RIGHT_CORNER 0x0011
-//Arrow pointing to bottom-left corner
-#define GLGE_CURSOR_STYLE_BOTTOM_RIGHT_CORNER 0x0012
-//Arrow pointing to bottom-right corner
-#define GLGE_CURSOR_STYLE_BOTTOM_LEFT_CORNER 0x0013
-//Full-screen cross-hair cursor (if possible, otherwise GLUT_CURSOR_CROSSHAIR)
-#define GLGE_CURSOR_STYLE_FULL_CROSSHAIR 0x0066
-//Invisible cursor
-#define GLGE_CURSOR_STYLE_NONE 0x0065
+#define GLGE_CURSOR_STYLE_CROSSHAIR 0x0003
+//a hand to grab
+#define GLGE_CURSOR_STYLE_HAND 0x000B
+//an style like when editing text
+#define GLGE_CURSOR_STYLE_TEXT 0x0001
+//An cross
+#define GLGE_CURSOR_STYLE_NO 0x000A
+//the cursor is invisible
+#define GLGE_CURSOR_STYLE_NONE 0x0BB
 //The default curser image
-#define GLGE_CURSOR_STYLE_DEFAULT 0x0064
+#define GLGE_CURSOR_STYLE_DEFAULT 0x0000
+//Four pointed arrow pointing north, south, east, and west
+#define GLGE_CURSOR_STYLE_FOUR_ARROWS 0x0009
+//Double arrow pointing northeast and southwest
+#define GLGE_CURSOR_STYLE_NORTHEAST_SOUTHWEST 0x0006
+//Double arrow pointing north and south
+#define GLGE_CURSOR_STYLE_NORTH_SOUTH 0x0008
+//Double arrow pointing northwest and southeast
+#define GLGE_CURSOR_STYLE_NORTHWEST_SOUTHEAST 0x0005
+//Double arrow pointing west and east
+#define GLGE_CURSOR_STYLE_WEST_EAST 0x0007
+
+//define the integer limit as unlimited FPS
+#define GLGE_FPS_UNLIMITED 2147483647
 
 /////////////
 //FUNCTIONS//
@@ -712,4 +693,10 @@ void glgeToggleWindowMoveable();
  */
 bool glgeGetWindowMoveable();
 
+/**
+ * @brief change the Icon of the application window
+ * 
+ * @param file the path for the new icon
+ */
+void glgeSetWindowIcon(const char* file);
 #endif

@@ -21,7 +21,7 @@ Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
 # Use GLGE
-To use GLGE, you need the OpenGL developer library, GLEW, Freeglut, and all default C++ libraries. 
+To use GLGE, you need the OpenGL developer library, GLEW, SDL2, and all default C++ libraries. 
 
 ## Installation
 To install, download the source code and move the "GLGE" folder to your preferred location,
@@ -37,7 +37,6 @@ Make sure you include and compile with all the required librarys.
 # Upcoming
 Upcoming features that may be added to GLGE in the future include:
 - Loadable models from files
-   - from .obj files (work in progress)
    - from .blend files
    - from other file formats
 - A 3D and 2D sound function to the core
@@ -45,24 +44,20 @@ Upcoming features that may be added to GLGE in the future include:
 - Procedrual materials
 - Procedrual shaders
 - A lighting core for 3D and 2D
-   - preset of lighting shaders
    - preset for different light sources
    - different light source presets
       - directional light
-      - point light
       - sun
       - light plates (some invisible shape that is emitting light)
 - Post processing
-   - preset for post processing core
    - preset for different effects (Bloom, distortion, etc.)
 - Texture atleasing
-
-## Working on
-Currently working on improving the shader core to make handling shaders simpler and more functional.
 
 # Changelogs
 ### Update 0.12-1
 - reversed update log order
+- Switched from FreeGLUT to SDL2 as background lib
+- added abillity to set the window icon
 ## Update 0.12
 - added a function that will be called if the window is resized
 - added a parameter to controll if GLGE will close if an error occures

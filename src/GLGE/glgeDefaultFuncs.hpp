@@ -23,35 +23,21 @@ void glgeDefaultDisplay();
  * @brief this is the default timer function for GLGE
  * limit the timer to the set maximal frames per second
  */
-void glgeDefaultTimer(int);
+void glgeDefaultTimer();
 
 /**
  * @brief the default keyboard function for key presses
  * store the pressed keys
  * @param key the pressed key
  */
-void glgeDefaultKeyFunc(unsigned char key, int, int);
+void glgeDefaultKeyFunc(int key);
 
 /**
  * @brief the default keyboard function for lifting a key
  * store wich keys aren't pressed
  * @param key the key that is no longer pressed
  */
-void glgeDefaultKeyUpFunc(unsigned char key, int, int);
-
-/**
- * @brief this function is called when a special key is pressed
- * store the pressed keys
- * @param key the pressed key
- */
-void glgeDefaultSpecKeyFunc(int key, int, int);
-
-/**
- * @brief this function is called when a special key gets released
- * store the pressed keys
- * @param key the released key
- */
-void glgeDefaultSpecKeyUpFunc(int key, int, int);
+void glgeDefaultKeyUpFunc(int key);
 
 /**
  * @brief this function is called when a mouse button updates
@@ -61,15 +47,7 @@ void glgeDefaultSpecKeyUpFunc(int key, int, int);
  * @param x the mouse x position
  * @param y the mouse y position
  */
-void glgeDefaultMouseFunc(int button, int state, int x, int y);
-
-/**
- * @brief this function is called when the mouse moves
- * store the mouse possition
- * @param x the mouse x position
- * @param y the mouse y position
- */
-void glgeDefaultPassiveMotionFunc(int x, int y);
+void glgeDefaultMouseFunc(int button, int state);
 
 /**
  * @brief this function is called if the window is resize

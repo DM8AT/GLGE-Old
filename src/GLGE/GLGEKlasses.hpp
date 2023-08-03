@@ -12,6 +12,15 @@
 #ifndef _GLGE_KLASSES_H_
 #define _GLGE_KLASSES_H_
 
+//define the mouse scroll type
+#define GLGE_MOUSE_SCROLL 5
+
+//define a button press
+#define GLGE_MOUSE_BUTTON_PRESS 1
+//define a button release
+#define GLGE_MOUSE_BUTTON_RELEASE 0
+
+
 //include the needed var types
 #include "CML/CMLVec2.h"
 
@@ -31,14 +40,6 @@ public:
      * default constructor
      */
     Keys();
-
-    /**
-     * @brief update a key in the keys variable
-     * 
-     * @param key the key to update
-     * @param status the status to set the key to
-     */
-    void keyUpdate(unsigned char key, bool status);
 
     /**
      * @brief update a special key
@@ -93,15 +94,7 @@ public:
      * @param button the botton to handle
      * @param state the button status
      */
-    void update(int button, int state, int x, int y);
-
-    /**
-     * @brief update the mouse position
-     * 
-     * @param x the x position of the mouse
-     * @param y the y position of the mouse
-     */
-    void updatePos(int x, int y);
+    void update(int button, int state);
 };
 
 #endif

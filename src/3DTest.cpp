@@ -13,6 +13,8 @@
 //include the header file, so it can be run from the main file
 #include "3DTest.hpp"
 
+//say that the SDL specific functions should be included as well
+#define GLGE_USE_SDL
 //include the library core, needed for 3D and 2D
 //used for first initalisation, keyboard functions, mouse functions and simple display things like creating and updating a windows
 #include "GLGE/GLGE.h"
@@ -54,16 +56,11 @@ Light l2;
 
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
-//set the rotation speed of the camera
-float camRot = 0.0025;
 //set the mouse sensetivity
-float mouseSensetivity = 2.f;
+float mouseSensetivity = 0.2f;
 
 //say if the mouse is currently locked to the screen
 bool isActive = true;
-
-//store the mouse pointer error
-float mousePosError = 0.f;
 
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
@@ -154,7 +151,7 @@ void tick()
     if (isActive)
     {
         //rotate the camera by the mouse position
-        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity, -((glgeGetMouse().pos.y-0.5f) * mouseSensetivity)-(mousePosError*2.f), 0);
+        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity * glgeGetDeltaTime(), -((glgeGetMouse().pos.y-0.5f) * mouseSensetivity * glgeGetDeltaTime()), 0);
     }
     //clamp the camera rotation on the y axis
     camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
@@ -434,6 +431,9 @@ void run3Dexample(int argc, char** argv)
     //after creating the window, the 3D core is initalised. This sets all thinks like depth buffer correctly
     glgeInit3DCore();
 
+    //set the icon of the window
+    glgeSetWindowIcon("assets/GLGEImage.png");
+
     //create an kernal to generate an gausian blure
     /*float kernal[] = {
         1.f/16.f, 1.f/8.f, 1.f/16.f,
@@ -453,7 +453,7 @@ void run3Dexample(int argc, char** argv)
     //glgeSetPostProcessingShader(pps.getShader());
 
     //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
-    //glgeDisableBackfaceCulling();
+    glgeDisableBackfaceCulling();
 
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
 

@@ -17,6 +17,17 @@
 
 #include <iostream>
 
+//include SDL2
+#ifdef _WIN32
+#include <SDL/SDL.h> /* Windows-specific SDL2 library */
+#include <SDL/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#else
+#include <SDL2/SDL.h> /* macOS- and GNU/Linux-specific */
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#endif
+
 /////////////
 //KEY CLASS//
 /////////////
@@ -29,244 +40,301 @@ Keys::Keys()
 }
 
 //update a key
-void Keys::keyUpdate(unsigned char key, bool status)
-{
-    //check if a should be updated
-    if (key == (unsigned char)'a' || key == (unsigned char)'A')
-    {
-        this->a = status;
-    }
-    //check if b should be updated
-    else if (key == (unsigned char)'b' || key == (unsigned char)'B')
-    {
-        this->b = status;
-    }
-    //check if c should be updated
-    else if (key == (unsigned char)'c' || key == (unsigned char)'C')
-    {
-        this->c = status;
-    }
-    //check if d should be updated
-    else if (key == (unsigned char)'d' || key == (unsigned char)'D')
-    {
-        this->d = status;
-    }
-    //check if e should be updated
-    else if (key == (unsigned char)'e' || key == (unsigned char)'E')
-    {
-        this->e = status;
-    }
-    //check if f should be updated
-    else if (key == (unsigned char)'f' || key == (unsigned char)'F')
-    {
-        this->f = status;
-    }
-    //check if g should be updated
-    else if (key == (unsigned char)'g' || key == (unsigned char)'G')
-    {
-        this->g = status;
-    }
-    //check if h should be updated
-    else if (key == (unsigned char)'h' || key == (unsigned char)'H')
-    {
-        this->h = status;
-    }
-    //check if i should be updated
-    else if (key == (unsigned char)'i' || key == (unsigned char)'I')
-    {
-        this->i = status;
-    }
-    //check if j should be updated
-    else if (key == (unsigned char)'j' || key == (unsigned char)'J')
-    {
-        this->j = status;
-    }
-    //check if k should be updated
-    else if (key == (unsigned char)'k' || key == (unsigned char)'K')
-    {
-        this->k = status;
-    }
-    //check if l should be updated
-    else if (key == (unsigned char)'l' || key == (unsigned char)'L')
-    {
-        this->l = status;
-    }
-    //check if m should be updated
-    else if (key == (unsigned char)'m' || key == (unsigned char)'M')
-    {
-        this->m = status;
-    }
-    //check if n should be updated
-    else if (key == (unsigned char)'n' || key == (unsigned char)'N')
-    {
-        this->n = status;
-    }
-    //check if o should be updated
-    else if (key == (unsigned char)'o' || key == (unsigned char)'O')
-    {
-        this->o = status;
-    }
-    //check if p should be updated
-    else if (key == (unsigned char)'p' || key == (unsigned char)'P')
-    {
-        this->p = status;
-    }
-    //check if q should be updated
-    else if (key == (unsigned char)'q' || key == (unsigned char)'Q')
-    {
-        this->q = status;
-    }
-    //check if r should be updated
-    else if (key == (unsigned char)'r' || key == (unsigned char)'R')
-    {
-        this->r = status;
-    }
-    //check if s should be updated
-    else if (key == (unsigned char)'s' || key == (unsigned char)'S')
-    {
-        this->s = status;
-    }
-    //check if t should be updated
-    else if (key == (unsigned char)'t' || key == (unsigned char)'T')
-    {
-        this->t = status;
-    }
-    //check if u should be updated
-    else if (key == (unsigned char)'u' || key == (unsigned char)'U')
-    {
-        this->u = status;
-    }
-    //check if v should be updated
-    else if (key == (unsigned char)'v' || key == (unsigned char)'V')
-    {
-        this->v = status;
-    }
-    //check if w should be updated
-    else if (key == (unsigned char)'w' || key == (unsigned char)'W')
-    {
-        this->w = status;
-    }
-    //check if x should be updated
-    else if (key == (unsigned char)'x' || key == (unsigned char)'X')
-    {
-        this->x = status;
-    }
-    //check if y should be updated
-    else if (key == (unsigned char)'y' || key == (unsigned char)'Y')
-    {
-        this->y = status;
-    }
-    //check if z should be updated
-    else if (key == (unsigned char)'z' || key == (unsigned char)'Z')
-    {
-        this->z = status;
-    }
-    //check if space should be updated
-    else if (key == (unsigned char)' ')
-    {
-        this->space = status;
-    }
-}
-
-//update a special key
 void Keys::keyUpdate(int key, bool status)
 {
-    //check for the function keys
-    //check for F1
-    if (key == GLUT_KEY_F1)
+    //update the key according to the key
+    switch (key)
     {
-        this->f1 = status;
-    }
-    //check for F2
-    else if (key == GLUT_KEY_F2)
-    {
-        this->f2 = status;
-    }
-    //check for F3
-    else if (key == GLUT_KEY_F3)
-    {
-        this->f3 = status;
-    }
-    //check for F4
-    else if (key == GLUT_KEY_F4)
-    {
-        this->f4 = status;
-    }
-    //check for F5
-    else if (key == GLUT_KEY_F5)
-    {
-        this->f5 = status;
-    }
-    //check for F6
-    else if (key == GLUT_KEY_F6)
-    {
-        this->f6 = status;
-    }
-    //check for F7
-    else if (key == GLUT_KEY_F7)
-    {
-        this->f7 = status;
-    }
-    //check for F8
-    else if (key == GLUT_KEY_F8)
-    {
-        this->f8 = status;
-    }
-    //check for F9
-    else if (key == GLUT_KEY_F9)
-    {
-        this->f9 = status;
-    }
-    //check for F10
-    else if (key == GLUT_KEY_F10)
-    {
-        this->f10 = status;
-    }
-    //check for F11
-    else if (key == GLUT_KEY_F11)
-    {
-        this->f11 = status;
-    }
-    //check for F12
-    else if (key == GLUT_KEY_F12)
-    {
-        this->f12 = status;
-    } 
-    //check for shift keys
-    else if (key == GLUT_KEY_SHIFT_L)
-    {
-        this->leftShift = status;
-        //check if the other shift key is pressed
-        if (!this->rightShift)
-        {
-            this->shift = status;
-        }
-    }
-    else if (key == GLUT_KEY_SHIFT_R)
-    {
-        this->rightShift = status;
-        //check if the other shift key is pressed
-        if (!this->leftShift)
-        {
-            this->shift = status;
-        }
-    }
-    //check for arrow keys
-    else if (key == GLUT_KEY_RIGHT)
-    {
-        this->arrowRight = status;
-    }
-    else if (key == GLUT_KEY_LEFT)
-    {
-        this->arrowLeft = status;
-    }
-    else if (key == GLUT_KEY_UP)
-    {
-        this->arrowUp = status;
-    }
-    else if (key == GLUT_KEY_DOWN)
-    {
-        this->arrowDown =status;
+        //check if the key is a
+        case SDL_SCANCODE_A:
+            //update a
+            this->a = status;
+            //exit
+            break;
+        //check if the key is b
+        case SDL_SCANCODE_B:
+            //update b
+            this->b = status;
+            //exit
+            break;
+        //check if the key is c
+        case SDL_SCANCODE_C:
+            //update c
+            this->c = status;
+            //exit
+            break;
+        //check if the key is d
+        case SDL_SCANCODE_D:
+            //update d
+            this->d = status;
+            //exit
+            break;
+        //check if the key is e
+        case SDL_SCANCODE_E:
+            //update e
+            this->e = status;
+            //exit
+            break;
+        //check if the key is f
+        case SDL_SCANCODE_F:
+            //update f
+            this->f = status;
+            //exit
+            break;
+        //check if the key is g
+        case SDL_SCANCODE_G:
+            //update g
+            this->g = status;
+            //exit
+            break;
+        //check if the key is h
+        case SDL_SCANCODE_H:
+            //update h
+            this->h = status;
+            //exit
+            break;
+        //check if the key is i
+        case SDL_SCANCODE_I:
+            //update i
+            this->i = status;
+            //exit
+            break;
+        //check if the key is j
+        case SDL_SCANCODE_J:
+            //update j
+            this->j = status;
+            //exit
+            break;
+        //check if the key is k
+        case SDL_SCANCODE_K:
+            //update k
+            this->k = status;
+            //exit
+            break;
+        //check if the key is l
+        case SDL_SCANCODE_L:
+            //update l
+            this->l = status;
+            //exit
+            break;
+        //check if the key is m
+        case SDL_SCANCODE_M:
+            //update m
+            this->m = status;
+            //exit
+            break;
+        //check if the key is n
+        case SDL_SCANCODE_N:
+            //update n
+            this->n = status;
+            //exit
+            break;
+        //check if the key is o
+        case SDL_SCANCODE_O:
+            //update o
+            this->o = status;
+            //exit
+            break;
+        //check if the key is p
+        case SDL_SCANCODE_P:
+            //update p
+            this->p = status;
+            //exit
+            break;
+        //check if the key is q
+        case SDL_SCANCODE_Q:
+            //update q
+            this->q = status;
+            //exit
+            break;
+        //check if the key is r
+        case SDL_SCANCODE_R:
+            //update r
+            this->r = status;
+            //exit
+            break;
+        //check if the key is s
+        case SDL_SCANCODE_S:
+            //update s
+            this->s = status;
+            //exit
+            break;
+        //check if the key is t
+        case SDL_SCANCODE_T:
+            //update t
+            this->t = status;
+            //exit
+            break;
+        //check if the key is u
+        case SDL_SCANCODE_U:
+            //update u
+            this->u = status;
+            //exit
+            break;
+        //check if the key is v
+        case SDL_SCANCODE_V:
+            //update v
+            this->v = status;
+            //exit
+            break;
+        //check if the key is w
+        case SDL_SCANCODE_W:
+            //update w
+            this->w = status;
+            //exit
+            break;
+        //check if the key is x
+        case SDL_SCANCODE_X:
+            //update x
+            this->x = status;
+            //exit
+            break;
+        //check if the key is y
+        case SDL_SCANCODE_Y:
+            //update y
+            this->y = status;
+            //exit
+            break;
+        //check if the key is z
+        case SDL_SCANCODE_Z:
+            //update z
+            this->z = status;
+            //exit
+            break;
+        //check if the key is space
+        case SDL_SCANCODE_SPACE:
+            //update space
+            this->space = status;
+            //exit
+            break;
+        //check if the key is f1
+        case SDL_SCANCODE_F1:
+            //update f1
+            this->f1 = status;
+            //exit
+            break;
+        //check if the key is f2
+        case SDL_SCANCODE_F2:
+            //update f2
+            this->f2 = status;
+            //exit
+            break;
+        //check if the key is f3
+        case SDL_SCANCODE_F3:
+            //update f3
+            this->f3 = status;
+            //exit
+            break;
+        //check if the key is f4
+        case SDL_SCANCODE_F4:
+            //update f4
+            this->f4 = status;
+            //exit
+            break;
+        //check if the key is f5
+        case SDL_SCANCODE_F5:
+            //update f5
+            this->f5 = status;
+            //exit
+            break;
+        //check if the key is f6
+        case SDL_SCANCODE_F6:
+            //update f6
+            this->f6 = status;
+            //exit
+            break;
+        //check if the key is f7
+        case SDL_SCANCODE_F7:
+            //update f7
+            this->f7 = status;
+            //exit
+            break;
+        //check if the key is f8
+        case SDL_SCANCODE_F8:
+            //update f8
+            this->f8 = status;
+            //exit
+            break;
+        //check if the key is f9
+        case SDL_SCANCODE_F9:
+            //update f9
+            this->f9 = status;
+            //exit
+            break;
+        //check if the key is f10
+        case SDL_SCANCODE_F10:
+            //update f10
+            this->f10 = status;
+            //exit
+            break;
+        //check if the key is f11
+        case SDL_SCANCODE_F11:
+            //update f11
+            this->f11 = status;
+            //exit
+            break;
+        //check if the key is f12
+        case SDL_SCANCODE_F12:
+            //update f12
+            this->f12 = status;
+            //exit
+            break;
+        //check if the key is r_shift
+        case SDL_SCANCODE_RSHIFT:
+            //update r_shift
+            this->rightShift = status;
+            //update the shift variable
+            this->shift = (this->rightShift || this->leftShift);
+            //exit
+            break;
+        //check if the key is l_shift
+        case SDL_SCANCODE_LSHIFT:
+            //update l_shift
+            this->leftShift = status;
+            //update the shift variable
+            this->shift = (this->rightShift || this->leftShift);
+            //exit
+            break;
+        //check if the right arrow key is pressed
+        case SDL_SCANCODE_RIGHT:
+            //update the right arrow
+            this->arrowRight = status;
+            //exit
+            break;
+        //check if the left arrow key is pressed
+        case SDL_SCANCODE_LEFT:
+            //update the left arrow
+            this->arrowLeft = status;
+            //exit
+            break;
+        //check if the up arrow key is pressed
+        case SDL_SCANCODE_UP:
+            //update the up arrow
+            this->arrowUp = status;
+            //exit
+            break;
+        //check if the down arrow key is pressed
+        case SDL_SCANCODE_DOWN:
+            //update the down arrow
+            this->arrowDown = status;
+            //exit
+            break;
+        //check if the right alt key is pressed
+        case SDL_SCANCODE_RALT:
+            //update the right arrow
+            this->rightAlt = status;
+            //update the alt variable
+            this->alt = (this->rightAlt || this->leftAlt);
+            //exit
+            break;
+        //check if the left alt key is pressed
+        case SDL_SCANCODE_LALT:
+            //update the left arrow
+            this->leftAlt = status;
+            //update the alt variable
+            this->alt = (this->rightAlt || this->leftAlt);
+            //exit
+            break;
     }
 }
 
@@ -572,71 +640,29 @@ Mouse::Mouse()
 }
 
 //update the mouse pressed buttons
-void Mouse::update(int button, int state, int, int)
+void Mouse::update(int button, int state)
 {
     //check if the inputed button is the left mouse button
-    if (button == GLUT_LEFT_BUTTON)
+    if (button == SDL_BUTTON_LEFT)
     {
-        //set the key to true if it is pressed
-        if (state == GLUT_DOWN)
-        {
-            this->leftButton = true;
-        }
-        //set the key to false if it is not pressed
-        else if (state == GLUT_UP)
-        {
-            this->leftButton = false;
-        }
+        //store the state
+        this->leftButton = (bool)state;
     }
     //check if the button is the right mouse button
-    else if (button == GLUT_RIGHT_BUTTON)
+    else if (button == SDL_BUTTON_RIGHT)
     {
-        //set the key to true if it is pressed
-        if (state == GLUT_DOWN)
-        {
-            this->rightButton = true;
-        }
-        //set the key to false if it is not pressed
-        else if (state == GLUT_UP)
-        {
-            this->rightButton = false;
-        }
+        //store the state
+        this->rightButton = (bool)state;
     }
     //check if the button is the middle mouse button
-    else if (button == GLUT_MIDDLE_BUTTON)
+    else if (button == SDL_BUTTON_MIDDLE)
     {
-        //set the key to true if it is pressed
-        if (state == GLUT_DOWN)
-        {
-            this->middleButton = true;
-        }
-        //set the key to false if it is not pressed
-        else if (state == GLUT_UP)
-        {
-            this->middleButton = false;
-        }
+        //store the state
+        this->middleButton = (bool)state;
     }
-    //neglate the button up
-    else if (state == GLUT_UP)
+    //if the button is the mouse scroll, scroll by the input
+    else if (button == GLGE_MOUSE_SCROLL)
     {
-        return;
+        this->mouseWeel += state;
     }
-    //if the button is the mouse scroll up, increase the scroll count
-    else if (button == 3)
-    {
-        this->mouseWeel++;
-    }
-    //if the button is the mouse scroll down, decrease the scroll count
-    else if (button == 4)
-    {
-        this->mouseWeel--;
-    }
-}
-
-void Mouse::updatePos(int x, int y)
-{
-    //store the inputed position as the pixel positoin
-    this->posPixel = vec2(x,y);
-    //set the normalised position to the pixel position scaled by the inverse of the screen width & height
-    this->pos = vec2((float)x / (float)glutGet(GLUT_WINDOW_WIDTH), (float )y / (float)glutGet(GLUT_WINDOW_HEIGHT));
 }

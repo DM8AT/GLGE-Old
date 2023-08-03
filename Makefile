@@ -7,7 +7,7 @@ INCLUDE	:= include
 LIB		:= lib
 GLGE    := src/GLGE
 
-LIBRARIES	:= -lGL -lglut -lGLEW
+LIBRARIES	:= -lGL -lGLEW -lSDL2main -lSDL2
 EXECUTABLE	:= main
 
 

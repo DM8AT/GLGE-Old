@@ -13,7 +13,7 @@
 #include "CML/CMLDVec2.h"
 #include "CML/CMLDVec3.h"
 #include "CML/CMLDVec4.h"
-#include "stb_image.hpp"
+#include "glgeImage.h"
 #include "glgeFuncs.hpp"
 #include "CML/CMLVec2.h"
 #include "CML/CMLVec3.h"

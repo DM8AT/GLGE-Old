@@ -1,7 +1,7 @@
 /**
  * @file glgeDefaultFuncs.cpp
  * @author DM8AT
- * @brief Define the functions for FreeGLUT to execute
+ * @brief Define the functions for SDL to execute
  * @version 0.1
  * @date 2023-02-09
  * 
@@ -21,7 +21,6 @@
 //include the OpenGL dependencys
 #include <GL/glew.h>
 #include <GL/glu.h>
-#include <GL/freeglut.h>
 
 //include the needed default librarys
 #include <iostream>
@@ -259,32 +258,29 @@ void glgeDefaultDisplay()
     drawLightingPass();
 
     //update the window
-    glutSwapBuffers();
+    SDL_GL_SwapWindow(glgeMainWindow);
 
     //say that the screen can be re-drawn
     draw = true;
 }
 
 //the default timer function for GLGE
-void glgeDefaultTimer(int)
+void glgeDefaultTimer()
 {
     //stop, if no window exists
-    if (glutGetWindow() == 0)
+    if (!glgeMainWindow)
     {
         return;
     }
-    
-    //initalise the redrawing of the screen
-    glutPostRedisplay();
 
-    //update the time since last tick
-    glgeDeltaTime = (glutGet(GLUT_ELAPSED_TIME) - glgeTickTime);
-    
-    //update the start time of the tick
-    glgeTickTime = glutGet(GLUT_ELAPSED_TIME);
+    //update the time it took for one tick to occure in seconds
+    glgeDeltaTime = (SDL_GetTicks() - glgeTickTime);
 
     //calculate the current frames per second
-    glgeCurrentFPS = 1000/glgeDeltaTime;
+    glgeCurrentFPS = 1.f/((SDL_GetTicks() - glgeTickTime)/1000.f);
+
+    //update the time since last tick
+    glgeTickTime = SDL_GetTicks();
 
     //output all OpenGL errors
     GLenum error;
@@ -304,27 +300,52 @@ void glgeDefaultTimer(int)
         };
     }
 
+    //store the actual window width
+    int w;
+    //store the actual window height
+    int h;
+    //get the window size
+    SDL_GetWindowSize(glgeMainWindow,&w,&h);
+
     //check if the window size is correct
-    if ((glgeWindowSize.x != (float)glutGet(GLUT_WINDOW_WIDTH)) || (glgeWindowSize.y != (float)glutGet(GLUT_WINDOW_HEIGHT)))
+    if ((glgeWindowSize.x != w) || (glgeWindowSize.y != h))
     {
         //check if a window resize is allowed
         if (!glgeAllowWindowResize)
         {
             //if a window resize is not allowed, reshape the window to the inputed valide size
-            glutReshapeWindow(glgeWindowSize.x, glgeWindowSize.y);
+            SDL_SetWindowSize(glgeMainWindow, glgeWindowSize.x, glgeWindowSize.y);
         }
     }
 
+    //store the actual window width
+    int x;
+    //store the actual window height
+    int y;
+    //get the window size
+    SDL_GetWindowPosition(glgeMainWindow,&x,&y);
+
     //check if the window was moved
-    if ((glgeWindowPosition.x != (float)glutGet(GLUT_WINDOW_X)) || (glgeWindowSize.y != (float)glutGet(GLUT_WINDOW_HEIGHT)))
+    if ((glgeWindowPosition.x != x) || (glgeWindowSize.y != y))
     {
         //check if a window moevement is allowed
         if (!glgeAllowWindowMovement)
         {
             //if window movement is not allowed, move the window back
-            glutPositionWindow(glgeWindowPosition.x, glgeWindowPosition.y);
+            SDL_SetWindowPosition(glgeMainWindow,glgeWindowPosition.x, glgeWindowPosition.y);
         }
     }
+
+    //get the active mouse position
+    SDL_GetMouseState(&x,&y);
+
+    //store the mouse position
+    glgeMouse.pos = vec2(x/glgeWindowSize.x,y/glgeWindowSize.y);
+    //store the pixel the mouse is on
+    glgeMouse.posPixel = vec2(x,y);
+
+    //get the current display
+    SDL_GetCurrentDisplayMode(0, &glgeMainDisplay);
 
     //if GLGE has an additional main function, call it
     if(glgeHasMainCallback)
@@ -340,12 +361,22 @@ void glgeDefaultTimer(int)
     //clear the releasd keys
     glgeKeysRelesdThisTick.clear();
 
-    //recall this function so that it is calld {glgeMaxFPS} times a second
-    glutTimerFunc(1000/glgeMaxFPS,glgeDefaultTimer,0);
+    //calculate the time to wait
+    int waitTime = std::floor((1000.f/glgeMaxFPS) - (1000.f/glgeTickTime));
+
+    //check if the wait time is negative
+    if (waitTime < 0)
+    {
+        //if it is, set it to 0
+        waitTime = 0;
+    }
+
+    //limit the framerate
+    SDL_Delay(waitTime);
 }
 
 //default keyboard function
-void glgeDefaultKeyFunc(unsigned char key, int, int)
+void glgeDefaultKeyFunc(int key)
 {
     //check if the key was allready pressed
     if (!glgeKeysRelesdThisTick.getKey(key))
@@ -359,7 +390,7 @@ void glgeDefaultKeyFunc(unsigned char key, int, int)
 }
 
 //default keyboard up function
-void glgeDefaultKeyUpFunc(unsigned char key, int, int)
+void glgeDefaultKeyUpFunc(int key)
 {
     //store wich key is no longer pressed
     glgePressedKeys.keyUpdate(key, false);
@@ -368,43 +399,10 @@ void glgeDefaultKeyUpFunc(unsigned char key, int, int)
     glgeKeysRelesdThisTick.keyUpdate(key, true);
 }
 
-//special keyboard function
-void glgeDefaultSpecKeyFunc(int key, int, int)
-{
-    //check if the key was allready pressed
-    if (!glgeKeysRelesdThisTick.getKey(key))
-    {
-        //store the pressed key in the variable for one tick
-        glgeKeysThisTick.keyUpdate(key, true);
-    }
-
-    //store the pressed key
-    glgePressedKeys.keyUpdate(key, true);
-}
-
-//special keyboard up func
-void glgeDefaultSpecKeyUpFunc(int key, int, int)
-{
-    //store which key is no longer pressed
-    glgePressedKeys.keyUpdate(key, false);
-
-    //store which key is relesd
-    glgeKeysRelesdThisTick.keyUpdate(key, true);
-}
-
-void glgeDefaultMouseFunc(int button, int state, int x, int y)
+void glgeDefaultMouseFunc(int button, int state)
 {
     //update the mouse
-    glgeMouse.update(button, state, x, y);
-
-    //update the mouse positoin
-    glgeMouse.updatePos(x,y);
-}
-
-void glgeDefaultPassiveMotionFunc(int x, int y)
-{
-    //update the mouse positoin
-    glgeMouse.updatePos(x,y);
+    glgeMouse.update(button, state);
 }
 
 void glgeDefaultResizeFunc(int width, int height)

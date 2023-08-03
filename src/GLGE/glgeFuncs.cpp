@@ -24,9 +24,11 @@
 #include <fstream>
 #include <cstring>
 
+//include acess to images
+#include "glgeImage.h"
+
 //include the OpenGL dependencys
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 
 //read a file
 bool readFile(const char* filename, std::string& output)
@@ -379,11 +381,57 @@ void createWindow(const char* n, vec2 s, vec2 p)
         };
     }
     //if no error occured, create the window
-    glutInitWindowSize(s.x,s.y);
-    glutInitWindowPosition(p.x,p.y);
-    glutCreateWindow(n);
-    //say that the program should continue running after the window was closed
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+
+    //initalise SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        //if sdl throws an value different than 0, print an error
+        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << std::endl;
+        //exit with an error
+        exit(1);
+    }
+
+    //initalise to OpenGL 3.0
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    //say that doublebuffering should be used
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    //set the depth accuarcy
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+    //store the SDL Window
+    SDL_Window* window;
+    //create an window using SDL2
+    window = SDL_CreateWindow(n, p.x, p.y, s.x, s.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+
+    //disable VSync
+    SDL_GL_SetSwapInterval(0);
+
+    //check if the window could be created
+    if (!window)
+    {
+        //if the window couldn't be created, throw an fatal error
+        std::cerr << "[FATAL ERROR] GLGE couldn't create the SDL main window. SDL error: " << SDL_GetError() << std::endl;
+        //exit with an error
+        exit(1);
+    }
+
+    //store the SDL Context
+    SDL_GLContext context;
+    //get the OpenGL context from the window
+    context = SDL_GL_CreateContext(window);
+
+    //check if the context is valide
+    if (context == NULL)
+    {
+        //if the context is not valide, print an fatal error
+        std::cerr << "[FATAL ERROR] GLGE could not create a OpenGL Context to the SDL Window. SDL Error: " << SDL_GetError() << std::endl;
+        //close SDL
+        SDL_Quit();
+        //exit with an error
+        exit(1);
+    }
 
     //initalise glew
     if (glewInit() != GLEW_OK)
@@ -404,30 +452,13 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //say that an window was created
     glgeHasMainWindow = true;
 
+    //store the window pointer
+    glgeMainWindow = window;
+
     //store the size of the window
     glgeWindowSize = s;
     //store the position of the window
     glgeWindowPosition = p;
-
-    //bind the window update function
-    glutDisplayFunc(glgeDefaultDisplay);
-    //bind the timer function
-    glutTimerFunc(0, glgeDefaultTimer, 0);
-    //bind the keyboard down and up function
-    glutKeyboardFunc(glgeDefaultKeyFunc);
-    glutKeyboardUpFunc(glgeDefaultKeyUpFunc);
-    //bind the keyboard down and up function for special keys
-    glutSpecialFunc(glgeDefaultSpecKeyFunc);
-    glutSpecialUpFunc(glgeDefaultSpecKeyUpFunc);
-    //bind the mouse update functions
-    glutMouseFunc(glgeDefaultMouseFunc);
-    glutPassiveMotionFunc(glgeDefaultPassiveMotionFunc);
-    //the motion func is the same as the passive motion, the mouse clicks are handled independendly
-    glutMotionFunc(glgeDefaultPassiveMotionFunc);
-    //this function is called if the window is resized to resize everything according to the new size
-    glutReshapeFunc(glgeDefaultResizeFunc);
-    //bind a function to be called if the window is moved
-    glutMotionFunc(glgeDefaultMoveFunc);
 
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);
@@ -811,4 +842,86 @@ void resizeWindow(int width, int height)
 
     //update the OpenGL viewport
     glViewport(0,0, width,height);
+}
+
+SDL_Surface* loadImage(const char* file)
+{
+    //check if the file exists
+    //start an ifstream with the file
+    std::fstream f;
+    //open the inputed file
+    f.open(file);
+    //check if the file is good
+    bool exists = f.good();
+    //close the file
+    f.close();
+    //if the file dosn't exist
+    if (!exists)
+    {
+        //print a warning message
+        if (glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_FILE_NOT_FOUND, file);
+        }
+        //check if the program should close
+        if (glgeExitOnError)
+        {
+            //if it should, close with an error
+            exit(1);
+        }
+    }
+
+    //tutorial to the image loading function: https://www.silbinarywolf.com/post/124379907558/loading-png-files-with-stbimage-and-sdl2
+    //store the width of the image
+    int w;
+    //store the height of the image
+    int h;
+    //store how
+    int bytesPerPixel;
+
+    //load the inputed file
+    unsigned char* data = glgeLoad(file, &w, &h, &bytesPerPixel);
+
+    //Store the pitch of the image
+	int pitch;
+    //Calculate pitch
+    pitch = w * bytesPerPixel;
+    pitch = (pitch + 3) & ~3;
+    
+    // Setup relevance bitmask
+	int Rmask, Gmask, Bmask, Amask;
+    #if SDL_BYTEORDER == SDL_LIL_ENDIAN
+        Rmask = 0x000000FF;
+        Gmask = 0x0000FF00;
+        Bmask = 0x00FF0000;
+        Amask = (bytesPerPixel == 4) ? 0xFF000000 : 0;
+    #else
+        int s = (bytesPerPixel == 4) ? 0 : 8;
+        Rmask = 0xFF000000 >> s;
+        Gmask = 0x00FF0000 >> s;
+        Bmask = 0x0000FF00 >> s;
+        Amask = 0x000000FF >> s;
+    #endif
+    
+    //load the image to an SDL Surface
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(data, w, h, bytesPerPixel*8, pitch, Rmask, Gmask, Bmask, Amask);
+
+    //check if the surface loaded successfull
+    if (!surface)
+    {
+        //clear the data
+        glgeImageFree(data);
+
+        //check if GLGE should print an warning
+        if (glgeWarningOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE WARNING] failed to create SDL_Surface from fiel " << file << std::endl;
+        }
+
+        //return 0
+        return NULL;
+    }
+    //if the surface construction was sucessfull, return the surface
+    return surface;
 }

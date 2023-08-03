@@ -22,6 +22,17 @@
 //include the glew library
 #include <GL/glew.h>
 
+//include SDL2
+#ifdef _WIN32
+#include <SDL/SDL.h> /* Windows-specific SDL2 library */
+#include <SDL/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#else
+#include <SDL2/SDL.h> /* macOS- and GNU/Linux-specific */
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#endif
+
 /**
  * @brief Create a Window
  * 
@@ -119,5 +130,13 @@ int count_char(std::string &str, char ch);
  * @param height the new height for the window
  */
 void resizeWindow(int width, int height);
+
+/**
+ * @brief load a file to an SDL_Surface
+ * 
+ * @param file the path to the file to load
+ * @return SDL_Surface* a pointer to an SDL_Surface
+ */
+SDL_Surface* loadImage(const char* file);
 
 #endif

@@ -27,6 +27,17 @@
 #include <vector>
 #include <ctime>
 
+//include SDL2
+#ifdef _WIN32
+#include <SDL/SDL.h> /* Windows-specific SDL2 library */
+#include <SDL/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#else
+#include <SDL2/SDL.h> /* macOS- and GNU/Linux-specific */
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_misc.h>
+#endif
+
 ///////////
 //CLASSES//
 ///////////
@@ -40,6 +51,18 @@ extern const char* glgePresets[];
 /////////////////////
 //Private Variables//
 /////////////////////
+
+//store the application window
+extern SDL_Window* glgeMainWindow;
+
+//store the OpenGL context to the main window
+extern SDL_GLContext glgeMainContext;
+
+//store the display mode
+extern SDL_DisplayMode glgeMainDisplay;
+
+//store the true window size
+extern vec2 glgeTrueWindowSize;
 
 //store the clear color
 extern vec4 glgeClearColor;
@@ -257,5 +280,8 @@ extern vec2 glgeWindowPosition;
 
 //say if it is allowed to move the window
 extern bool glgeAllowWindowMovement;
+
+//store the opperating system the application is compiled for
+extern int glgeOperatingSystem;
 
 #endif
