@@ -64,9 +64,8 @@ Upcoming features that may be added to GLGE in the future include:
 - added funktions for handeling fullscreen mode
 - added access to keys that where toggled (bools only true if the key is pressed this tick)
 - added a function to resize the window trough code, if parameter force is true, it can be used if the window size is locked
-- the window size now can be locked, disabeling all user window size controll
+- the window size and position can now be locked, disabeling all user window size and position controll
 - the window can be positiond trough code after it was initalised
-- the window position cna be loced, disabeling all user window position controll
 ### Update 0.11-6
 - changed HDR from lighting pass to post-processing pass
 ### Update 0.11-5
