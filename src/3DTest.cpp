@@ -57,7 +57,7 @@ Light l2;
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
 //set the mouse sensetivity
-float mouseSensetivity = 0.2f;
+float mouseSensetivity = 20.f;
 
 //say if the mouse is currently locked to the screen
 bool isActive = true;
@@ -151,10 +151,34 @@ void tick()
     if (isActive)
     {
         //rotate the camera by the mouse position
-        camera.rotate(-(glgeGetMouse().pos.x-0.5f) * mouseSensetivity * glgeGetDeltaTime(), -((glgeGetMouse().pos.y-0.5f) * mouseSensetivity * glgeGetDeltaTime()), 0);
+        camera.rotate((-(glgeGetMouse().pos.x-0.5f)/glgeGetDeltaTime())*mouseSensetivity, (-((glgeGetMouse().pos.y-0.5f))/glgeGetDeltaTime())*mouseSensetivity, 0);
     }
     //clamp the camera rotation on the y axis
     camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
+    
+    //if the cursor is clicked and not locked to the window, lock it to the window
+    if (glgeGetMouse().leftButton && !isActive)
+    {
+        glgeSetCursor(GLGE_CURSOR_STYLE_NONE);
+        isActive = true;
+    }
+
+    //if the e key is pressed while the mouse is locked, unlock it
+    if (glgeGetToggledKeys().e && isActive)
+    {
+        glgeSetCursor(GLGE_CURSOR_STYLE_DEFAULT);
+        isActive = false;
+    }
+
+    //if the mouse is locked, move it to 0,0
+    if (isActive)
+    {
+        //check first if the pointer is not allready at 0,0
+        if ((glgeGetMouse().posPixel.x != (glgeGetWindowSize().x/2)) || (glgeGetMouse().posPixel.y != (glgeGetWindowSize().y/2)))
+        {
+            glgeWarpPointer(0,0);
+        }
+    }
 
     //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
     camSpeed += (float)glgeGetMouse().mouseWeel / (float)1000;
@@ -194,28 +218,8 @@ void tick()
     //update the wall
     wall.update();
 
-    //if the cursor is clicked and not locked to the window, lock it to the window
-    if (glgeGetMouse().leftButton && !isActive)
-    {
-        glgeSetCursor(GLGE_CURSOR_STYLE_NONE);
-        isActive = true;
-    }
-
-    //if the e key is pressed while the mouse is locked, unlock it
-    if (glgeGetToggledKeys().e && isActive)
-    {
-        glgeSetCursor(GLGE_CURSOR_STYLE_DEFAULT);
-        isActive = false;
-    }
-
-    //if the mouse is locked, move it to 0,0
-    if (isActive)
-    {
-        glgeWarpPointer(0,0);
-    }
-
     //set the position of the light source to be exactly at the player
-    light.setPos(camera.getPos());
+    //light.setPos(camera.getPos());
 
     //write the current FPS as the window title
     glgeSetWindowTitle(std::string("3D example script for GLGE : " + std::to_string(glgeGetCurrentFPS())).c_str());
@@ -338,8 +342,9 @@ void cubeSetup()
     cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.01,2),vec3(0,0,0),1));
 
     //create a material for the cube
-    //Material cubeMaterial = Material("assets/cubeTexture.png", "Texture", 0.1);
-    Material cubeMaterial = Material(glgeGetLastFrame(), "Texture", 0.1);
+    Material cubeMaterial = Material(glgeGetLastFrame(), "Texture", 0);
+    //set it to unlit
+    cubeMaterial.setLit(false);
 
     //apply the material to the cube
     cube.setMaterial(cubeMaterial);
@@ -452,19 +457,29 @@ void run3Dexample(int argc, char** argv)
     //set the post processing shader to invert the colors
     //glgeSetPostProcessingShader(pps.getShader());
 
-    //Normaly, backface culling is enabled. But because my demo project is not that big, I decided to deactivate it
-    glgeDisableBackfaceCulling();
+    //Normaly, backface culling is enabled. But it can be disabled using the following function:
+    //glgeDisableBackfaceCulling();
 
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
+    glgeSetLightingShader("src/GLGE/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
     glgeSetPostProcessingShader("src/testPostProcessingShader.fs");
 
-    //set the FPS limit (Base Limit = 60)
-    glgeSetMaxFPS(70);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
+    
+    //set a skybox, this reverses the use of a clear color, but I wanted to show how it works
+    glgeSetSkybox("assets/skybox/top.jpg",
+                  "assets/skybox/bottom.jpg",
+                  "assets/skybox/left.jpg",
+                  "assets/skybox/right.jpg",
+                  "assets/skybox/front.jpg",
+                  "assets/skybox/back.jpg");
+
+    //set the FPS limit (Base Limit = 60)
+    glgeSetMaxFPS(70);
 
     //the binding of an display function is here optional, because an default function is allready created behind the scens. But it is recomended if something
     //like drawing an object should be used
@@ -501,7 +516,7 @@ void run3Dexample(int argc, char** argv)
     l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
     glgeAddGlobalLighSource(&l2);
 
-    light = Light(2,5,0, 1,1,1, 250);
+    light = Light(10,5,0, 1,1,1, 250);
     glgeAddGlobalLighSource(&light);
 
     //disable the mouse pointer

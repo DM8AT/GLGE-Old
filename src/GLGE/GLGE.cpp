@@ -277,6 +277,17 @@ void glgeRunMainLoop()
                     glgeDefaultMouseFunc(event.button.button, GLGE_MOUSE_BUTTON_RELEASE);
                     //jump to the next event
                     break;
+                case SDL_MOUSEMOTION:
+                    //create two integers to store the mouse position
+                    int x,y;
+                    //get the active mouse position
+                    SDL_GetMouseState(&x,&y);
+                    //store the mouse position
+                    glgeMouse.pos = vec2(float(x) / glgeWindowSize.x, float(y) / glgeWindowSize.y);
+                    //store the pixel the mouse is on
+                    glgeMouse.posPixel = vec2(x,y);
+                    //jump to the next event
+                    break;
                 case SDL_MOUSEWHEEL:
                     //handle the mouse scrolling
                     glgeDefaultMouseFunc(GLGE_MOUSE_SCROLL, event.wheel.y);
@@ -359,8 +370,8 @@ void glgeSetClearColor(float r, float g, float b, bool normalise)
     //store the clear color
     glgeClearColor = vec4(r,g,b,1.f);
 
-    //finaly, set the clear color
-    glClearColor(r,g,b,1.f);
+    //disable the skybox
+    glgeUseSkybox = false;
 }
 
 //second function to set the clear color
@@ -411,8 +422,8 @@ void glgeSetClearColor(vec3 color, bool normalise)
     //store the clear color
     glgeClearColor = vec4(color.x,color.y,color.z,1.f);
 
-    //finaly, set the clear color
-    glClearColor(color.x,color.y,color.z,1.f);
+    //disable the skybox
+    glgeUseSkybox = false;
 }
 
 //thired function to set the clear color
@@ -463,8 +474,134 @@ void glgeSetClearColor(vec4 color, bool normalise)
     //store the clear color
     glgeClearColor = vec4(color.x,color.y,color.z,1.f);
 
-    //finaly, set the clear color
-    glClearColor(color.x,color.y,color.z,1.f);
+    //disable the skybox
+    glgeUseSkybox = false;
+}
+
+void glgeSetSkybox(const char* top, const char* bottom, const char* left, const char* right, const char* front, const char* back)
+{
+    //variables to store the image data
+    //the image width
+    int width;
+    //the image height
+    int height;
+    //the amount of channels in the image
+    int nrChannels;
+    //the image data
+    unsigned char *data;
+
+    //activate the first texture unit
+    glActiveTexture(GL_TEXTURE0);
+    //create a new skybox texture
+    glGenTextures(1, &glgeSkyboxCube);
+    //store the texture mode
+    GLint texMode = GL_RGB;
+    //bind the texture as a cube map
+    glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
+    //load the top image
+    data = glgeLoad(top, &width, &height, &nrChannels);
+    //check if the width is valide
+    if (width > GL_MAX_TEXTURE_SIZE)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << width << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << std::endl;
+        }
+        //check if GLGE should crash on an error
+        if (glgeExitOnError)
+        {
+            //close the program with an error
+            exit(1);
+        }
+    }
+    //check if the height is valide
+    if (height > GL_MAX_TEXTURE_SIZE)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << height << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << std::endl;
+        }
+        //check if GLGE should crash on an error
+        if (glgeExitOnError)
+        {
+            //close the program with an error
+            exit(1);
+        }
+    }
+    //check if a alpha channel exists
+    if (nrChannels == 4)
+    {
+        //set the texture mode to also use an alpha channel
+        texMode = GL_RGBA;
+    }
+    else
+    {
+        //set the texture mode to only rgb
+        texMode = GL_RGB;
+    }
+    //load the image to y-positive
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 
+                0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+    //load the bottom image
+    data = glgeLoad(bottom, &width, &height, &nrChannels);
+    //load the image to y-negative
+    glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 
+        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+    //load the left image
+    data = glgeLoad(left, &width, &height, &nrChannels);
+    //load the image to x-negative
+    glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 
+        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+    //load the right image
+    data = glgeLoad(right, &width, &height, &nrChannels);
+    //load the image to x-positive
+    glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X, 
+        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+    //load the front image
+    data = glgeLoad(front, &width, &height, &nrChannels);
+    //load the image to z-positive
+    glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 
+        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+    //load the back image
+    data = glgeLoad(back, &width, &height, &nrChannels);
+    //load the image to z-negative
+    glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 
+        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
+    //clear the texture data
+    glgeImageFree(data);
+
+    //set the default texture parameters
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glgeWrapingMode);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glgeWrapingMode);
+    //but watch out to set them to 3D
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    //say that the skybox is active
+    glgeUseSkybox = true;
 }
 
 //bind a display func callback
@@ -596,6 +733,9 @@ void glgeSetMaxFPS(int fps)
             exit(1);
         };
     }
+
+    //update the swap interval for SDL to imediate updates
+    SDL_GL_SetSwapInterval(0);
 
     //set the maximal frames per second
     glgeMaxFPS = fps;
@@ -783,7 +923,7 @@ GLint glgeGetUniformVar(GLuint program, const char* name)
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
         }
         //return 0
-        return 0;
+        return -1;
     }
     //if no error occured, return the id of the uniform variable
     return ret;
@@ -1385,7 +1525,7 @@ void glgeSetFullscreenMode(bool isFullscreen)
         //set the screen size to the complete screen
         SDL_SetWindowSize(glgeMainWindow, glgeTrueWindowSize.x, glgeTrueWindowSize.y);
         //resize everything
-        glgeDefaultResizeFunc(glgeMainDisplay.w, glgeMainDisplay.h);
+        glgeDefaultResizeFunc(glgeTrueWindowSize.x, glgeTrueWindowSize.y);
 
     }
 }

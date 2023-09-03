@@ -54,6 +54,11 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+### Update 0.12-2
+- disabled VSync, custom FPS work again
+- added option for unlit materials as a material property
+- added cubemaps for skyboxes
+- removed mouse lag from demo
 ### Update 0.12-1
 - reversed update log order
 - Switched from FreeGLUT to SDL2 as background lib

@@ -190,6 +190,9 @@ void Material::applyShader(GLuint shader)
     //get the location of the metalic variable
     this->metalicLoc = glgeGetUniformVar(shader, "metalic");
 
+    //get the location of the lit parameter
+    this->litLoc = glgeGetUniformVar(shader, "lit");
+
     //get the location of the color
     this->colorLoc = glgeGetUniformVar(shader, this->colorUniform);
 
@@ -256,43 +259,49 @@ void Material::setUniformName(const char* name, unsigned int item)
 int Material::applyMaterial()
 {
     //pass the color of the material
-    if (this->colorLoc != 0)
+    if (this->colorLoc != -1)
     {
         glUniform4f(this->colorLoc, this->color.x, this->color.y, this->color.z, this->color.w);
     }
 
     //pass the roughness to the material
-    if (this->roughnessLoc != 0)
+    if (this->roughnessLoc != -1)
     {
         glUniform1f(this->roughnessLoc, roughness);
     }
 
+    //pass the lit parameter to the shader
+    if (this->litLoc != -1)
+    {
+        glUniform1i(this->litLoc, (int)lit);
+    }
+
     //pass the metalic value to the material
-    if (this->metalicLoc != 0)
+    if (this->metalicLoc != -1)
     {
         glUniform1f(this->metalicLoc, metal);
     }
 
     //pass if a normal map is bound, but only if the uniform exists
-    if (this->normIsActivLoc != 0)
+    if (this->normIsActivLoc != -1)
     {
         glUniform1i(this->normIsActivLoc, (int) this->normalMapLoc!=-1);
     }
 
     //pass if a roughness map is bound, but only if the uniform exists
-    if (this->roughIsActivLoc != 0)
+    if (this->roughIsActivLoc != -1)
     {
         glUniform1i(this->roughIsActivLoc, (int) this->roughnessMapLoc!=-1);
     }
 
     //pass if a height map is bound, but only if the uniform exists
-    if (this->highIsActiveLoc != 0)
+    if (this->highIsActiveLoc != -1)
     {
         glUniform1i(this->highIsActiveLoc, (int) this->heightMapLoc!=-1);
     }
 
     //pass the amount of textures to the shader, but only if the uniform exists
-    if (this->usedLoc != 0)
+    if (this->usedLoc != -1)
     {
         glUniform1i(this->usedLoc, (int)this->textures.size());
     }
@@ -344,4 +353,10 @@ void Material::removeMaterial()
     }
     //clear the bound textures
     this->boundTextures.clear();
+}
+
+void Material::setLit(bool l)
+{
+    //store the lit parameters
+    this->lit = l;
 }

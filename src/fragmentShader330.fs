@@ -59,7 +59,8 @@ void main()
     gl_FragData[0] = col;
     gl_FragData[1] = vec4(n,1);
     gl_FragData[2] = vec4(currentPos, 1);
-    gl_FragData[3] = vec4(rough,0,0,1);
+    //watch out: the b chanell of the roughness map says if the object sould be lit or unlit: 1 is lit; 0 is unlit
+    gl_FragData[3] = vec4(rough,0,1,1);
 
     gl_FragDepth = gl_FragCoord.z;
 }

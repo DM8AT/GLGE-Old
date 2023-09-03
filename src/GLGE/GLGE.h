@@ -201,6 +201,18 @@ void glgeSetClearColor(vec3 color, bool normalise = false);
 void glgeSetClearColor(vec4 color, bool normalise = false);
 
 /**
+ * @brief load a cube map as a skybox
+ * 
+ * @param top the top image for the skybox
+ * @param bottom the bottom image for the skybox
+ * @param left the left image for the skybox
+ * @param right the right image for the skybox
+ * @param front the front image for the skybox
+ * @param back the back image for the skybox
+ */
+void glgeSetSkybox(const char* top, const char* bottom, const char* left, const char* right, const char* front, const char* back);
+
+/**
  * @brief input a function that should be called every time the window refreshes
  * 
  * the function is called betwean the clearing and refreshing of the window, this dosn't need to be done manualy

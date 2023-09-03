@@ -157,7 +157,7 @@ GLint getUniformVar(GLuint program, const char* name)
             //say where the error occured
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
         }
-        //return a pointer to 0
+        //return -1
         return -1;
     }
     //if no error occured, return the id of the uniform variable
@@ -303,6 +303,17 @@ void getDefaultUniformsFromPostProcessingShader()
     //get the main image variable from the shader
     glgeMainImageInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeMainImage");
 
+    //disable the error output
+    glgeSetErrorOutput(false);
+    //get the position map from the post processing shader
+    glgeAlbedoInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeAlbedoMap");
+    //get the position map from the post processing shader
+    glgeNormalInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeNormalMap");
+    //get the position map from the post processing shader
+    glgePositionInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgePositionMap");
+    //get the position map from the post processing shader
+    glgeRoughnessInPPS = glgeGetUniformVar(glgePostProcessingShader, "glgeRoughnessMap");
+
     //reset the glge error output
     glgeSetErrorOutput(glgeErr);
 
@@ -338,6 +349,10 @@ bool getUniformsForLightingShader()
     glgeCamPosInLightingPass = getUniformVar(glgeLightingShader, "glgeCameraPos");
     //get the uniform for the far plane
     glgeFarPlaneInLightingPass = getUniformVar(glgeLightingShader, "glgeFarPlane");
+    //get the camera rotation matrix in the lighting shader
+    glgeRotInLightingPass = getUniformVar(glgeLightingShader, "glgeCameraRot");
+    //get the camera projection matrix in the lighting shader
+    glgeProjInLightingPass = getUniformVar(glgeLightingShader, "glgeProject");
     //reset the error output
     glgeSetErrorOutput(error);
 
@@ -687,20 +702,77 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //get the uniform for the screen texture in the post processing shader
     glUniform1i(glGetUniformLocation(glgePostProcessingShader, "glgeMainImage"), 0);
 
-
-    //store the status of the glge error output
-    bool err = glgeErrorOutput;
-    //disable the error output
-    glgeErrorOutput = false;
-
-    //reset the error output
-    glgeErrorOutput = err;
-
-    //create the shader for shadow mapping
-    glgeShadowShader = Shader();
-
     //load the default lighting shader
     glgeSetLightingShader(GLGE_DEFAULT_LIGHTING_SHADER);
+
+    //create an cube of size 1
+    float skyboxVerts[] = 
+    {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f
+    };
+
+    //create two buffers, one vertex array and one array buffer
+    glGenVertexArrays(1, &glgeSkyboxBuffer);
+    glGenBuffers(1, &glgeSkyboxBuffer);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, glgeSkyboxBuffer);
+    //load the data into the array buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVerts), &skyboxVerts, GL_STATIC_DRAW);
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+    //generate the shaders for the default lighting shader
+    glgeSkyboxShader = glgeCompileShader(GLGE_DEFAULT_VERTEX_SKYBOX, GLGE_DEFAULT_FRAGMENT_SKYBOX);
+
+    //get the uniforms
+    //get the rotation uniform
+    glgeSkyboxRotation = getUniformVar(glgeSkyboxShader, "glgeRot");
+    //get the projection uniform
+    glgeSkyboxProject = getUniformVar(glgeSkyboxShader, "glgeProject");
+    //get the sampler
+    glgeSkyboxSampler = getUniformVar(glgeSkyboxShader, "glgeSkybox");
 }
 
 //convert an error code into an string

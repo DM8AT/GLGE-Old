@@ -51,7 +51,7 @@ void drawLightingPass()
     glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
 
     //set the clear color to black
-    glClearColor(-2,-2,-2,0);
+    glClearColor(0,0,0,0);
 
     //clear the other buffers
     glClear(GL_COLOR_BUFFER_BIT);
@@ -68,12 +68,55 @@ void drawLightingPass()
         ((void(*)())glgeDisplayCallback)();
     }
 
+    //switch the depth function to greater equal
+    glDepthFunc(GL_GEQUAL);
+    //switch the order of the backface culling
+    glCullFace(GL_FRONT);
+
+    //draw the skybox
+    //switch to the skybox shader
+    glUseProgram(glgeSkyboxShader);
+    //bind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, glgeSkyboxBuffer);
+    //activate the vertex attribute for the position
+    glEnableVertexAttribArray(0);
+    //load the position into the shader
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    //push the projection matrix to the shader
+    glUniformMatrix4fv(glgeSkyboxProject, 1, GL_FALSE, glgeMainCamera->getProjectionMatrixPointer());
+    //push the rotation to the shader
+    glUniformMatrix4fv(glgeSkyboxRotation, 1, GL_FALSE, glgeMainCamera->getRotMatPointer());
+    //activate the first texture unit
+    glActiveTexture(GL_TEXTURE0);
+    //bind the skybox
+    glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
+
+    //draw the skybox
+    glDrawArrays(GL_TRIANGLES, 0, 108/3);
+
+    //unbind the skybox texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    //unbind the vertex attribute
+    glDisableVertexAttribArray(0);
+    //unbind the shader
+    glUseProgram(0);
+    //unbind the buffers
+    //unbind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //unbind the IBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //switch the depth buffer back
+    glDepthFunc(GL_GREATER);
+
     //switch to the lighting framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, glgeLightingFBO);
 
     //clear the frame buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
+    //switch the order of the backface culling to the correct order
+    glCullFace(GL_BACK);
     //disable depth testing
     glDisable(GL_DEPTH_TEST);
 
@@ -98,6 +141,8 @@ void drawLightingPass()
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
         //activate the uniform texture array
         glActiveTexture(GL_TEXTURE0);
+        //clear the cube map texture (just for safty, can't have cube map and 2D at the same time)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         //bind the framebuffer texture
         glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
         //activate the second texture unit
@@ -129,6 +174,10 @@ void drawLightingPass()
             glUniform3f(glgeCamPosInLightingPass, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
             //pass the far plane
             glUniform1f(glgeFarPlaneInLightingPass, glgeMainCamera->getFarPlane());
+            //bind the camera rotation
+            glUniform3f(glgeRotInLightingPass, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeToRadians(180));
+            //bind the camera projection matrix
+            glUniformMatrix4fv(glgeProjInLightingPass, 1, false, glgeMainCamera->getProjectionMatrixPointer());
         }
         //pass all the lights to the shader
         //load all light positions to the shader
@@ -151,9 +200,10 @@ void drawLightingPass()
         }
         //pass the amount of active lights
         glUniform1i(glgeActiveLightInLightingPass, (int)glgeLights.size());
-
+        
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
         //unbind the normal texture
         glBindTexture(GL_TEXTURE_2D, 0);
         //activate the thired texture unit
@@ -207,12 +257,61 @@ void drawLightingPass()
     glEnableVertexAttribArray(1);
     //load the texture coordinate into the shader
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    //activate the uniform texture array
-    glActiveTexture(GL_TEXTURE0);
-    //bind the framebuffer texture
-    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
-    //pass the uniform to the framebuffer
-    glUniform1i(glgeMainImageInPPS,0);
+
+    //check if the main image should be bound
+    if (!(glgeMainImageInPPS == -1))
+    {
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE0);
+        //bind the framebuffer texture
+        glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
+        //pass the uniform to the framebuffer
+        glUniform1i(glgeMainImageInPPS,0);
+    }
+    //check if the albedo map should be bound
+    if (!(glgeAlbedoInPPS == -1))
+    {
+        //if the map should be bound
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE1);
+        //bind the albeod texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
+        //pass the uniform to the framebuffer
+        glUniform1i(glgeAlbedoInPPS,1);
+    }
+    //check if the albedo map should be bound
+    if (!(glgeNormalInPPS == -1))
+    {
+        //if the map should be bound
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE2);
+        //bind the albeod texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
+        //pass the uniform to the framebuffer
+        glUniform1i(glgeNormalInPPS,2);
+    }
+    //check if the albedo map should be bound
+    if (!(glgePositionInPPS == -1))
+    {
+        //if the map should be bound
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE3);
+        //bind the albeod texture
+        glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
+        //pass the uniform to the framebuffer
+        glUniform1i(glgePositionInPPS,3);
+    }
+    //check if the albedo map should be bound
+    if (!(glgeRoughnessInPPS == -1))
+    {
+        //if the map should be bound
+        //activate the uniform texture array
+        glActiveTexture(GL_TEXTURE4);
+        //bind the albeod texture
+        glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
+        //pass the uniform to the framebuffer
+        glUniform1i(glgeRoughnessInPPS,4);
+    }
 
     //draw the screen
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -238,6 +337,22 @@ void drawLightingPass()
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    //bind the fourth texture unit
+    glActiveTexture(GL_TEXTURE3);
+    //bind the fourth texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //bind the thired texture unit
+    glActiveTexture(GL_TEXTURE3);
+    //bind the thired texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //bind the second texture unit
+    glActiveTexture(GL_TEXTURE2);
+    //bind the second texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //bind the first texture unit
+    glActiveTexture(GL_TEXTURE1);
+    //bind the first texture
+    glBindTexture(GL_TEXTURE_2D, 0);
     //bind the default texture unit
     glActiveTexture(GL_TEXTURE0);
     //bind the default texture
@@ -259,6 +374,8 @@ void glgeDefaultDisplay()
 
     //update the window
     SDL_GL_SwapWindow(glgeMainWindow);
+    //finish the OpenGL operation
+    glFinish();
 
     //say that the screen can be re-drawn
     draw = true;
@@ -282,6 +399,8 @@ void glgeDefaultTimer()
     //update the time since last tick
     glgeTickTime = SDL_GetTicks();
 
+    //check if an error occured
+    bool err = false;
     //output all OpenGL errors
     GLenum error;
     //loop over all errors
@@ -290,15 +409,27 @@ void glgeDefaultTimer()
         //output the error and connect it to the OpenGL error
         if(glgeErrorOutput)
         {
-            printf(GLGE_ERROR_OPEN_GL_ERROR, getGLErrorString(error));
+            //check if an error allready occured
+            if (err)
+            {
+                //if it did, only print the openGL error message
+                printf("%s\n", getGLErrorString(error));
+            }
+            else
+            {
+                //print the compleate error message
+                printf(GLGE_ERROR_OPEN_GL_ERROR, getGLErrorString(error));
+            }
         }
-        //stop the script
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
+        //say that an error occured
+        err = true;
     }
+    //stop the script if an error occured an GLGE is supposed to
+    if (glgeExitOnError && err)
+    {
+        //only exit the program if glge is tolled to exit on an error
+        exit(1);
+    };
 
     //store the actual window width
     int w;
@@ -335,14 +466,6 @@ void glgeDefaultTimer()
             SDL_SetWindowPosition(glgeMainWindow,glgeWindowPosition.x, glgeWindowPosition.y);
         }
     }
-
-    //get the active mouse position
-    SDL_GetMouseState(&x,&y);
-
-    //store the mouse position
-    glgeMouse.pos = vec2(x/glgeWindowSize.x,y/glgeWindowSize.y);
-    //store the pixel the mouse is on
-    glgeMouse.posPixel = vec2(x,y);
 
     //get the current display
     SDL_GetCurrentDisplayMode(0, &glgeMainDisplay);

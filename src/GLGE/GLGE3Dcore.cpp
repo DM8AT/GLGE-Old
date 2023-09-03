@@ -1428,6 +1428,36 @@ float Camera::getFarPlane()
     return this->far;
 }
 
+float* Camera::getRotMatPointer()
+{
+    //return a pointer to the rotation matrix
+    return &this->rotMat.m[0][0];
+}
+
+float* Camera::getProjectionMatrixPointer()
+{
+    //return a pointer to the rotation matrix
+    return &this->projectionMatrix.m[0][0];
+}
+
+float* Camera::getTransformMatPointer()
+{
+    //return a pointer to the transformation matrix
+    return &this->transMat.m[0][0];
+}
+
+float* Camera::getViewMatrixPointer()
+{
+    //return a pointer to the view matrix
+    return &this->viewMatrix.m[0][0];
+}
+
+mat4 Camera::getViewMatrix()
+{
+    //return the view matrix
+    return this->viewMatrix;
+}
+
 //PRIVATE
 
 void Camera::calculateViewMatrix()
@@ -1477,6 +1507,8 @@ void Camera::calculateViewMatrix()
                           0,0,1,-transf.pos.z,
                           0,0,0,1);
 
+    //store the complete view matrix
+    this->viewMatrix = this->transMat*this->rotMat;
 }
 
 mat4 Camera::calculateProjectionMatrix()

@@ -140,7 +140,7 @@ extern unsigned int glgeFrameNormalMap;
 //store the fragment position in a texture
 extern unsigned int glgeFramePositionMap;
 
-//store the roughness in a texture
+//store the roughness in a texture r=roughness, g=metalness, b=unlit
 extern unsigned int glgeFrameRoughnessMap;
 
 //store the renderd image
@@ -188,6 +188,33 @@ extern int glgeCamPosInLightingPass;
 //store the position of the far plane uniform in the Lighting Pass shader
 extern int glgeFarPlaneInLightingPass;
 
+//store the rotation matrix in the lighting shader
+extern int glgeRotInLightingPass;
+
+//pass the projection matrix to the lighting shader
+extern int glgeProjInLightingPass;
+
+//store if the skybox is active
+extern bool glgeUseSkybox;
+
+//store the skybox in an cube map
+extern unsigned int glgeSkyboxCube;
+
+//store the geometry for the skybox
+extern unsigned int glgeSkyboxBuffer;
+
+//store the shader for the skybox
+extern unsigned int glgeSkyboxShader;
+
+//store the sampler in the skybox shader
+extern int glgeSkyboxSampler;
+
+//store the rotation in the skybox shader
+extern int glgeSkyboxRotation;
+
+//store the projection matrix in the skybox
+extern int glgeSkyboxProject;
+
 //store the active color buffers
 extern GLenum glgeUsedColorBuffers[];
 
@@ -220,6 +247,18 @@ extern int glgePostProcessingShader;
 
 //store the main image in the post processing shader
 extern int glgeMainImageInPPS;
+
+//store the position of the uniform for the albedo map in the post processing shader
+extern int glgeAlbedoInPPS;
+
+//store the position of the uniform for the normal map in the post processing shader
+extern int glgeNormalInPPS;
+
+//store the position of the uniform for the position map in the post processing shader
+extern int glgePositionInPPS;
+
+//store the position of the uniform for the roughness map in the post processing shader
+extern int glgeRoughnessInPPS;
 
 //store the frame buffer for the lighting pass
 extern unsigned int glgeLightingFBO;

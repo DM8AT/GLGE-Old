@@ -841,6 +841,41 @@ public:
      */
     float getFarPlane();
 
+    /**
+     * @brief Get a pointer to the rotation matrix of the camera
+     * 
+     * @return float* a pointer to the camera rotation matrix
+     */
+    float* getRotMatPointer();
+
+    /**
+     * @brief Get a pointer to the projection matrix
+     * 
+     * @return float* a pointer to the projection matrix
+     */
+    float* getProjectionMatrixPointer();
+
+    /**
+     * @brief Get a pointer to the transformation matrix
+     * 
+     * @return float* a pointer to the transformation matrix
+     */
+    float* getTransformMatPointer();
+    
+    /**
+     * @brief Get a pointer to the view matrix
+     * 
+     * @return float* a pointer to the view matrix
+     */
+    float* getViewMatrixPointer();
+
+    /**
+     * @brief Get the view matrix
+     * 
+     * @return mat4 the complete view matrix
+     */
+    mat4 getViewMatrix();
+
 private:
     //store the right direction of the camera
     vec4 right = vec4(1,0,0,0);

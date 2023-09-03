@@ -21,6 +21,8 @@ uniform int glgeActiveLights;
 //camera data
 uniform vec3 glgeCameraPos;
 uniform float glgeFarPlane;
+uniform vec3 glgeCameraRot;
+uniform mat4 glgeProject;
 
 float ambient = 0.1;
 
@@ -152,17 +154,20 @@ void main()
 {
     vec4 col = vec4(0,0,0,0);
     color = texture(glgeAlbedoMap, texCoords);
-    normal = (texture(glgeNormalMap, texCoords).xyz - vec3(0.5,0.5,0.5)) * vec3(2,2,2);
+    normal = texture(glgeNormalMap, texCoords).xyz;
     pos = texture(glgePositionMap, texCoords).xyz;
     roughness  = texture(glgeRoughnessMap, texCoords).r;
     metallic = texture(glgeRoughnessMap, texCoords).g;
+    int lit = int(texture(glgeRoughnessMap, texCoords).b);
 
-    if (normal == vec3(-5,-5,-5) || (glgeActiveLights == 0))
+    FragColor.w = color.w;
+
+    if ((lit == 0) || (glgeActiveLights == 0))
     {
-        FragColor.rgb = -color.rgb;
+        FragColor.rgb = color.rgb;
     }
     else
     {
-        FragColor = vec4(calculateLightingPBR(color.rgb), color.w);
+        FragColor.rgb = calculateLightingPBR(color.rgb);
     }
 }

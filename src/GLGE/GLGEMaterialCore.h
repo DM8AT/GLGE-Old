@@ -187,27 +187,38 @@ public:
      */
     void removeMaterial();
 
+    /**
+     * @brief Set if the object is effected by lighting
+     * 
+     * @param lit true: lighting takes effect | false: lighting is ignored
+     */
+    void setLit(bool lit);
+
 private:
     //store the positon of the roughness in the shader
-    GLuint roughnessLoc = 0;
+    int roughnessLoc = -1;
     //store the position of the metalic in the shader
-    GLuint metalicLoc = 0;
+    int metalicLoc = -1;
     //store the positon of the color in the shader
-    GLuint colorLoc = 0;
+    int colorLoc = -1;
     //store the position of the used textures uniform
-    GLuint usedLoc = 0;
+    int usedLoc = -1;
     //store the position to say if the normal map is active
-    GLuint normIsActivLoc = 0;
+    int normIsActivLoc = -1;
     //store the position to say if the roughness map is active
-    GLuint roughIsActivLoc = 0;
+    int roughIsActivLoc = -1;
     //store the position to say if the hight map is used
-    GLuint highIsActiveLoc = 0;
+    int highIsActiveLoc = -1;
     //store all images for the Material
     std::vector<GLuint> textures;
     //store the positons of the images
-    std::vector<GLuint> imageLocs;
+    std::vector<int> imageLocs;
     //store the names for the uniforms
     std::vector<const char*> uniformNames;
+    //say if the material is effected by lighting
+    bool lit = true;
+    //store the position of the lit parameter in the shader
+    int litLoc = -1;
     //store the location of the normal map in the image vector
     int normalMapLoc = -1;
     //store the location of the roughness map in the image vector

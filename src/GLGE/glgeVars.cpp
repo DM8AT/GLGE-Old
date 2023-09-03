@@ -166,6 +166,39 @@ int glgeCamPosInLightingPass = -1;
 //store the position of the far plane uniform in the Lighting Pass shader
 int glgeFarPlaneInLightingPass = -1;
 
+//store the rotation matrix in the lighting shader
+int glgeRotInLightingPass = -1;
+
+//pass the projection matrix to the lighting shader
+int glgeProjInLightingPass = -1;
+
+//store if the skybox is active
+bool glgeUseSkybox = false;
+
+//store the skybox in an cube map
+unsigned int glgeSkyboxCube = 0;
+
+//store the geometry for the skybox
+unsigned int glgeSkyboxBuffer = 0;
+
+//store the VBO for a cube
+unsigned int glgeCubeVBO = 0;
+
+//store the IBO for a cube
+unsigned int glgeCubeIBO = 0;
+
+//store the shader for the skybox
+unsigned int glgeSkyboxShader = 0;
+
+//store the sampler in the skybox shader
+int glgeSkyboxSampler = -1;
+
+//store the rotation in the skybox shader
+int glgeSkyboxRotation = -1;
+
+//store the projection matrix in the skybox
+int glgeSkyboxProject = -1;
+
 //store the active color buffers
 GLenum glgeUsedColorBuffers[] = {GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
 
@@ -204,6 +237,18 @@ int glgePostProcessingShader = 0;
 
 //store the main image in the post processing shader
 int glgeMainImageInPPS = 0;
+
+//store the position of the uniform for the albedo map in the post processing shader
+int glgeAlbedoInPPS = 0;
+
+//store the position of the uniform for the normal map in the post processing shader
+int glgeNormalInPPS = 0;
+
+//store the position of the uniform for the position map in the post processing shader
+int glgePositionInPPS = 0;
+
+//store the position of the uniform for the roughness map in the post processing shader
+int glgeRoughnessInPPS = 0;
 
 //store the frame buffer for the lighting pass
 unsigned int glgeLightingFBO = 0;

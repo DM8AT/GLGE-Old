@@ -3,6 +3,7 @@
 precision highp float;
 
 uniform sampler2D glgeMainImage;
+uniform sampler2D glgeRoughnessMap;
 
 in vec4 color;
 in vec2 texCoords;
@@ -14,22 +15,17 @@ const float exposure = 1.0f;
 
 void main()
 {
-    FragColor = texture(glgeMainImage, texCoords);
+    vec3 col = texture(glgeMainImage, texCoords).rgb;
 
-    if (FragColor.w == 0.f)
+    vec3 mapped = col;
+    //apply tone mapping if the object is lit
+    if (int(texture(glgeRoughnessMap, texCoords).b) == 1)
     {
-        FragColor.rgb *= -0.25f;
-        FragColor.w = 1.f;
-    }
-    else
-    {
-        vec3 col = texture(glgeMainImage, texCoords).rgb;
-
         // tone mapping
-        vec3 mapped = vec3(1.0) - exp(-col * exposure);
+        mapped = vec3(1.0) - exp(-mapped * exposure);
         // gamma correction
         mapped = pow(mapped, vec3(1.0 / gamma));
-
-        FragColor = vec4(mapped, 1.f);
     }
+
+    FragColor = vec4(mapped, 1.f);
 }
