@@ -659,7 +659,7 @@ void Object::draw()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
     //store how much texture units are used
-    int textures;
+    int textures = 0;
 
     //check if the shadow pass is drawn
     if (!glgeIsShadowPass)
