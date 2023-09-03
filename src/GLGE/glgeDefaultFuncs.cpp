@@ -68,46 +68,50 @@ void drawLightingPass()
         ((void(*)())glgeDisplayCallback)();
     }
 
-    //switch the depth function to greater equal
-    glDepthFunc(GL_GEQUAL);
-    //switch the order of the backface culling
-    glCullFace(GL_FRONT);
+    //check if a skybox is active
+    if (glgeUseSkybox)
+    {
+        //switch the depth function to greater equal
+        glDepthFunc(GL_GEQUAL);
+        //switch the order of the backface culling
+        glCullFace(GL_FRONT);
 
-    //draw the skybox
-    //switch to the skybox shader
-    glUseProgram(glgeSkyboxShader);
-    //bind the VBO
-    glBindBuffer(GL_ARRAY_BUFFER, glgeSkyboxBuffer);
-    //activate the vertex attribute for the position
-    glEnableVertexAttribArray(0);
-    //load the position into the shader
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    //push the projection matrix to the shader
-    glUniformMatrix4fv(glgeSkyboxProject, 1, GL_FALSE, glgeMainCamera->getProjectionMatrixPointer());
-    //push the rotation to the shader
-    glUniformMatrix4fv(glgeSkyboxRotation, 1, GL_FALSE, glgeMainCamera->getRotMatPointer());
-    //activate the first texture unit
-    glActiveTexture(GL_TEXTURE0);
-    //bind the skybox
-    glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
+        //draw the skybox
+        //switch to the skybox shader
+        glUseProgram(glgeSkyboxShader);
+        //bind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, glgeSkyboxBuffer);
+        //activate the vertex attribute for the position
+        glEnableVertexAttribArray(0);
+        //load the position into the shader
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        //push the projection matrix to the shader
+        glUniformMatrix4fv(glgeSkyboxProject, 1, GL_FALSE, glgeMainCamera->getProjectionMatrixPointer());
+        //push the rotation to the shader
+        glUniformMatrix4fv(glgeSkyboxRotation, 1, GL_FALSE, glgeMainCamera->getRotMatPointer());
+        //activate the first texture unit
+        glActiveTexture(GL_TEXTURE0);
+        //bind the skybox
+        glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
 
-    //draw the skybox
-    glDrawArrays(GL_TRIANGLES, 0, 108/3);
+        //draw the skybox
+        glDrawArrays(GL_TRIANGLES, 0, 108/3);
 
-    //unbind the skybox texture
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    //unbind the vertex attribute
-    glDisableVertexAttribArray(0);
-    //unbind the shader
-    glUseProgram(0);
-    //unbind the buffers
-    //unbind the VBO
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //unbind the IBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        //unbind the skybox texture
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        //unbind the vertex attribute
+        glDisableVertexAttribArray(0);
+        //unbind the shader
+        glUseProgram(0);
+        //unbind the buffers
+        //unbind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //unbind the IBO
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    //switch the depth buffer back
-    glDepthFunc(GL_GREATER);
+        //switch the depth buffer back
+        glDepthFunc(GL_GREATER);
+    }
 
     //switch to the lighting framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, glgeLightingFBO);
