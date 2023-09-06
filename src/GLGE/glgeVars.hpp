@@ -294,7 +294,7 @@ extern Shader glgeShadowShader;
 extern GLuint glgeLightWorldPosUniform;
 
 //store how to sample images
-extern GLenum glgeWrapingMode;
+extern GLenum glgeInterpolationMode;
 
 //store if the shadow pass is currently drawing
 extern bool glgeIsShadowPass;

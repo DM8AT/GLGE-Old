@@ -287,7 +287,7 @@ GLuint glgeLightPosShadowLoc = 0;
 GLuint glgeLightWorldPosUniform = 0;
 
 //store how to sample images
-GLenum glgeWrapingMode = GL_NEAREST;
+GLenum glgeInterpolationMode = GL_NEAREST;
 
 //store if the shadow pass is currently drawing
 bool glgeIsShadowPass = false;

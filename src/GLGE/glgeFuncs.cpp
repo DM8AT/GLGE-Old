@@ -762,7 +762,6 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //unbind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
     //generate the shaders for the default lighting shader
     glgeSkyboxShader = glgeCompileShader(GLGE_DEFAULT_VERTEX_SKYBOX, GLGE_DEFAULT_FRAGMENT_SKYBOX);
 

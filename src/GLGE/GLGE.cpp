@@ -590,8 +590,8 @@ void glgeSetSkybox(const char* top, const char* bottom, const char* left, const 
     glgeImageFree(data);
 
     //set the default texture parameters
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glgeWrapingMode);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glgeWrapingMode);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     //but watch out to set them to 3D
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -1142,8 +1142,8 @@ GLuint glgeTextureFromFile(const char* name, vec2* sP)
     // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeWrapingMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeWrapingMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
 
     // load and generate the texture
     int width, height, nrChannels;
@@ -1352,10 +1352,10 @@ void glgeSetPostProcessingShader(GLuint shader)
     getDefaultUniformsFromPostProcessingShader();
 }
 
-void glgeSetWrapingMode(unsigned int mode)
+void glgeSetInterpolationMode(unsigned int mode)
 {
-    //store the inputed wraping mode
-    glgeWrapingMode = mode; 
+    //store the inputed Interpolation mode
+    glgeInterpolationMode = mode; 
 }
 
 void glgeWarpPointer(vec2 pointerPos, unsigned int space)

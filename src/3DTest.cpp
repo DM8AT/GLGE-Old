@@ -271,7 +271,7 @@ void floorSetup()
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then create a material for the grass floor
-    Material grassFloorMat = Material("assets/grass.png", "Texture", 0.2);
+    Material grassFloorMat = Material("assets/grass.png", GLGE_TEXTURE, 0.2);
     //apply the material to the grass floor
     grassFloor.setMaterial(grassFloorMat);
 }
@@ -342,7 +342,7 @@ void cubeSetup()
     cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.01,2),vec3(0,0,0),1));
 
     //create a material for the cube
-    Material cubeMaterial = Material(glgeGetLastFrame(), "Texture", 0);
+    Material cubeMaterial = Material(glgeGetLastFrame(), GLGE_TEXTURE, 0);
     //set it to unlit
     cubeMaterial.setLit(false);
 
@@ -360,7 +360,7 @@ void thingSetup()
     thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
 
     //create a material for the thing
-    Material thingMat = Material("assets/cubeTexture.png", "Texture", 0.2);
+    Material thingMat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0.2);
 
     //apply the material to the thing
     thing.setMaterial(thingMat);
@@ -383,25 +383,21 @@ void wallSetup()
     //create the material for the wall
     Material mat;
     //load the albedo to the material
-    mat = Material("assets/WallTexture/harshbricks-albedo.png", "Texture", 0.2);
-
-    //set the wraping mode to linear, so the normal get linearly interpolated. It looks better
-    glgeSetWrapingMode(GLGE_LINEAR);
+    mat = Material("assets/WallTexture/harshbricks-albedo.png", GLGE_TEXTURE, 0.2);
+    //set the Interpolation mode to linear, so the normal get linearly interpolated. It looks better
+    glgeSetInterpolationMode(GLGE_LINEAR);
 
     //load the normal map to the material
-    mat.setNormalMap("assets/WallTexture/harshbricks-normal.png", "NormalMap");
+    mat.setNormalMap("assets/WallTexture/harshbricks-normal.png", GLGE_NORMAL_MAP);
 
     //load the roughness map
-    mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", "RoughnessMap");
+    mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", GLGE_ROUGHNESS_MAP);
 
     //load the height map
     mat.setHeightMap("assets/WallTexture/harshbricks-height5-16.png");
 
-    //reset the wraping mode
-    glgeSetWrapingMode(GLGE_NEAREST);
-
-    //add the second texture for the ambient occlusion
-    mat.addImage("assets/WallTexture/harshbricks-ao2.png", "AmbientMap");
+    //reset the Interpolation mode
+    glgeSetInterpolationMode(GLGE_NEAREST);
 
     //create a shader for the wall
     Shader shader = Shader("src/vertexShader.vs", "src/fragmentShader330.fs");

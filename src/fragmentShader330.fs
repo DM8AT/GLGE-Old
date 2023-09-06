@@ -10,48 +10,48 @@ in vec3 normal;
 in vec3 currentPos;
 
 //mesh data
-uniform float roughness;
+uniform float glgeRoughness;
 
-uniform sampler2D AmbientMap;
-uniform sampler2D NormalMap;
-uniform sampler2D RoughnessMap;
-uniform sampler2D Texture;
+uniform sampler2D glgeAmbientMap;
+uniform sampler2D glgeNormalMap;
+uniform sampler2D glgeRoughnessMap;
+uniform sampler2D glgeTexture;
 
 uniform samplerCube shadowMap;
 
 uniform int usedTextures;
 
-uniform bool NormalMapIsActive;
-uniform bool RoughnessMapIsActive;
+uniform bool glgeNormalMapIsActive;
+uniform bool glgeRoughnessMapIsActive;
 
 float rough;
 
 void main()
 {
-    vec4 col = texture(Texture, texCoord);
+    vec4 col = texture(glgeTexture, texCoord);
 
     if (usedTextures > 1)
     {
-        col = vec4(vec3(col * texture(AmbientMap, texCoord).r), col.w);
+        col = vec4(vec3(col * texture(glgeAmbientMap, texCoord).r), col.w);
     }
 
     col += color;
 
-    if (RoughnessMapIsActive)
+    if (glgeRoughnessMapIsActive)
     {
-        rough = texture(RoughnessMap, texCoord).r;
+        rough = texture(glgeRoughnessMap, texCoord).r;
     }
     else
     {
-        rough = roughness;
+        rough = glgeRoughness;
     }
 
     //calculate the normal
     vec3 n = normalize(normal);
 
-    if (NormalMapIsActive)
+    if (glgeNormalMapIsActive)
     {
-        n = normalize(normal + (texture(NormalMap, texCoord).rgb * 2.f - 1.f));
+        n = normalize(normal + (texture(glgeNormalMap, texCoord).rgb * 2.f - 1.f));
     }
 
     vec4 FragColor = vec4(0);

@@ -666,13 +666,10 @@ void Object::draw()
     {
         //only do shader binding if if it is not the shadow pass
         //bind the shader
-        glUseProgram(this->shader);
+        this->shader.applyShader();
 
         //Bind the material
-        textures = this->mat.applyMaterial();
-
-        //bind all light uniforms
-        //this->loadLights();
+        this->mat.applyMaterial();
     }
 
     //always input the color argument
@@ -693,50 +690,14 @@ void Object::draw()
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
     }
 
-    //always pass the move matrix to the shader
-    glUniformMatrix4fv(camMatLoc, 1, GL_FALSE, &this->camMat.m[0][0]);
     //other uniforms are only passed if it is not the shadow pass
     if (!glgeIsShadowPass)
     {
-        //pass the model matrix to the shader, if it has one
-        if (modelMatLoc != 0)
-        {
-            glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
-        }
-        //pas the rotation matrix to the shader, if it has one
-        if (this->rotMatLoc != 0)
-        {
-            glUniformMatrix4fv(rotMatLoc, 1, GL_FALSE, &this->rotMat.m[0][0]);
-        }
-        //pass the camera position to the shader, if it has one
-        if (this->camPosLoc != 0)
-        {
-            glUniform3f(this->camPosLoc, glgeMainCamera->getPos().x, glgeMainCamera->getPos().y, glgeMainCamera->getPos().z);
-        }
-        //pass the camera position to the shader, if it has one
-        if (this->camRotLoc != 0)
-        {
-            glUniform3f(this->camRotLoc, glgeMainCamera->getRotation().x, glgeMainCamera->getRotation().y, glgeMainCamera->getRotation().z);
-        }
-        //pass the far plane to the shader, if it exists
-        if (this->farPlaneLoc != 0)
-        {
-            glUniform1f(this->farPlaneLoc, glgeMainCamera->getFarPlane());
-        }
-
         if (glgeLights.size() != 0)
         {
             //bind the shadow map
             glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
-            //pass the sampler to the shader
-            //glUniform1i(this->shadowMapLoc, textures + 1); // Error bei JuNi
         }
-    }
-    //if it is not the shadow pass
-    else
-    {
-        //pass the model matrix to the shader
-        glUniformMatrix4fv(glgeModelMatShadowLoc, 1, GL_FALSE, &this->modelMat.m[0][0]);
     }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
@@ -759,7 +720,7 @@ void Object::draw()
         glDisableVertexAttribArray(2);
 
         //unbind the shader
-        glUseProgram(0);
+        this->shader.removeShader();
     }
 
     //unbind the buffers
@@ -771,6 +732,18 @@ void Object::update()
 {
     //recalculate the move matrix
     this->recalculateMatrices();
+    //push the camera matrix
+    this->shader.setCustomMat4(glgeCamMatrix, this->camMat);
+    //push the model matrix to the shader
+    this->shader.setCustomMat4("modelMat", this->modelMat);
+    //push the camera position to the shader
+    this->shader.setCustomVec3("cameraPos", glgeMainCamera->getPos());
+    //push the camera rotation to the shader
+    this->shader.setCustomVec3("cameraLook", glgeMainCamera->getRotation());
+    //push the rotation matrix to the shader
+    this->shader.setCustomMat4("rotMat", this->rotMat);
+    //push the far plane to the shader
+    this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
 
     //check if a light source was changed
     if (this->lightPosLocs.size() != glgeLights.size())
@@ -802,7 +775,7 @@ void Object::setShader(const char* p)
 void Object::setShader(GLuint shader)
 {
     //store the inputed shader
-    this->shader = shader;
+    this->shader = Shader(shader);
     
     //get all uniforms
     this->getUniforms();
@@ -811,7 +784,7 @@ void Object::setShader(GLuint shader)
 void Object::setShader(std::string vs, std::string fs)
 {
     //compile the shader source code and store the shader
-    this->shader = glgeCompileShader(vs, fs);
+    this->shader = Shader(vs, fs);
     
     //get all uniforms
     this->getUniforms();
@@ -819,12 +792,8 @@ void Object::setShader(std::string vs, std::string fs)
 
 void Object::setShader(std::string vs, const char* file)
 {
-    //create a variable to store the fragment shader
-    std::string fs;
-    //load the fragment shader
-    readFile(file, fs);
-    //compile the shader source code and store the shader
-    this->shader = glgeCompileShader(vs, fs);
+    //compile and store the shader
+    this->shader = Shader(vs, file);
     
     //get all uniforms
     this->getUniforms();
@@ -832,7 +801,7 @@ void Object::setShader(std::string vs, const char* file)
 
 GLuint Object::getShader()
 {
-    return this->shader;
+    return this->shader.getShader();
 }
 
 //apply a new transform to the object
@@ -1027,13 +996,19 @@ void Object::setMaterial(Material mat)
     //store the inputed material
     this->mat = mat;
     //update the material of the object
-    this->mat.applyShader(this->shader);
+    this->mat.applyShader(this->shader.getShader());
 }
 
-Material Object::getMaterial()
+Material* Object::getMaterial()
 {
-    //return the material stored in the object
-    return this->mat;
+    //return a pointer to the material stored in the object
+    return &this->mat;
+}
+
+Shader* Object::getShaderP()
+{
+    //return a pointer to the shader stored in the object
+    return &this->shader;
 }
 
 //PRIV
@@ -1089,27 +1064,25 @@ void Object::getUniforms()
     bool outErrs = glgeErrorOutput;
     //deactivate GLGE errors
     glgeErrorOutput = false;
-    //save the location of the move matrix
-    this->camMatLoc = glgeGetUniformVar(this->shader, glgeCamMatrix);
-    //save the location of the model matrix
-    this->modelMatLoc = glgeGetUniformVar(this->shader, "modelMat");
-    //save the location of the camera position argument
-    this->camPosLoc = glgeGetUniformVar(this->shader, "cameraPos");
-    //save the location of the camera rotation argument
-    this->camRotLoc = glgeGetUniformVar(this->shader, "cameraLook");
-    //store the location of the rotation matrix
-    this->rotMatLoc = glgeGetUniformVar(this->shader, "rotMat");
-    //store the location for the shadow map
-    this->shadowMapLoc = glgeGetUniformVar(this->shader, "shadowMap");
-    //store the location of the far plane
-    this->farPlaneLoc = glgeGetUniformVar(this->shader, "farPlane");
-    //store the uniform for the shadow map
-    this->shadowMapSamplerLoc = glgeGetUniformVar(this->shader, "shadowMap");
+    //push the camera matrix
+    this->shader.setCustomMat4(glgeCamMatrix, this->camMat);
+    //push the model matrix to the shader
+    this->shader.setCustomMat4("modelMat", this->modelMat);
+    //push the camera position to the shader
+    this->shader.setCustomVec3("cameraPos", glgeMainCamera->getPos());
+    //push the camera rotation to the shader
+    this->shader.setCustomVec3("cameraLook", glgeMainCamera->getRotation());
+    //push the rotation matrix to the shader
+    this->shader.setCustomMat4("rotMat", this->rotMat);
+    //push the far plane to the shader
+    this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
+    //get all uniform positions
+    this->shader.recalculateUniforms();
     //reset GLGE error output
     glgeErrorOutput = outErrs;
 
     //recalculate the uniforms of the material
-    this->mat.applyShader(this->shader);
+    this->mat.applyShader(this->shader.getShader());
 
     //recalculate all light unifomrs
     this->getLightUniforms();
@@ -1141,21 +1114,21 @@ void Object::getLightUniforms()
         //calculate the name of an uniform for the light positions
         std::string uniform = prefixLightPos + std::string("[") + std::to_string(i) + std::string("]");
         //get the uniform for the light position
-        this->lightPosLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+        this->lightPosLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
 
         //calculate the name of an uniform for the light color
         uniform = prefixLightCol + std::string("[") + std::to_string(i) + std::string("]");
         //get the uniform for the light color
-        this->lightColLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+        this->lightColLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
 
         //calculate the name of an uniform for the light intensity
         uniform = prefixLightInt + std::string("[") + std::to_string(i) + std::string("]");
         //get the uniform for the light intensity
-        this->lightIntLocs.push_back(glgeGetUniformVar(this->shader, uniform.c_str()));
+        this->lightIntLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
     }
 
     //get the uniform for the amount of used lights
-    this->usedLigtsPos = glgeGetUniformVar(this->shader, "activeLights");
+    this->usedLigtsPos = glgeGetUniformVar(this->shader.getShader(), "activeLights");
 
     //reset GLGE error output
     glgeErrorOutput = outErrs;

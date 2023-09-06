@@ -54,6 +54,36 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.13
+- parse custom variables to an shader using a material
+   - Supported types:
+      - float
+      - integer
+      - boolean
+      - vec2
+      - vec3
+      - vec4
+      - mat2
+      - mat3
+      - mat4
+      - textures
+   - execute operations while parsing the uniform, suppoerted opperations:
+      - set
+      - add
+      - subtract
+      - multiply
+      - divide
+      - logical and
+      - logical or
+      - logical not
+      - logical nand
+      - logical nor
+      - logical xor
+      - cross product
+- implemented the same functionality for uniforms for materials
+- changed internal structure from class "Object" to use the class "Shader" for shader management
+- get a pointer to the material used by an 3D object: changed function from returning a material to a material*
+- get a pointer to the shader used by an 3D object
 ### Update 0.12-2
 - disabled VSync, custom FPS work again
 - added option for unlit materials as a material property

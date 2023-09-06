@@ -478,11 +478,11 @@ void glgeSetPostProsessingShader(std::string shader);
 void glgeSetPostProsessingShader(GLuint shader);
 
 /**
- * @brief Set the Wraping Mode for textures
+ * @brief Set the Interpolation Mode for textures
  * 
- * @param mode the new wraping mode
+ * @param mode the new Interpolation mode
  */
-void glgeSetWrapingMode(unsigned int mode);
+void glgeSetInterpolationMode(unsigned int mode);
 
 /**
  * @brief set the position of the mouse pointer

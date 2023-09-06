@@ -26,6 +26,7 @@
 
 //Needed GLGE cores
 #include "GLGEMaterialCore.h"
+#include "GLGEShaderCore.h"
 
 //include the library core
 #include "GLGE.h"
@@ -592,9 +593,16 @@ public:
     /**
      * @brief Get the Material from the object
      * 
-     * @return Material the material of the object
+     * @return Material* a pointer to the material of the object
      */
-    Material getMaterial();
+    Material* getMaterial();
+
+    /**
+     * @brief Get the shader form the object
+     * 
+     * @return Shader* a pointer to the shader class instance
+     */
+    Shader* getShaderP();
 
 private:
     //store the transform for the object
@@ -604,17 +612,7 @@ private:
     //store the vertex and index buffer
     GLuint VBO ,IBO;
     //save the shader
-    GLint shader;
-    //store the move matrix location
-    GLuint camMatLoc;
-    //store the position of the model matrix, if it is found
-    GLuint modelMatLoc;
-    //store the rotation matrix location
-    GLuint rotMatLoc;
-    //store the position of the camera position vector, if it is found
-    GLuint camPosLoc;
-    //store the position of the camera rotation vector, if it is found
-    GLuint camRotLoc;
+    Shader shader;
     //the local matrix to make the object correct
     mat4 camMat = mat4(1,0,0,0,
                         0,1,0,0,
@@ -642,10 +640,6 @@ private:
     std::vector<GLuint> lightColLocs;
     //store the position of the light intensitys
     std::vector<GLuint> lightIntLocs;
-    //store the location of the shadow map
-    GLuint shadowMapLoc;
-    //store the location of the uniform for the far plane
-    GLuint farPlaneLoc;
     //store the position for the used lights
     GLuint usedLigtsPos;
     //store the position for the shadow maps

@@ -15,6 +15,40 @@
 //include the dependencys
 //standart librarys
 #include <string>
+#include <map>
+//CML
+#include "CML/CML.h"
+
+//check if the material core is allready included
+#ifndef _GLGE_MATERIAL_CORE_H_
+
+//define the mode for setting custom values
+#define GLGE_MODE_SET 0
+//define the mode for adding custom values
+#define GLGE_MODE_ADD 1
+//define the mode for subtracting custom values
+#define GLGE_MODE_SUBTRACT 2
+//define the mode for multipliing custom values
+#define GLGE_MODE_MULTIPLY 3
+//define the mode for dividing custom values
+#define GLGE_MODE_DIVIDE 4
+//define the mode for a cross product
+#define GLGE_MODE_CROSS 5
+//define the mode for a logical and opperation
+#define GLGE_MODE_AND 6
+//define the mode for a logical or opperation
+#define GLGE_MODE_OR 7
+//define the mode for a logical not opperation
+#define GLGE_MODE_NOT 8
+//define the mode for a logical nand opperation
+#define GLGE_MODE_NAND 9
+//define the mode for a logical nor opperation
+#define GLGE_MODE_NOR 10
+//define the mode for a logical xor opperation
+#define GLGE_MODE_XOR 11
+
+//close the if-statement
+#endif //line 20
 
 //include the OpenGL dependencys
 #include <GL/glew.h>
@@ -100,6 +134,23 @@ public:
     Shader(const char* vertexShader, const char* geometryShader, const char* fragmentShader);
 
     /**
+     * @brief Construct a new Shader using an allready compiled shader
+     * 
+     * @param shader the compiled shader
+     */
+    Shader(GLuint shader);
+
+    /**
+     * @brief set the shader to the current active shader
+     */
+    void applyShader();
+
+    /**
+     * @brief unbind the shader
+     */
+    void removeShader();
+
+    /**
      * @brief Get the Shader
      * 
      * @return GLuint the compiled OpenGL shader
@@ -157,10 +208,253 @@ public:
      */
     void updateShader(std::string shaderData, unsigned int type);
 
-protected:
+    /**
+     * @brief Set the value for a custom float uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the float
+     * @param mode say if the value should be set, added, subtracted, multiplied or divided | default: set
+     */
+    void setCustomFloat(std::string name, float value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom int uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the integer
+     * @param mode say if the value should be set, added, subtracted, multiplied or divided | default: set
+     */
+    void setCustomInt(std::string name, int value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom bool uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the bool
+     * @param mode say if the value should be set, or if an logical opperation should be performed | default: set
+     */
+    void setCustomBool(std::string name, bool value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom vec2 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the vec2
+     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     */
+    void setCustomVec2(std::string name, vec2 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom vec3 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the vec3
+     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     */
+    void setCustomVec3(std::string name, vec3 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom vec4 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the vec4
+     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     */
+    void setCustomVec4(std::string name, vec4 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom mat2 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the mat2
+     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     */
+    void setCustomMat2(std::string name, mat2 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom mat3 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the mat3
+     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     */
+    void setCustomMat3(std::string name, mat3 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Set the value for a custom mat4 uniform in the shader
+     * 
+     * @param name the name of the uniform in the shader
+     * @param value the value for the mat4
+     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     */
+    void setCustomMat4(std::string name, mat4 value, unsigned int mode = GLGE_MODE_SET);
+
+    /**
+     * @brief Load a custom texture from an file
+     * 
+     * @param name the name of the sampler in the shader
+     * @param file the texture file
+     */
+    void setCustomTexture(std::string name, char* file);
+
+    /**
+     * @brief Load a custom texture from an file
+     * 
+     * @param name the name of the sampler in the shader
+     * @param file the texture file
+     */
+    void setCustomTexture(std::string name, std::string file);
+
+    /**
+     * @brief Load a custom texture from an texture pointer
+     * 
+     * @param name the name of the sampler in the shader
+     * @param texture the OpenGL texture pointer
+     */
+    void setCustomTexture(std::string name, unsigned int texture);
+
+    /**
+     * @brief Get a float that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return float the value that is going to be parsed
+     */
+    float getFloatByName(std::string name);
+
+    /**
+     * @brief Get an integer that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return int the value that is going to be parsed
+     */
+    int getIntByName(std::string name);
+
+    /**
+     * @brief Get an boolean that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return bool the value that is going to be parsed
+     */
+    bool getBoolByName(std::string name);
+
+    /**
+     * @brief Get an vec2 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return vec2 the value that is going to be parsed
+     */
+    vec2 getVec2ByName(std::string name);
+
+    /**
+     * @brief Get an vec3 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return vec3 the value that is going to be parsed
+     */
+    vec3 getVec3ByName(std::string name);
+
+    /**
+     * @brief Get an vec4 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return vec4 the value that is going to be parsed
+     */
+    vec4 getVec4ByName(std::string name);
+
+    /**
+     * @brief Get an mat2 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return mat2 the value that is going to be parsed
+     */
+    mat2 getMat2ByName(std::string name);
+
+    /**
+     * @brief Get an mat3 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return mat3 the value that is going to be parsed
+     */
+    mat3 getMat3ByName(std::string name);
+
+    /**
+     * @brief Get an mat4 that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return mat4 the value that is going to be parsed
+     */
+    mat4 getMat4ByName(std::string name);
+
+    /**
+     * @brief Get an OpenGL sampler that is parsed to the shader
+     * 
+     * @param name the name of the uniform
+     * @return unsigned int the sampler that is going to be parsed
+     */
+    unsigned int getTextureByName(std::string name);
+
+    /**
+     * @brief Get the string descriping the name of the inputed mode
+     * 
+     * @param mode the mode to get the name from
+     * @return std::string the string that describes the mode
+     */
+    std::string getModeString(unsigned int mode);
+
+    /**
+     * @brief resample all uniform variables
+     */
+    void recalculateUniforms();
+    
+private:
     //store the address of the OpenGL shader
     GLuint shader = 0;
-    //store the shader source code
+    //store how many textures are bound
+    int boundTextures = 0;
+
+    //custom values
+
+    //store the custom values (floats)
+    std::map<std::string, float> floats;
+    //store the custom values (integers)
+    std::map<std::string, int> integers;
+    //store the custom values (booleans)
+    std::map<std::string, bool> booleans;
+    //store the custom values (vec2)
+    std::map<std::string, vec2> vec2s;
+    //store the custom values (vec3)
+    std::map<std::string, vec3> vec3s;
+    //store the custom values (vec4)
+    std::map<std::string, vec4> vec4s;
+    //store the custom values (mat2)
+    std::map<std::string, mat2> mat2s;
+    //store the custom values (mat3)
+    std::map<std::string, mat3> mat3s;
+    //store the custom values (mat4)
+    std::map<std::string, mat4> mat4s;
+    //store a custom texture
+    std::map<std::string, GLuint> customTextures;
+
+    //store the locations of the custom floats
+    std::map<std::string, unsigned int> floatLocs;
+    //store the locations of the custom integers
+    std::map<std::string, unsigned int> intLocs;
+    //store the locations of the custom booleans
+    std::map<std::string, unsigned int> boolLocs;
+    //store the locations of the custom vec2s
+    std::map<std::string, unsigned int> vec2Locs;
+    //store the locations of the custom vec3s
+    std::map<std::string, unsigned int> vec3Locs;
+    //store the locations of the custom vec4s
+    std::map<std::string, unsigned int> vec4Locs;
+    //store the locations of the custom mat2s
+    std::map<std::string, unsigned int> mat2Locs;
+    //store the locations of the custom mat3s
+    std::map<std::string, unsigned int> mat3Locs;
+    //store the locations of the custom mat4s
+    std::map<std::string, unsigned int> mat4Locs;
+    //store the locations of the custom textures
+    std::map<std::string, unsigned int> customTextureLocs;
 };
 
 /////////////
