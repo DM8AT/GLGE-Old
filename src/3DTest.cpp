@@ -54,6 +54,8 @@ Light light;
 
 Light l2;
 
+Shader* invColPPS;
+
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
 //set the mouse sensetivity
@@ -180,8 +182,31 @@ void tick()
         }
     }
 
-    //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
-    camSpeed += (float)glgeGetMouse().mouseWeel / (float)1000;
+    //check if the key y is pressed
+    if (glgeGetKeys().y)
+    {
+        //check if the mouse was scrolled
+        if (glgeGetMouse().mouseWheel != 0)
+        {
+            //check the direction of the mouse wheel
+            if (glgeGetMouse().mouseWheel > 0)
+            {
+                //change the amount of color inversion by a bit
+                invColPPS->setCustomFloat("strength", 0.01, GLGE_MODE_ADD);
+            }
+            else
+            {
+                //change the amount of color inversion by a bit
+                invColPPS->setCustomFloat("strength", 0.01, GLGE_MODE_SUBTRACT);
+            }
+        }
+    }
+    else
+    {
+        //to make the speed changeable in runtime, add the mouse wheel status divided by 1000 to it, to make the scrolling more sensitive
+        camSpeed += (float)glgeGetMouse().mouseWheel / (float)1000;
+    }
+
 
     //clamp the camera speed in an range betwean 0.001 and 0.5
     camSpeed = glgeClamp(camSpeed, 0.001, 0.5);
@@ -419,6 +444,19 @@ void windowResized(int width, int height)
     printf("Window resized to: %d, %d\n", width,height);
 }
 
+//a function to set up an shader
+Shader testCustomPPSFunc(unsigned int curr)
+{
+    //create a custom shader object
+    Shader s("src/testShader.fs", GLGE_FRAGMENT_SHADER);
+    //set the input for the main image (can be named anything)
+    s.setCustomTexture("glgeMainImage", curr);
+    //set the input for the window size (can be named anything)
+    s.setCustomVec2("glgeWindowSize", glgeGetWindowSize());
+    //give the shader to the program
+    return s;
+}
+
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
 void run3Dexample(int argc, char** argv)
@@ -435,24 +473,6 @@ void run3Dexample(int argc, char** argv)
     //set the icon of the window
     glgeSetWindowIcon("assets/GLGEImage.png");
 
-    //create an kernal to generate an gausian blure
-    /*float kernal[] = {
-        1.f/16.f, 1.f/8.f, 1.f/16.f,
-        1.f/08.f, 1.f/4.f, 1.f/08.f,
-        1.f/16.f, 1.f/8.f, 1.f/16.f,
-    };*/
-
-    //create an shader from an cernal
-    //Shader dyn = glgeCreateKernalShader(kernal, sizeof(kernal));
-
-    //asign the shader for the gausian blure
-    //glgeSetPostProcessingShader(dyn.getShader());
-
-    //create an shader object to store the shader
-    //Shader pps("src/testShader.fs", GLGE_FRAGMENT_SHADER);
-    //set the post processing shader to invert the colors
-    //glgeSetPostProcessingShader(pps.getShader());
-
     //Normaly, backface culling is enabled. But it can be disabled using the following function:
     //glgeDisableBackfaceCulling();
 
@@ -460,8 +480,15 @@ void run3Dexample(int argc, char** argv)
     glgeSetLightingShader("src/GLGE/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
-    glgeSetPostProcessingShader("src/testPostProcessingShader.fs");
-
+    glgeSetPostProsessingShader("src/testPostProcessingShader.fs");
+    //bind another post processing shader
+    invColPPS = glgeSetPostProsessingShader("src/invertColors.fs");
+    //set a uniform float in the shader to controll the strength for the invertion
+    invColPPS->setCustomFloat("strength", 1);
+    //recalculate the positions of the uniforms
+    invColPPS->recalculateUniforms();
+    //add a function that will be executed as a post-processing shader during the post-processing passes
+    glgeAddCustomPostProcessingFunc(testCustomPPSFunc);
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

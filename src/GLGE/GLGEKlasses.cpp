@@ -663,6 +663,6 @@ void Mouse::update(int button, int state)
     //if the button is the mouse scroll, scroll by the input
     else if (button == GLGE_MOUSE_SCROLL)
     {
-        this->mouseWeel += state;
+        this->mouseWheel += state;
     }
 }

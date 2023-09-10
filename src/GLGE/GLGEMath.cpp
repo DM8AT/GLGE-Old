@@ -311,3 +311,15 @@ float glgeToDegrees(float a)
     //return the angle in degrees
     return a * GLGE_TO_DEGREES;
 }
+
+float glgeMax(float value, float min)
+{
+    //if the value is greater min, return the value, else min
+    return (value >= min) ? value : min;
+}
+
+float glgeMin(float value, float max)
+{
+    //if the value is less than max, return the value, else max
+    return (max >= value) ? max : value;
+}

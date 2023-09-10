@@ -323,4 +323,21 @@ extern bool glgeAllowWindowMovement;
 //store the opperating system the application is compiled for
 extern int glgeOperatingSystem;
 
+//store all the post-processing shaders
+extern std::vector<Shader*> glgePostProcessingShaders;
+
+//store some functions, that should be called after the post-processing pass
+extern std::vector<Shader (*)(unsigned int)> glgeCustomPostProcessingFuncs;
+
+//store the frame buffer for the post-processing pass
+extern unsigned int glgePPSFBO;
+
+//store the render buffer for the post-processing pass
+extern unsigned int glgePPSRBO;
+
+//store the main image in the post processing pass
+extern unsigned int glgeMainImagePPS;
+
+//store if the current post-processing pass is the first
+extern bool glgeIsFirstPPSPass;
 #endif

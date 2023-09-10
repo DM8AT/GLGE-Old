@@ -15,10 +15,12 @@
 #include "glgeVars.hpp"
 #include "glgePrivDefines.hpp"
 #include "glgeErrors.hpp"
+#include "GLGEMath.h"
 
 //include the default librarys
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 
 ///////////
 //CLASSES//
@@ -1038,6 +1040,8 @@ void Shader::removeShader()
     glActiveTexture(GL_TEXTURE0);
     //unbind the shader
     glUseProgram(0);
+    //reset the bound texture
+    this->boundTextures = 0;
 }
 
 void Shader::recalculateUniforms()
@@ -1140,7 +1144,7 @@ void Shader::recalculateUniforms()
 
 Shader glgeCreateKernalShader(float* kernal, int size)
 {
-    std::string header("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
+    std::string header("#version 300 es\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;");
     std::string width = std::to_string(glgeWindowSize.x);
     std::string height = std::to_string(glgeWindowSize.y);
 
@@ -1217,7 +1221,7 @@ Shader glgeCreateKernalShader(float* kernal, int size)
         }
     }
 
-    std::string body2 = std::string("void main(){vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string(size*size)+"; i++){color += vec3(texture(screenTexture, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
+    std::string body2 = std::string("void main(){vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string(size*size)+"; i++){color += vec3(texture(glgeMainImage, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
 
     std::string shader = header + body1 + offs + kern + body2;
 
@@ -1228,11 +1232,9 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
 {
     size = std::sqrt((float)size / (float)sizeof(float));
 
-    std::string header("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D screenTexture;");
-    std::string width = std::to_string(glgeWindowSize.x);
-    std::string height = std::to_string(glgeWindowSize.y);
+    std::string header("#version 300 es\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;uniform vec2 glgeWindowSize;void main(){");
 
-    std::string body1 = std::string("const float offset_x = 1.f / ")+width+(";const float offset_y = 1.f / ") + height + std::string(";"); 
+    std::string body1 = std::string("float offset_x = 1.f / glgeWindowSize.x;float offset_y = 1.f / glgeWindowSize.y;"); 
 
     std::string offs = std::string("vec2 offsets["+std::to_string(size*size)+"] = vec2[](");
 
@@ -1305,9 +1307,84 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
         }
     }
 
-    std::string body2 = std::string("void main(){vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string((int) size*size)+"; i+=1){color += vec3(texture(screenTexture, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
+    std::string body2 = std::string("vec3 color = vec3(0.0f);for(int i = 0; i < "+std::to_string((int) size*size)+"; i+=1){color += vec3(texture(glgeMainImage, texCoords.st + offsets[i])) * kernel[i];}FragColor = vec4(color, 1.0f);}");
 
     std::string shader = header + body1 + offs + kern + body2;
 
     return Shader(shader, GLGE_FRAGMENT_SHADER);
+}
+
+Shader glgeCreateGausionBlureShader(int radius)
+{
+    //calculate the width and height (diameter)
+    const int d = radius*2 +1;
+    //create the cernal
+    float kernel[d*d] = {};
+
+    //implementation from: https://www.tutorialspoint.com/gaussian-filter-generation-in-cplusplus
+    double sigma = 1.0;
+    double p, q = 2.0 * sigma * sigma;
+    double sum = 0.0;
+    for (int x = -radius; x <= radius; x++)
+    {
+        for (int y = -radius; y <= radius; y++)
+        {
+            p = sqrt(x * x + y * y);
+            kernel[(x+radius)*(radius+1) + y+radius] = (exp(-(p * p) / q)) / (GLGE_PI * q);
+            sum += kernel[(x+radius)*(radius+1) + y+radius];
+        }
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            kernel[i*3 + j] /= sum;
+        }
+    }
+    
+    //compile the shader as an cernal shader
+    Shader shader = glgeCreateKernalShader(kernel, (unsigned long) d*d * sizeof(float));
+    //return the shader
+    return shader;
+}
+
+int glgeAddCustomPostProcessingFunc(Shader (*func)(unsigned int))
+{
+    //get the length of the vector
+    int ret = (int)glgeCustomPostProcessingFuncs.size();
+
+    //add the function pointer to the vector
+    glgeCustomPostProcessingFuncs.push_back(func);
+
+    //give back the length
+    return ret;
+}
+
+void glgeDeleteCusotmPostProcessingFunc(int index)
+{
+    //delete the specefied index
+    glgeCustomPostProcessingFuncs.erase(glgeCustomPostProcessingFuncs.begin()+index);
+}
+
+int glgeGetIndexOfCustomPostProcessingFunc(Shader (*func)(unsigned int))
+{
+    //find the index of the shader
+    std::vector<Shader (*)(unsigned int)>::iterator iter = std::find(glgeCustomPostProcessingFuncs.begin(), glgeCustomPostProcessingFuncs.end(), func);
+    //check if the element wasn't found
+    if (iter == glgeCustomPostProcessingFuncs.cend())
+    {
+        //quit the function with -1
+        return -1;
+    }
+    else
+    {
+        //return the index
+        return std::distance(glgeCustomPostProcessingFuncs.begin(), iter);
+    }
+}
+
+void glgeDeleteCusotmPostProcessingFunc(Shader (*func)(unsigned int))
+{
+    //delete the index of the element
+    glgeDeleteCusotmPostProcessingFunc(glgeGetIndexOfCustomPostProcessingFunc(func));
 }

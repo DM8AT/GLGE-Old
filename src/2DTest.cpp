@@ -82,7 +82,7 @@ void tickFunc()
     }
 
     //change the world speed by the mouse wheel delta scroll divided by 10
-    worldScale += glgeGetMouse().mouseWeel/10.f;
+    worldScale += glgeGetMouse().mouseWheel/10.f;
 
     //clamp the world scale beteween 0.1 and 3
     if (worldScale < 0.1)
@@ -208,7 +208,7 @@ void run2Dexample(int argc, char** argv)
     setupCrosshair();
 
     //load and set a post processing shader directly from an file
-    glgeSetPostProcessingShader("src/testShader.fs");
+    glgeSetPostProsessingShader("src/testShader.fs");
 
     //execute the script
     glgeRunMainLoop();

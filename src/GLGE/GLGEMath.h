@@ -204,4 +204,22 @@ float glgeToRadians(float angle);
  */
 float glgeToDegrees(float angle);
 
+/**
+ * @brief get the bigger value of two numbers
+ * 
+ * @param value the value to compare
+ * @param min the value to compare with
+ * @return float the bigger value
+ */
+float glgeMax(float value, float min);
+
+/**
+ * @brief get the smaller value of two numbers
+ * 
+ * @param value the value to compare
+ * @param min the value to compare with
+ * @return float the bigger value
+ */
+float glgeMin(float value, float max);
+
 #endif

@@ -246,89 +246,137 @@ void drawLightingPass()
 
     //clear the frame buffer
     glClear(GL_COLOR_BUFFER_BIT);
+    //say that the momentan pass is the first
+    glgeIsFirstPPSPass = true;
 
-    //bind the post processing shader
-    glUseProgram(glgePostProcessingShader);
-    //bind the vertex array
-    glBindVertexArray(glgeScreenVAO);
-    //bind the array buffer
-    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
-    //activate the vertex attribute for the position
-    glEnableVertexAttribArray(0);
-    //load the position into the shader
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    //activate the vertex attrivute for the texture coordinate
-    glEnableVertexAttribArray(1);
-    //load the texture coordinate into the shader
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    //check if there are any post-processing shaders
+    if ((int)glgePostProcessingShaders.size() < 1)
+    {
+        //bind the light framebuffer for reading
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, glgeLightingFBO);
+        //bind the default fbo for drawing
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        //copy the framebuffers
+        glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    }
+    else
+    {
+        //loop over all post-processing shader
+        for (Shader* shader : glgePostProcessingShaders)
+        {
+            //bind the correct framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //activate the shader
+            shader->applyShader();
+            //take care of the uniforms
+            getDefaultUniformsFromPostProcessingShader(shader);
+            //update all uniforms
+            shader->recalculateUniforms();
+            //bind the vertex array
+            glBindVertexArray(glgeScreenVAO);
+            //bind the array buffer
+            glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+            //activate the vertex attribute for the position
+            glEnableVertexAttribArray(0);
+            //load the position into the shader
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+            //activate the vertex attrivute for the texture coordinate
+            glEnableVertexAttribArray(1);
+            //load the texture coordinate into the shader
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    //check if the main image should be bound
-    if (!(glgeMainImageInPPS == -1))
-    {
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE0);
-        //bind the framebuffer texture
-        glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
-        //pass the uniform to the framebuffer
-        glUniform1i(glgeMainImageInPPS,0);
-    }
-    //check if the albedo map should be bound
-    if (!(glgeAlbedoInPPS == -1))
-    {
-        //if the map should be bound
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE1);
-        //bind the albeod texture
-        glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
-        //pass the uniform to the framebuffer
-        glUniform1i(glgeAlbedoInPPS,1);
-    }
-    //check if the albedo map should be bound
-    if (!(glgeNormalInPPS == -1))
-    {
-        //if the map should be bound
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE2);
-        //bind the albeod texture
-        glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
-        //pass the uniform to the framebuffer
-        glUniform1i(glgeNormalInPPS,2);
-    }
-    //check if the albedo map should be bound
-    if (!(glgePositionInPPS == -1))
-    {
-        //if the map should be bound
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE3);
-        //bind the albeod texture
-        glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
-        //pass the uniform to the framebuffer
-        glUniform1i(glgePositionInPPS,3);
-    }
-    //check if the albedo map should be bound
-    if (!(glgeRoughnessInPPS == -1))
-    {
-        //if the map should be bound
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE4);
-        //bind the albeod texture
-        glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
-        //pass the uniform to the framebuffer
-        glUniform1i(glgeRoughnessInPPS,4);
+            //draw the screen
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //deactivate the shader
+            shader->removeShader();
+            //make sure to enable texture unit 0
+            glActiveTexture(GL_TEXTURE0);
+            //unbind the buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            //deactivate the vertex attrib array pointers
+            glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
+
+            //bind the default FBO for reading
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            //bind the light framebuffer as writing
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgePPSFBO);
+            //copy the framebuffers
+            glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            //bind the default framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //say that an pass finished
+            glgeIsFirstPPSPass = false;
+        }
     }
 
-    //draw the screen
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //check if custom shader functions are bound
+    if ((int)glgeCustomPostProcessingFuncs.size() > 0)
+    {
+        //loop over all post-processing shader
+        for (Shader (*shaderFunc)(unsigned int) : glgeCustomPostProcessingFuncs)
+        {
+            //bind the correct FBO
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //create a shader to store the shader from the function
+            Shader shader;
+            //check if this is the first post-processing pass
+            if (glgeIsFirstPPSPass)
+            {
+                //get the shader using the custom function and the lit image
+                shader = shaderFunc(glgeLightingImageOut);
+            }
+            else
+            {
+                //get the shader using the custom function and the image from the last PPS
+                shader = shaderFunc(glgeMainImagePPS);
+            }
+            //get the default uniforms
+            getDefaultUniformsFromPostProcessingShader(&shader);
+            //get all uniforms (this is done automaticaly, because it is needed)
+            shader.recalculateUniforms();
+            //activate the shader
+            shader.applyShader();
+            //bind the vertex array
+            glBindVertexArray(glgeScreenVAO);
+            //bind the array buffer
+            glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+            //activate the vertex attribute for the position
+            glEnableVertexAttribArray(0);
+            //load the position into the shader
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+            //activate the vertex attrivute for the texture coordinate
+            glEnableVertexAttribArray(1);
+            //load the texture coordinate into the shader
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    //activate the thired texture unit
-    glActiveTexture(GL_TEXTURE2);
-    //unbind the shader
-    glUseProgram(0);
-    //unbind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //deactivate the vertex attrib array pointers
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+            //draw the screen
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //deactivate the shader
+            shader.removeShader();
+            //make sure to enable texture unit 0
+            glActiveTexture(GL_TEXTURE0);
+            //unbind the buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            //deactivate the vertex attrib array pointers
+            glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
+
+            //bind the default FBO for reading
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            //bind the light framebuffer as writing
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glgePPSFBO);
+            //copy the framebuffers
+            glBlitFramebuffer(0,0, glgeWindowSize.x, glgeWindowSize.y, 0,0, glgeWindowSize.x, glgeWindowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            //bind the default framebuffer
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //say that an pass finished
+            glgeIsFirstPPSPass = false;
+        }
+    }
+
 
     //copy the render to another fragment shader
     //bind the default framebuffer as read only
@@ -340,27 +388,6 @@ void drawLightingPass()
 
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //bind the fourth texture unit
-    glActiveTexture(GL_TEXTURE3);
-    //bind the fourth texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //bind the thired texture unit
-    glActiveTexture(GL_TEXTURE3);
-    //bind the thired texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //bind the second texture unit
-    glActiveTexture(GL_TEXTURE2);
-    //bind the second texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //bind the first texture unit
-    glActiveTexture(GL_TEXTURE1);
-    //bind the first texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //bind the default texture unit
-    glActiveTexture(GL_TEXTURE0);
-    //bind the default texture
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //////////////////////////
@@ -481,7 +508,7 @@ void glgeDefaultTimer()
     }
 
     //set the mouse wheel to 0
-    glgeMouse.mouseWeel = 0;
+    glgeMouse.mouseWheel = 0;
 
     //clear the key from the last tick
     glgeKeysThisTick.clear();

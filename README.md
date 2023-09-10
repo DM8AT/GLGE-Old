@@ -54,6 +54,22 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.14
+- switched post processing shaders to use the class "Shader" instead of unsigned int
+- support for more than one post-processing shader
+- added the ability, to use functions as post-processing shaders
+   - return type of function must be an instance of the GLGE "Shader" class
+   - input must be one unsigned int to input the main image
+- added ability to acess the main image passes
+   - albedo buffer
+   - normal buffer
+   - position buffer
+   - roughness buffer
+      - red chanel: roughness as float in range 0-1
+      - green chanel: metallic as float in range 0-1
+      - blue chanel: lit as bool
+   - lighning buffer
+- added new frame buffer object for the post processing pass
 ## Update 0.13
 - parse custom variables to an shader using a material
    - Supported types:

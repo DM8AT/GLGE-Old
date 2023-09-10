@@ -6,16 +6,7 @@ out vec4 FragColor;
 in vec2 texCoords;
 
 uniform sampler2D glgeMainImage;
-
-const float offset_x = 1.0f / 1000.0f;  
-const float offset_y = 1.0f / 1000.0f;  
-
-vec2 offsets[9] = vec2[]
-(
-    vec2(-offset_x,  offset_y), vec2( 0.0f,    offset_y), vec2( offset_x,  offset_y),
-    vec2(-offset_x,  0.0f),     vec2( 0.0f,    0.0f),     vec2( offset_x,  0.0f),
-    vec2(-offset_x, -offset_y), vec2( 0.0f,   -offset_y), vec2( offset_x, -offset_y) 
-);
+uniform vec2 glgeWindowSize;
 
 float kernel[9] = float[]
 (
@@ -26,6 +17,15 @@ float kernel[9] = float[]
 
 void main()
 {
+    float offset_x = 1.0f / glgeWindowSize.x;
+    float offset_y = 1.0f / glgeWindowSize.y;
+    
+    vec2 offsets[9] = vec2[]
+    (
+        vec2(-offset_x,  offset_y), vec2( 0.0f,    offset_y), vec2( offset_x,  offset_y),
+        vec2(-offset_x,  0.0f),     vec2( 0.0f,    0.0f),     vec2( offset_x,  0.0f),
+        vec2(-offset_x, -offset_y), vec2( 0.0f,   -offset_y), vec2( offset_x, -offset_y) 
+    );
     vec3 color = vec3(0);
     for(int i = 0; i < 9; i++)
     {

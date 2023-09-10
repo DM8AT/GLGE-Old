@@ -10,6 +10,7 @@
  */
 
 #include "glgeVars.hpp"
+#include "GLGEShaderCore.h"
 #include <map>
 
 ///////////
@@ -315,3 +316,21 @@ bool glgeAllowWindowMovement = true;
 
 //store the opperating system the application is compiled for
 int glgeOperatingSystem = -1;
+
+//store all the post-processing shaders
+std::vector<Shader*> glgePostProcessingShaders = {};
+
+//store some functions, that should be called after the post-processing pass
+std::vector<Shader (*)(unsigned int)> glgeCustomPostProcessingFuncs = {};
+
+//store the frame buffer for the lighting pass
+unsigned int glgePPSFBO = 0;
+
+//store the render buffer for the ligthing pass
+unsigned int glgePPSRBO = 0;
+
+//store the main image in the post processing pass
+unsigned int glgeMainImagePPS = 0;
+
+//store if the current post-processing pass is the first
+bool glgeIsFirstPPSPass = false;

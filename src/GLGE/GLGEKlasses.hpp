@@ -83,7 +83,7 @@ public:
     //store the status of the mouse buttons
     bool leftButton, rightButton, middleButton = false;
     //store the amoung of scrolles from the mouse wheel
-    signed char mouseWeel;
+    signed char mouseWheel;
 
     //default constructor
     Mouse();

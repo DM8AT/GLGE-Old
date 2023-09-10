@@ -33,6 +33,9 @@
 #include <SDL2/SDL_misc.h>
 #endif
 
+//include the shaders
+#include "GLGEShaderCore.h"
+
 /**
  * @brief Create a Window
  * 
@@ -70,7 +73,7 @@ void getLightingUniformsFromLightingPass();
 /**
  * @brief Get the Default Uniforms From the Post Processing Shader
  */
-void getDefaultUniformsFromPostProcessingShader();
+void getDefaultUniformsFromPostProcessingShader(Shader* shader);
 
 /**
  * @brief convert an error code from OpenGL into an error string

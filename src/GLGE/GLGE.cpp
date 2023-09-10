@@ -27,6 +27,7 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
+#include <algorithm>
 
 
 ////////////////////
@@ -915,12 +916,24 @@ GLint glgeGetUniformVar(GLuint program, const char* name)
     //if the id is -1, output an error
     if (ret == -1)
     {
-        //output an error message
-        if (glgeErrorOutput)
+        //get the length of the name
+        int length = (int)std::string(name).length();
+        //output an error message, if the length is less than 4
+        if (glgeErrorOutput && (length < 4))
         {
             printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
             //say where the error occured
             std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+        }
+        else
+        {
+            //output an error message, if the name dosn't starts with glge
+            if (glgeErrorOutput && !(name[0]=='g' && name[1]=='l' && name[2]=='g' && name[3]=='e'))
+            {
+                printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
+                //say where the error occured
+                std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+            }
         }
         //return 0
         return -1;
@@ -1306,50 +1319,182 @@ void glgeSetLightingShader(GLuint shader)
     }
 }
 
-void glgeSetPostProcessingShader(const char* shaderFile)
+Shader* glgeSetPostProsessingShader(const char* shaderFile)
 {
-    //create strings for the shader
-    std::string data;
-
-    //read the files
-    if (!readFile(shaderFile, data))
+    //create the new shader
+    Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, shaderFile);
+    //check if the shader contains the main image
+    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
     {
-        //output an error message
+        //check if an error should be printed
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            //print an error
+            std::cerr << "[GLGE ERROR] File " << shaderFile << 
+            " was inputed as an post-processing shader, but the uniform \"glgeMainImage\" for the input of the image is undefined" << std::endl;
         }
-        //stop the script
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
     }
-
-    //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
-
-    //get the default uniforms
-    getDefaultUniformsFromPostProcessingShader();
+    //store a new shader in the post-processing stack
+    glgePostProcessingShaders.push_back(shader);
+    //setup all default uniforms
+    getDefaultUniformsFromPostProcessingShader(shader);
+    //store the current error output state
+    bool err = glgeGetErrorOutput();
+    //disable the error output
+    glgeSetErrorOutput(false);
+    //update the shader
+    shader->recalculateUniforms();
+    //reset error output
+    glgeSetErrorOutput(err);
+    //output the shader
+    return shader;
+}
+Shader* glgeSetPostProsessingShader(std::string shaderSource)
+{
+    //create the new shader
+    Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, shaderSource);
+    //check if the shader contains the main image
+    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader" << std::endl << 
+            "Shader source: " << std::endl << shaderSource << std::endl;
+        }
+    }
+    //store a new shader in the post-processing stack
+    glgePostProcessingShaders.push_back(shader);
+    //setup all default uniforms
+    getDefaultUniformsFromPostProcessingShader(shader);
+    //store the current error output state
+    bool err = glgeGetErrorOutput();
+    //disable the error output
+    glgeSetErrorOutput(false);
+    //update the shader
+    shader->recalculateUniforms();
+    //reset error output
+    glgeSetErrorOutput(err);
+    //output the shader
+    return shader;
 }
 
-void glgeSetPostProcessingShader(std::string shader)
+Shader* glgeSetPostProsessingShader(GLuint s)
 {
-    //compile the shader and save it
-    glgePostProcessingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, shader);
-
-    //get the default uniforms
-    getDefaultUniformsFromPostProcessingShader();
+    //create the new shader
+    Shader* shader = new Shader(s);
+    //check if the shader contains the main image
+    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by shader pointer" << std::endl;
+        }
+    }
+    //store a new shader in the post-processing stack
+    glgePostProcessingShaders.push_back(shader);
+    //setup all default uniforms
+    getDefaultUniformsFromPostProcessingShader(shader);
+    //store the current error output state
+    bool err = glgeGetErrorOutput();
+    //disable the error output
+    glgeSetErrorOutput(false);
+    //update the shader
+    shader->recalculateUniforms();
+    //reset error output
+    glgeSetErrorOutput(err);
+    //output the shader
+    return shader;
 }
 
-void glgeSetPostProcessingShader(GLuint shader)
+void glgeSetPostProsessingShader(Shader* shader)
 {
-    //store the inputed shader as the Lighting shader
-    glgePostProcessingShader = shader;
+    //store the shader
+    glgePostProcessingShaders.push_back(shader);
+    //check if the shader contains the main image
+    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by pointer" << std::endl;
+        }
+    }
+    //setup all default uniforms
+    getDefaultUniformsFromPostProcessingShader(shader);
+    //store the current error output state
+    bool err = glgeGetErrorOutput();
+    //disable the error output
+    glgeSetErrorOutput(false);
+    //update the shader
+    shader->recalculateUniforms();
+    //reset error output
+    glgeSetErrorOutput(err);
+}
 
-    //get the default uniforms
-    getDefaultUniformsFromPostProcessingShader();
+Shader* glgeGetPostProcessingShader(int index)
+{
+    //return the searched shader
+    return glgePostProcessingShaders[index];
+}
+
+int glgeGetIndexOfPostProcessingShader(Shader* shader)
+{
+    //find the index of the shader
+    std::vector<Shader*>::iterator iter = std::find(glgePostProcessingShaders.begin(), glgePostProcessingShaders.end(), shader);
+    //check if the element wasn't found
+    if (iter == glgePostProcessingShaders.cend())
+    {
+        //quit the function with -1
+        return -1;
+    }
+    else
+    {
+        //return the index
+        return std::distance(glgePostProcessingShaders.begin(), iter);
+    }
+}
+
+void glgeDeletePostProcessingShader(int index, bool del)
+{
+    //get a reference to the shader
+    Shader* shader = glgePostProcessingShaders[index];
+    //delte the shader from the post-processing stack
+    glgePostProcessingShaders.erase(glgePostProcessingShaders.begin() + index);
+    //check if the shader should be deleted
+    if (del)
+    {
+        //if it should be deleted, delete it
+        delete shader;
+    }
+}
+
+void glgeDeletePostProcessingShader(Shader* shader, bool del)
+{
+    //find the index of the shader
+    int index = glgeGetIndexOfPostProcessingShader(shader);
+    //check if the index is -1
+    if (index == -1)
+    {
+        //check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            std::cerr << "[GLGE WARNING] tryed to remove shader that wasn't part of post-processing pipeline" << std::endl;
+        }
+        //quit the function
+        return;
+    }
+    else
+    {
+        //call the function to remove by index
+        glgeDeletePostProcessingShader(index, del);
+    }
+    //set the inputed shader to the Nullpointer
+    shader = NULL;
 }
 
 void glgeSetInterpolationMode(unsigned int mode)
@@ -1672,4 +1817,34 @@ void glgeSetWindowIcon(const char* file)
     }
     //set the current application window's icon
     SDL_SetWindowIcon(glgeMainWindow,img);
+}
+
+unsigned int glgeGetAlbedoBuffer()
+{
+    //return the main albedo texture
+    return glgeFrameAlbedoMap;
+}
+
+unsigned int glgeGetNormalBuffer()
+{
+    //return the main normal map
+    return glgeFrameNormalMap;
+}
+
+unsigned int glgeGetPositionBuffer()
+{
+    //return the main position map
+    return glgeFramePositionMap;
+}
+
+unsigned int glgeGetRoughnessBuffer()
+{
+    //return the main roughness map
+    return glgeFrameRoughnessMap;
+}
+
+unsigned int glgeGetLighningBuffer()
+{
+    //return the lit image
+    return glgeLightingImageOut;
 }

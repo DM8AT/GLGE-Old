@@ -6,11 +6,14 @@ out vec4 FragColor;
 
 in vec2 texCoords;
 
-uniform sampler2D screenTexture;
+uniform sampler2D glgeMainImage;
+uniform float strength;
 
 void main()
 {
-    vec4 color = texture(screenTexture, texCoords);
+    vec4 color = texture(glgeMainImage, texCoords);
 
-    FragColor = vec4(vec3(1,1,1)-vec3(color.x,color.y,color.z),1);
+    vec3 invert = (vec3(1,1,1)-vec3(color.x,color.y,color.z));
+    float s = clamp(strength, 0.f, 1.f);
+    FragColor = vec4((invert*(1.f-s))+(color.rgb*s),1);
 }

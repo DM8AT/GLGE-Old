@@ -42,6 +42,8 @@
 #include "GLGEKlasses.hpp"
 //include the math functions
 #include "GLGEMath.h"
+//include the shader
+#include "GLGEShaderCore.h"
 
 ///////////
 //DEFINES//
@@ -461,21 +463,60 @@ void glgeSetLightingShader(GLuint shader);
  * 
  * @param shaderFile the path to the post processing shader
  */
-void glgeSetPostProcessingShader(const char* shaderFile);
+Shader* glgeSetPostProsessingShader(const char* shaderFile);
 
 /**
  * @brief bind an shader that will controll how light sources effect the objects
  * 
  * @param shader the source code for the shader
  */
-void glgeSetPostProsessingShader(std::string shader);
+Shader* glgeSetPostProsessingShader(std::string shader);
 
 /**
  * @brief bind an shader that will controll how light sources effect the objects
  * 
  * @param shader the allready compiled OpenGL shader
  */
-void glgeSetPostProsessingShader(GLuint shader);
+Shader* glgeSetPostProsessingShader(GLuint shader);
+
+/**
+ * @brief set the post-processing shader to an allready existing shader
+ * 
+ * @param shader the shader object
+ */
+void glgeSetPostProsessingShader(Shader* shader);
+
+/**
+ * @brief get an post-processing shader by an index
+ * 
+ * @param index the index of the post-processing shader in the pipeline
+ * @return Shader* a pointer to the shader
+ */
+Shader* glgeGetPostProcessingShader(int index);
+
+/**
+ * @brief get the index of an post-processing shader, -1 if it dosn't exist
+ * 
+ * @param shader the shader to find the index for
+ * @return int the index in the pipeline
+ */
+int glgeGetIndexOfPostProcessingShader(Shader* shader);
+
+/**
+ * @brief delete an post processing shader
+ * 
+ * @param index the index of the shader to remove
+ * @param del say if the shader sould be deletet from memory, default = false
+ */
+void glgeDeletePostProcessingShader(int index, bool del = false);
+
+/**
+ * @brief delete an post processing shader
+ * 
+ * @param shader a pointer to the shader, that sould be removed
+ * @param del say if the shader sould be deletet from memory, default = false
+ */
+void glgeDeletePostProcessingShader(Shader* shader, bool del = false);
 
 /**
  * @brief Set the Interpolation Mode for textures
@@ -711,4 +752,43 @@ bool glgeGetWindowMoveable();
  * @param file the path for the new icon
  */
 void glgeSetWindowIcon(const char* file);
+
+/**
+ * @brief get the current albedo buffer - stores the main color of all pixels on screen
+ * 
+ * @return unsigned int the main albedo buffer
+ */
+unsigned int glgeGetAlbedoBuffer();
+
+/**
+ * @brief get the current normal buffer - stores the main normal vector for all pixels on screen
+ * 
+ * @return unsigned int the main normal buffer
+ */
+unsigned int glgeGetNormalBuffer();
+
+/**
+ * @brief get the current position buffer - stores the position in world space for all pixels on screen
+ * 
+ * @return unsigned int the main position buffer
+ */
+unsigned int glgeGetPositionBuffer();
+
+/**
+ * @brief get the current roughness buffer
+ * r: float roughness
+ * g: float metalic
+ * b: bool lit
+ * 
+ * @return unsigned int the main roughness buffer
+ */
+unsigned int glgeGetRoughnessBuffer();
+
+/**
+ * @brief get the buffer that stores the lit image
+ * basecly the image befor bost processing is applied
+ * @return unsigned int the main lit buffer
+ */
+unsigned int glgeGetLighningBuffer();
+
 #endif
