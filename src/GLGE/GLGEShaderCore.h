@@ -67,6 +67,9 @@
 //CLASSES//
 ///////////
 
+/**
+ * @brief a generic shader object, used to change the look of objects, lighing or the complete scene
+ */
 class Shader
 {
 public:

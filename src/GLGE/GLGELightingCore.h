@@ -34,6 +34,9 @@
 //define a light as a light that shines in an direction
 #define GLGE_DIRECTIONAL_LIGHT 2
 
+/**
+ * @brief store a light in the scene
+ */
 class Light
 {
 public:

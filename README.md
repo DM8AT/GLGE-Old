@@ -54,6 +54,13 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.15
+- added custom render targets
+   - ability to render more complex post processing effects
+- added comments for all classes
+- removed a few left-overs from the change to SDL2 (in: GLGEKlasses.cpp)
+- now performing all framebuffer status checks
+- changed from RGBA32F_EXB framebuffers to RGB16F (there should be no visible difference, it is just a bit faster) 
 ## Update 0.14
 - switched post processing shaders to use the class "Shader" instead of unsigned int
 - support for more than one post-processing shader

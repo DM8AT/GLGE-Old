@@ -12,8 +12,12 @@
 //include the class for defining things
 #include "GLGEKlasses.hpp"
 
+//include the GLGE dependencys
+#include "glgeVars.hpp"
+#include "glgeErrors.hpp"
+
 //include freeglut
-#include <GL/freeglut.h>
+#include <GL/glew.h>
 
 #include <iostream>
 
@@ -342,88 +346,88 @@ bool Keys::getKey(int key)
 {
     //check for the function keys
     //check for F1
-    if (key == GLUT_KEY_F1)
+    if (key == SDL_SCANCODE_F1)
     {
         return this->f1;
     }
     //check for F2
-    else if (key == GLUT_KEY_F2)
+    else if (key == SDL_SCANCODE_F2)
     {
         return this->f2;
     }
     //check for F3
-    else if (key == GLUT_KEY_F3)
+    else if (key == SDL_SCANCODE_F3)
     {
         return this->f3;
     }
     //check for F4
-    else if (key == GLUT_KEY_F4)
+    else if (key == SDL_SCANCODE_F4)
     {
         return this->f4;
     }
     //check for F5
-    else if (key == GLUT_KEY_F5)
+    else if (key == SDL_SCANCODE_F5)
     {
         return this->f5;
     }
     //check for F6
-    else if (key == GLUT_KEY_F6)
+    else if (key == SDL_SCANCODE_F6)
     {
         return this->f6;
     }
     //check for F7
-    else if (key == GLUT_KEY_F7)
+    else if (key == SDL_SCANCODE_F7)
     {
         return this->f7;
     }
     //check for F8
-    else if (key == GLUT_KEY_F8)
+    else if (key == SDL_SCANCODE_F8)
     {
         return this->f8;
     }
     //check for F9
-    else if (key == GLUT_KEY_F9)
+    else if (key == SDL_SCANCODE_F9)
     {
         return this->f9;
     }
     //check for F10
-    else if (key == GLUT_KEY_F10)
+    else if (key == SDL_SCANCODE_F10)
     {
         return this->f10;
     }
     //check for F11
-    else if (key == GLUT_KEY_F11)
+    else if (key == SDL_SCANCODE_F11)
     {
         return this->f11;
     }
     //check for F12
-    else if (key == GLUT_KEY_F12)
+    else if (key == SDL_SCANCODE_F12)
     {
         return this->f12;
     } 
     //check for shift keys
-    else if (key == GLUT_KEY_SHIFT_L)
+    else if (key == SDL_SCANCODE_LSHIFT)
     {
         return this->leftShift;
     }
-    else if (key == GLUT_KEY_SHIFT_R)
+    else if (key == SDL_SCANCODE_RSHIFT)
     {
         return this->rightShift;
     }
     //check for arrow keys
-    else if (key == GLUT_KEY_RIGHT)
+    else if (key == SDL_SCANCODE_RIGHT)
     {
         return this->arrowRight;
     }
-    else if (key == GLUT_KEY_LEFT)
+    else if (key == SDL_SCANCODE_LEFT)
     {
         return this->arrowLeft;
     }
-    else if (key == GLUT_KEY_UP)
+    else if (key == SDL_SCANCODE_UP)
     {
         return this->arrowUp;
     }
-    else if (key == GLUT_KEY_DOWN)
+    else if (key == SDL_SCANCODE_DOWN)
     {
         return this->arrowDown;
     }
@@ -665,4 +669,221 @@ void Mouse::update(int button, int state)
     {
         this->mouseWheel += state;
     }
+}
+
+/////////////////
+//RENDER TARGET//
+/////////////////
+
+//PUBLIC
+
+RenderTarget::RenderTarget()
+{
+    //initalise everyting
+}
+
+RenderTarget::RenderTarget(vec2 size)
+{
+    //generate the texture and the render target
+    this->generateTexture(size.x, size.y, true);
+}
+
+RenderTarget::RenderTarget(int width, int height)
+{
+    //generate the texture and the render target
+    this->generateTexture(width, height, true);
+}
+
+RenderTarget::RenderTarget(unsigned int glTexture)
+{
+    //store the inputed texture
+    this->texture = glTexture;
+    //two ints to store the width and height
+    int w,h = 0;
+    //activate texture 0
+    glActiveTexture(GL_TEXTURE0);
+    //bind the texture
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    //get the width from the texture
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+    //get the height from the texture
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
+    //generate the render target
+    this->generateTexture(w,h, false);
+}
+
+void RenderTarget::draw()
+{
+    //check if the shader is a nullpointer
+    if (this->shader == NULL)
+    {
+        //print an warning
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            std::cerr << "[GLGE WARNING] shader for a custom render target is a nullpointer, but it\'s draw methode was called" << std::endl;
+        }
+        //stop the script
+        return;
+    }
+
+    //activate the FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
+
+    //activate the shader
+    this->shader->applyShader();
+
+    //bind the vertex array
+    glBindVertexArray(glgeScreenVAO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
+    //activate the vertex attribute for the position
+    glEnableVertexAttribArray(0);
+    //load the position into the shader
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    //activate the vertex attrivute for the texture coordinate
+    glEnableVertexAttribArray(1);
+    //load the texture coordinate into the shader
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    //draw the screen
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //deactivate the vertex attrib array pointers
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+    //unbind the shader
+    this->shader->removeShader();
+    //make sure to enable texture unit 0
+    glActiveTexture(GL_TEXTURE0);
+
+    //unbind the FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderTarget::changeSize(vec2 s)
+{
+    //update the inernal size
+    this->updateSize(s);
+}
+
+void RenderTarget::changeSize(int newWidth, int newHeight)
+{
+    //update the inernal size
+    this->updateSize(vec2(newWidth, newHeight));
+}
+
+void RenderTarget::setShader(Shader* shader, bool ownShader)
+{
+    //store the inputed shader
+    this->shader = shader;
+    //say that the shader isn't its own
+    this->ownShader = ownShader;
+}
+
+void RenderTarget::setShader(unsigned int shader)
+{
+    //generate the shader
+    this->shader = new Shader(shader);
+    //say that the sader is its own
+    this->ownShader = true;
+}
+
+Shader* RenderTarget::getShader()
+{
+    //return the shader
+    return this->shader;
+}
+
+unsigned int RenderTarget::getTexture()
+{
+    //return the texture
+    return this->texture;
+}
+
+vec2 RenderTarget::getSize()
+{
+    //return the stored size
+    return this->size;
+}
+
+//PRIVATE
+
+void RenderTarget::generateTexture(int w, int h, bool genTexture)
+{
+    //create and bind the custom frame buffer
+    glGenFramebuffers(1, &this->FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
+
+    if (genTexture)
+    
+    {
+        //generate a texture to store the render target texture
+        glGenTextures(1, &this->texture);
+        glBindTexture(GL_TEXTURE_2D, this->texture);
+        //set the texture parameters so it dosn't loop around the screen
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        //bind the texture to the frame buffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture, 0);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    else
+    {
+        //bind the texture
+        glBindTexture(GL_TEXTURE_2D, this->texture);
+        //bind the texture to the frame buffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture, 0);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    //check if the framebuffer compiled correctly
+    GLuint fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if ( fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        //stop the program
+        exit(1);
+    }
+
+    //store the width and height
+    this->size = vec2(w,h);
+    //update the parameter if the texture is owned
+    this->ownTex = genTexture;
+    //unbind the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //unbind the render buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
+
+void RenderTarget::updateSize(vec2 s)
+{
+    //check if the texture exists
+    if (this->texture != 0)
+    {
+        //if it dose, resize it
+
+        //bind texture unit 0
+        glActiveTexture(GL_TEXTURE0);
+        //unbind any 3D textures
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        //update the texture
+        glBindTexture(GL_TEXTURE_2D, this->texture);
+        //set the texture parameters so it dosn't loop around the screen
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, s.x, s.y, 0, GL_RGBA, GL_FLOAT, NULL);
+        //unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    //change the internal size
+    this->size = s;
 }

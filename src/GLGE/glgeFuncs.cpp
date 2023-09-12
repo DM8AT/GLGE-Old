@@ -505,7 +505,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameAlbedoMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -519,7 +519,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameNormalMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -533,7 +533,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFramePositionMap);
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -547,7 +547,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameRoughnessMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -591,7 +591,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameLastTick);
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -602,6 +602,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    //check if the framebuffer compiled correctly
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -627,7 +629,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeLightingImageOut);
     glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -638,6 +640,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    //check if the framebuffer compiled correctly
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -663,7 +667,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeMainImagePPS);
     glBindTexture(GL_TEXTURE_2D, glgeMainImagePPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -674,6 +678,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    //check if the framebuffer compiled correctly
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -911,43 +917,43 @@ void resizeWindow(int width, int height)
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update all the texture sizes
     //update the normal texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the position texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the roughness texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the last tick texture
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the main image texture
     glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the lighting texture
     glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the post processing texture
     glBindTexture(GL_TEXTURE_2D, glgeMainImagePPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);

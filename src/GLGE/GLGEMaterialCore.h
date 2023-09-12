@@ -100,6 +100,9 @@
 #include <map>
 #include <string>
 
+/**
+ * @brief a material, that can be applied to an object to change its look
+ */
 class Material
 {
 public:

@@ -221,6 +221,9 @@ struct Vertex
     Vertex(float x, float y, float z, float r, float g, float b, float a, float nx, float ny, float nz);
 };
 
+/**
+ * @brief store the mesh for a 3D object
+ */
 class Mesh
 {
 public:
@@ -280,6 +283,9 @@ public:
     void recalculateNormals();
 };
 
+/**
+ * @brief store an 3D object
+ */
 class Object
 {
 public:

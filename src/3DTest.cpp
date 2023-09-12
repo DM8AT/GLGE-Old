@@ -56,6 +56,8 @@ Light l2;
 
 Shader* invColPPS;
 
+RenderTarget renderTarget;
+
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
 //set the mouse sensetivity
@@ -441,6 +443,9 @@ void wallSetup()
 
 void windowResized(int width, int height)
 {
+    //update the size of the render target
+    renderTarget.changeSize(width, height);
+    //print debug information
     printf("Window resized to: %d, %d\n", width,height);
 }
 
@@ -490,6 +495,11 @@ void run3Dexample(int argc, char** argv)
     //add a function that will be executed as a post-processing shader during the post-processing passes
     glgeAddCustomPostProcessingFunc(testCustomPPSFunc);
 
+    //generate a render target using an shader
+    renderTarget = RenderTarget(glgeGetScreenSize());
+    //set the shader for the render target
+    renderTarget.setShader(new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/invertColors.fs"), true);
+
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
     
@@ -518,7 +528,7 @@ void run3Dexample(int argc, char** argv)
     //a window can be moved by default, so no function is needed to say that it can be moved (but you can say that it can't be moved)
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
-    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,-90,0),1));
+    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
     //then, the camera is moved one unit up
     camera.move(0,1,0);
     //after the camera is set up, the camera is bound to the library using an pointer. So, the camera can be changed and updated

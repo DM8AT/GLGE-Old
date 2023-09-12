@@ -5,6 +5,10 @@
  * @version 0.1
  * @date 2023-01-29
  * 
+ * //////////////////////////////////////////////////////
+ * // IMPORTANT: THIS FILE IS CURRENTLY NOT MAINTAINED //
+ * //////////////////////////////////////////////////////
+ * 
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  */
 
@@ -73,7 +77,7 @@ struct Transform2D
     mat3 getMatrix();
 };
 
-//a 2D transform
+//a 2D vertex
 struct Vertex2D
 {
     //the position of the vertex
@@ -171,6 +175,9 @@ struct Vertex2D
 //CLASSES//
 ///////////
 
+/**
+ * @brief store a 2D mesh
+ */
 class Mesh2D
 {
 public:
@@ -203,6 +210,9 @@ public:
     std::vector<Vertex2D> vertices; 
 };
 
+/**
+ * @brief an 2D object
+ */
 class Object2D
 {
 public:
