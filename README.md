@@ -41,16 +41,12 @@ Upcoming features that may be added to GLGE in the future include:
    - from other file formats
 - A 3D and 2D sound function to the core
 - 2D and 3D physics
-- Procedrual materials
-- Procedrual shaders
-- A lighting core for 3D and 2D
+- A lighting core for 2D
    - preset for different light sources
    - different light source presets
       - directional light
       - sun
       - light plates (some invisible shape that is emitting light)
-- Post processing
-   - preset for different effects (Bloom, distortion, etc.)
 - Texture atleasing
 
 # Changelogs
@@ -60,7 +56,8 @@ Upcoming features that may be added to GLGE in the future include:
 - added comments for all classes
 - removed a few left-overs from the change to SDL2 (in: GLGEKlasses.cpp)
 - now performing all framebuffer status checks
-- changed from RGBA32F_EXB framebuffers to RGB16F (there should be no visible difference, it is just a bit faster) 
+- changed from RGBA32F_EXB framebuffers to RGB16F (there should be no visible difference, it is just a bit faster)
+- updated upcoming list
 ## Update 0.14
 - switched post processing shaders to use the class "Shader" instead of unsigned int
 - support for more than one post-processing shader
