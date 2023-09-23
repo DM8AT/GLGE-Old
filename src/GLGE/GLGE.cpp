@@ -9,6 +9,15 @@
  * 
  */
 
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
+
 //include the GLGE dependencys
 #include "GLGE.h"
 #include "glgeErrors.hpp"
@@ -28,7 +37,6 @@
 #include <ctime>
 #include <fstream>
 #include <algorithm>
-
 
 ////////////////////
 //Public functions//
@@ -496,7 +504,7 @@ void glgeSetSkybox(const char* top, const char* bottom, const char* left, const 
     //create a new skybox texture
     glGenTextures(1, &glgeSkyboxCube);
     //store the texture mode
-    GLint texMode = GL_RGB;
+    int texMode = GL_RGB;
     //bind the texture as a cube map
     glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
     //load the top image
@@ -839,10 +847,10 @@ float glgeGetDeltaTime()
 }
 
 //add a shader to an shader program
-void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
+void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned int shaderType)
 {
     //create a new shader with the inputed type
-    GLuint shaderObj = glCreateShader(shaderType);
+    unsigned int shaderObj = glCreateShader(shaderType);
 
     //check if the shader object could be created
     if (shaderObj == 0)
@@ -867,7 +875,7 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
     p[0] = shadertext;
 
     //store the length of the text
-    GLint lengths[1];
+    int lengths[1];
     lengths[0] = strlen(shadertext);
 
     //set the shader source code
@@ -877,7 +885,7 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
     glCompileShader(shaderObj);
 
     //check for compiling errors
-    GLint success;
+    int success;
     glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
 
     //if there was an error, print a message and exit
@@ -907,10 +915,10 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
 }
 
 //get a uniform variable from a shader
-GLint glgeGetUniformVar(GLuint program, const char* name)
+int glgeGetUniformVar(unsigned int program, const char* name)
 {
     //create the output variable
-    GLint ret;
+    int ret;
     //set the output variable to the uniform variable in the shader
     ret = glGetUniformLocation(program, name);
     //if the id is -1, output an error
@@ -943,10 +951,10 @@ GLint glgeGetUniformVar(GLuint program, const char* name)
 }
 
 //compile and add the shaders to this object
-GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
+unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
 {
     //create a new shader program
-    GLuint shaderProgram = glCreateProgram();
+    unsigned int shaderProgram = glCreateProgram();
 
     //check if the shader could be created
     if (shaderProgram == 0)
@@ -1006,7 +1014,7 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
     glgeAddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
     //create an variable to check for success
-    GLint success = 0;
+    int success = 0;
     //setup an error log
     GLchar ErrorLog[1024] = {0};
 
@@ -1061,10 +1069,10 @@ GLuint glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
     return shaderProgram;
 }
 
-GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment)
+unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment)
 {
     //create a new shader program
-    GLuint shaderProgram = glCreateProgram();
+    unsigned int shaderProgram = glCreateProgram();
 
     //check if the shader could be created
     if (shaderProgram == 0)
@@ -1091,7 +1099,7 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
     glgeAddShader(shaderProgram, fileDataFragment.c_str(), GL_FRAGMENT_SHADER);
 
     //create an variable to check for success
-    GLint success = 0;
+    int success = 0;
     //setup an error log
     GLchar ErrorLog[1024] = {0};
 
@@ -1146,9 +1154,9 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
     return shaderProgram;
 }
 
-GLuint glgeTextureFromFile(const char* name, vec2* sP)
+unsigned int glgeTextureFromFile(const char* name, vec2* sP)
 {
-    GLuint texture;
+    unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -1304,7 +1312,7 @@ void glgeSetLightingShader(std::string LightingShader)
     }
 }
 
-void glgeSetLightingShader(GLuint shader)
+void glgeSetLightingShader(unsigned int shader)
 {
     //store the inputed shader as the Lighting shader
     glgeLightingShader = shader;
@@ -1380,7 +1388,7 @@ Shader* glgeSetPostProsessingShader(std::string shaderSource)
     return shader;
 }
 
-Shader* glgeSetPostProsessingShader(GLuint s)
+Shader* glgeSetPostProsessingShader(unsigned int s)
 {
     //create the new shader
     Shader* shader = new Shader(s);
@@ -1574,31 +1582,31 @@ float glgeGetCurrentElapsedTime()
     return SDL_GetTicks();
 }
 
-GLuint glgeGetMainAlbedoMap()
+unsigned int glgeGetMainAlbedoMap()
 {
     //return the main albedo texture
     return glgeFrameAlbedoMap;
 }
 
-GLuint glgeGetMainNormalMap()
+unsigned int glgeGetMainNormalMap()
 {
     //return the main normal map
     return glgeFrameNormalMap;
 }
 
-GLuint glgeGetMainPositionMap()
+unsigned int glgeGetMainPositionMap()
 {
     //return the main position map
     return glgeFramePositionMap;
 }
 
-GLuint glgeGetMainRoughnessMap()
+unsigned int glgeGetMainRoughnessMap()
 {
     //return the main roughness map
     return glgeFrameRoughnessMap;
 }
 
-GLuint glgeGetLastFrame()
+unsigned int glgeGetLastFrame()
 {
     //return a pointer to the last frame map
     return glgeFrameLastTick;
@@ -1620,24 +1628,6 @@ bool glgeGetExitOnError()
 {
     //return the local value to store if glge should exit on an error
     return glgeExitOnError;
-}
-
-void glgeUseDownUpSampeling(bool shouldUse)
-{
-    //store the inputed state
-    glgeDownUpSampeling = shouldUse;
-}
-
-void glgeSwapDownUpSampeling()
-{
-    //swap the current state of use
-    glgeDownUpSampeling = !glgeDownUpSampeling;
-}
-
-bool glgeGetDownUpSampeling()
-{
-    //output the current state of use
-    return glgeDownUpSampeling;
 }
 
 void glgeBindOnWindowResizeFunc(void (*func)(int, int))

@@ -92,9 +92,6 @@
 //include the needed math librarys
 #include "CML/CML.h"
 
-//include OpenGL
-#include <GL/glew.h>
-
 //include the needed things from the default library
 #include <vector>
 #include <map>
@@ -131,7 +128,7 @@ public:
      * @param roughness the roughness for the texture
      * @param metal store the metalicness of the object
      */
-    Material(GLuint texture, const char* uniform, float roughness, float metal = 0);
+    Material(unsigned int texture, const char* uniform, float roughness, float metal = 0);
 
     /**
      * @brief Construct a new Material
@@ -185,7 +182,7 @@ public:
     /**
      * @brief this function gets all needed data from the sader
      */
-    void applyShader(GLuint shader);
+    void applyShader(unsigned int shader);
 
     /**
      * @brief apply the material for drawing
@@ -459,7 +456,7 @@ private:
     //store the custom values (mat4)
     std::map<std::string, mat4> mat4s;
     //store a custom texture
-    std::map<std::string, GLuint> customTextures;
+    std::map<std::string, unsigned int> customTextures;
 
     //store the locations of the custom floats
     std::map<std::string, unsigned int> floatLocs;

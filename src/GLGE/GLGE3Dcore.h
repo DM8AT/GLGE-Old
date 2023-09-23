@@ -13,8 +13,6 @@
 #ifndef _GLGE_3D_CORE_H_
 #define _GLGE_3D_CORE_H_
 
-//include glew
-#include <GL/glew.h>
 #include <vector>
 
 //include the needed components from CML
@@ -383,14 +381,14 @@ public:
      * 
      * @param shader the allready compiled shader
      */
-    void setShader(GLuint shader);
+    void setShader(unsigned int shader);
 
     /**
      * @brief Get the Shader from the object
      * 
-     * @return GLuint the position of the shader on the graphics card
+     * @return unsigned int the position of the shader on the graphics card
      */
-    GLuint getShader();
+    unsigned int getShader();
 
     /**
      * @brief apply a specific transform to the Objct
@@ -616,7 +614,7 @@ private:
     //store a mesh
     Mesh mesh;
     //store the vertex and index buffer
-    GLuint VBO ,IBO;
+    unsigned int VBO ,IBO;
     //save the shader
     Shader shader;
     //the local matrix to make the object correct
@@ -641,15 +639,15 @@ private:
     //store the material of the object
     Material mat;
     //store the position of the light positions
-    std::vector<GLuint> lightPosLocs;
+    std::vector<unsigned int> lightPosLocs;
     //store the position of the light colors
-    std::vector<GLuint> lightColLocs;
+    std::vector<unsigned int> lightColLocs;
     //store the position of the light intensitys
-    std::vector<GLuint> lightIntLocs;
+    std::vector<unsigned int> lightIntLocs;
     //store the position for the used lights
-    GLuint usedLigtsPos;
+    unsigned int usedLigtsPos;
     //store the position for the shadow maps
-    GLuint shadowMapSamplerLoc;
+    unsigned int shadowMapSamplerLoc;
 
     //compile the draw list
     void compileBuffers();
@@ -911,7 +909,7 @@ private:
                          0,0,0,1);
 
     //store the location of the exposure
-    GLuint expLoc;
+    unsigned int expLoc;
     //store the exposure
     float exposure = 0.1;
 

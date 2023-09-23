@@ -89,7 +89,7 @@ char* getGLErrorString(unsigned int error);
  * @param shaderProgram the program to get the variable from
  * @param name the name of the variable
  */
-GLint getUniformVar(GLuint shaderProgram, const char* name);
+GLint getUniformVar(unsigned int shaderProgram, const char* name);
 
 /**
  * @brief add a new shader object
@@ -98,7 +98,7 @@ GLint getUniformVar(GLuint shaderProgram, const char* name);
  * @param shadertext the text for the shader code
  * @param shaderType the type of the shader
  */
-void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
+void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shaderType);
 
 /**
  * @brief this function compiles the inputed two files into shaders
@@ -106,16 +106,16 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
  * @param vertex the file for the vertex shader
  * @param fragment the file for the fragment shader
  */
-GLuint compileShader(const char* vertex, const char* fragment);
+unsigned int compileShader(const char* vertex, const char* fragment);
 
 /**
  * @brief this file loads the two inputed std::vectors of strings as shader
  * 
  * @param fileDataVertex the data of the vertex shader
  * @param fileDataFragment the data of the fragment shader
- * @return GLuint the compiled shader
+ * @return unsigned int the compiled shader
  */
-GLuint compileShader(std::string fileDataVertex, std::string fileDataFragment, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile");
+unsigned int compileShader(std::string fileDataVertex, std::string fileDataFragment, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile");
 
 /**
  * @brief count the number of an character in an string

@@ -137,13 +137,13 @@ Shader::Shader(const char* vs, const char* gs, const char* fs)
     this->addGeometryShader(gs);
 }
 
-Shader::Shader(GLuint shader)
+Shader::Shader(unsigned int shader)
 {
     //store the inputed shader
     this->shader = shader;
 }
 
-GLuint Shader::getShader()
+unsigned int Shader::getShader()
 {
     //return the stored shader
     return this->shader;
@@ -163,7 +163,7 @@ void Shader::addGeometryShader(std::string source)
     addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
 
     //create an variable to check for success
-    GLint success = 0;
+    int success = 0;
     //setup an error log
     GLchar ErrorLog[1024] = {0};
 
@@ -228,7 +228,7 @@ void Shader::addGeometryShader(const char* f)
     addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
 
     //create an variable to check for success
-    GLint success = 0;
+    int success = 0;
     //setup an error log
     GLchar ErrorLog[1024] = {0};
 

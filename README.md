@@ -50,6 +50,11 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.15-1
+- removed OpenGL access from main script
+   - OpenGL can be included as an additional library, but it is not needed. The option is still available
+- added bloom effect as example in 3DTest.cpp
+   - bloom and ping-pong blure will have integrated functions in the future, it is just a showcase
 ## Update 0.15
 - added custom render targets
    - ability to render more complex post processing effects

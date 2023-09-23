@@ -8,6 +8,14 @@
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include the class for defining things
 #include "GLGEKlasses.hpp"
@@ -727,6 +735,13 @@ void RenderTarget::draw()
         return;
     }
 
+    //check if a callback function is bound
+    if (this->callback != NULL)
+    {
+        //call the callback function, taking this as an input
+        this->callback(this);
+    }
+
     //activate the FBO
     glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
 
@@ -770,6 +785,12 @@ void RenderTarget::changeSize(vec2 s)
     this->updateSize(s);
 }
 
+void RenderTarget::setCustomCallbackFunction(void(*func)(RenderTarget*))
+{
+    //store the inputed function (NULL is catched later)
+    this->callback = func;
+}
+
 void RenderTarget::changeSize(int newWidth, int newHeight)
 {
     //update the inernal size
@@ -778,6 +799,12 @@ void RenderTarget::changeSize(int newWidth, int newHeight)
 
 void RenderTarget::setShader(Shader* shader, bool ownShader)
 {
+    //check if an own shader is currently used
+    if (ownShader)
+    {
+        //if it is, delete the shader
+        delete this->shader;
+    }
     //store the inputed shader
     this->shader = shader;
     //say that the shader isn't its own
@@ -786,6 +813,12 @@ void RenderTarget::setShader(Shader* shader, bool ownShader)
 
 void RenderTarget::setShader(unsigned int shader)
 {
+    //check if an own shader is currently used
+    if (ownShader)
+    {
+        //if it is, delete the shader
+        delete this->shader;
+    }
     //generate the shader
     this->shader = new Shader(shader);
     //say that the sader is its own
@@ -814,6 +847,23 @@ vec2 RenderTarget::getSize()
 
 void RenderTarget::generateTexture(int w, int h, bool genTexture)
 {
+    //check if the size is to small
+    if ((w < 1) || (h < 1))
+    {
+        //check if an error should be outputed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] an size of " << w << ", " << h << std::endl;
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            //close with error code 1
+            exit(1);
+        }
+    }
+
     //create and bind the custom frame buffer
     glGenFramebuffers(1, &this->FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
@@ -846,7 +896,7 @@ void RenderTarget::generateTexture(int w, int h, bool genTexture)
     }
 
     //check if the framebuffer compiled correctly
-    GLuint fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    unsigned int fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if ( fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -868,6 +918,22 @@ void RenderTarget::generateTexture(int w, int h, bool genTexture)
 
 void RenderTarget::updateSize(vec2 s)
 {
+    //check if the size is to small
+    if ((s.x < 1.f) || (s.y < 1.f))
+    {
+        //check if an error should be outputed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] an size of " << s.x << ", " << s.y << " is not possible for a render target" << std::endl;
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            //close with error code 1
+            exit(1);
+        }
+    }
     //check if the texture exists
     if (this->texture != 0)
     {

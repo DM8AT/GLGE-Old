@@ -50,9 +50,6 @@
 //close the if-statement
 #endif //line 20
 
-//include the OpenGL dependencys
-#include <GL/glew.h>
-
 ///////////
 //DEFINES//
 ///////////
@@ -141,7 +138,7 @@ public:
      * 
      * @param shader the compiled shader
      */
-    Shader(GLuint shader);
+    Shader(unsigned int shader);
 
     /**
      * @brief set the shader to the current active shader
@@ -156,9 +153,9 @@ public:
     /**
      * @brief Get the Shader
      * 
-     * @return GLuint the compiled OpenGL shader
+     * @return unsigned int the compiled OpenGL shader
      */
-    GLuint getShader();
+    unsigned int getShader();
 
     /**
      * @brief delete the shader
@@ -411,7 +408,7 @@ public:
     
 private:
     //store the address of the OpenGL shader
-    GLuint shader = 0;
+    unsigned int shader = 0;
     //store how many textures are bound
     int boundTextures = 0;
 
@@ -436,7 +433,7 @@ private:
     //store the custom values (mat4)
     std::map<std::string, mat4> mat4s;
     //store a custom texture
-    std::map<std::string, GLuint> customTextures;
+    std::map<std::string, unsigned int> customTextures;
 
     //store the locations of the custom floats
     std::map<std::string, unsigned int> floatLocs;

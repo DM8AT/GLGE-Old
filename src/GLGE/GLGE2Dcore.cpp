@@ -8,6 +8,14 @@
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include the main file
 #include "GLGE2Dcore.h"
@@ -27,9 +35,9 @@
 //an pointer to the camera
 Camera2D* mainCam = NULL;
 //store the default 2D shader
-GLuint glgeDefault2DShader;
+unsigned int glgeDefault2DShader;
 //store the move matrix location in the default glge 2D shader
-GLint glgeDefaultMoveMatLoc;
+int glgeDefaultMoveMatLoc;
 
 ///////////
 //STRUCTS//
@@ -365,7 +373,7 @@ void Object2D::setShader(const char* p)
     this->shaderSetup(vs.c_str(), fs.c_str());
 }
 
-void Object2D::setShader(GLuint shader)
+void Object2D::setShader(unsigned int shader)
 {
     //store the inputed shader
     this->shader = shader;
@@ -383,7 +391,7 @@ void Object2D::setShader(std::string vs, std::string fs)
     this->moveMatLoc = glgeGetUniformVar(shader, glgeCamMatrix);
 }
 
-GLuint Object2D::getShader()
+unsigned int Object2D::getShader()
 {
     //return the shader
     return this->shader;    
@@ -395,7 +403,7 @@ void Object2D::setTexture(const char* file)
     this->texture = glgeTextureFromFile(file);
 }
 
-void Object2D::setTexture(GLuint texture)
+void Object2D::setTexture(unsigned int texture)
 {
     //store the inputed texture
     this->texture = texture;
@@ -409,7 +417,7 @@ void Object2D::deleteTexture()
     this->texture = 0;
 }
 
-GLuint Object2D::getTexture()
+unsigned int Object2D::getTexture()
 {
     //return the stored texture
     return this->texture;

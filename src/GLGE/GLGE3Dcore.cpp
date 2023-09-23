@@ -8,6 +8,14 @@
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include the 3d core
 #include "GLGE3Dcore.h"
@@ -53,7 +61,7 @@ bool has_double_slash(std::string &str)
 //////////////////////
 
 //store the default 3D shader
-GLuint glgeShaderDefault;
+unsigned int glgeShaderDefault;
 
 ////////////////////////////
 //Decalrations for Structs//
@@ -772,7 +780,7 @@ void Object::setShader(const char* p)
     this->shaderSetup(vs.c_str(), fs.c_str());
 }
 
-void Object::setShader(GLuint shader)
+void Object::setShader(unsigned int shader)
 {
     //store the inputed shader
     this->shader = Shader(shader);
@@ -799,7 +807,7 @@ void Object::setShader(std::string vs, const char* file)
     this->getUniforms();
 }
 
-GLuint Object::getShader()
+unsigned int Object::getShader()
 {
     return this->shader.getShader();
 }

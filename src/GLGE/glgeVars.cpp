@@ -261,7 +261,7 @@ unsigned int glgeLightingRBO = 0;
 unsigned int glgeLightingImageOut = 0;
 
 //store the uniforms in the post processing shader
-std::map<std::string, GLuint> glgePPSUniforms = {};
+std::map<std::string, unsigned int> glgePPSUniforms = {};
 
 //create and setup the lights vector
 std::vector<Light*> glgeLights;
@@ -273,19 +273,19 @@ unsigned int glgeShadowMapResolution = 1000;
 Shader glgeShadowShader;
 
 //store the uniform for the model matrix in the shadow shader
-GLuint glgeModelMatShadowLoc = 0;
+unsigned int glgeModelMatShadowLoc = 0;
 
 //store the uniform for the shdow matrices in the shadow shader
-GLuint glgeShadowMatShadowLoc = 0;
+unsigned int glgeShadowMatShadowLoc = 0;
 
 //store the uniform for the far plane in the shadow shader
-GLuint glgeFarShadowLoc = 0;
+unsigned int glgeFarShadowLoc = 0;
 
 //store the uniform for the light position in the shadow shader
-GLuint glgeLightPosShadowLoc = 0;
+unsigned int glgeLightPosShadowLoc = 0;
 
 //store the light world position
-GLuint glgeLightWorldPosUniform = 0;
+unsigned int glgeLightWorldPosUniform = 0;
 
 //store how to sample images
 GLenum glgeInterpolationMode = GL_NEAREST;
@@ -295,9 +295,6 @@ bool glgeIsShadowPass = false;
 
 //store the main camera for GLGE
 Camera* glgeMainCamera = NULL;
-
-//say if the down-and upsampleing should be done
-bool glgeDownUpSampeling = true;
 
 //say if the window is currently in fullscreen mode
 bool glgeFullscreen = false;

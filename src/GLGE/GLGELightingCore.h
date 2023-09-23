@@ -14,8 +14,6 @@
 
 //include the needed math librarys
 #include "CML/CMLVec3.h"
-//include GLEW
-#include <GL/glew.h>
 
 //declare the base lighting shaders
 
@@ -221,9 +219,9 @@ private:
     //store the light intensity
     float lightIntensity;
     //store the shadow map for the light
-    GLuint shadowFBO;
+    unsigned int shadowFBO;
     //store the shadow map cube texture
-    GLuint shadowMap;
+    unsigned int shadowMap;
     //setup the shadow map
     void setupShadowMap();
 };

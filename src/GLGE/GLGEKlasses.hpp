@@ -149,6 +149,13 @@ public:
     void changeSize(vec2 newSize);
 
     /**
+     * @brief Set a function the render target will automatically call when drawing
+     * The input to the function is automaticaly a poitner to the object it self, so it can be manipulated
+     * @param func a function pointer
+     */
+    void setCustomCallbackFunction(void(*func)(RenderTarget*));
+
+    /**
      * @brief change the size of the render target
      * 
      * @param newWidth the new width of the render target
@@ -205,6 +212,8 @@ private:
     bool ownTex = false;
     //say if the shader is its own
     bool ownShader = false;
+    //store a custom callback function
+    void(*callback)(RenderTarget*) = NULL;
 
     /**
      * @brief generate the texture for the render target as well as the render target it self

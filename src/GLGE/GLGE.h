@@ -32,8 +32,6 @@
 #define _GLGE_H_
 //say that the thinks can only be defined once
 #pragma once
-//include glew
-#include <GL/glew.h>
 //include CML
 #include "CML/CML.h"
 
@@ -355,7 +353,7 @@ float glgeGetDeltaTime();
  * @param shaderProgram the program to get the variable from
  * @param name the name of the variable
  */
-GLint glgeGetUniformVar(GLuint shaderProgram, const char* name);
+int glgeGetUniformVar(unsigned int shaderProgram, const char* name);
 
 /**
  * @brief add a new shader object
@@ -364,7 +362,7 @@ GLint glgeGetUniformVar(GLuint shaderProgram, const char* name);
  * @param shadertext the text for the shader code
  * @param shaderType the type of the shader
  */
-void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType);
+void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned int shaderType);
 
 /**
  * @brief this function compiles the inputed two files into shaders
@@ -372,16 +370,16 @@ void glgeAddShader(GLuint shaderProgram, const char* shadertext, GLenum shaderTy
  * @param vertex the file for the vertex shader
  * @param fragment the file for the fragment shader
  */
-GLuint glgeCompileShader(const char* vertex, const char* fragment);
+unsigned int glgeCompileShader(const char* vertex, const char* fragment);
 
 /**
  * @brief this file loads the two inputed std::vectors of strings as shader
  * 
  * @param fileDataVertex the data of the vertex shader
  * @param fileDataFragment the data of the fragment shader
- * @return GLuint the compiled shader
+ * @return unsigned int the compiled shader
  */
-GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment);
+unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment);
 
 /**
  * @brief load an texture from an file
@@ -390,7 +388,7 @@ GLuint glgeCompileShader(std::string fileDataVertex, std::string fileDataFragmen
  * @param storeSize an optional place to store the size of the Picture
  * @return GLint the compiled OpenGL texture
  */
-GLuint glgeTextureFromFile(const char* file, vec2* storeSize = NULL);
+unsigned int glgeTextureFromFile(const char* file, vec2* storeSize = NULL);
 
 /**
  * @brief get the size of an texture from an file
@@ -456,7 +454,7 @@ void glgeSetLightingShader(std::string lightingShader);
  * 
  * @param shader the allready compiled OpenGL shader
  */
-void glgeSetLightingShader(GLuint shader);
+void glgeSetLightingShader(unsigned int shader);
 
 /**
  * @brief bind an shader that will controll how light sources effect the objects
@@ -477,7 +475,7 @@ Shader* glgeSetPostProsessingShader(std::string shader);
  * 
  * @param shader the allready compiled OpenGL shader
  */
-Shader* glgeSetPostProsessingShader(GLuint shader);
+Shader* glgeSetPostProsessingShader(unsigned int shader);
 
 /**
  * @brief set the post-processing shader to an allready existing shader
@@ -566,37 +564,37 @@ float glgeGetCurrentElapsedTime();
 /**
  * @brief get the albedo texture from the last frame
  * 
- * @return GLuint a pointer to the albedo texture on the GPU
+ * @return unsigned int a pointer to the albedo texture on the GPU
  */
-GLuint glgeGetMainAlbedoMap();
+unsigned int glgeGetMainAlbedoMap();
 
 /**
  * @brief get the normal texture from the last frame
  * 
- * @return GLuint a pointer to the normal texture on the GPU
+ * @return unsigned int a pointer to the normal texture on the GPU
  */
-GLuint glgeGetMainNormalMap();
+unsigned int glgeGetMainNormalMap();
 
 /**
  * @brief get the position texture from the last frame
  * 
- * @return GLuint a position to the albedo texture on the GPU
+ * @return unsigned int a position to the albedo texture on the GPU
  */
-GLuint glgeGetMainPositionMap();
+unsigned int glgeGetMainPositionMap();
 
 /**
  * @brief get the roughness texture from the last frame
  * 
- * @return GLuint a roughness to the albedo texture on the GPU
+ * @return unsigned int a roughness to the albedo texture on the GPU
  */
-GLuint glgeGetMainRoughnessMap();
+unsigned int glgeGetMainRoughnessMap();
 
 /**
  * @brief get a texture that always points to the last frame
  * 
- * @return GLuint the OpenGL texture
+ * @return unsigned int the OpenGL texture
  */
-GLuint glgeGetLastFrame();
+unsigned int glgeGetLastFrame();
 
 /**
  * @brief say if GLGE should exit the application if an error occures
@@ -617,26 +615,6 @@ void glgeToggleExitOnError();
  * @return false : glge won't clos if an error occures
  */
 bool glgeGetExitOnError();
-
-/**
- * @brief say if GLGE should down and then upsample the lighted image before the post-processing pass
- * 
- * @param shouldUse say if the sampling chain should be used
- */
-void glgeUseDownUpSampeling(bool shouldUse);
-
-/**
- * @brief swap the current state of the down-upsampeling chain use
- */
-void glgeSwapDownUpSampeling();
-
-/**
- * @brief say if GLGE is currently using the down and upsampeling chain before the post-processing pass
- * 
- * @return true : GLGE will down and upsample before the post-processing pass | 
- * @return false : GLGE won't down and upsample before the post-processing pass
- */
-bool glgeGetDownUpSampeling();
 
 /**
  * @brief set the function that glge calles after it has resized the window

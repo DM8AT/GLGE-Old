@@ -302,7 +302,7 @@ public:
      * 
      * @param shader the allready compiled shader
      */
-    void setShader(GLuint shader);
+    void setShader(unsigned int shader);
 
     /**
      * @brief Set the Shader
@@ -315,9 +315,9 @@ public:
     /**
      * @brief Get the Shader
      * 
-     * @return GLuint the compiled shader
+     * @return unsigned int the compiled shader
      */
-    GLuint getShader();
+    unsigned int getShader();
 
     /**
      * @brief Set the Texture for the object
@@ -331,7 +331,7 @@ public:
      * 
      * @param texture the allready compiled OpenGL texture
      */
-    void setTexture(GLuint texture);
+    void setTexture(unsigned int texture);
 
     /**
      * @brief deletes the own texture and sets it to 0
@@ -341,9 +341,9 @@ public:
     /**
      * @brief Get the Texture from the file
      * 
-     * @return GLuint the allready compiled OpenGL texture
+     * @return unsigned int the allready compiled OpenGL texture
      */
-    GLuint getTexture();
+    unsigned int getTexture();
 
     /**
      * @brief Set the Transform for the object
@@ -491,17 +491,17 @@ protected:
     //store the transform of the object
     Transform2D transf;
     //store the vertex and index buffer
-    GLuint VBO, IBO;
+    unsigned int VBO, IBO;
     //save the shader
-    GLint shader;
+    int shader;
     //store the move matrix location
-    GLuint moveMatLoc;
+    unsigned int moveMatLoc;
     //the local matrix to make the object correct
     mat3 moveMat = mat3(1,0,0,
                         0,1,0,
                         0,0,0);
     //store a texture
-    GLuint texture;
+    unsigned int texture;
     //say if the object is static
     bool isStatic;
     //save the length of the vertex and index buffer

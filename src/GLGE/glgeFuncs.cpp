@@ -8,6 +8,14 @@
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include the GLGE dependencys
 #include "glgeErrors.hpp"
@@ -73,10 +81,10 @@ bool readFile(const char* filename, std::string& output)
 
 //an copy of the shader code to make the shader handeling here easier
 
-void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
+void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shaderType)
 {
     //create a new shader with the inputed type
-    GLuint shaderObj = glCreateShader(shaderType);
+    unsigned int shaderObj = glCreateShader(shaderType);
 
     //check if the shader object could be created
     if (shaderObj == 0)
@@ -101,7 +109,7 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
     p[0] = shadertext;
 
     //store the length of the text
-    GLint lengths[1];
+    int lengths[1];
     lengths[0] = strlen(shadertext);
 
     //set the shader source code
@@ -111,7 +119,7 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
     glCompileShader(shaderObj);
 
     //check for compiling errors
-    GLint success;
+    int success;
     glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
 
     //if there was an error, print a message and exit
@@ -141,10 +149,10 @@ void addShader(GLuint shaderProgram, const char* shadertext, GLenum shaderType)
 }
 
 //get a uniform variable from a shader
-GLint getUniformVar(GLuint program, const char* name)
+int getUniformVar(unsigned int program, const char* name)
 {
     //create the output variable
-    GLint ret;
+    int ret;
     //set the output variable to the uniform variable in the shader
     ret = glGetUniformLocation(program, name);
     //if the id is -1, output an error
@@ -165,10 +173,10 @@ GLint getUniformVar(GLuint program, const char* name)
 }
 
 //compile and add the shaders to this object
-GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShader, const char* fileFragmentShader)
+unsigned int compileShader(std::string vs, std::string fs, const char* fileVertexShader, const char* fileFragmentShader)
 {
     //create a new shader program
-    GLuint shaderProgram = glCreateProgram();
+    unsigned int shaderProgram = glCreateProgram();
 
     //check if the shader could be created
     if (shaderProgram == 0)
@@ -195,7 +203,7 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
     addShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
     //create an variable to check for success
-    GLint success = 0;
+    int success = 0;
     //setup an error log
     GLchar ErrorLog[1024] = {0};
 
@@ -253,7 +261,7 @@ GLuint compileShader(std::string vs, std::string fs, const char* fileVertexShade
 }
 
 //compile and add the shaders to this object
-GLuint compileShader(const char* fileNameVS, const char* fileNameFS)
+unsigned int compileShader(const char* fileNameVS, const char* fileNameFS)
 {
     //store the source of the vertex shader
     std::string vs;
@@ -506,8 +514,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -520,8 +528,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -534,8 +542,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -548,8 +556,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -565,7 +573,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
 
     //check if the framebuffer compiled correctly
-    GLuint fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    unsigned int fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     //if the frame buffer compiled not correctly
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -592,8 +600,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -630,8 +638,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
@@ -668,8 +676,8 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindTexture(GL_TEXTURE_2D, glgeMainImagePPS);
     //set the texture parameters so it dosn't loop around the screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer

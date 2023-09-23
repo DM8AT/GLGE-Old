@@ -8,6 +8,14 @@
  * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
+#include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include GLGEMaterialCore
 #include "GLGEMaterialCore.h"
@@ -36,7 +44,7 @@ Material::Material(const char* image, const char* uniform, float roughness, floa
     this->setCustomTexture(uniform, image);
 }
 
-Material::Material(GLuint texture, const char* uniform, float roughness, float metalic)
+Material::Material(unsigned int texture, const char* uniform, float roughness, float metalic)
 {
     //store the inputed roughness
     this->roughness = roughness;
@@ -121,7 +129,7 @@ void Material::setMetalicMap(const char* image, const char* uniformName)
 
 }
 
-void Material::applyShader(GLuint shader)
+void Material::applyShader(unsigned int shader)
 {
     //activate the inputed shader
     glUseProgram(shader);

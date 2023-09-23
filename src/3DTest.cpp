@@ -56,7 +56,18 @@ Light l2;
 
 Shader* invColPPS;
 
-RenderTarget renderTarget;
+//store the bright parts of the image
+RenderTarget brightMap;
+//store the first render target for the ping-pong blure
+RenderTarget pingPongBlure_first;
+//store the second render target for the ping-pong blure
+RenderTarget pingPongBlure_second;
+//store a shader for the final bloom calculation
+Shader bloomShader;
+//store a shader for down sampeling
+Shader downSample;
+//store a shader for up sampeling
+Shader upSample;
 
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
@@ -411,8 +422,6 @@ void wallSetup()
     Material mat;
     //load the albedo to the material
     mat = Material("assets/WallTexture/harshbricks-albedo.png", GLGE_TEXTURE, 0.2);
-    //set the Interpolation mode to linear, so the normal get linearly interpolated. It looks better
-    glgeSetInterpolationMode(GLGE_LINEAR);
 
     //load the normal map to the material
     mat.setNormalMap("assets/WallTexture/harshbricks-normal.png", GLGE_NORMAL_MAP);
@@ -423,13 +432,10 @@ void wallSetup()
     //load the height map
     mat.setHeightMap("assets/WallTexture/harshbricks-height5-16.png");
 
-    //reset the Interpolation mode
-    glgeSetInterpolationMode(GLGE_NEAREST);
-
     //create a shader for the wall
-    Shader shader = Shader("src/vertexShader.vs", "src/fragmentShader330.fs");
+    Shader shader = Shader("src/Shaders/vertexShader.vs", "src/Shaders/fragmentShader330.fs");
     //set a geometry shader for the wall
-    shader.addGeometryShader("src/geometryShader.gs");
+    shader.addGeometryShader("src/Shaders/geometryShader.gs");
 
     //create the Wall from an file
     wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,155,0), 1.f));
@@ -443,23 +449,115 @@ void wallSetup()
 
 void windowResized(int width, int height)
 {
-    //update the size of the render target
-    renderTarget.changeSize(width, height);
+    //check if the width is less than 50
+    if (width < 50)
+    {
+        //resize the window to an width of 50
+        glgeResizeWindow(50, height);
+        //stop this script
+        return;
+    }
+    //check if the height is less than 50
+    if (height < 50)
+    {
+        //resize the window to an height of 50
+        glgeResizeWindow(width, 50);
+        //stop this script
+        return;
+    }
+    //update the size of the render targets
+    brightMap.changeSize(width, height);
     //print debug information
     printf("Window resized to: %d, %d\n", width,height);
 }
 
-//a function to set up an shader
-Shader testCustomPPSFunc(unsigned int curr)
+Shader calculateBloom(unsigned int img)
 {
-    //create a custom shader object
-    Shader s("src/testShader.fs", GLGE_FRAGMENT_SHADER);
-    //set the input for the main image (can be named anything)
-    s.setCustomTexture("glgeMainImage", curr);
-    //set the input for the window size (can be named anything)
-    s.setCustomVec2("glgeWindowSize", glgeGetWindowSize());
-    //give the shader to the program
-    return s;
+    //update the render buffer for the contrast
+    brightMap.draw();
+
+    //specefy the amount of downsamples
+    unsigned int samples = 2;
+
+    //make the first setup for the blure using the brightness map
+    //set the size to half the size of the brightness map
+    pingPongBlure_first.changeSize(brightMap.getSize()/vec2(2,2));
+    //load the texture from the brightness map to the shader
+    downSample.setCustomTexture("image", brightMap.getTexture());
+    //pass the size of the brightness map to the shader
+    downSample.setCustomVec2("screenSize", brightMap.getSize());
+    //pass a multiplyer for the texture coordinates to the shader
+    downSample.setCustomInt("sampleMult", 2);
+    //bind the down sampleing shader to the render target
+    pingPongBlure_first.setShader(&downSample);
+    
+    //down sample
+    for (unsigned int i = 0; i < samples; i++)
+    {
+        //draw the first ping-pong blure
+        pingPongBlure_first.draw();
+        //setup the second ping-pong blure
+        //change the size of the render target by dividing the size by 2
+        pingPongBlure_second.changeSize(pingPongBlure_first.getSize()/vec2(2,2));
+        //pass the image of the other blure pass to the shader
+        downSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+        //pass the size of the other render target to the shader
+        downSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+        //multiply the texture coordinate multiplyer by 2
+        downSample.setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
+        //bind the shader (just to be sure it is correct)
+        pingPongBlure_second.setShader(&downSample);
+        //draw the blure pass
+        pingPongBlure_second.draw();
+
+        //setup the blure pass for the first render target
+        //set the size to half the size of the other render target
+        pingPongBlure_first.changeSize(pingPongBlure_second.getSize()/vec2(2,2));
+        //bind the output texture of the other render target
+        downSample.setCustomTexture("image", pingPongBlure_second.getTexture());
+        //pass the size of the other render target
+        downSample.setCustomVec2("screenSize", pingPongBlure_second.getSize());
+        //multiply the multiplyer for the texture coordinates by 2
+        downSample.setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
+    }
+    //reset the value for the sample multiplyer, make sure to divide instantly by 2 because it was multiplied one more time than drawn
+    upSample.setCustomInt("sampleMult", downSample.getIntByName("sampleMult")/2);
+    //up sampling
+    for (unsigned int i = 0; i < samples; i++)
+    {
+        //set the size for the first render target to two times the size of the second render target
+        pingPongBlure_first.changeSize(pingPongBlure_second.getSize().scale(vec2(2,2)));
+        //pass the output image of the second render target to the shader
+        upSample.setCustomTexture("image", pingPongBlure_second.getTexture());
+        //pass the size of the second render target to the shader
+        upSample.setCustomVec2("screenSize", pingPongBlure_second.getSize());
+        //divide the multiplyer for the texture coordinates by 2
+        upSample.setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
+        //bind the up sampeling shader to the first render target
+        pingPongBlure_first.setShader(&upSample);
+        //draw the first render target
+        pingPongBlure_first.draw();
+
+        //set the size of the second render target to half the size of the first render target
+        pingPongBlure_second.changeSize(pingPongBlure_first.getSize().scale(vec2(2,2)));
+        //pass the output image of the first render target to the shader
+        upSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+        //pass the size of the first render target to the shader
+        upSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+        //divide the multiplyer for the texture coordinates by 2
+        upSample.setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
+        //bind the up sampeling shader to the second render target
+        pingPongBlure_second.setShader(&upSample);
+        //draw the second render target
+        pingPongBlure_second.draw();
+    }
+
+    //pass the current texture to the bloom shader
+    bloomShader.setCustomTexture("currImage", img);
+    //recalgulate the uniforms for the bloom shader
+    bloomShader.recalculateUniforms();
+    //output the bloom shader
+    return bloomShader;
 }
 
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
@@ -471,6 +569,8 @@ void run3Dexample(int argc, char** argv)
 
     //as second step, a window is created. This should be done second, because it also initalises the glew library
     glgeCreateWindow("3D example script for GLGE : init...", 1000, 1000);
+    //set the interpolation mode to linear
+    glgeSetInterpolationMode(GLGE_LINEAR);
 
     //after creating the window, the 3D core is initalised. This sets all thinks like depth buffer correctly
     glgeInit3DCore();
@@ -485,20 +585,56 @@ void run3Dexample(int argc, char** argv)
     glgeSetLightingShader("src/GLGE/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
-    glgeSetPostProsessingShader("src/testPostProcessingShader.fs");
+    glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
     //bind another post processing shader
-    invColPPS = glgeSetPostProsessingShader("src/invertColors.fs");
+    invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
     //set a uniform float in the shader to controll the strength for the invertion
     invColPPS->setCustomFloat("strength", 1);
     //recalculate the positions of the uniforms
     invColPPS->recalculateUniforms();
-    //add a function that will be executed as a post-processing shader during the post-processing passes
-    glgeAddCustomPostProcessingFunc(testCustomPPSFunc);
 
-    //generate a render target using an shader
-    renderTarget = RenderTarget(glgeGetScreenSize());
-    //set the shader for the render target
-    renderTarget.setShader(new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/invertColors.fs"), true);
+    /////////
+    //BLOOM//
+    /////////
+
+    //bind a post processing funciton for bloom calculation
+    glgeAddCustomPostProcessingFunc(calculateBloom);
+    //generate a render target for the bright parts of the image
+    brightMap = RenderTarget(glgeGetScreenSize());
+    //bind the shader that should be applied for the calculations
+    brightMap.setShader(new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/brightnessContrast.fs"), true);
+    //pass the lit image to the shader
+    brightMap.getShader()->setCustomTexture("litImage", glgeGetLighningBuffer());
+    //recalculate the uniforms for the shader
+    brightMap.getShader()->recalculateUniforms();
+    //setup the first render target for the blure
+    pingPongBlure_first = RenderTarget(glgeGetScreenSize());
+    //setup the second render target for the blure
+    pingPongBlure_second = RenderTarget(glgeGetScreenSize());
+    //setup the bloom shader
+    bloomShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/finalBloomShader.fs");
+    //pass the lit image to the bloom shader
+    bloomShader.setCustomTexture("bloomMap", pingPongBlure_first.getTexture());
+    //compile the shader for down sampeling
+    downSample = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/downSampleShader.fs");
+    //set down the image for the down sampeling shader
+    downSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+    //set down the image size for the down sampeling shader
+    downSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+    //set the uniform for the texture map multiplyer
+    downSample.setCustomInt("sampleMult", 1);
+    //recalculate the uniform variables
+    downSample.recalculateUniforms();
+    //compile the shader for up sampeling
+    upSample = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/upSampleShader.fs");
+    //set up the image for the down sampeling shader
+    upSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+    //set up the image size for the down sampeling shader
+    upSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+    //set the uniform for the texture map multiplyer
+    upSample.setCustomInt("sampleMult", 1);
+    //recalculate the uniform variables
+    upSample.recalculateUniforms();
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
@@ -512,7 +648,7 @@ void run3Dexample(int argc, char** argv)
                   "assets/skybox/back.jpg");
 
     //set the FPS limit (Base Limit = 60)
-    glgeSetMaxFPS(70);
+    glgeSetMaxFPS(100);
 
     //the binding of an display function is here optional, because an default function is allready created behind the scens. But it is recomended if something
     //like drawing an object should be used
@@ -539,17 +675,21 @@ void run3Dexample(int argc, char** argv)
     floorSetup();
     //the cube is set up, like the floor is set up
     cubeSetup();
+    //set the interpolation mode for textures to nearest
+    glgeSetInterpolationMode(GLGE_NEAREST);
     //setup the thing by loading it form an .obj file
     thingSetup();
+    //set the interpolation mode for textures to linear
+    glgeSetInterpolationMode(GLGE_LINEAR);
     //setup the enterprise object
     enterpriseSetup();
     //setup the wall
     wallSetup();
 
-    l2 = Light(2,5,0, 0.35,0.125,0.5, 50);
+    l2 = Light(2,5,0, 0.35,0.125,0.5, 100);
     glgeAddGlobalLighSource(&l2);
 
-    light = Light(10,5,0, 1,1,1, 250);
+    light = Light(10,5,0, 1,1,1, 50);
     glgeAddGlobalLighSource(&light);
 
     //disable the mouse pointer
