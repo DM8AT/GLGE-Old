@@ -10,3 +10,6 @@ bin/*
 assets/atlas.png
 assets/atlas.png.json
 assets/atlas_mcTest.png
+
+# Doxygen files
+doxygen/*
