@@ -56,8 +56,6 @@ Light l2;
 
 Shader* invColPPS;
 
-//store the bright parts of the image
-RenderTarget brightMap;
 //store the first render target for the ping-pong blure
 RenderTarget pingPongBlure_first;
 //store the second render target for the ping-pong blure
@@ -465,27 +463,21 @@ void windowResized(int width, int height)
         //stop this script
         return;
     }
-    //update the size of the render targets
-    brightMap.changeSize(width, height);
     //print debug information
     printf("Window resized to: %d, %d\n", width,height);
 }
 
 Shader calculateBloom(unsigned int img)
 {
-    //update the render buffer for the contrast
-    brightMap.draw();
-
     //specefy the amount of downsamples
     unsigned int samples = 2;
-
     //make the first setup for the blure using the brightness map
     //set the size to half the size of the brightness map
-    pingPongBlure_first.changeSize(brightMap.getSize()/vec2(2,2));
+    pingPongBlure_first.changeSize(glgeGetScreenSize()/vec2(2,2));
     //load the texture from the brightness map to the shader
-    downSample.setCustomTexture("image", brightMap.getTexture());
+    downSample.setCustomTexture("image", glgeGetLighningBuffer());
     //pass the size of the brightness map to the shader
-    downSample.setCustomVec2("screenSize", brightMap.getSize());
+    downSample.setCustomVec2("screenSize", glgeGetScreenSize());
     //pass a multiplyer for the texture coordinates to the shader
     downSample.setCustomInt("sampleMult", 2);
     //bind the down sampleing shader to the render target
@@ -599,14 +591,6 @@ void run3Dexample(int argc, char** argv)
 
     //bind a post processing funciton for bloom calculation
     glgeAddCustomPostProcessingFunc(calculateBloom);
-    //generate a render target for the bright parts of the image
-    brightMap = RenderTarget(glgeGetScreenSize());
-    //bind the shader that should be applied for the calculations
-    brightMap.setShader(new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/brightnessContrast.fs"), true);
-    //pass the lit image to the shader
-    brightMap.getShader()->setCustomTexture("litImage", glgeGetLighningBuffer());
-    //recalculate the uniforms for the shader
-    brightMap.getShader()->recalculateUniforms();
     //setup the first render target for the blure
     pingPongBlure_first = RenderTarget(glgeGetScreenSize());
     //setup the second render target for the blure

@@ -11,7 +11,7 @@ out vec4 FragColor;
 
 void main()
 {
-    vec3 col = texture(bloomMap, texCoords).rgb*vec3(5);
+    vec3 col = texture(bloomMap, texCoords).rgb*vec3(0.5);
     col += (texture(currImage, texCoords).rgb);
 
     FragColor = vec4(col, 1);
