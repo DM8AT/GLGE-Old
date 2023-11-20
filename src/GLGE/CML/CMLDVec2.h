@@ -1,12 +1,13 @@
 #ifndef _CMLDVEC2_H_
 #define _CMLDVEC2_H_
-#pragma once
 
 struct dvec2
 {
     double x,y;
 
     dvec2();
+
+    dvec2(double xy);
 
     dvec2(double x, double y);
 

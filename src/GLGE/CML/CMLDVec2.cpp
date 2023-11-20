@@ -7,6 +7,12 @@ dvec2::dvec2()
     y = 0;
 }
 
+dvec2::dvec2(double xy)
+{
+    this->x = xy;
+    this->y = xy;
+}
+
 dvec2::dvec2(double x, double y)
 {
     this->x = x;

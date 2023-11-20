@@ -8,6 +8,8 @@ struct vec2
 
     vec2();
 
+    vec2(float xy);
+
     vec2(float x, float y);
 
     vec2 operator+(vec2 v);

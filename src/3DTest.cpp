@@ -408,7 +408,7 @@ void enterpriseSetup()
     enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1));
 
     //create a material for the object
-    Material mat = Material(vec4(0.25,0.25,0.25, 1.f), 0.2, 1.0);
+    Material mat = Material(vec4(vec3(0.25), 1.f), 0.2, 1.0);
 
     //bind the material to the enterprise
     enterprise.setMaterial(mat);

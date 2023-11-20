@@ -1,6 +1,9 @@
+#ifndef CML_NO_VEC_CASTS
+#include "CMLVec2.h"
+#endif
+
 #ifndef _CMLVEC3_H_
 #define _CMLVEC3_H_
-#pragma once
 
 struct vec3
 {
@@ -8,7 +11,15 @@ struct vec3
 
     vec3();
 
+    vec3(float xyz);
+
     vec3(float x, float y, float z);
+
+#ifndef CML_NO_VEC_CASTS
+    vec3(vec2 xy, float z);
+
+    vec3(float x, vec2 yz);
+#endif
 
     vec3 operator+(vec3 v);
 

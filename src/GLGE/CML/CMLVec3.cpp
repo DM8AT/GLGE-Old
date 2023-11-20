@@ -8,12 +8,37 @@ vec3::vec3()
     z = 0;
 }
 
+vec3::vec3(float xyz)
+{
+    this->x = xyz;
+    this->y = xyz;
+    this->z = xyz;
+}
+
 vec3::vec3(float x, float y, float z)
 {
     this->x = x;
     this->y = y;
     this->z = z;
 }
+
+#ifndef CML_NO_VEC_CASTS
+
+vec3::vec3(vec2 xy, float z)
+{
+    this->x = xy.x;
+    this->y = xy.y;
+    this->z = z;
+}
+
+vec3::vec3(float x, vec2 yz)
+{
+    this->x = x;
+    this->y = yz.x;
+    this->z = yz.y;
+}
+
+#endif
 
 vec3 vec3::operator+(vec3 v)
 {

@@ -1,6 +1,10 @@
+//check if vec to vec casts should be possible
+#ifndef CML_NO_VEC_CASTS
+#include "CMLDVec2.h"
+#endif
+
 #ifndef _CMLDVEC3_H_
 #define _CMLDVEC3_H_
-#pragma once
 
 struct dvec3
 {
@@ -8,7 +12,15 @@ struct dvec3
 
     dvec3();
 
+    dvec3(double xyz);
+
     dvec3(double x, double y, double z);
+
+#ifndef CML_NO_VEC_CASTS
+    dvec3(dvec2 xy, double z);
+
+    dvec3(double x, dvec2 yz);
+#endif
 
     dvec3 operator+(dvec3 v);
 

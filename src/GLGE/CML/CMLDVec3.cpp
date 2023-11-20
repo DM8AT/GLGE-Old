@@ -8,12 +8,35 @@ dvec3::dvec3()
     z = 0;
 }
 
+dvec3::dvec3(double xyz)
+{
+    this->x = xyz;
+    this->y = xyz;
+    this->z = xyz;
+}
+
 dvec3::dvec3(double x, double y, double z)
 {
     this->x = x;
     this->y = y;
     this->z = z;
 }
+
+#ifndef CML_NO_VEC_CASTS
+dvec3::dvec3(dvec2 xy, double z)
+{
+    this->x = xy.x;
+    this->y = xy.y;
+    this->z = z;
+}
+
+dvec3::dvec3(double x, dvec2 yz)
+{
+    this->x = x;
+    this->y = yz.x;
+    this->z = yz.y;
+}
+#endif
 
 dvec3 dvec3::operator+(dvec3 v)
 {

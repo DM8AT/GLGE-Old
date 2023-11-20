@@ -7,6 +7,12 @@ vec2::vec2()
     y = 0;
 }
 
+vec2::vec2(float xy)
+{
+    this->x = xy;
+    this->y = xy;
+}
+
 vec2::vec2(float x, float y)
 {
     this->x = x;

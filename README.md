@@ -51,6 +51,15 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.15-2
+- importing a vector of a size > 2 will now include all lower size vectors by default
+- added more constructors to vec2, vec3, vec4, dvec2, dvec3, dvec4
+   - supporting construction from an vec3 from one vec2 and a float/double
+   - supporting construction from an vec4 from one vec3 and a float/double
+   - supporting construction from an vec4 from two vec2s
+   - supporting construction from an vec2/vec3/vec4 from one float/double
+- most changes can be reverted by adding CML_NO_VEC_CASTS before importing the modules
+   - constructor for one float will always be created
 ## Update 0.15-1
 - removed OpenGL access from main script
    - OpenGL can be included as an additional library, but it is not needed. The option is still available
