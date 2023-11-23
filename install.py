@@ -39,4 +39,4 @@ if os.path.isdir("/usr/lib64/x86_64-linux-gnu"):
     print("installed libGLGE.so to /usr/lib64/x86_64-linux-gnu")
 
 # copy the include/GLGE directory to /usr/include
-os.system("sudo mv bin/include/GLGE /usr/include/")
+os.system("sudo cp -r bin/include/GLGE /usr/include/")
