@@ -92,9 +92,9 @@ void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shader
         //output an error message
         if (glgeErrorOutput)
         {
-            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << std::endl;
+            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << "\n";
             //print where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -134,7 +134,7 @@ void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shader
             //print the message
             printf(GLGE_ERROR_SHADER_COMPILE_ERROR, shaderType, InfoLog);
             //print where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -163,7 +163,7 @@ int getUniformVar(unsigned int program, const char* name)
         {
             printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << "\n";
         }
         //return -1
         return -1;
@@ -186,7 +186,7 @@ unsigned int compileShader(std::string vs, std::string fs, const char* fileVerte
         {
             printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -389,7 +389,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     {
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_WINDOW_SUB_FUNC<< std::endl;
+            std::cerr << GLGE_ERROR_STR_WINDOW_SUB_FUNC<< "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -404,7 +404,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         //if sdl throws an value different than 0, print an error
-        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << std::endl;
+        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
         //exit with an error
         exit(1);
     }
@@ -430,7 +430,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (!window)
     {
         //if the window couldn't be created, throw an fatal error
-        std::cerr << "[FATAL ERROR] GLGE couldn't create the SDL main window. SDL error: " << SDL_GetError() << std::endl;
+        std::cerr << "[FATAL ERROR] GLGE couldn't create the SDL main window. SDL error: " << SDL_GetError() << "\n";
         //exit with an error
         exit(1);
     }
@@ -444,7 +444,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (context == NULL)
     {
         //if the context is not valide, print an fatal error
-        std::cerr << "[FATAL ERROR] GLGE could not create a OpenGL Context to the SDL Window. SDL Error: " << SDL_GetError() << std::endl;
+        std::cerr << "[FATAL ERROR] GLGE could not create a OpenGL Context to the SDL Window. SDL Error: " << SDL_GetError() << "\n";
         //close SDL
         SDL_Quit();
         //exit with an error
@@ -457,7 +457,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
         if(glgeErrorOutput)
         {
             printf(GLGE_ERROR_GLEW_INIT_FAILED, glewGetErrorString(glewInit()));
-            std::cerr << GLGE_ERROR_STR_GLEW_INIT << std::endl;
+            std::cerr << GLGE_ERROR_STR_GLEW_INIT << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -473,10 +473,16 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //store the window pointer
     glgeMainWindow = window;
 
+    //clear the main window
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SDL_GL_SwapWindow(glgeMainWindow);
+
     //store the size of the window
     glgeWindowSize = s;
     //store the position of the window
     glgeWindowPosition = p;
+    //store the window aspect ratio
+    glgeWindowAspect = s.x/s.y;
 
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);
@@ -492,10 +498,6 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //setup the depth buffer
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
-
-    //setup transparency
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //create and bind the custom frame buffer
     glGenFramebuffers(1, &glgeFBO);
@@ -513,7 +515,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameAlbedoMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -527,7 +529,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameNormalMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -541,27 +543,73 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFramePositionMap);
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, glgeFramePositionMap, 0);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     //generate a texture to store the fragment roughness
     glGenTextures(1, &glgeFrameRoughnessMap);
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, glgeFrameRoughnessMap, 0);
+
+    //generate a texture to store the lighting pass output
+    glGenTextures(1, &glgeLightingImageOut);
+    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, glgeLightingImageOut, 0);
+
+    //generate a texture to store the depth information
+    glGenTextures(1, &glgeDepthBuffer);
+    glBindTexture(GL_TEXTURE_2D, glgeDepthBuffer);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, glgeDepthBuffer, 0);
+
+    //generate a texture to store the depth information
+    glGenTextures(1, &glgeSolidLitBuffer);
+    glBindTexture(GL_TEXTURE_2D, glgeSolidLitBuffer);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, glgeSolidLitBuffer, 0);
+
+    //generate a texture to store the last tick image
+    glGenTextures(1, &glgeTransparentAcumTexture);
+    glBindTexture(GL_TEXTURE_2D, glgeTransparentAcumTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, GL_TEXTURE_2D, glgeTransparentAcumTexture, 0);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -578,7 +626,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
         //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
         //stop the program
         exit(1);
     }
@@ -599,7 +647,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glGenTextures(1, &glgeFrameLastTick);
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -616,45 +664,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
         //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
-        //stop the program
-        exit(1);
-    }
-
-    //create and bind the thired custom frame buffer
-    glGenFramebuffers(1, &glgeLightingFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, glgeLightingFBO);
-
-    //generate the second Render Buffer
-    glGenRenderbuffers(1, &glgeLightingRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-    //attach an depth stencil
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeLightingRBO);
-
-    //generate a texture to store the lighting pass output
-    glGenTextures(1, &glgeLightingImageOut);
-    glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glgeLightingImageOut, 0);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //check if the framebuffer compiled correctly
-    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-    {
-        //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
         //stop the program
         exit(1);
     }
@@ -668,14 +678,12 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glBindRenderbuffer(GL_RENDERBUFFER, glgePPSRBO);
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
-    //attach an depth stencil
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, glgeLightingRBO);
 
     //generate a texture to store the lighting pass output
     glGenTextures(1, &glgeMainImagePPS);
     glBindTexture(GL_TEXTURE_2D, glgeMainImagePPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -692,7 +700,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
         //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
         //stop the program
         exit(1);
     }
@@ -729,7 +737,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //check if the albedo map was found
     if (!albedo)
     {
-        std::cerr << "Could not find albedo map in default lighthing shader" << std::endl;
+        std::cerr << "Could not find albedo map in default lighthing shader" << "\n";
         if (glgeExitOnError)
         {
             //only exit the program if glge is tolled to exit on an error
@@ -817,6 +825,18 @@ void createWindow(const char* n, vec2 s, vec2 p)
     glgeSkyboxProject = getUniformVar(glgeSkyboxShader, "glgeProject");
     //get the sampler
     glgeSkyboxSampler = getUniformVar(glgeSkyboxShader, "glgeSkybox");
+
+    //setup the basic transparent combine shader
+    glgeTransparentCombineShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_TRANSPARENT_COMBINE_SHADER);
+    //load the uniforms
+    //load the uniform for the accumulation texture
+    glgeTransparentCombineShader->setCustomTexture("glgeTranspAccumTexture", glgeTransparentAcumTexture);
+    //load the uniform for the count texture
+    glgeTransparentCombineShader->setCustomTexture("glgeTranspCountTexture", glgeDepthBuffer);
+    //update the uniform binding
+    glgeTransparentCombineShader->recalculateUniforms();
+    //say that no custom shader is bound
+    glgeHasCustomTransparentCombineShader = false;
 }
 
 //convert an error code into an string
@@ -910,8 +930,6 @@ void resizeWindow(int width, int height)
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
 
-    //update the window size of the thierd frame buffer to store the last tick
-    glBindRenderbuffer(GL_RENDERBUFFER, glgeLightingRBO);
     //setup the storage for the render buffer
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, glgeWindowSize.x, glgeWindowSize.y);
 
@@ -925,43 +943,58 @@ void resizeWindow(int width, int height)
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameAlbedoMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update all the texture sizes
     //update the normal texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameNormalMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the position texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFramePositionMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the roughness texture parameters
     glBindTexture(GL_TEXTURE_2D, glgeFrameRoughnessMap);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the depth and alpha texture parameters
+    glBindTexture(GL_TEXTURE_2D, glgeDepthBuffer);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the solid lit texture
+    glBindTexture(GL_TEXTURE_2D, glgeSolidLitBuffer);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+
+    //update the transparent accumulation texture
+    glBindTexture(GL_TEXTURE_2D, glgeTransparentAcumTexture);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the last tick texture
     glBindTexture(GL_TEXTURE_2D, glgeFrameLastTick);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the main image texture
     glBindTexture(GL_TEXTURE_2D, glgeMainImageInPPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the lighting texture
     glBindTexture(GL_TEXTURE_2D, glgeLightingImageOut);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the post processing texture
     glBindTexture(GL_TEXTURE_2D, glgeMainImagePPS);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, glgeWindowSize.x, glgeWindowSize.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1042,7 +1075,7 @@ SDL_Surface* loadImage(const char* file)
         if (glgeWarningOutput)
         {
             //print an error
-            std::cerr << "[GLGE WARNING] failed to create SDL_Surface from fiel " << file << std::endl;
+            std::cerr << "[GLGE WARNING] failed to create SDL_Surface from fiel " << file << "\n";
         }
 
         //return 0

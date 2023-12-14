@@ -17,9 +17,11 @@ void main()
 {
     vec3 col = texture(glgeMainImage, texCoords).rgb;
 
+    vec3 roughData = texture(glgeRoughnessMap, texCoords).rgb;
+
     vec3 mapped = col;
     //apply tone mapping if the object is lit
-    if (int(texture(glgeRoughnessMap, texCoords).b) == 1)
+    if (roughData.b == 1.f)
     {
         // tone mapping
         mapped = vec3(1.0) - exp(-mapped * exposure);

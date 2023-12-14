@@ -302,9 +302,10 @@ public:
      * @param sizeVertices the size of the vertices pointer
      * @param sizeIndices the size of the indices pointer
      * @param transform an optinal transform for the object
+     * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform = Transform(), bool isStatic = false);
+    Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief Construct a new Object
@@ -312,18 +313,20 @@ public:
      * @param vertices the vertices in an std::vector
      * @param indices the faces in an std::vector
      * @param transform an optinal transform for the object
+     * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform = Transform(), bool isStatic = false);
+    Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief Construct a new Object
      * 
      * @param mesh the mesh for the Object
      * @param transform an optinal transform for the object
+     * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(Mesh mesh, Transform transform = Transform(), bool isStatic = false);
+    Object(Mesh mesh, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief Construct a new Object
@@ -331,9 +334,10 @@ public:
      * @param file the file to load the data from
      * @param type the type of the file
      * @param transform an optinal transform for the object
+     * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(const char* file, int type, Transform transform = Transform(), bool isStatic = false);
+    Object(const char* file, int type, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief draw the object to the screen
@@ -608,6 +612,21 @@ public:
      */
     Shader* getShaderP();
 
+    /**
+     * @brief Set if the object should be handelt as opaque or transparent
+     * 
+     * @param isTransparent true : the object is transparent | false : the object is opaque
+     */
+    void setTransparency(bool isTransparent);
+
+    /**
+     * @brief Get if the object is handelt as transparent or opaque
+     * 
+     * @return true : the object is transparent | 
+     * @return false : the object is opaque
+     */
+    bool getTransparency();
+
 private:
     //store the transform for the object
     Transform transf;
@@ -615,6 +634,8 @@ private:
     Mesh mesh;
     //store the vertex and index buffer
     unsigned int VBO ,IBO;
+    //store if the object is transparent or opaque
+    bool isTransparent = false;
     //save the shader
     Shader shader;
     //the local matrix to make the object correct
@@ -648,6 +669,8 @@ private:
     unsigned int usedLigtsPos;
     //store the position for the shadow maps
     unsigned int shadowMapSamplerLoc;
+    //store the object UUID
+    unsigned int uuid = 0;
 
     //compile the draw list
     void compileBuffers();
@@ -661,10 +684,9 @@ private:
     //get all uniforms from the shader
     void getUniforms();
 
-    //recalculate all uniforms for the ligts
+    //get the light specific uniforms from the shader
     void getLightUniforms();
-
-    //pass all light data to the shader
+    //load the light uniforms to the shader
     void loadLights();
 };
 

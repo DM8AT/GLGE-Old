@@ -43,34 +43,16 @@
 ////////////////////
 
 //init function for glge
-void glgeInit(int argc, char** argv)
+void glgeInit()
 {
     //error check
     bool error = false;
-    //if argc = 0, the length of argv is 0 --> output error, but only if error output is enabled
-    if (argc == 0)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_ARGC_OUT_OF_BOUNDS, argc);
-        }
-        error = true;
-    }
-    //if argv is the nullpointer, output an error if error output is enabled
-    if (argv == nullptr)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_NULLPOINTER_INP_INIT);
-        }
-        error = true;
-    }
     //if an error occoured, stop the function
     if (error)
     {
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_GLGE_INIT_ERROR << std::endl;
+            std::cerr << GLGE_ERROR_STR_GLGE_INIT_ERROR << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -144,7 +126,7 @@ void glgeCreateWindow(const char* name, vec2 size, vec2 pos)
         //print an error message
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << std::endl;
+            std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -209,7 +191,7 @@ void glgeCreateWindow(const char* name, int width, int height, vec2 pos)
         //print an error message
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << std::endl;
+            std::cerr << GLGE_ERROR_STR_WINDOW_INPUT_ERROR << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -256,6 +238,15 @@ bool glgeGetWarningOutput()
 //start the main loop of GLGE
 void glgeRunMainLoop()
 {
+    //check if a main window is bound
+    if (glgeHasMainWindow == false)
+    {
+        //print an error
+        std::cerr << "[GLGE FATAL ERROR] forgot to create window before running main loop \n";
+        //close the program
+        exit(1);
+    }
+
     //store if the file should stop
     bool running = true;
 
@@ -367,7 +358,7 @@ void glgeSetClearColor(float r, float g, float b, bool normalise)
     {
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
+            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
         }
         if (glgeExitOnError)
         {
@@ -419,7 +410,7 @@ void glgeSetClearColor(vec3 color, bool normalise)
     {
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
+            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
         }
         if (glgeExitOnError)
         {
@@ -471,7 +462,7 @@ void glgeSetClearColor(vec4 color, bool normalise)
     {
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << std::endl;
+            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
         }
         if (glgeExitOnError)
         {
@@ -516,7 +507,7 @@ void glgeSetSkybox(const char* top, const char* bottom, const char* left, const 
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << width << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << std::endl;
+            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << width << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n";
         }
         //check if GLGE should crash on an error
         if (glgeExitOnError)
@@ -532,7 +523,7 @@ void glgeSetSkybox(const char* top, const char* bottom, const char* left, const 
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << height << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << std::endl;
+            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << height << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n";
         }
         //check if GLGE should crash on an error
         if (glgeExitOnError)
@@ -635,7 +626,7 @@ void glgeBindDisplayFunc(void (*func)())
         //print an exit message
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_BIND_DISPLAY_CALLBACK << std::endl;
+            std::cerr << GLGE_ERROR_STR_BIND_DISPLAY_CALLBACK << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -684,7 +675,7 @@ void glgeBindMainFunc(void (*func)())
         //print an exit message
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << std::endl;
+            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -733,7 +724,7 @@ void glgeSetMaxFPS(int fps)
         //output an exit message
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_SET_MAX_FPS << std::endl;
+            std::cerr << GLGE_ERROR_STR_SET_MAX_FPS << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -792,7 +783,7 @@ void glgeSetMoveMatrixName(const char* name)
         if(glgeErrorOutput)
         {
             printf(GLGE_ERROR_INVALIDE_INPUT);
-            std::cerr << GLGE_ERROR_STR_GLGE_SET_MOV_MAT_NAME << std::endl;
+            std::cerr << GLGE_ERROR_STR_GLGE_SET_MOV_MAT_NAME << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -858,9 +849,9 @@ void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned 
         //output an error message
         if (glgeErrorOutput)
         {
-            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << std::endl;
+            std::cout << GLGE_ERROR_COULD_NOT_CREATE_SHADER << shaderType << "\n";
             //print where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -900,7 +891,7 @@ void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned 
             //print the message
             printf(GLGE_ERROR_SHADER_COMPILE_ERROR, shaderType, InfoLog);
             //print where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_ADD_SHADER << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -931,7 +922,7 @@ int glgeGetUniformVar(unsigned int program, const char* name)
         {
             printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << "\n";
         }
         else
         {
@@ -940,7 +931,7 @@ int glgeGetUniformVar(unsigned int program, const char* name)
             {
                 printf(GLGE_ERROR_UNIFORM_VAR_NOT_FOUND, name);
                 //say where the error occured
-                std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << std::endl;
+                std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << "\n";
             }
         }
         //return 0
@@ -964,7 +955,7 @@ unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
         {
             printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -983,7 +974,7 @@ unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
         //output an error message
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -1001,7 +992,7 @@ unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
         //if the file can't be read, output an error message
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -1082,7 +1073,7 @@ unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataF
         {
             printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -1184,7 +1175,7 @@ unsigned int glgeTextureFromFile(const char* name, vec2* sP)
     }
     else
     {
-        std::cout << "Failed to load texture file: " << name << std::endl;
+        std::cout << "Failed to load texture file: " << name << "\n";
     }
 
     //store the size if the input is not NULL
@@ -1205,7 +1196,7 @@ vec2 glgeGetTextureSize(const char* name)
     unsigned char* data = glgeLoad(name, &w, &h, &c, 0);
     if(!data)
     {
-        std::cout << "Failed to load texture file: " << name << std::endl;
+        std::cout << "Failed to load texture file: " << name << "\n";
     }
     glgeImageFree(data);
     return vec2(h,w);
@@ -1274,7 +1265,7 @@ void glgeSetLightingShader(const char* lightingShaderFile)
         //output an error message
         if (glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << std::endl;
+            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -1339,7 +1330,7 @@ Shader* glgeSetPostProsessingShader(const char* shaderFile)
         {
             //print an error
             std::cerr << "[GLGE ERROR] File " << shaderFile << 
-            " was inputed as an post-processing shader, but the uniform \"glgeMainImage\" for the input of the image is undefined" << std::endl;
+            " was inputed as an post-processing shader, but the uniform \"glgeMainImage\" for the input of the image is undefined" << "\n";
         }
     }
     //store a new shader in the post-processing stack
@@ -1368,8 +1359,8 @@ Shader* glgeSetPostProsessingShader(std::string shaderSource)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader" << std::endl << 
-            "Shader source: " << std::endl << shaderSource << std::endl;
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader" << "\n" << 
+            "Shader source: " << "\n" << shaderSource << "\n";
         }
     }
     //store a new shader in the post-processing stack
@@ -1399,7 +1390,7 @@ Shader* glgeSetPostProsessingShader(unsigned int s)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by shader pointer" << std::endl;
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by shader pointer" << "\n";
         }
     }
     //store a new shader in the post-processing stack
@@ -1429,7 +1420,7 @@ void glgeSetPostProsessingShader(Shader* shader)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by pointer" << std::endl;
+            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by pointer" << "\n";
         }
     }
     //setup all default uniforms
@@ -1491,7 +1482,7 @@ void glgeDeletePostProcessingShader(Shader* shader, bool del)
         //check if an warning should be printed
         if (glgeWarningOutput)
         {
-            std::cerr << "[GLGE WARNING] tryed to remove shader that wasn't part of post-processing pipeline" << std::endl;
+            std::cerr << "[GLGE WARNING] tryed to remove shader that wasn't part of post-processing pipeline" << "\n";
         }
         //quit the function
         return;
@@ -1558,7 +1549,7 @@ void glgeSetCursor(int curser)
         if (glgeErrorOutput)
         {
             //if they should, print an error
-            std::cerr << "[GLGE ERROR] couldn't create SDL system coursor, SDL error: " << SDL_GetError() << std::endl;
+            std::cerr << "[GLGE ERROR] couldn't create SDL system coursor, SDL error: " << SDL_GetError() << "\n";
         }
         //check if GLGE should exit on an error
         if (glgeExitOnError)
@@ -1796,7 +1787,7 @@ void glgeSetWindowIcon(const char* file)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] failed to create SDL_Surface for image to change the window icon, SDL error: " << SDL_GetError() << std::endl;
+            std::cerr << "[GLGE ERROR] failed to create SDL_Surface for image to change the window icon, SDL error: " << SDL_GetError() << "\n";
         }
         //check if GLGE should crash on an error
         if (glgeExitOnError)
@@ -1837,4 +1828,48 @@ unsigned int glgeGetLighningBuffer()
 {
     //return the lit image
     return glgeLightingImageOut;
+}
+
+bool glgeGetTransparencyPass()
+{
+    //return the pass status
+    return glgeTransparentOpaquePass;
+}
+
+void glgeSetTransparencyCombineShader(Shader* shader)
+{
+    //check if the inputed pointer is a null pointer
+    if (shader == NULL)
+    {
+        //check if warning output is enabled
+        if (glgeWarningOutput)
+        {
+            //print a warning
+            printf("[GLGE WARNING] A null pointer is not a valid transparent combine shader\n");
+        }
+        //stop the function
+        return;
+    }
+    //check if a custom shader is bound
+    if (!glgeHasCustomTransparentCombineShader)
+    {
+        //if not, delete the old shader
+        delete glgeTransparentCombineShader;
+    }
+    //store the shader
+    glgeTransparentCombineShader = shader;
+    //say that a custom shader is bound
+    glgeHasCustomTransparentCombineShader = true;
+}
+
+Shader* glgeGetTransparencyCombineShader()
+{
+    //return the shader
+    return glgeTransparentCombineShader;
+}
+
+bool glgeGetIfCustomTransparentCombineShaderIsBound()
+{
+    //return the boolean
+    return glgeHasCustomTransparentCombineShader;
 }

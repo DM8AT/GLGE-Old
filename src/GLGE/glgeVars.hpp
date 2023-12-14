@@ -143,6 +143,9 @@ extern unsigned int glgeFramePositionMap;
 //store the roughness in a texture r=roughness, g=metalness, b=unlit
 extern unsigned int glgeFrameRoughnessMap;
 
+//store the depth of solid and transparent objects as well as the max alpha value
+extern unsigned int glgeDepthBuffer;
+
 //store the renderd image
 extern unsigned int glgeFrameLastTick;
 
@@ -152,11 +155,8 @@ extern unsigned int glgeFBOLastTick;
 //store a renderbuffer to store the image from last tick
 extern unsigned int glgeRBOLastTick;
 
-//store a framebuffer to store the image from the lighting pass
-extern unsigned int glgeFBOLighintPass;
-
-//store a renderbuffer to store the image from lighting pass
-extern unsigned int glgeFBOLightingPass;
+//store the lit buffer
+extern unsigned int glgeSolidLitBuffer;
 
 //store the position of the uniform for the albedo map in the post processing shader
 extern int glgeAlbedoInLightingPass;
@@ -260,12 +260,6 @@ extern int glgePositionInPPS;
 //store the position of the uniform for the roughness map in the post processing shader
 extern int glgeRoughnessInPPS;
 
-//store the frame buffer for the lighting pass
-extern unsigned int glgeLightingFBO;
-
-//store the render buffer for the ligthing pass
-extern unsigned int glgeLightingRBO;
-
 //store the output image for the lighting pass
 extern unsigned int glgeLightingImageOut;
 
@@ -340,4 +334,20 @@ extern unsigned int glgeMainImagePPS;
 
 //store if the current post-processing pass is the first
 extern bool glgeIsFirstPPSPass;
+
+//store if the current draw pass is a transparent or an opaque pass
+extern bool glgeTransparentOpaquePass;
+
+//store how many objects have been created
+extern unsigned int glgeObjectUUID;
+
+//store the accumulation texture for transparent geometry
+extern unsigned int glgeTransparentAcumTexture;
+
+//store the shader to combine the solid and transparent geometry
+extern Shader* glgeTransparentCombineShader;
+
+//store if glge has a custom transparent combination shader
+extern bool glgeHasCustomTransparentCombineShader;
+
 #endif

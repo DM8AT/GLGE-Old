@@ -51,6 +51,20 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.2
+- removed misteriouse 1 form 2DTest.cpp
+- changed std::endl with \n
+- argc and argv are no longer needed to initalise GLGE
+- seperated draws to transparent and opaque
+- added alpha clipping with an value of 0.5 for opaque objects
+- added a fast way to render transparent objects (using Bavoil and Myers method from 2008 that improves uppon Meshkins OIT opperator)
+   PRO: 
+   - it is really fast
+   - allowing deffered rendering for solid geometry
+   - only one combine pass for solid and opaque geometry
+   CONS:
+   - it is not really exact and solid geometry renderd as transparent looks wierd
+      - these consequenses are acceptable for the huge performance boost compared to sortet transparency
 ## Update 0.15-2
 - importing a vector of a size > 2 will now include all lower size vectors by default
 - added more constructors to vec2, vec3, vec4, dvec2, dvec3, dvec4

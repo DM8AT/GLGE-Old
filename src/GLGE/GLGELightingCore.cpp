@@ -229,7 +229,7 @@ void glgeAddGlobalLighSource(Light* l)
         //write a warning if warning printing is enabled
         if (glgeWarningOutput)
         {
-            std::cout << GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT << (int)glgeLights.size() << std::endl;
+            std::cout << GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT << (int)glgeLights.size() << "\n";
         }
     }
 

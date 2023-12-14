@@ -729,7 +729,7 @@ void RenderTarget::draw()
         if (glgeWarningOutput)
         {
             //print the warning
-            std::cerr << "[GLGE WARNING] shader for a custom render target is a nullpointer, but it\'s draw methode was called" << std::endl;
+            std::cerr << "[GLGE WARNING] shader for a custom render target is a nullpointer, but it\'s draw methode was called" << "\n";
         }
         //stop the script
         return;
@@ -854,7 +854,7 @@ void RenderTarget::generateTexture(int w, int h, bool genTexture)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] an size of " << w << ", " << h << std::endl;
+            std::cerr << "[GLGE ERROR] an size of " << w << ", " << h << "\n";
         }
         //check if the program should close on an error
         if (glgeExitOnError)
@@ -901,7 +901,7 @@ void RenderTarget::generateTexture(int w, int h, bool genTexture)
     if ( fboStatus != GL_FRAMEBUFFER_COMPLETE)
     {
         //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << std::endl;
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
         //stop the program
         exit(1);
     }
@@ -925,7 +925,7 @@ void RenderTarget::updateSize(vec2 s)
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] an size of " << s.x << ", " << s.y << " is not possible for a render target" << std::endl;
+            std::cerr << "[GLGE ERROR] an size of " << s.x << ", " << s.y << " is not possible for a render target" << "\n";
         }
         //check if the program should close on an error
         if (glgeExitOnError)

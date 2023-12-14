@@ -62,6 +62,8 @@ bool has_double_slash(std::string &str)
 
 //store the default 3D shader
 unsigned int glgeShaderDefault;
+//store the default transparent 3D shader
+unsigned int glgeTransparentShaderDefault;
 
 ////////////////////////////
 //Decalrations for Structs//
@@ -311,7 +313,7 @@ Mesh::Mesh(std::string data, int type)
 {
     if (type != GLGE_OBJ)
     {
-        std::cerr << "Currently, only .obj files are supported" << std::endl;
+        std::cerr << "Currently, only .obj files are supported" << "\n";
         return;
     }
 
@@ -560,7 +562,7 @@ Object::Object()
 }
 
 //constructor using pointer
-Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform, bool isStatic)
+Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform, bool isTransparent, bool isStatic)
 {
     //construct and save a mesh from the pointers
     this->mesh = Mesh(vertices, indices, sizeVertices, sizeIndices);
@@ -570,12 +572,28 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 
     //save if the object is static
     this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
 
     //calculate the buffers
     this->compileBuffers();
 
-    //bind the default 3D shader
-    this->shader = glgeShaderDefault;
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = glgeTransparentShaderDefault;
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = glgeShaderDefault;
+    }
     //get the uniforms
     this->getUniforms();
 
@@ -585,7 +603,7 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 }
 
 //constructor using vectors
-Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform, bool isStatic)
+Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform, bool isTransparent, bool isStatic)
 {
     //construct and save a mesh from the pointers
     this->mesh = Mesh(vertices, indices);
@@ -595,12 +613,28 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 
     //save if the object is static
     this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
 
     //calculate the buffers
     this->compileBuffers();
 
-    //bind the default 3D shader
-    this->shader = glgeShaderDefault;
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = glgeTransparentShaderDefault;
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = glgeShaderDefault;
+    }
     //get the uniforms
     this->getUniforms();
 
@@ -610,7 +644,7 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 }
 
 //construct an object from an mesh
-Object::Object(Mesh mesh, Transform transform, bool isStatic)
+Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic)
 {
     //construct and save a mesh from the pointers
     this->mesh = mesh;
@@ -620,12 +654,28 @@ Object::Object(Mesh mesh, Transform transform, bool isStatic)
 
     //save if the object is static
     this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
 
     //calculate the buffers
     this->compileBuffers();
 
-    //bind the default 3D shader
-    this->shader = glgeShaderDefault;
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = glgeTransparentShaderDefault;
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = glgeShaderDefault;
+    }
     //get the uniforms
     this->getUniforms();
 
@@ -635,7 +685,7 @@ Object::Object(Mesh mesh, Transform transform, bool isStatic)
 }
 
 //create an object from an file
-Object::Object(const char* file, int type, Transform transform, bool isStatic)
+Object::Object(const char* file, int type, Transform transform, bool isTransparent, bool isStatic)
 {
     //construct and save a mesh from the pointers
     this->mesh = Mesh(file, type);
@@ -645,12 +695,28 @@ Object::Object(const char* file, int type, Transform transform, bool isStatic)
 
     //save if the object is static
     this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
 
     //calculate the buffers
     this->compileBuffers();
 
-    //bind the default 3D shader
-    this->shader = glgeShaderDefault;
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = glgeTransparentShaderDefault;
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = glgeShaderDefault;
+    }
     //get the uniforms
     this->getUniforms();
 
@@ -662,12 +728,16 @@ Object::Object(const char* file, int type, Transform transform, bool isStatic)
 //draw the object
 void Object::draw()
 {
+    //check if the current object belongs to the current pass
+    if (this->isTransparent != glgeTransparentOpaquePass)
+    {
+        //abbort the draw, if not
+        return;
+    }
+    
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-
-    //store how much texture units are used
-    int textures = 0;
 
     //check if the shadow pass is drawn
     if (!glgeIsShadowPass)
@@ -697,15 +767,11 @@ void Object::draw()
         glEnableVertexAttribArray(3);
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
     }
-
-    //other uniforms are only passed if it is not the shadow pass
-    if (!glgeIsShadowPass)
+    //check if this is the transparent pass
+    if (this->isTransparent)
     {
-        if (glgeLights.size() != 0)
-        {
-            //bind the shadow map
-            glgeLights[glgeLights.size()-1]->bindShadowMapTexture(textures + 1);
-        }
+        //pass the lights
+        this->loadLights();
     }
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
@@ -752,9 +818,13 @@ void Object::update()
     this->shader.setCustomMat4("rotMat", this->rotMat);
     //push the far plane to the shader
     this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
+    //push the screen resolution to the shader
+    this->shader.setCustomVec2("glgeScreenResolution", glgeWindowSize);
+    //push the uuid to the shader
+    this->shader.setCustomInt("glgeObjectUUID", this->uuid);
 
-    //check if a light source was changed
-    if (this->lightPosLocs.size() != glgeLights.size())
+    //check if the object is transparent
+    if (this->isTransparent)
     {
         //update the light uniforms
         this->getLightUniforms();
@@ -1019,6 +1089,18 @@ Shader* Object::getShaderP()
     return &this->shader;
 }
 
+void Object::setTransparency(bool transparent)
+{
+    //store the inputed value
+    this->isTransparent = transparent;
+}
+
+bool Object::getTransparency()
+{
+    //output if the object is transparent
+    return this->isTransparent;
+}
+
 //PRIV
 void Object::compileBuffers()
 {
@@ -1084,6 +1166,18 @@ void Object::getUniforms()
     this->shader.setCustomMat4("rotMat", this->rotMat);
     //push the far plane to the shader
     this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
+    //add the screen resolution
+    this->shader.setCustomVec2("glgeScreenResolution", glgeWindowSize);
+    //push the uuid to the shader
+    this->shader.setCustomInt("glgeObjectUUID", this->uuid);
+
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //add the depth and alpha buffer
+        this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeDepthBuffer);
+    }
+
     //get all uniform positions
     this->shader.recalculateUniforms();
     //reset GLGE error output
@@ -1091,19 +1185,16 @@ void Object::getUniforms()
 
     //recalculate the uniforms of the material
     this->mat.applyShader(this->shader.getShader());
-
-    //recalculate all light unifomrs
-    this->getLightUniforms();
 }
 
 void Object::getLightUniforms()
 {
     //set the prefix for the light position
-    std::string prefixLightPos = std::string("lightPos");
+    std::string prefixLightPos = std::string("glgeLightPos");
     //set the prefix for the light color
-    std::string prefixLightCol = std::string("lightColor");
+    std::string prefixLightCol = std::string("glgeLightColor");
     //set the prefix for the light intensity
-    std::string prefixLightInt = std::string("lightInt");
+    std::string prefixLightInt = std::string("glgeLightInt");
 
     //store the state of the GLGE error output
     bool outErrs = glgeErrorOutput;
@@ -1136,7 +1227,7 @@ void Object::getLightUniforms()
     }
 
     //get the uniform for the amount of used lights
-    this->usedLigtsPos = glgeGetUniformVar(this->shader.getShader(), "activeLights");
+    this->usedLigtsPos = glgeGetUniformVar(this->shader.getShader(), "glgeActiveLights");
 
     //reset GLGE error output
     glgeErrorOutput = outErrs;
@@ -1177,7 +1268,7 @@ void Object::loadLights()
     //pass the amount of used lights to the shader if it is not 0
     if (this->usedLigtsPos != 0)
     {
-        glUniform1f(this->usedLigtsPos, (float)glgeLights.size());
+        glUniform1i(this->usedLigtsPos, (int)glgeLights.size());
     }
 }
 
@@ -1191,6 +1282,15 @@ void Object::loadLights()
 Camera::Camera()
 {
     //initalise the object
+    //default for FOV: 90
+    this->fov = 90*GLGE_TO_RADIANS;
+    //default for near plane: 0.1
+    this->near = 0.1;
+    //default for far plane: 100
+    this->far = 100;
+    //instantiate the own updates
+    this->update();
+    this->recalculateProjection();
 }
 
 //initalise with parameters
@@ -1250,7 +1350,7 @@ Camera::Camera(float FOV, float near, double far, Transform transform)
         //output where the error occured
         if(glgeErrorOutput)
         {
-            std::cerr << GLGE_ERROR_STR_CAMERA_CAMERA << std::endl;
+            std::cerr << GLGE_ERROR_STR_CAMERA_CAMERA << "\n";
         }
         //stop the script
         if (glgeExitOnError)
@@ -1519,7 +1619,7 @@ void glgeBindCamera(Camera* camera)
         {
             printf(GLGE_ERROR_INPUT_NULLPOINTER);
             //say where the error occured
-            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CAMERA << std::endl;
+            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CAMERA << "\n";
         }
         //stop the program
         if (glgeExitOnError)
@@ -1543,4 +1643,6 @@ void glgeInit3DCore()
 
     //load the default 3D shaders
     glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
+    //load the default 3D transparent shader
+    glgeTransparentShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
 }

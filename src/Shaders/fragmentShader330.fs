@@ -10,6 +10,7 @@ in vec3 normal;
 in vec3 currentPos;
 
 //mesh data
+uniform int glgeObjectUUID;
 uniform float glgeRoughness;
 
 uniform sampler2D glgeAmbientMap;
@@ -61,6 +62,7 @@ void main()
     gl_FragData[2] = vec4(currentPos, 1);
     //watch out: the b chanell of the roughness map says if the object sould be lit or unlit: 1 is lit; 0 is unlit
     gl_FragData[3] = vec4(rough,0,1,1);
+    gl_FragData[5] = vec4(gl_FragCoord.z,glgeObjectUUID,0,1);
 
     gl_FragDepth = gl_FragCoord.z;
 }

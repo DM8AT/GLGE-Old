@@ -87,12 +87,10 @@
 /**
  * @brief initalise the GLGE library, execute at start of script
  * 
- * The arguments are the input to the main function. It initalises Freeglut. 
+ * The arguments are the input to the main function. It initalises SDL2. 
  * 
- * @param argc number of input arguments
- * @param argv input arguemnts
  */
-void glgeInit(int argc, char** argv);
+void glgeInit();
 
 /**
  * @brief create a window using GLGE
@@ -764,9 +762,41 @@ unsigned int glgeGetRoughnessBuffer();
 
 /**
  * @brief get the buffer that stores the lit image
- * basecly the image befor bost processing is applied
+ * 
  * @return unsigned int the main lit buffer
  */
 unsigned int glgeGetLighningBuffer();
+
+/**
+ * @brief checke if the current draw pass is for transparent or opaque objects
+ * 
+ * @return true : the current pass is for transparent objects | 
+ * @return false : the current pass is for opaque objects
+ */
+bool glgeGetTransparencyPass();
+
+/**
+ * @brief set a new transparent combinatino shader
+ * this shader will be used to combine the transparent and opace pass. 
+ * state of blending function:
+ * GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA
+ * @param shader a pointer to the shader
+ */
+void glgeSetTransparencyCombineShader(Shader* shader);
+
+/**
+ * @brief get the shader that is used to combine the transparent and opaque geometry
+ * 
+ * @return Shader* a pointer to the shader
+ */
+Shader* glgeGetTransparencyCombineShader();
+
+/**
+ * @brief get if GLGE has a custom transparent combine shader
+ * if GLGE has no custom transparent shader, it will delete the old one if a new one is bound
+ * @return true : The shader will not be deleted if a new one is bound | 
+ * @return false : The shader will be deleted if a new one is bound
+ */
+bool glgeGetIfCustomTransparentCombineShaderIsBound();
 
 #endif

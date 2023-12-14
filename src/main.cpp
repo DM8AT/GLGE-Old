@@ -20,7 +20,7 @@
 #include "GLGE/GLGEtextureAtlas.h"
 
 //the main function, code execution will start here. The input arguments are needed to initalise the library
-int main(int argc, char** argv)
+int main()
 {
     #if 0
     // texture atlas demo code
@@ -73,13 +73,13 @@ int main(int argc, char** argv)
     {
         //launch the 3D core
         printf("\nLaunching 3D example\n");
-        run3Dexample(argc, argv);
+        run3Dexample();
     }
     else if (inp == 1)
     {
         //launch the 2D core
         printf("\nLaunching 2D example\n");
-        run2Dexample(argc, argv);
+        run2Dexample();
     }
     //osterei
     else if (inp == 42)

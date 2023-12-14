@@ -451,7 +451,7 @@ void Material::setCustomFloat(std::string name, float value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"float\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"float\"" << "\n";
     }
 }
 
@@ -503,7 +503,7 @@ void Material::setCustomInt(std::string name, int value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"integer\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"integer\"" << "\n";
     }
 }
 
@@ -571,7 +571,7 @@ void Material::setCustomBool(std::string name, bool value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"boolean\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"boolean\"" << "\n";
     }
 }
 
@@ -623,7 +623,7 @@ void Material::setCustomVec2(std::string name, vec2 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec2\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec2\"" << "\n";
     }
 }
 
@@ -675,7 +675,7 @@ void Material::setCustomVec3(std::string name, vec3 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec3\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec3\"" << "\n";
     }
 }
 
@@ -727,7 +727,7 @@ void Material::setCustomVec4(std::string name, vec4 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec4\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec4\"" << "\n";
     }
 }
 
@@ -771,7 +771,7 @@ void Material::setCustomMat2(std::string name, mat2 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat2\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat2\"" << "\n";
     }
 }
 
@@ -815,7 +815,7 @@ void Material::setCustomMat3(std::string name, mat3 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat3\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat3\"" << "\n";
     }
 }
 
@@ -859,7 +859,7 @@ void Material::setCustomMat4(std::string name, mat4 value, unsigned int mode)
     if (glgeWarningOutput)
     {
         //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat4\"" << std::endl;
+        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat4\"" << "\n";
     }
 }
 

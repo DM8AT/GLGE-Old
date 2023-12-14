@@ -122,6 +122,12 @@ unsigned int glgeFramePositionMap = 0;
 //store the roughness in a texture
 unsigned int glgeFrameRoughnessMap = 0;
 
+//store the depth of solid and transparent objects as well as the max alpha value
+unsigned int glgeDepthBuffer = 0;
+
+//store the final renderd image before post processing
+unsigned int glgePrePostProcessing = 0;
+
 //store the renderd image
 unsigned int glgeFrameLastTick = 0;
 
@@ -131,11 +137,8 @@ unsigned int glgeFBOLastTick = 0;
 //store a renderbuffer to store the image from last tick
 unsigned int glgeRBOLastTick = 0;
 
-//store a framebuffer to store the image from the lighting pass
-unsigned int glgeFBOLighintPass = 0;
-
-//store a renderbuffer to store the image from lighting pass
-unsigned int glgeFBOLightingPass = 0;
+//store the lit buffer
+unsigned int glgeSolidLitBuffer = 0;
 
 //store the position of the uniform for the albedo map in the post processing shader
 int glgeAlbedoInLightingPass = -1;
@@ -201,13 +204,17 @@ int glgeSkyboxRotation = -1;
 int glgeSkyboxProject = -1;
 
 //store the active color buffers
-GLenum glgeUsedColorBuffers[] = {GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+GLenum glgeUsedColorBuffers[] = {GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, 
+                                 GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, 
+                                 GL_COLOR_ATTACHMENT7};
 
 //store the length of the unsigned buffer array
 unsigned int glgeLenUsedColorBuffers = sizeof(glgeUsedColorBuffers) / sizeof(glgeUsedColorBuffers[0]);
 
 //store all the color buffers
-GLenum glgeAllUsedColorBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+GLenum glgeAllUsedColorBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, 
+                                    GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, 
+                                    GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7};
 
 //store the length of all used color buffers
 unsigned int glgeLenAllUsedColorBuffers = sizeof(glgeAllUsedColorBuffers) / sizeof(glgeAllUsedColorBuffers[0]);
@@ -331,3 +338,18 @@ unsigned int glgeMainImagePPS = 0;
 
 //store if the current post-processing pass is the first
 bool glgeIsFirstPPSPass = false;
+
+//store if the current draw pass is a transparent or an opaque pass
+bool glgeTransparentOpaquePass = false;
+
+//store how many objects have been created
+unsigned int glgeObjectUUID = 1;
+
+//store the accumulation texture for transparent geometry
+unsigned int glgeTransparentAcumTexture = 0;
+
+//store the shader to combine the solid and transparent geometry
+Shader* glgeTransparentCombineShader = NULL;
+
+//store if glge has a custom transparent combination shader
+bool glgeHasCustomTransparentCombineShader = false;

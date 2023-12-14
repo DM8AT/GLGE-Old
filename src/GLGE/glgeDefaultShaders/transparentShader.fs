@@ -4,25 +4,36 @@
 
 precision highp float;
 
-out vec4 FragColor;
-in vec2 texCoords;
+layout(location = 3) out vec4 Lit;
+layout(location = 5) out vec4 Max;
+layout(location = 7) out vec4 Col;
 
-uniform sampler2D glgeAlbedoMap;
+uniform sampler2D glgeLitMap;
+
+in vec4 color;
+in vec2 texCoord;
+in vec3 normal;
+in vec3 currentPos;
+
+uniform int glgeObjectUUID;
+uniform vec2 glgeScreenResolution;
+uniform vec4 glgeColor;
+uniform float glgeRough;
+uniform float glgeMetalic;
+uniform sampler2D glgeAmbientMap;
 uniform sampler2D glgeNormalMap;
-uniform sampler2D glgePositionMap;
-uniform sampler2D glgeRoughnessMap;
+uniform sampler2D glgeRoughMap;
+uniform sampler2D glgeTexture;
+uniform samplerCube shadowMap;
+uniform int usedTextures;
+uniform bool NormalMapIsActive;
+uniform bool glgeLit;
+uniform bool roughMapIsActive;
+uniform vec3 cameraPos;
+uniform float farPlane;
 
-//light data
-uniform vec3 glgeLightColor[255];
-uniform float glgeLightInt[255];
-uniform vec3 glgeLightPos[255];
-uniform int glgeActiveLights;
-
-//camera data
-uniform vec3 glgeCameraPos;
-uniform float glgeFarPlane;
-uniform vec3 glgeCameraRot;
-uniform mat4 glgeProject;
+float rough = 0.f;
+vec3 n = vec3(0);
 
 float ambient = 0.1;
 
@@ -31,18 +42,16 @@ int iteration = 0;
 float biasAngle = 0.0005;
 vec3 actualNormal = vec3(0,0,0);
 
-vec4 lightCol[] = vec4[](vec4(1,1,1,1));
-vec3 lightPos[] = vec3[](vec3(2,5,0));
-float lightInt[] = float[](250.f);
-
-float rough;
+//light data
+uniform vec3 glgeLightColor[255];
+uniform float glgeLightInt[255];
+uniform vec3 glgeLightPos[255];
+uniform int glgeActiveLights;
 
 float lightRadius = 0.1;
 float a = 0.f;
 float b = 0.f;
 
-vec4 color;
-vec3 normal;
 vec3 pos;
 float roughness;
 
@@ -98,7 +107,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 vec3 calculateLightingPBR(vec3 col)
 {
     vec3 N = normalize(normal);
-    vec3 V = normalize(glgeCameraPos - pos);
+    vec3 V = normalize(cameraPos - pos);
 
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, col, metallic);
@@ -133,41 +142,55 @@ vec3 calculateLightingPBR(vec3 col)
     }   
   
     vec3 ambient = vec3(0.03) * col * ambient;
-    vec3 color = ambient + Lo;
+    vec3 color = ambient + max(Lo, vec3(0));
 	
     return (color);
 }
 
-vec4 calculateLighting(vec4 color, vec3 normal, vec3 pos, float roughness)
-{
-    vec3 col = color.rgb;
-
-    vec3 lightDir = normalize(glgeLightPos[0] - pos);
-    float diff = max(dot(normal.xyz, lightDir), 0.0);
-
-    col *= diff;
-
-    return vec4(col, color.w);
-}
-
 void main()
 {
-    vec4 col = vec4(0,0,0,0);
-    color = texture(glgeAlbedoMap, texCoords);
-    normal = texture(glgeNormalMap, texCoords).xyz;
-    pos = texture(glgePositionMap, texCoords).xyz;
-    roughness  = texture(glgeRoughnessMap, texCoords).r;
-    metallic = texture(glgeRoughnessMap, texCoords).g;
-    int lit = int(texture(glgeRoughnessMap, texCoords).b);
+    vec2 uv = gl_FragCoord.rg/glgeScreenResolution;
 
-    FragColor.w = color.w;
+    vec4 col = glgeColor;
+    col.rgb += color.rgb;
+    col.w += clamp(color.w,0.f,1.f);
+    vec4 texColor = texture(glgeTexture, texCoord);
+    col.rgb += texColor.rgb;
+    col.w *= clamp(texColor.w,0.f,1.f);
 
-    if ((lit == 0) || (glgeActiveLights == 0))
+    col.w = clamp(col.w, 0.f, 1.f);
+
+    if (col.w == 0.f){discard;}
+
+    if (usedTextures > 1)
     {
-        FragColor.rgb = color.rgb;
+        col += vec4(texture(glgeAmbientMap, texCoord).rgb, col.w);
+    }
+
+    if (roughMapIsActive)
+    {
+        rough = texture(glgeRoughMap, texCoord).r;
     }
     else
     {
-        FragColor.rgb = calculateLightingPBR(color.rgb);
+        rough = glgeRough;
     }
+    n = normalize(normal);
+    if (NormalMapIsActive)
+    {
+        n = normalize(normal + (texture(glgeNormalMap, texCoord).rgb));
+    }
+
+    if (glgeLit)
+    {
+        pos = currentPos;
+        roughness = rough;
+        col.rgb = calculateLightingPBR(col.rgb);
+    }
+
+    Col = col;
+    Max = vec4(0,0,1,1);
+    Lit.b = 1.f;
+
+    gl_FragDepth = gl_FragCoord.z;
 }

@@ -16,9 +16,7 @@
 /**
  * @brief the main function of the 3D example
  * 
- * @param argc needed for glgeInit
- * @param argv needed for glgeInit
  */
-void run3Dexample(int argc, char** argv);
+void run3Dexample();
 
 #endif

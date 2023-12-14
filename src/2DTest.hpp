@@ -15,6 +15,6 @@
 /**
  * @brief this is the function run from the main file 
  */
-void run2Dexample(int argc, char** argv);
+void run2Dexample();
 
 #endif

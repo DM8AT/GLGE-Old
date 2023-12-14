@@ -42,11 +42,6 @@
 #define GLGE_ERROR_GLEW_INIT_FAILED "[GLGE ERROR] could not initialise glew, glew error string: %s\n"
 
 /**
- * this error is printed if argc is an value that defenetly dosn't come from the main function input
- */
-#define GLGE_ERROR_ARGC_OUT_OF_BOUNDS "[GLGE ERROR] Invalid number for argc in init function: %d\n"
-
-/**
  * this error is called if the input to the init function into argv is a nullpointer
  */
 #define GLGE_ERROR_NULLPOINTER_INP_INIT "[GLGE ERROR] nullpointer as input for init function\n"

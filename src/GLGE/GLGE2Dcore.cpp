@@ -256,6 +256,12 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
 
 void Object2D::draw()
 {
+    //check if this is the transparent pass
+    if (glgeTransparentOpaquePass)
+    {
+        //break the draw call
+        return;
+    }
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);

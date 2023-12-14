@@ -122,7 +122,7 @@ void triangleSetup()
                            Vertex2D(-1,-1, 0,1,0,1),
                            Vertex2D( 1,-1, 0,0,1,1)};
 
-    //bind the vertices to an triangle1
+    //bind the vertices to an triangle
     uint indices[] = {0,1,2};
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
@@ -172,10 +172,10 @@ void setupCrosshair()
 }
 
 //this is the main function
-void run2Dexample(int argc, char** argv)
+void run2Dexample()
 {
     //initalise the library
-    glgeInit(argc, argv);
+    glgeInit();
 
     //create an window named "2D GLGE Example" and with the size of 1000px*1000px
     glgeCreateWindow("2D GLGE Example", 1000, 1000);

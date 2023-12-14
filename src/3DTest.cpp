@@ -13,8 +13,6 @@
 //include the header file, so it can be run from the main file
 #include "3DTest.hpp"
 
-//say that the SDL specific functions should be included as well
-#define GLGE_USE_SDL
 //include the library core, needed for 3D and 2D
 //used for first initalisation, keyboard functions, mouse functions and simple display things like creating and updating a windows
 #include "GLGE/GLGE.h"
@@ -397,7 +395,6 @@ void thingSetup()
 
     //create a material for the thing
     Material thingMat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0.2);
-
     //apply the material to the thing
     thing.setMaterial(thingMat);
 }
@@ -405,10 +402,10 @@ void thingSetup()
 void enterpriseSetup()
 {
     //load the Enterprise object from an file, the file format is .obj
-    enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1));
+    enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1), true);
 
     //create a material for the object
-    Material mat = Material(vec4(vec3(0.25), 1.f), 0.2, 1.0);
+    Material mat = Material(vec4(vec3(0.25), 0.5f), 0.2, 1.0);
 
     //bind the material to the enterprise
     enterprise.setMaterial(mat);
@@ -554,10 +551,10 @@ Shader calculateBloom(unsigned int img)
 
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
 //The inputs are declared in the 3DTest.hpp file to make the function acessable from the main.cpp file. 
-void run3Dexample(int argc, char** argv)
+void run3Dexample()
 {
     //first, the library is initalised. if the library is used, this should alway be done first. 
-    glgeInit(argc, argv);
+    glgeInit();
 
     //as second step, a window is created. This should be done second, because it also initalises the glew library
     glgeCreateWindow("3D example script for GLGE : init...", 1000, 1000);
@@ -574,7 +571,7 @@ void run3Dexample(int argc, char** argv)
     //glgeDisableBackfaceCulling();
 
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
-    glgeSetLightingShader("src/GLGE/glgeDefaultLightingShaderSource.fs");
+    //glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
     glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
