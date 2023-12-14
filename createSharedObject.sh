@@ -1,4 +1,4 @@
 #!/bin/bash
 #
 #  
-g++ -shared -o libGLGE.so -fPIC src/GLGE/*.cpp src/GLGE/CML/*.cpp
+g++ -shared -o bin/libGLGE.so -fPIC src/GLGE/*.cpp src/GLGE/CML/*.cpp

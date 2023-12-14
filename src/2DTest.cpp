@@ -122,7 +122,7 @@ void triangleSetup()
                            Vertex2D(-1,-1, 0,1,0,1),
                            Vertex2D( 1,-1, 0,0,1,1)};
 
-    //bind the vertices to an triangle
+    //bind the vertices to an triangle1
     uint indices[] = {0,1,2};
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
