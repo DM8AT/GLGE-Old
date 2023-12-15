@@ -603,13 +603,6 @@ void glgeDefaultMouseFunc(int button, int state)
 
 void glgeDefaultResizeFunc(int width, int height)
 {
-    //check if glge is allowed to change the window size
-    if (glgeAllowWindowResize)
-    {
-        //if the window can change size, update the size
-        resizeWindow(width, height);
-    }
-
     //after that, call the customizable function that should be called on resize
     //check if the function is a nullpointer
     if (!(glgeOnWindowResize == nullptr))

@@ -51,6 +51,9 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.2-1
+- switched to SDL_SetWindowResizable to allow window resizing
+- removed now redundend code for fixing window size
 ## Update 0.2
 - removed misteriouse 1 form 2DTest.cpp
 - changed std::endl with \n

@@ -1702,6 +1702,8 @@ void glgeResizeWindow(vec2 size, bool force)
 
 void glgeSetWindowResizable(bool resizable)
 {
+    //set the correct window resize mode
+    SDL_SetWindowResizable(glgeMainWindow, SDL_bool(resizable));
     //store the inputed mode
     glgeAllowWindowResize = resizable;
 }
