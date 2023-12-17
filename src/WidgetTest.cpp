@@ -41,11 +41,11 @@ void widgetTick()
     }
 
     //calculate the current second
-    float sec = round(((float)(time(0)%60)))/60.f;
+    float sec = floor(((float)(time(0)%60)))/60.f;
     //calculate the current minute
-    float min = round(((float)(time(0)%3600))/60.f)/60.f;
+    float min = floor(((float)(time(0)%3600))/60.f)/60.f;
     //calculate the current hour
-    float hour = round(((float)(time(0)%(3600*12)))/3600.f)/12.f + 1.f/12.f;
+    float hour = floor(((float)(time(0)%(3600*12)))/3600.f)/12.f + 1.f/12.f;
     //rotate the pointer to the current second
     clockPointerSec.setRotation(sec * -360.f);
     //rotate the pointer to the current minute
