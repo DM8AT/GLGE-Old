@@ -421,7 +421,7 @@ void createWindow(const char* n, vec2 s, vec2 p)
     //store the SDL Window
     SDL_Window* window;
     //create an window using SDL2
-    window = SDL_CreateWindow(n, p.x, p.y, s.x, s.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow(n, p.x, p.y, s.x, s.y, glgeWindowFlags);
 
     //disable VSync
     SDL_GL_SetSwapInterval(0);

@@ -543,6 +543,24 @@ vec2 Object2D::getScale()
     return this->transf.size;
 }
 
+void Object2D::setAnchor(vec2 anchor)
+{
+    //store the inputed position
+    this->anchor = anchor;
+}
+
+void Object2D::setAnchor(float x, float y)
+{
+    //store the inputs as an vec2
+    this->anchor = vec2(x,y);
+}
+
+vec2 Object2D::getAnchor()
+{
+    //return the anchor
+    return this->anchor;
+}
+
 void Object2D::createBuffers()
 {
     //generate the vertex buffer for the object
@@ -826,6 +844,24 @@ void Camera2D::recalculateMatrix()
 
 void glgeInit2DCore()
 {
+    //check if GLGE has a window
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if errors should be printed
+        if (glgeErrorOutput)
+        {
+            //if yes, print an error
+            std::cerr << "[GLGE ERROR] initalising a GLGE core module before opening a window dosn't work\n";
+        }
+        //check if glge should stop upon an error
+        if (glgeExitOnError)
+        {
+            //stop the program
+            exit(1);
+        }
+        //else, stop the function
+        return;
+    }
     //initalise the 2D base shader
     glgeDefault2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
     //get the move matrix location from the default shader

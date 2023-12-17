@@ -1635,6 +1635,24 @@ void glgeBindCamera(Camera* camera)
 //initalise for 3D
 void glgeInit3DCore()
 {
+    //check if GLGE has a window
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if errors should be printed
+        if (glgeErrorOutput)
+        {
+            //if yes, print an error
+            std::cerr << "[GLGE ERROR] initalising a GLGE core module before opening a window dosn't work\n";
+        }
+        //check if glge should stop upon an error
+        if (glgeExitOnError)
+        {
+            //stop the program
+            exit(1);
+        }
+        //else, stop the function
+        return;
+    }
     //set the depth test correctly
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_GREATER);

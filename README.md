@@ -51,6 +51,29 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.3
+- added a lot of new window related functions
+   - show/hide the window border
+   - force the window to staty open even if closing is issued using window close actions | default window closing actions are:
+      - the 'x' in the top left of the window border
+      - 'alt + F4' on Windows and Linux
+   - glge main window can now be closed by code
+      - if this closing was wrongly initiated, it can be stopped during the tick it was initiated
+   - the glge main window can be always renderd on top of other windows
+   - added a function to change the window brightness
+      - WARNING: on some operating systems, this effects the compleate screen brightness, if the window is the currently focused one
+- glgeGetScreenSize now returns the actual screen size in pixels, not the window size
+- added ability to add a few window flags
+   - window can be hidden from task bar
+   - window can be treated as a popup menu
+   - window can be treated as a tooltip
+   - window can be treated as an utility window
+   - the window should be created in high-DPI mode if supported
+      - if it is not supported, no warning nor error is shown
+- added a function to get if the window is focused
+- added a function to get if the mouse is touching the window
+- added a function to capture the mouse inside of the window
+- updated install.py to now install into /usr/local/include and /usr/local/lib
 ## Update 0.2-1
 - switched to SDL_SetWindowResizable to allow window resizing
 - removed now redundend code for fixing window size

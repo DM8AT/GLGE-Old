@@ -80,6 +80,19 @@
 //define the integer limit as unlimited FPS
 #define GLGE_FPS_UNLIMITED 2147483647
 
+//define the window flags
+
+//say that the window should be created in high-DPI mode if supported
+#define GLGE_WINDOW_FLAG_ALLOW_HIGHDPI 8192
+//window should be treated as a popup menu
+#define GLGE_WINDOW_FLAG_POPUP_MENU 524288
+//window should not be added to the taskbar
+#define GLGE_WINDOW_FLAG_SKIP_TASKBAR 65536
+//window should be treated as a tooltip
+#define GLGE_WINDOW_FLAG_TOOLTIP 262144
+//window should be treated as a utility window
+#define GLGE_WINDOW_FLAG_UTILITY 131072
+
 /////////////
 //FUNCTIONS//
 /////////////
@@ -798,5 +811,157 @@ Shader* glgeGetTransparencyCombineShader();
  * @return false : The shader will be deleted if a new one is bound
  */
 bool glgeGetIfCustomTransparentCombineShaderIsBound();
+
+/**
+ * @brief hide or show the window border
+ * 
+ * @param visible true : the window border will get shown | false : the window border will get hidden
+ */
+void glgeSetWindowBorderVisible(bool visible);
+
+/**
+ * @brief get if the window border Border
+ * 
+ * @return true : the window border is shown | 
+ * @return false : the window border is hidden
+ */
+bool glgeGetWindowBorderVisible();
+
+/**
+ * @brief say if the window should automaticaly close upon window closing actions
+ * 
+ * @param forceOpen true : the window will not close upon window closing actions | false : the window will close upon window closing actions
+ */
+void glgeSetWindowForceOpen(bool forceOpen);
+
+/**
+ * @brief get if the window will close automaticaly upon window closing actions
+ * 
+ * @return true : the window will not close upon window closing actions | 
+ * @return false : the window will close upon window closing actions
+ */
+bool glgeGetWindowForceOpen();
+
+/**
+ * @brief close the GLGE main window
+ * 
+ * @param force say if the window should close even if force open is active, default is true
+ */
+void glgeCloseWindow(bool force = true);
+
+/**
+ * @brief say if a window closing was initated in this tick
+ * 
+ * @return true : a window closing was initiated and the window will close | 
+ * @return false : no window closing was initiated
+ */
+bool glgeGetWindowClosingInitiated();
+
+/**
+ * @brief override the issued closing of the GLGE main window
+ * 
+ * @param force say if this function should also execute if the window is force opend
+ */
+void glgeStopWindowClosing(bool force = true);
+
+/**
+ * @brief say if the window should always render on top of other windows
+ * 
+ * @param onTop true : the window will always render on top | false : the window won't always render on top
+ */
+void glgeSetWindowAlwaysOnTop(bool onTop);
+
+/**
+ * @brief get if the window renders always on top of other windows
+ * 
+ * @return true : the window will always render on top | 
+ * @return false : the window won't always render on top
+ */
+bool glgeGetWindowAlwaysOnTop();
+
+/**
+ * @brief set how bright the window should render. 1.0 is the normal brightness, 0.0 is compleate black. 
+ * WARNING: On some opperating systems, this effects the compleate monitor brightness, if the window is on top. 
+ * @param brightness the birghtness of the window, must be at least 0.0
+ */
+void glgeSetWindowBrightness(float brightness);
+
+/**
+ * @brief get the current window brightness
+ * 
+ * @return float : the window brightness
+ */
+float glgeGetWindowBrightness();
+
+/**
+ * @brief add a window flag before the window is constructed
+ * 
+ * @param windowFlag the window flag
+ */
+void glgeAddWindowFlag(int windowFlag);
+
+/**
+ * @brief show or hide the window
+ * 
+ * @param show true : the window will be shown | hide : the window will be hidden
+ */
+void glgeShowHideWindow(bool show);
+
+/**
+ * @brief get if the window is shown or hidden
+ * 
+ * @return true : the window is shown | 
+ * @return false : the window is hidden
+ */
+bool glgeGetWindowShown();
+
+/**
+ * @brief maximize or minimize the window
+ * 
+ * @param maximized true : the window will be maximized | false : the window will be minimized 
+ * @param force say if this function should execute if window resizing is disabled
+ */
+void glgeMaximizeMinimizeWindow(bool maximized, bool force = false);
+
+/**
+ * @brief get if the window is maximized or minimized
+ * 
+ * @return true : the window is maximized | 
+ * @return false : the window is minimized
+ */
+bool glgeGetWindowMaximized();
+
+/**
+ * @brief check if the glge main window is focused
+ * 
+ * @return true : the window is focused | 
+ * @return false : the window is not focused
+ */
+bool glgeGetWindowFocus();
+
+/**
+ * @brief get if the mouse is touching the window
+ * 
+ * @return true : the mouse is touching the window | 
+ * @return false : the mouse is not touching the window
+ */
+bool glgeGetMouseFocus();
+
+/**
+ * @brief 
+ * 
+ * @param mode 
+ */
+void glgeSetMouseGrabMode(bool mode);
+
+/**
+ * @brief Get the Keyboard Grab Mode object
+ * 
+ * @return true 
+ * @return false 
+ */
+bool glgeGetMouseGrabMode();
+
+void glgeFocusWindow(bool moveUp = true);
 
 #endif

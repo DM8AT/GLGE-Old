@@ -12,6 +12,7 @@
 //include the examples
 #include "3DTest.hpp"
 #include "2DTest.hpp"
+#include "WidgetTest.hpp"
 
 //for input and printing, iostream is included
 #include <iostream>
@@ -63,6 +64,7 @@ int main()
     //first, write information on what to input to start the examples
     printf("Write 0 to run the 3D example\n");
     printf("Write 1 to run the 2D example\n");
+    printf("Write 2 to run the widget example\n");
 
     //then, get the user input
     int inp;
@@ -80,6 +82,12 @@ int main()
         //launch the 2D core
         printf("\nLaunching 2D example\n");
         run2Dexample();
+    }
+    else if (inp == 2)
+    {
+        //launch the widget example
+        printf("\nLaunching widget example\nTo exit press F4\n");
+        runWidgetExample();
     }
     //osterei
     else if (inp == 42)

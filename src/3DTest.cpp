@@ -470,11 +470,11 @@ Shader calculateBloom(unsigned int img)
     unsigned int samples = 2;
     //make the first setup for the blure using the brightness map
     //set the size to half the size of the brightness map
-    pingPongBlure_first.changeSize(glgeGetScreenSize()/vec2(2,2));
+    pingPongBlure_first.changeSize(glgeGetWindowSize()/vec2(2,2));
     //load the texture from the brightness map to the shader
     downSample.setCustomTexture("image", glgeGetLighningBuffer());
     //pass the size of the brightness map to the shader
-    downSample.setCustomVec2("screenSize", glgeGetScreenSize());
+    downSample.setCustomVec2("screenSize", glgeGetWindowSize());
     //pass a multiplyer for the texture coordinates to the shader
     downSample.setCustomInt("sampleMult", 2);
     //bind the down sampleing shader to the render target
@@ -589,9 +589,9 @@ void run3Dexample()
     //bind a post processing funciton for bloom calculation
     glgeAddCustomPostProcessingFunc(calculateBloom);
     //setup the first render target for the blure
-    pingPongBlure_first = RenderTarget(glgeGetScreenSize());
+    pingPongBlure_first = RenderTarget(glgeGetWindowSize());
     //setup the second render target for the blure
-    pingPongBlure_second = RenderTarget(glgeGetScreenSize());
+    pingPongBlure_second = RenderTarget(glgeGetWindowSize());
     //setup the bloom shader
     bloomShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/finalBloomShader.fs");
     //pass the lit image to the bloom shader

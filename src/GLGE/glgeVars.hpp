@@ -350,4 +350,31 @@ extern Shader* glgeTransparentCombineShader;
 //store if glge has a custom transparent combination shader
 extern bool glgeHasCustomTransparentCombineShader;
 
+//store if the GLGE window has a border
+extern bool glgeHasWindowBorder;
+
+//say if glge should automaticaly close on window close events
+extern bool glgeWindowForceOpen;
+
+//say if the window should be closed by glge
+extern bool glgeOPCloseWindow;
+
+//say if the window is always renderd on top
+extern bool glgeWindowAlwaysOnTop;
+
+//store how bright the window is renderd
+extern float glgeWindowBrightness;
+
+//store the window flags GLGE is using
+extern SDL_WindowFlags glgeWindowFlags;
+
+//store if the window is maximised
+extern bool glgeWindowMaximised;
+
+//store if the window is shown
+extern bool glgeWindowIsShown;
+
+//store if the mouse is grabbed in the window
+extern bool glgeMouseGrabMode;
+
 #endif

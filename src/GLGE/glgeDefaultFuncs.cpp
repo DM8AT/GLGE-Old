@@ -603,6 +603,8 @@ void glgeDefaultMouseFunc(int button, int state)
 
 void glgeDefaultResizeFunc(int width, int height)
 {
+    //resize the window
+    resizeWindow(width,height);
     //after that, call the customizable function that should be called on resize
     //check if the function is a nullpointer
     if (!(glgeOnWindowResize == nullptr))

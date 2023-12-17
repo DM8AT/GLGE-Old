@@ -485,7 +485,31 @@ public:
      */
     vec2 getScale();
 
+    /**
+     * @brief Set the anchor position for the objct
+     * 
+     * @param anchor the anchor
+     */
+    void setAnchor(vec2 anchor);
+
+    /**
+     * @brief Set the anchor position for the objct
+     * 
+     * @param x the x part of the anchor
+     * @param y the y part of the anchor
+     */
+    void setAnchor(float x, float y);
+
+    /**
+     * @brief Get the anchor position from the object
+     * 
+     * @return vec2 the anchor position
+     */
+    vec2 getAnchor();
+
 protected:
+    //store the anchor position for the 2D Object
+    vec2 anchor = vec2(0);
     //store the mesh for the object
     Mesh2D mesh;
     //store the transform of the object

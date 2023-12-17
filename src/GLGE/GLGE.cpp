@@ -296,15 +296,15 @@ void glgeRunMainLoop()
                 case SDL_WINDOWEVENT:
                     switch (event.window.event) {
                         case SDL_WINDOWEVENT_RESIZED:
-                            /* Change view port to the new window dimensions */
+                            //Change view port to the new window dimensions
                             glgeDefaultResizeFunc(event.window.data1, event.window.data2);
-                            /* Update window content */
+                            //Update window content
                             glgeDefaultDisplay();
                             break;
                     }
             }
             //check if the window should close:
-            if (event.type == SDL_QUIT)
+            if (((event.type == SDL_QUIT) && (!glgeWindowForceOpen)) || glgeOPCloseWindow)
             {
                 //if it should close, say that the loop is nolonger running
                 running = false;
@@ -1564,8 +1564,12 @@ void glgeSetCursor(int curser)
 
 vec2 glgeGetScreenSize()
 {
+    //store the display mode
+    SDL_DisplayMode display;
+    //get the display mode from SDL
+    SDL_GetCurrentDisplayMode(0, &display);
     //return the screen size
-    return glgeWindowSize;
+    return vec2(display.w, display.h);
 }
 
 float glgeGetCurrentElapsedTime()
@@ -1874,4 +1878,246 @@ bool glgeGetIfCustomTransparentCombineShaderIsBound()
 {
     //return the boolean
     return glgeHasCustomTransparentCombineShader;
+}
+
+void glgeSetWindowBorderVisible(bool visible)
+{
+    //store the new window border state
+    glgeHasWindowBorder = visible;
+    //update the window border
+    SDL_SetWindowBordered(glgeMainWindow, SDL_bool(visible));
+}
+
+bool glgeGetWindowBorderVisible()
+{
+    //return the current window borderd state
+    return glgeHasWindowBorder;
+}
+
+void glgeSetWindowForceOpen(bool forceOpen)
+{
+    //store the new state of the variable
+    glgeWindowForceOpen = forceOpen;
+}
+
+bool glgeGetWindowForceOpen()
+{
+    //return the current state of the variable
+    return glgeWindowForceOpen;
+}
+
+void glgeCloseWindow(bool force)
+{
+    //check if this function should run
+    if (glgeWindowForceOpen && !force)
+    {
+        //if not, stop this function
+        return;
+    }
+    //else, say that the window should close
+    glgeOPCloseWindow = true;
+}
+
+bool glgeGetWindowClosingInitiated()
+{
+    //return the current closing status
+    return glgeOPCloseWindow;
+}
+
+void glgeStopWindowClosing(bool force)
+{
+    //check if this function should run
+    if ((!glgeOPCloseWindow) || ((!force) && glgeOPCloseWindow))
+    {
+        //stop this function
+        return;
+    }
+    //say that the window won't be closed
+    glgeOPCloseWindow = false;
+}
+
+void glgeSetWindowAlwaysOnTop(bool onTop)
+{
+    //store the new state
+    glgeWindowAlwaysOnTop = onTop;
+    //update the window
+    SDL_SetWindowAlwaysOnTop(glgeMainWindow, SDL_bool(onTop));
+}
+
+bool glgeGetWindowAlwaysOnTop()
+{
+    //return the current on top state
+    return glgeWindowAlwaysOnTop;
+}
+
+void glgeSetWindowBrightness(float brightness)
+{
+    //check if the brightness is less than 0
+    if (brightness < 0.f)
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print a warning
+            printf("[GLGE WARNING] a brightness of %f is not allowed, the brightness must be at least 0.f\n", brightness);
+        }
+        //stop this function
+        return;
+    }
+    //store the new window brightness
+    glgeWindowBrightness = brightness;
+    //update the window brightness
+    SDL_SetWindowBrightness(glgeMainWindow, brightness);
+}
+
+float glgeGetWindowBrightness()
+{
+    //return the current brightness
+    return glgeWindowBrightness;
+}
+
+void glgeAddWindowFlag(int windowFlag)
+{
+    //check if the window was already created
+    if (glgeHasMainWindow)
+    {
+        //check if warnings should be printed
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            printf("[GLGE WARNING] window falg can't be set if a window was allready opend\n");
+        }
+        //stop the function
+        return;
+    }
+    //store if the flag is valide
+    bool val = false;
+    //check all valid flags
+    switch (windowFlag)
+    {
+        //check the flags, if it is one, say that it is valide
+        case GLGE_WINDOW_FLAG_ALLOW_HIGHDPI:
+        case GLGE_WINDOW_FLAG_POPUP_MENU:
+        case GLGE_WINDOW_FLAG_SKIP_TASKBAR:
+        case GLGE_WINDOW_FLAG_TOOLTIP:
+        case GLGE_WINDOW_FLAG_UTILITY:
+            val = true;
+            break;
+        default:
+            val = false;
+            break;
+    }
+    //check if the flag is valide
+    if (!val)
+    {
+        //if not, check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] inputed an invalide flag as a window flag\n";
+        }
+        //check if glge should close on error
+        if (glgeExitOnError)
+        {
+            //stop the program
+            exit(1);
+        }
+        //else, stop the function
+        return;
+    }
+    //set the window flag
+    glgeWindowFlags = SDL_WindowFlags(glgeWindowFlags | windowFlag);
+}
+
+void glgeShowHideWindow(bool show)
+{
+    //store the new show/hide state
+    glgeWindowIsShown = show;
+    //update the window
+    if (show)
+    {
+        //show the window
+        SDL_ShowWindow(glgeMainWindow);
+    }
+    else
+    {
+        //hide the window
+        SDL_HideWindow(glgeMainWindow);
+    }
+}
+
+bool glgeGetWindowShown()
+{
+    //return the current window show/hide state
+    return glgeWindowIsShown;
+}
+
+void glgeMaximizeMinimizeWindow(bool maximized, bool force)
+{
+    //check if this function should execute
+    if (!glgeAllowWindowResize && !force)
+    {
+        //stop this function
+        return;
+    }
+    //store the new state
+    glgeWindowMaximised = maximized;
+    //maximize or minize the window
+    if (maximized)
+    {
+        //maximize the window
+        SDL_MaximizeWindow(glgeMainWindow);
+    }
+    else
+    {
+        //minize the window
+        SDL_MinimizeWindow(glgeMainWindow);
+    }
+}
+
+bool glgeGetWindowMaximized()
+{
+    //return the current maximized state
+    return glgeWindowMaximised;
+}
+
+bool glgeGetWindowFocus()
+{
+    //get the input flags and maks out the input focus, then return it as an bool
+    return (bool)(SDL_GetWindowFlags(glgeMainWindow) & SDL_WINDOW_INPUT_FOCUS);
+}
+
+bool glgeGetMouseFocus()
+{
+    //get the input flags and maks out the mouse focus, then return it as an bool
+    return (bool)(SDL_GetWindowFlags(glgeMainWindow) & SDL_WINDOW_MOUSE_FOCUS);
+}
+
+void glgeSetMouseGrabMode(bool mode)
+{
+    //update the intern mode
+    glgeMouseGrabMode = mode;
+    //update the mode for the main window
+    SDL_SetWindowMouseGrab(glgeMainWindow, SDL_bool(mode));
+}
+
+bool glgeGetMouseGrabMode()
+{
+    //return the intern mode
+    return glgeMouseGrabMode;
+}
+
+void glgeFocusWindow(bool moveUp)
+{
+    //check if the window should move up
+    if (moveUp)
+    {
+        //use the function that moves the window up
+        SDL_RaiseWindow(glgeMainWindow);
+    }
+    else
+    {
+        //use the function that dosn't move the window up
+        SDL_SetWindowInputFocus(glgeMainWindow);
+    }
 }
