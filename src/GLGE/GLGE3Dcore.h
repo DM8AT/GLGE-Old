@@ -627,6 +627,21 @@ public:
      */
     bool getTransparency();
 
+    /**
+     * @brief Say if the object should only render in the transparent pass
+     * 
+     * @param transparent true : the object will only render in the transparent pass | false : the object will render in the transparent and opaque pass if it is transparent
+     */
+    void setFullyTransparent(bool transparent);
+
+    /**
+     * @brief Get if the object renders in both passes
+     * 
+     * @return true : the object will only render in the transparent pass | 
+     * @return false : the object will render in the transparent and opaque pass if it is transparent
+     */
+    bool getFullyTransparent();
+
 private:
     //store the transform for the object
     Transform transf;
@@ -671,6 +686,8 @@ private:
     unsigned int shadowMapSamplerLoc;
     //store the object UUID
     unsigned int uuid = 0;
+    //store if the object is fully transparent
+    bool fullyTransparent = false;
 
     //compile the draw list
     void compileBuffers();

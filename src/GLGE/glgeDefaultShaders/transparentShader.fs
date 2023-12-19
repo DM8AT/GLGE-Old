@@ -20,17 +20,18 @@ uniform vec2 glgeScreenResolution;
 uniform vec4 glgeColor;
 uniform float glgeRough;
 uniform float glgeMetalic;
+uniform bool glgeHasTexture;
+uniform sampler2D glgeTexture;
 uniform sampler2D glgeAmbientMap;
 uniform sampler2D glgeNormalMap;
 uniform sampler2D glgeRoughMap;
-uniform sampler2D glgeTexture;
 uniform samplerCube shadowMap;
-uniform int usedTextures;
 uniform bool NormalMapIsActive;
 uniform bool glgeLit;
 uniform bool roughMapIsActive;
 uniform vec3 cameraPos;
 uniform float farPlane;
+uniform bool glgePass;
 
 float rough = 0.f;
 vec3 n = vec3(0);
@@ -154,18 +155,18 @@ void main()
     vec4 col = glgeColor;
     col.rgb += color.rgb;
     col.w += clamp(color.w,0.f,1.f);
-    vec4 texColor = texture(glgeTexture, texCoord);
-    col.rgb += texColor.rgb;
-    col.w *= clamp(texColor.w,0.f,1.f);
-
+    if (glgeHasTexture)
+    {
+        vec4 texColor = texture(glgeTexture, texCoord);
+        col.rgb += texColor.rgb;
+        col.w *= clamp(texColor.w,0.f,1.f);
+    }
+    
     col.w = clamp(col.w, 0.f, 1.f);
 
     if (col.w == 0.f){discard;}
-
-    if (usedTextures > 1)
-    {
-        col += vec4(texture(glgeAmbientMap, texCoord).rgb, col.w);
-    }
+    if (!glgePass && col.w!=1.f){discard;}
+    if (glgePass && col.w==1.f){discard;}
 
     if (roughMapIsActive)
     {

@@ -51,6 +51,10 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.3-1
+- an alpha of 1.f will now be renderd solid on transparent objects
+- transparent objects will render in the opaque and transparent pass by default now to render solid and transparent parts
+- a object can be set to be "fullyTransparent", then it will have the old behaviour. This drasticaly improves performance for only transparent objects. 
 ## Update 0.3
 - added a lot of new window related functions
    - show/hide the window border

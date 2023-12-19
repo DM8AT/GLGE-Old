@@ -156,6 +156,9 @@ void Material::applyShader(unsigned int shader)
     //get the location of the lit parameter
     this->litLoc = glgeGetUniformVar(shader, "glgeLit");
 
+    //get the location to say if a texture is bound
+    this->hasTextureLoc = glgeGetUniformVar(shader, "glgeHasTexture");
+
     //get the location of the color
     this->colorLoc = glgeGetUniformVar(shader, this->colorUniform);
 
@@ -301,6 +304,12 @@ void Material::applyMaterial()
     {
         //pass if the texture vector contains the normal map
         glUniform1i(this->roughIsActivLoc, (int)(this->customTextures[this->roughnessUniform] != 0));
+    }
+    //pass hasTexture if it is bound
+    if (this->hasTextureLoc != -1)
+    {
+        //pass if there is a texture
+        glUniform1i(this->hasTextureLoc, (int)this->customTextures.count(GLGE_TEXTURE));
     }
 
     //pass the costom floats

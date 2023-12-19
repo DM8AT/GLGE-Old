@@ -587,12 +587,12 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = glgeTransparentShaderDefault;
+        this->shader = Shader(glgeTransparentShaderDefault);
     }
     else
     {
         //bind the opaque shader
-        this->shader = glgeShaderDefault;
+        this->shader = Shader(glgeShaderDefault);
     }
     //get the uniforms
     this->getUniforms();
@@ -628,12 +628,12 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = glgeTransparentShaderDefault;
+        this->shader = Shader(glgeTransparentShaderDefault);
     }
     else
     {
         //bind the opaque shader
-        this->shader = glgeShaderDefault;
+        this->shader = Shader(glgeShaderDefault);
     }
     //get the uniforms
     this->getUniforms();
@@ -669,12 +669,12 @@ Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = glgeTransparentShaderDefault;
+        this->shader = Shader(glgeTransparentShaderDefault);
     }
     else
     {
         //bind the opaque shader
-        this->shader = glgeShaderDefault;
+        this->shader = Shader(glgeShaderDefault);
     }
     //get the uniforms
     this->getUniforms();
@@ -710,12 +710,12 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = glgeTransparentShaderDefault;
+        this->shader = Shader(glgeTransparentShaderDefault);
     }
     else
     {
         //bind the opaque shader
-        this->shader = glgeShaderDefault;
+        this->shader = Shader(glgeShaderDefault);
     }
     //get the uniforms
     this->getUniforms();
@@ -729,9 +729,15 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
 void Object::draw()
 {
     //check if the current object belongs to the current pass
-    if (this->isTransparent != glgeTransparentOpaquePass)
+    if (!this->isTransparent && glgeTransparentOpaquePass)
     {
         //abbort the draw, if not
+        return;
+    }
+    //check for fully transparent objects
+    if (this->fullyTransparent && !glgeTransparentOpaquePass)
+    {
+        //abbort the draw, if it is the opaque pass
         return;
     }
     
@@ -742,6 +748,13 @@ void Object::draw()
     //check if the shadow pass is drawn
     if (!glgeIsShadowPass)
     {
+        //bind the transparent extra data
+        if (this->isTransparent)
+        {
+            //pass the current pass
+            this->shader.setCustomInt("glgePass", glgeTransparentOpaquePass);
+        }
+
         //only do shader binding if if it is not the shadow pass
         //bind the shader
         this->shader.applyShader();
@@ -1101,6 +1114,18 @@ bool Object::getTransparency()
     return this->isTransparent;
 }
 
+void Object::setFullyTransparent(bool transparent)
+{
+    //store the new input
+    this->fullyTransparent = transparent;
+}
+
+bool Object::getFullyTransparent()
+{
+    //return the current state
+    return this->fullyTransparent;
+}
+
 //PRIV
 void Object::compileBuffers()
 {
@@ -1174,6 +1199,9 @@ void Object::getUniforms()
     //check if the object is transparent
     if (this->isTransparent)
     {
+        //add the pass variable
+        //pass the current pass
+        this->shader.setCustomInt("glgePass", false);
         //add the depth and alpha buffer
         this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeDepthBuffer);
     }
@@ -1662,5 +1690,5 @@ void glgeInit3DCore()
     //load the default 3D shaders
     glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
     //load the default 3D transparent shader
-    glgeTransparentShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
+    glgeTransparentShaderDefault = compileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
 }

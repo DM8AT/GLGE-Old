@@ -434,6 +434,8 @@ private:
     const char* metalicUniform = GLGE_METALIC_MAP;
     //store the amount of bound textures
     int boundTextures;
+    //store the position to pass if a texture is bound
+    int hasTextureLoc;
 
     //custom values
 

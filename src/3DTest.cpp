@@ -77,7 +77,6 @@ bool isActive = true;
 void display()
 {
     //before this function is called, the complete screen gets cleared. 
-
     //draw the Enterpreis
     enterprise.draw();
 
@@ -409,6 +408,8 @@ void enterpriseSetup()
 
     //bind the material to the enterprise
     enterprise.setMaterial(mat);
+    //say that the enterpreise is fully transparent
+    enterprise.setFullyTransparent(true);
 }
 
 void wallSetup()
