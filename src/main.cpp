@@ -24,41 +24,18 @@
 int main()
 {
     #if 0
-    // texture atlas demo code
+    // creat an example texture atlas
+    Atlas x;
 
-    // create new atlas object. This is for creating and using a texture atlas
-    atlas x;
+    x.path = "assets/demoAtlas.png";
 
-    // add files that will make up the texture atlas
-    x.add("assets/cubeTexture.png");
     x.add("assets/cubeTexture.png");
     x.add("assets/Crosshair.png");
     x.add("assets/grass.png");
 
-    // get the list of texture paths
-    std::vector<const char*> tmp = x.dump();
-    // print the size of the texture path vector
-    std::cout << "Size of vector: " << tmp.size() << "\n";
-
-    // print the contents of the path vector
-    for (long unsigned int i = 0; i < tmp.size(); i++) {
-        std::cout << tmp[i] << "\n";
-    }
-
-    // Then, build the atlas
     x.build(true);
 
-    // get atlas image
-    unsigned char* iAtlas = x.iAtlas;
-    // get the information about the atlas
-    nlohmann::json data = x.atlasData;
-    // print atlas info
-    std::cout << "W: " << data["w"] << "\n";
-    std::cout << "H: " << data["h"] << "\n";
-
-    // print the texture coor for cube texture, the top left corner
     std::cout << "C: " << x.getTexCoord("assets/cubeTexture.png", 0, 1).x << " " << x.getTexCoord("assets/cubeTexture.png", 0, 1).y << "\n";
-
     #endif
     #if 1
     //first, write information on what to input to start the examples

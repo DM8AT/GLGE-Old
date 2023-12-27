@@ -15,6 +15,8 @@ if False:
     os.system("cp SDL2-2.28.5/include/* include/SDL2")
     os.system("rm -r SDL2-2.28.5 SDL2-2.28.5.tar.gz*")
 
+# get the username
+user = os.getlogin()
 # setup the path header
 pathHead = "/usr/local/"
 # say if sudo is used
@@ -34,7 +36,7 @@ print("sudo is needed to create and move the files to the destination folders")
 # copy all headers in a folder called bin/include
 if not os.path.isdir(pathHead + "include/GLGE/CML"):
     print("creating directory " + pathHead + "include/GLGE/CML" + " because it didn't exist")
-    os.system(sudo + "mkdir -p " + pathHead + "include/GLGE/CML")
+    os.system(sudo + "mkdir " + pathHead + "include/GLGE/CML")
 
 for o in headers:
     print("copying header " + o + " to " + pathHead + "include/"+o[4:])

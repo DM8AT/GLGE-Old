@@ -5,10 +5,9 @@
  * @version 0.1
  * @date 2023-02-27
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
-#include "nlohmann/json.hpp"
 #include "glgeErrors.hpp"
 #include "CML/CMLDVec2.h"
 #include "CML/CMLDVec3.h"
@@ -23,12 +22,14 @@
 #include <vector>
 #include <math.h>
 
+#include "glgeAtlasFile.hpp"
+
 // Include guard
 #ifndef _ATLAS_H_
 #define _ATLAS_H_
 
 // texture atlas class
-class atlas {
+class Atlas {
     private:
 
         // The vector for holding all the image paths
@@ -127,13 +128,14 @@ class atlas {
         unsigned char* iAtlas;
 
         // The information on where each texture on the atlas is and how wide and tall it is
-        nlohmann::json atlasData;
+        //nlohmann::json atlasData;
+        GLGEAtlasFile atlasData;
 
         /**
          * @brief Default constructor
          * 
          */
-        atlas();
+        Atlas();
 
         /**
          * @brief Adds any amount of texture paths to the path vector

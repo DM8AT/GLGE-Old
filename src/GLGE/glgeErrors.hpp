@@ -264,23 +264,6 @@
  */
 #define GLGE_ERROR_ALLOCATE_MEMORY "[GLGE ERROR RETURN] could not allocate memory for %s\n"
 
-/**
- * this message is printed if the textrue atlas does not have room for a texture. This hopefully does never happen.
- */
-#define GLGE_ERROR_ATLAS_NOT_ENOUGH_IMAGE_SPACE "[GLGE ERROR RETURN] no space for image %s was found in texture atlas while creating.\n"
-
-/**
- * this message is printed if the missing texture is not found.
- * HINT: Specify a missing texture by using 'myAtlas.missing_path = "path/to/your/texture";'
- */
-#define GLGE_ERROR_ATLAS_NO_MISSING_TEXTURE "[GLGE ERROR RETURN] no missing texture specified or not found\n"
-
-/**
- * this error isprinted when a specific file is not found
- * 
- */
-#define GLGE_ERROR_ATLAS_INVALID "[GLGE ERROR RETURN] specified file %s not found or not valid.\n"
-
 ////////////////////////
 //GLGE Warning Strings//
 ////////////////////////
@@ -291,11 +274,6 @@
 #define GLGE_WARNING_POINTER_IS_NULLPOINTER "[GLGE WARNING] the inputed pointer is the nullpointer\n"
 
 #define GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT "[GLGE WARNING] the amount of bound light sources is bigger than the maximum supported by the default shader. Supported: 255, bound: "
-
-/**
- * this warning occures if a requested texture is not found in the texture atlas
- */
-#define GLGE_WARNING_ATLAS_CHILD_TEXTURE_NOT_FOUND "[GLGE WARNING] the requested texture %s was not found in texture atlas.\n"
 
 /**
  * this warning occures if a file is not the correct type
