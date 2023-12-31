@@ -214,6 +214,8 @@ private:
     bool ownShader = false;
     //store a custom callback function
     void(*callback)(RenderTarget*) = NULL;
+    //store the window index of the render target
+    int windowIndex = -1;
 
     /**
      * @brief generate the texture for the render target as well as the render target it self

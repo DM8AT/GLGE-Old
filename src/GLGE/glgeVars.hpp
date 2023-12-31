@@ -19,6 +19,8 @@
 #include "GLGELightingCore.h"
 //include the shader core
 #include "GLGEShaderCore.h"
+//include the window core
+#include "GLGEWindow.h"
 //include the 3D core
 #include "GLGE3Dcore.h"
 //include 4D vectors
@@ -52,20 +54,11 @@ extern const char* glgePresets[];
 //Private Variables//
 /////////////////////
 
-//store the application window
-extern SDL_Window* glgeMainWindow;
-
-//store the OpenGL context to the main window
-extern SDL_GLContext glgeMainContext;
-
 //store the display mode
 extern SDL_DisplayMode glgeMainDisplay;
 
-//store the true window size
-extern vec2 glgeTrueWindowSize;
-
-//store the clear color
-extern vec4 glgeClearColor;
+//store the current window index
+extern int glgeCurrentWindowIndex;
 
 //should error be outputed?
 extern bool glgeErrorOutput;
@@ -79,12 +72,6 @@ extern bool glgeWarningOutput;
 //is an main window created?
 extern bool glgeHasMainWindow;
 
-//additional display function
-extern void (*glgeDisplayCallback)();
-
-//is an display callback bound?
-extern bool glgeHasDisplayCallback;
-
 //the maximal frames per second the window should run on
 extern int glgeMaxFPS;
 
@@ -97,21 +84,8 @@ extern float glgeDeltaTime;
 //the time the last tick started at
 extern float glgeTickTime;
 
-//a callback for a function called every tick
-extern void (*glgeMainCallback)();
-
-//a callback to a function, is called if the window is resize
-//int 1 = width, int 2 = height
-extern void (*glgeOnWindowResize)(int, int);
-
-//is a main callback function bound?
-extern bool glgeHasMainCallback;
-
 //store the name for the move matrix
 extern char* glgeCamMatrix;
-
-//store the window aspect
-extern float glgeWindowAspect;
 
 //store all pressed keys
 extern Keys glgePressedKeys;
@@ -125,96 +99,6 @@ extern Keys glgeKeysRelesdThisTick;
 //store the mouse information
 extern Mouse glgeMouse;
 
-//store the backface culling mode
-extern bool glgeUseCulling;
-
-//store the custom frame buffer
-extern unsigned int glgeFBO;
-
-//store the color from the frame buffer in an texture
-extern unsigned int glgeFrameAlbedoMap;
-
-//store the direction normal for post-processing
-extern unsigned int glgeFrameNormalMap;
-
-//store the fragment position in a texture
-extern unsigned int glgeFramePositionMap;
-
-//store the roughness in a texture r=roughness, g=metalness, b=unlit
-extern unsigned int glgeFrameRoughnessMap;
-
-//store the depth of solid and transparent objects as well as the max alpha value
-extern unsigned int glgeDepthBuffer;
-
-//store the renderd image
-extern unsigned int glgeFrameLastTick;
-
-//store a framebuffer to store the image from the last tick
-extern unsigned int glgeFBOLastTick;
-
-//store a renderbuffer to store the image from last tick
-extern unsigned int glgeRBOLastTick;
-
-//store the lit buffer
-extern unsigned int glgeSolidLitBuffer;
-
-//store the position of the uniform for the albedo map in the post processing shader
-extern int glgeAlbedoInLightingPass;
-
-//store the position of the uniform for the normal map in the post processing shader
-extern int glgeNormalInLightingPass;
-
-//store the position of the uniform for the position map in the post processing shader
-extern int glgePositionInLightingPass;
-
-//store the position of the uniform for the roughness map in the post processing shader
-extern int glgeRoughnessInLightingPass;
-
-//store the position of the light color uniform in the Lighting Pass shader
-extern std::vector<int> glgeLightColInLightingPass;
-
-//store the position of the light intensity uniform in the Lighting Pass shader
-extern std::vector<int> glgeLightIntInLightingPass;
-
-//store the position of the light position uniform in the Lighting Pass shader
-extern std::vector<int> glgeLightPosInLightingPass;
-
-//store the position of the active light uniform in the Lighting Pass shader
-extern int glgeActiveLightInLightingPass;
-
-//store the position of the camera positin uniform in the Lighting Pass shader
-extern int glgeCamPosInLightingPass;
-
-//store the position of the far plane uniform in the Lighting Pass shader
-extern int glgeFarPlaneInLightingPass;
-
-//store the rotation matrix in the lighting shader
-extern int glgeRotInLightingPass;
-
-//pass the projection matrix to the lighting shader
-extern int glgeProjInLightingPass;
-
-//store if the skybox is active
-extern bool glgeUseSkybox;
-
-//store the skybox in an cube map
-extern unsigned int glgeSkyboxCube;
-
-//store the geometry for the skybox
-extern unsigned int glgeSkyboxBuffer;
-
-//store the shader for the skybox
-extern unsigned int glgeSkyboxShader;
-
-//store the sampler in the skybox shader
-extern int glgeSkyboxSampler;
-
-//store the rotation in the skybox shader
-extern int glgeSkyboxRotation;
-
-//store the projection matrix in the skybox
-extern int glgeSkyboxProject;
-
 //store the active color buffers
 extern GLenum glgeUsedColorBuffers[];
 
@@ -227,128 +111,20 @@ extern GLenum glgeAllUsedColorBuffers[];
 //store the length of all used color buffers
 extern unsigned int glgeLenAllUsedColorBuffers;
 
-//store the RBO
-extern unsigned int glgeRBO;
-
-//store the RBO for the normals
-extern unsigned int glgeRBONormal;
-
-//store the window size
-extern vec2 glgeWindowSize;
-
-//store the rectangle that covers the whole screen
-extern unsigned int glgeScreenVBO, glgeScreenVAO;
-
-//store the shader for the lighting pass
-extern int glgeLightingShader;
-
-//store the shader for the post processing pass
-extern int glgePostProcessingShader;
-
-//store the main image in the post processing shader
-extern int glgeMainImageInPPS;
-
-//store the position of the uniform for the albedo map in the post processing shader
-extern int glgeAlbedoInPPS;
-
-//store the position of the uniform for the normal map in the post processing shader
-extern int glgeNormalInPPS;
-
-//store the position of the uniform for the position map in the post processing shader
-extern int glgePositionInPPS;
-
-//store the position of the uniform for the roughness map in the post processing shader
-extern int glgeRoughnessInPPS;
-
-//store the output image for the lighting pass
-extern unsigned int glgeLightingImageOut;
-
-//create a vector to store all lights
-extern std::vector<Light*> glgeLights;
-
-//store the resolution for the shadow map
-extern unsigned int glgeShadowMapResolution;
-
-//store the uniform for the model matrix in the shadow shader
-extern GLuint glgeModelMatShadowLoc;
-
-//store the uniform for the shdow matrices in the shadow shader
-extern GLuint glgeShadowMatShadowLoc;
-
-//store the uniform for the far plane in the shadow shader
-extern GLuint glgeFarShadowLoc;
-
-//store the uniform for the light position in the shadow shader
-extern GLuint glgeLightPosShadowLoc;
-
-//store the shader for shadow mapping
-extern Shader glgeShadowShader;
-
 //store the light world position
 extern GLuint glgeLightWorldPosUniform;
 
 //store how to sample images
 extern GLenum glgeInterpolationMode;
 
-//store if the shadow pass is currently drawing
-extern bool glgeIsShadowPass;
-
-//store the main camera for GLGE
-extern Camera* glgeMainCamera;
-
-//say if the down-and upsampleing should be done
-extern bool glgeDownUpSampeling;
-
-//say if the window is currently in fullscreen mode
-extern bool glgeFullscreen;
-
-//store the window size outside of the fullscreen mode
-extern vec2 glgeNormalWindowSize;
-
-//say if glge should allow if the window is resized
-extern bool glgeAllowWindowResize;
-
-//store the position of the window
-extern vec2 glgeWindowPosition;
-
-//say if it is allowed to move the window
-extern bool glgeAllowWindowMovement;
-
 //store the opperating system the application is compiled for
 extern int glgeOperatingSystem;
-
-//store all the post-processing shaders
-extern std::vector<Shader*> glgePostProcessingShaders;
-
-//store some functions, that should be called after the post-processing pass
-extern std::vector<Shader (*)(unsigned int)> glgeCustomPostProcessingFuncs;
-
-//store the frame buffer for the post-processing pass
-extern unsigned int glgePPSFBO;
-
-//store the render buffer for the post-processing pass
-extern unsigned int glgePPSRBO;
-
-//store the main image in the post processing pass
-extern unsigned int glgeMainImagePPS;
-
-//store if the current post-processing pass is the first
-extern bool glgeIsFirstPPSPass;
 
 //store if the current draw pass is a transparent or an opaque pass
 extern bool glgeTransparentOpaquePass;
 
 //store how many objects have been created
 extern unsigned int glgeObjectUUID;
-
-//store the accumulation texture for transparent geometry
-extern unsigned int glgeTransparentAcumTexture;
-
-//store the shader to combine the solid and transparent geometry
-extern Shader* glgeTransparentCombineShader;
-
-//store if glge has a custom transparent combination shader
-extern bool glgeHasCustomTransparentCombineShader;
 
 //store if the GLGE window has a border
 extern bool glgeHasWindowBorder;
@@ -376,5 +152,17 @@ extern bool glgeWindowIsShown;
 
 //store if the mouse is grabbed in the window
 extern bool glgeMouseGrabMode;
+
+//store the window id
+extern unsigned int glgeWindowID;
+
+//store the window vector
+extern std::vector<GLGEWindow*> glgeWindows;
+
+//store the index of the main window in the window array
+extern unsigned int glgeMainWindowIndex;
+
+//store if GLEW was allready initalised
+extern bool glgeInitalisedGLEW;
 
 #endif

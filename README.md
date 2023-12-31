@@ -51,6 +51,26 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.4-beta-1
+### Goal
+- create support for multiple windows handeld by GLGE
+   - Window class for API acess
+- minimal API changes
+   - GLGE main window to manage one window with the old API
+### Current
+- added files:
+   - GLGEWindow.h   : declares the window class, private variables of the window class and functions of the window class
+   - GLGEWindow.cpp : defines the functions of the window class declared in file "GLGEWindow.h"
+- GLGE now runs on an "main window", all window dependend functions are now passed to that window when called
+   - the creation of an main window is not needed, nor so handeling it. But to start the main loop, at least one window will need to be created and started. starting a window will mark it redy for executing functions when the main loop is started. Starting windows during the main loop should work too, but I didn't test it. 
+- added the window class to manage multiple windows at once in the main loop
+- GLGE will now chatch SDL2 errors
+### Known problems
+- currently, no Objects will render
+- the pass for combining the solid and transparent geometry is broken and fills the window black
+
+
+
 ## Update 0.3-1
 - an alpha of 1.f will now be renderd solid on transparent objects
 - transparent objects will render in the opaque and transparent pass by default now to render solid and transparent parts

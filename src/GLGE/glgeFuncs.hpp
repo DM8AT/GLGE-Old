@@ -35,6 +35,8 @@
 
 //include the shaders
 #include "GLGEShaderCore.h"
+//include windows
+#include "GLGEWindow.h"
 
 /**
  * @brief Create a Window
@@ -45,7 +47,7 @@
  * @param s the size of the window
  * @param p the position of the window
  */
-void createWindow(const char* n, vec2 s, vec2 p);
+GLGEWindow* createWindow(const char* n, vec2 s, vec2 p);
 
 /**
  * @brief read a file
@@ -56,24 +58,6 @@ void createWindow(const char* n, vec2 s, vec2 p);
  * @return false the file can't be found
  */
 bool readFile(const char* filename, std::string& output);
-
-/**
- * @brief Get the Uniforms For current Post Processing shader
- * 
- * @return true: could find albedo map uniform |
- * @return false: could not find albedo map uniform
- */
-bool getUniformsForLightingShader();
-
-/**
- * @brief Get the Lighting Uniforms From the post processing shader
- */
-void getLightingUniformsFromLightingPass();
-
-/**
- * @brief Get the Default Uniforms From the Post Processing Shader
- */
-void getDefaultUniformsFromPostProcessingShader(Shader* shader);
 
 /**
  * @brief convert an error code from OpenGL into an error string
@@ -125,14 +109,6 @@ unsigned int compileShader(std::string fileDataVertex, std::string fileDataFragm
  * @return int the amount of symbols in the string
  */
 int count_char(std::string &str, char ch);
-
-/**
- * @brief handle the resizing of the window
- * 
- * @param width the new width for the window
- * @param height the new height for the window
- */
-void resizeWindow(int width, int height);
 
 /**
  * @brief load a file to an SDL_Surface

@@ -14,12 +14,6 @@
 #define _GLGE_DEFAULT_FUNCS_H_
 
 /**
- * @brief this is the default display function for GLGE
- * update the screen
- */
-void glgeDefaultDisplay();
-
-/**
  * @brief this is the default timer function for GLGE
  * limit the timer to the set maximal frames per second
  */
@@ -48,21 +42,5 @@ void glgeDefaultKeyUpFunc(int key);
  * @param y the mouse y position
  */
 void glgeDefaultMouseFunc(int button, int state);
-
-/**
- * @brief this function is called if the window is resize
- * 
- * @param width the new width of the window
- * @param height the new height of the window
- */
-void glgeDefaultResizeFunc(int width, int height);
-
-/**
- * @brief a function that is called if the window is moved
- * 
- * @param x the x position of the window
- * @param y the y position of the window
- */
-void glgeDefaultMoveFunc(int x, int y);
 
 #endif

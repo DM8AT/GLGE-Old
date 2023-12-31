@@ -492,8 +492,9 @@ Shader* glgeSetPostProsessingShader(unsigned int shader);
  * @brief set the post-processing shader to an allready existing shader
  * 
  * @param shader the shader object
+ * @param int the index in the post processing stack
  */
-void glgeSetPostProsessingShader(Shader* shader);
+int glgeSetPostProsessingShader(Shader* shader);
 
 /**
  * @brief get an post-processing shader by an index
@@ -916,12 +917,12 @@ void glgeShowHideWindow(bool show);
 bool glgeGetWindowShown();
 
 /**
- * @brief maximize or minimize the window
+ * @brief maximize the window
  * 
- * @param maximized true : the window will be maximized | false : the window will be minimized 
+ * @param maximized true : the window will be maximized | false : the window will be normal 
  * @param force say if this function should execute if window resizing is disabled
  */
-void glgeMaximizeMinimizeWindow(bool maximized, bool force = false);
+void glgeMaximize(bool maximized, bool force = false);
 
 /**
  * @brief get if the window is maximized or minimized

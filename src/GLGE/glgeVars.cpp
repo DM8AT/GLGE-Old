@@ -40,6 +40,9 @@ SDL_GLContext glgeMainContext;
 //store the display mode
 SDL_DisplayMode glgeMainDisplay;
 
+//store the current window index
+int glgeCurrentWindowIndex = 0;
+
 //store the true window size
 vec2 glgeTrueWindowSize = vec2(0,0);
 
@@ -380,3 +383,15 @@ bool glgeWindowIsShown = true;
 
 //store if the mouse is grabbed in the window
 bool glgeMouseGrabMode = false;
+
+//store the window id
+unsigned int glgeWindowID = 0;
+
+//store the window vector
+std::vector<GLGEWindow*> glgeWindows = {};
+
+//store the index of the main window in the window array
+unsigned int glgeMainWindowIndex = 0;
+
+//store if GLEW was allready initalised
+bool glgeInitalisedGLEW = false;

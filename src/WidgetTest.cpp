@@ -11,8 +11,11 @@
 
 #include "WidgetTest.hpp"
 #include "GLGE/GLGEALL.h"
+#include "GLGE/GLGEWindow.h"
 #include <ctime>
 #include <math.h>
+
+#include "GLGE/glgeVars.hpp"
 
 //store the pointer for seconds
 Object2D clockPointerSec;
@@ -20,6 +23,8 @@ Object2D clockPointerSec;
 Object2D clockPointerMin;
 //store the pointer for hours
 Object2D clockPointerHour;
+
+GLGEWindow win;
 
 void widgetDraw()
 {
@@ -109,6 +114,8 @@ void runWidgetExample()
     //diable window resizing
     glgeSetWindowResizable(false);
 
+    glgeWindows[glgeMainWindowIndex]->makeCurrent();
+
     //create the pointer mesh for seconds
     Mesh2D m = createPointerMesh(0.05, 1, vec3(1,0,0));
     //setup the pointer for seconds
@@ -122,6 +129,10 @@ void runWidgetExample()
     //setup the pointer for hours
     clockPointerHour = Object2D(m.vertices, m.indices);
 
+    win = GLGEWindow("Hallo Welt!", 250,250);
+    win.setClearColor(1,1,1);
+    win.start();
+
     //move the window to the top right of the screen
     glgeSetWindowPosition(vec2(glgeGetScreenSize().x-glgeGetWindowSize().x + 5, glgeGetWindowPosition().y + 29.f));
     //bind the main tick function
@@ -130,4 +141,6 @@ void runWidgetExample()
     glgeBindDisplayFunc(widgetDraw);
     //run the program
     glgeRunMainLoop();
+    //close the custom window
+    win.close();
 }

@@ -646,9 +646,9 @@ void Object2D::recalculateMoveMatrix()
     //fix matrix bug
     this->moveMat.m[2][2] = -1;
     //correct the size of the object depending on the largest side of the window
-    this->moveMat = mat3(1.f/glgeWindowAspect, 0, 0,
-                         0, 1.f, 0,
-                         0, 0, 1.f) * this->moveMat;
+    this->moveMat = mat3(1.f/glgeWindows[glgeMainWindowIndex]->getWindowAspect(), 0, 0,
+                         0,                                                       1.f, 0,
+                         0,                                                       0, 1.f) * this->moveMat;
 }
 
 //////////

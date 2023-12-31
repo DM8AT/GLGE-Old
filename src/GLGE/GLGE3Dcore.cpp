@@ -564,6 +564,8 @@ Object::Object()
 //constructor using pointer
 Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform, bool isTransparent, bool isStatic)
 {
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
     //construct and save a mesh from the pointers
     this->mesh = Mesh(vertices, indices, sizeVertices, sizeIndices);
 
@@ -605,6 +607,8 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
 //constructor using vectors
 Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Transform transform, bool isTransparent, bool isStatic)
 {
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
     //construct and save a mesh from the pointers
     this->mesh = Mesh(vertices, indices);
 
@@ -646,6 +650,8 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
 //construct an object from an mesh
 Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic)
 {
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
     //construct and save a mesh from the pointers
     this->mesh = mesh;
 
@@ -687,6 +693,8 @@ Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic
 //create an object from an file
 Object::Object(const char* file, int type, Transform transform, bool isTransparent, bool isStatic)
 {
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
     //construct and save a mesh from the pointers
     this->mesh = Mesh(file, type);
 
@@ -728,58 +736,68 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
 //draw the object
 void Object::draw()
 {
+    //check if the object belongs to the window
+    if (glgeCurrentWindowIndex != this->windowIndex)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] Can't draw an object in an window it was not created in.\n";
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            //close with an error
+            exit(1);
+        }
+        //stop the function
+        return;
+    }
     //check if the current object belongs to the current pass
-    if (!this->isTransparent && glgeTransparentOpaquePass)
+    if (!this->isTransparent && glgeWindows[this->windowIndex]->isTranparentPass())
     {
         //abbort the draw, if not
         return;
     }
     //check for fully transparent objects
-    if (this->fullyTransparent && !glgeTransparentOpaquePass)
+    if (this->fullyTransparent && !glgeWindows[this->windowIndex]->isTranparentPass())
     {
         //abbort the draw, if it is the opaque pass
         return;
     }
-    
+
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-    //check if the shadow pass is drawn
-    if (!glgeIsShadowPass)
+    //bind the transparent extra data
+    if (this->isTransparent)
     {
-        //bind the transparent extra data
-        if (this->isTransparent)
-        {
-            //pass the current pass
-            this->shader.setCustomInt("glgePass", glgeTransparentOpaquePass);
-        }
-
-        //only do shader binding if if it is not the shadow pass
-        //bind the shader
-        this->shader.applyShader();
-
-        //Bind the material
-        this->mat.applyMaterial();
+        //pass the current pass
+        this->shader.setCustomInt("glgePass", glgeWindows[this->windowIndex]->isTranparentPass());
     }
+
+    //bind the shader
+    this->shader.applyShader();
+
+    //Bind the material
+    this->mat.applyMaterial();
 
     //always input the color argument
     //activate sub elements
     //say where the position vector is
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
-    if (!glgeIsShadowPass)
-    {
-        //say where the color is
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
-        //say where the texCoords are
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
-        //say where the normals are
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
-    }
+    //say where the color is
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
+    //say where the texCoords are
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
+    //say where the normals are
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
     //check if this is the transparent pass
     if (this->isTransparent)
     {
@@ -789,26 +807,22 @@ void Object::draw()
 
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
-    //these things are only bound if it is not the shadow pass
-    if (!glgeIsShadowPass)
-    {
-        //unbind the texture for the shadow map
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    //unbind the texture for the shadow map
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-        //unbind the material
-        this->mat.removeMaterial();
+    //unbind the material
+    this->mat.removeMaterial();
 
-        //deactivate the sub elements
-        //deactivate the position argument
-        glDisableVertexAttribArray(0);
-        //deactivate the color argument
-        glDisableVertexAttribArray(1);
-        //deactivate the texCoord argument
-        glDisableVertexAttribArray(2);
+    //deactivate the sub elements
+    //deactivate the position argument
+    glDisableVertexAttribArray(0);
+    //deactivate the color argument
+    glDisableVertexAttribArray(1);
+    //deactivate the texCoord argument
+    glDisableVertexAttribArray(2);
 
-        //unbind the shader
-        this->shader.removeShader();
-    }
+    //unbind the shader
+    this->shader.removeShader();
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -817,6 +831,24 @@ void Object::draw()
 
 void Object::update()
 {
+    //check if the object belongs to the window
+    if (glgeCurrentWindowIndex != this->windowIndex)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] Can't update an object in an window it was not created in.\n";
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            //close with an error
+            exit(1);
+        }
+        //stop the function
+        return;
+    }
     //recalculate the move matrix
     this->recalculateMatrices();
     //push the camera matrix
@@ -824,15 +856,15 @@ void Object::update()
     //push the model matrix to the shader
     this->shader.setCustomMat4("modelMat", this->modelMat);
     //push the camera position to the shader
-    this->shader.setCustomVec3("cameraPos", glgeMainCamera->getPos());
+    this->shader.setCustomVec3("cameraPos", glgeWindows[glgeMainWindowIndex]->getCamera()->getPos());
     //push the camera rotation to the shader
-    this->shader.setCustomVec3("cameraLook", glgeMainCamera->getRotation());
+    this->shader.setCustomVec3("cameraLook", glgeWindows[glgeMainWindowIndex]->getCamera()->getRotation());
     //push the rotation matrix to the shader
     this->shader.setCustomMat4("rotMat", this->rotMat);
     //push the far plane to the shader
-    this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
+    this->shader.setCustomFloat("farPlane", glgeWindows[glgeMainWindowIndex]->getCamera()->getFarPlane());
     //push the screen resolution to the shader
-    this->shader.setCustomVec2("glgeScreenResolution", glgeWindowSize);
+    this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[glgeMainWindowIndex]->getSize());
     //push the uuid to the shader
     this->shader.setCustomInt("glgeObjectUUID", this->uuid);
 
@@ -1129,6 +1161,14 @@ bool Object::getFullyTransparent()
 //PRIV
 void Object::compileBuffers()
 {
+    //check if the window index is -1 (uninitalised)
+    if (this->windowIndex == -1)
+    {
+        //store the new window index
+        this->windowIndex = glgeCurrentWindowIndex;
+    }
+    //make sure to bind the OpenGL context
+    glgeWindows[this->windowIndex]->makeCurrent();
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -1167,8 +1207,10 @@ void Object::recalculateMatrices()
 {
     //save the model matrix
     this->modelMat = this->transf.getMatrix();
+    //get the camera
+    Camera* cam = glgeWindows[this->windowIndex]->getCamera();
     //set the move matrix to the product of 3 matrices
-    this->camMat = glgeMainCamera->getProjectionMatrix() * glgeMainCamera->getRotMat() * glgeMainCamera->getTransformMat();
+    this->camMat = cam->getProjectionMatrix() * cam->getRotMat() * cam->getTransformMat();
     //recalculate the rotation matrix
     this->rotMat = this->transf.getRotationMatrix();
 }
@@ -1179,20 +1221,22 @@ void Object::getUniforms()
     bool outErrs = glgeErrorOutput;
     //deactivate GLGE errors
     glgeErrorOutput = false;
+    //store the camera
+    Camera* cam = glgeWindows[this->windowIndex]->getCamera();
     //push the camera matrix
     this->shader.setCustomMat4(glgeCamMatrix, this->camMat);
     //push the model matrix to the shader
     this->shader.setCustomMat4("modelMat", this->modelMat);
     //push the camera position to the shader
-    this->shader.setCustomVec3("cameraPos", glgeMainCamera->getPos());
+    this->shader.setCustomVec3("cameraPos", cam->getPos());
     //push the camera rotation to the shader
-    this->shader.setCustomVec3("cameraLook", glgeMainCamera->getRotation());
+    this->shader.setCustomVec3("cameraLook", cam->getRotation());
     //push the rotation matrix to the shader
     this->shader.setCustomMat4("rotMat", this->rotMat);
     //push the far plane to the shader
-    this->shader.setCustomFloat("farPlane", glgeMainCamera->getFarPlane());
+    this->shader.setCustomFloat("farPlane", cam->getFarPlane());
     //add the screen resolution
-    this->shader.setCustomVec2("glgeScreenResolution", glgeWindowSize);
+    this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[this->windowIndex]->getSize());
     //push the uuid to the shader
     this->shader.setCustomInt("glgeObjectUUID", this->uuid);
 
@@ -1203,7 +1247,7 @@ void Object::getUniforms()
         //pass the current pass
         this->shader.setCustomInt("glgePass", false);
         //add the depth and alpha buffer
-        this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeDepthBuffer);
+        this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeWindows[this->windowIndex]->getEIDATex());
     }
 
     //get all uniform positions
@@ -1236,7 +1280,7 @@ void Object::getLightUniforms()
     //clear the light intensity vector
     this->lightIntLocs.clear();
 
-    for (int i = 0; i < (int)glgeLights.size(); i++)
+    for (int i = 0; i < (int)glgeWindows[this->windowIndex]->getLights().size(); i++)
     {
         //calculate the name of an uniform for the light positions
         std::string uniform = prefixLightPos + std::string("[") + std::to_string(i) + std::string("]");
@@ -1263,13 +1307,15 @@ void Object::getLightUniforms()
 
 void Object::loadLights()
 {
+    //get all lights
+    std::vector<Light*> lights = glgeWindows[this->windowIndex]->getLights();
     //load all light positions to the shader
     for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
     {
         //pass the light position if it is not 0
         if (this->lightPosLocs[i] != 0)
         {
-            glUniform3f(this->lightPosLocs[i], glgeLights[i]->getPos().x, glgeLights[i]->getPos().y, glgeLights[i]->getPos().z);
+            glUniform3f(this->lightPosLocs[i], lights[i]->getPos().x, lights[i]->getPos().y, lights[i]->getPos().z);
         }
     }
 
@@ -1279,7 +1325,7 @@ void Object::loadLights()
         //pass the light color if it is not 0
         if (this->lightColLocs[i] != 0)
         {
-            glUniform3f(this->lightColLocs[i], glgeLights[i]->getColor().x, glgeLights[i]->getColor().y, glgeLights[i]->getColor().z);
+            glUniform3f(this->lightColLocs[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
         }
     }
 
@@ -1289,14 +1335,14 @@ void Object::loadLights()
         //pass the light intensity if it is not 0
         if (this->lightIntLocs[i] != 0)
         {
-            glUniform1f(this->lightIntLocs[i], glgeLights[i]->getInsensity());
+            glUniform1f(this->lightIntLocs[i], lights[i]->getInsensity());
         }
     }
 
     //pass the amount of used lights to the shader if it is not 0
     if (this->usedLigtsPos != 0)
     {
-        glUniform1i(this->usedLigtsPos, (int)glgeLights.size());
+        glUniform1i(this->usedLigtsPos, (int)lights.size());
     }
 }
 
@@ -1567,6 +1613,20 @@ mat4 Camera::getViewMatrix()
     return this->viewMatrix;
 }
 
+void Camera::setWindowIndex(unsigned int windowIndex)
+{
+
+    //store the inputed window index
+    this->windowIndex = windowIndex;
+
+}
+
+unsigned int Camera::getWindowIndex()
+{
+    //return the window index
+    return this->windowIndex;
+}
+
 //PRIVATE
 
 void Camera::calculateViewMatrix()
@@ -1622,7 +1682,11 @@ void Camera::calculateViewMatrix()
 
 mat4 Camera::calculateProjectionMatrix()
 {
-    float ar = glgeWindowAspect;
+    float ar = 1;
+    if (glgeHasMainWindow)
+    {
+        ar = glgeWindows[this->windowIndex]->getWindowAspect();
+    }
     float zRange = far - near;
     float tHF = std::tan((fov/2.f));
 
@@ -1656,8 +1720,8 @@ void glgeBindCamera(Camera* camera)
             exit(1);
         };
     }
-    //else bind the camera
-    glgeMainCamera = camera;
+    //else bind the camera to the main window
+    glgeWindows[glgeMainWindowIndex]->setCamera(camera);
 }
 
 //initalise for 3D

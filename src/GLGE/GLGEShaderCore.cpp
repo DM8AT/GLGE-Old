@@ -1145,8 +1145,8 @@ void Shader::recalculateUniforms()
 Shader glgeCreateKernalShader(float* kernal, int size)
 {
     std::string header("#version 300 es\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;");
-    std::string width = std::to_string(glgeWindowSize.x);
-    std::string height = std::to_string(glgeWindowSize.y);
+    std::string width = std::to_string(glgeWindows[glgeCurrentWindowIndex]->getSize().x);
+    std::string height = std::to_string(glgeWindows[glgeCurrentWindowIndex]->getSize().y);
 
     std::string body1 = std::string("const float offset_x = 1.f / ")+width+(";const float offset_y = 1.f / ") + height + std::string(";"); 
 
@@ -1350,41 +1350,76 @@ Shader glgeCreateGausionBlureShader(int radius)
 
 int glgeAddCustomPostProcessingFunc(Shader (*func)(unsigned int))
 {
-    //get the length of the vector
-    int ret = (int)glgeCustomPostProcessingFuncs.size();
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add a post processing function to a main window, if no main window exists\n");
+        }
+        //stop the function
+        return -1;
+    }
 
-    //add the function pointer to the vector
-    glgeCustomPostProcessingFuncs.push_back(func);
-
-    //give back the length
-    return ret;
+    //pass the function
+    return glgeWindows[glgeMainWindowIndex]->addPostProcessingFunction(func);
 }
 
 void glgeDeleteCusotmPostProcessingFunc(int index)
 {
-    //delete the specefied index
-    glgeCustomPostProcessingFuncs.erase(glgeCustomPostProcessingFuncs.begin()+index);
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't delete a post processing function of an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+
+    //pass the function
+    return glgeWindows[glgeMainWindowIndex]->removePostProcessingFunction(index);
 }
 
 int glgeGetIndexOfCustomPostProcessingFunc(Shader (*func)(unsigned int))
 {
-    //find the index of the shader
-    std::vector<Shader (*)(unsigned int)>::iterator iter = std::find(glgeCustomPostProcessingFuncs.begin(), glgeCustomPostProcessingFuncs.end(), func);
-    //check if the element wasn't found
-    if (iter == glgeCustomPostProcessingFuncs.cend())
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //quit the function with -1
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the index of an post processing function from main window, if no main window exists\n");
+        }
+        //stop the function
         return -1;
     }
-    else
-    {
-        //return the index
-        return std::distance(glgeCustomPostProcessingFuncs.begin(), iter);
-    }
+
+    //pass the function
+    return glgeWindows[glgeMainWindowIndex]->getPostProcessingFuncIndex(func);
 }
 
 void glgeDeleteCusotmPostProcessingFunc(Shader (*func)(unsigned int))
 {
-    //delete the index of the element
-    glgeDeleteCusotmPostProcessingFunc(glgeGetIndexOfCustomPostProcessingFunc(func));
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't delete a post processing function from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+
+    //pass the function
+    return glgeWindows[glgeMainWindowIndex]->removePostProcessingFunction(func);
 }
