@@ -60,11 +60,6 @@ bool has_double_slash(std::string &str)
 //PRIAVATE VAIRABLES//
 //////////////////////
 
-//store the default 3D shader
-unsigned int glgeShaderDefault;
-//store the default transparent 3D shader
-unsigned int glgeTransparentShaderDefault;
-
 ////////////////////////////
 //Decalrations for Structs//
 ////////////////////////////
@@ -589,12 +584,12 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = Shader(glgeTransparentShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
     }
     else
     {
         //bind the opaque shader
-        this->shader = Shader(glgeShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
     }
     //get the uniforms
     this->getUniforms();
@@ -632,12 +627,12 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = Shader(glgeTransparentShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
     }
     else
     {
         //bind the opaque shader
-        this->shader = Shader(glgeShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
     }
     //get the uniforms
     this->getUniforms();
@@ -675,12 +670,12 @@ Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = Shader(glgeTransparentShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
     }
     else
     {
         //bind the opaque shader
-        this->shader = Shader(glgeShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
     }
     //get the uniforms
     this->getUniforms();
@@ -718,12 +713,12 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
     if (this->isTransparent)
     {
         //bind the transparent shader
-        this->shader = Shader(glgeTransparentShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
     }
     else
     {
         //bind the opaque shader
-        this->shader = Shader(glgeShaderDefault);
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
     }
     //get the uniforms
     this->getUniforms();
@@ -766,6 +761,9 @@ void Object::draw()
         //abbort the draw, if it is the opaque pass
         return;
     }
+
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
 
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -856,15 +854,15 @@ void Object::update()
     //push the model matrix to the shader
     this->shader.setCustomMat4("modelMat", this->modelMat);
     //push the camera position to the shader
-    this->shader.setCustomVec3("cameraPos", glgeWindows[glgeMainWindowIndex]->getCamera()->getPos());
+    this->shader.setCustomVec3("cameraPos", glgeWindows[this->windowIndex]->getCamera()->getPos());
     //push the camera rotation to the shader
-    this->shader.setCustomVec3("cameraLook", glgeWindows[glgeMainWindowIndex]->getCamera()->getRotation());
+    this->shader.setCustomVec3("cameraLook", glgeWindows[this->windowIndex]->getCamera()->getRotation());
     //push the rotation matrix to the shader
     this->shader.setCustomMat4("rotMat", this->rotMat);
     //push the far plane to the shader
-    this->shader.setCustomFloat("farPlane", glgeWindows[glgeMainWindowIndex]->getCamera()->getFarPlane());
+    this->shader.setCustomFloat("farPlane", glgeWindows[this->windowIndex]->getCamera()->getFarPlane());
     //push the screen resolution to the shader
-    this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[glgeMainWindowIndex]->getSize());
+    this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[this->windowIndex]->getSize());
     //push the uuid to the shader
     this->shader.setCustomInt("glgeObjectUUID", this->uuid);
 
@@ -989,17 +987,17 @@ void Object::setRotation(float x, float y)
 }
 
 //rotate the object
-void Object::rotate(vec2 r)
+void Object::rotate(vec3 r)
 {
     //rotate the object
-    this->transf.rot += vec3(r.x,r.y,0);
+    this->transf.rot += r;
 }
 
 //rotate the object
-void Object::rotate(float x, float y)
+void Object::rotate(float x, float y, float z)
 {
     //rotate the object
-    this->transf.rot += vec3(x,y,0);
+    this->transf.rot += vec3(x,y,z);
 }
 
 vec3 Object::getRotation()
@@ -1750,9 +1748,4 @@ void glgeInit3DCore()
     glDepthFunc(GL_GREATER);
     //set the clear depth correctly
     glClearDepth(0.f);
-
-    //load the default 3D shaders
-    glgeShaderDefault = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
-    //load the default 3D transparent shader
-    glgeTransparentShaderDefault = compileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
 }

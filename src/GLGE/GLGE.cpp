@@ -266,6 +266,44 @@ bool glgeGetWarningOutput()
     return glgeWarningOutput;
 }
 
+/**
+ * @brief safely get a window from the glge window stack
+ * 
+ * @param windowID the ID of the window to acess
+ * @return GLGEWindow* a pointer to the window, NULL if the window acess failed
+ */
+GLGEWindow* safeWindowAcess(unsigned int windowID)
+{
+    //check if the window pointer is 0
+    if ((windowID-1) > (unsigned int)glgeWindows.size())
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            printf("[GLGE WARNING] tried to acess a window out of range\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //get the window pointer
+    GLGEWindow* wptr = glgeWindows[windowID-1];
+    //check if the window pointer is a nullpointer
+    if (wptr == NULL)
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            printf("[GLGE WARNING] tried to execute a window function on an not started window\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //return the pointer
+    return wptr;
+}
+
 //start the main loop of GLGE
 void glgeRunMainLoop()
 {
@@ -333,11 +371,19 @@ void glgeRunMainLoop()
                     //get the active mouse position
                     SDL_GetMouseState(&x,&y);
                     //store the screen size
-                    vec2 s = glgeGetScreenSize();
+                    vec2 s = glgeWindows[event.window.windowID-1]->getSize();
                     //store the mouse position
                     glgeMouse.pos = vec2(float(x) / s.x, float(y) / s.y);
                     //store the pixel the mouse is on
                     glgeMouse.posPixel = vec2(x,y);
+                    //get the mouse on the screen
+                    SDL_GetGlobalMouseState(&x, &y);
+                    //store the screen size
+                    s = glgeGetScreenSize();
+                    //store the mouse position
+                    glgeMouse.screenPos = vec2(float(x) / s.x, float(y) / s.y);
+                    //store the pixel the mouse is on
+                    glgeMouse.screenPosPixel = vec2(x,y);
                     //jump to the next event
                     break;
                 }
@@ -352,71 +398,90 @@ void glgeRunMainLoop()
                 {
                     switch (event.window.event)
                     {
-                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_MINIMIZED:
                         {
-                            //check if the window pointer is 0
-                            if ((event.window.windowID-1) > (unsigned int)glgeWindows.size())
-                            {
-                                //check if a warning should be printed
-                                if (glgeWarningOutput)
-                                {
-                                    //print the warning
-                                    printf("[GLGE WARNING] tried to acess a window out of range\n");
-                                }
-                                //skip the window
-                                break;
-                            }
-                            //get the window pointer
-                            GLGEWindow* wptr = glgeWindows[event.window.windowID-1];
-                            //check if the window pointer is a nullpointer
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
-                                //check if a warning should be printed
-                                if (glgeWarningOutput)
-                                {
-                                    //print the warning
-                                    printf("[GLGE WARNING] tried to execute a window function on an not started window\n");
-                                }
-                                //skip the window
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //minimize the window
+                            wptr->minimize(true);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_RESTORED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //restore the window using the minimize function
+                            wptr->minimize(false);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_MAXIMIZED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //call the maximize function
+                            wptr->maximize(true);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_RESIZED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
                                 break;
                             }
                             //call the resize function
-                            wptr->callResizeFunc(event.window.data1, event.window.data2);
-                            //jump to the next window
+                            wptr->resizeWindow(event.window.data1, event.window.data2);
+                            //stop the itteration
                             break;
                         }
                         case SDL_WINDOWEVENT_CLOSE:
                         {
-                            //check if the window pointer is 0
-                            if ((event.window.windowID-1) > (unsigned int)glgeWindows.size())
-                            {
-                                //check if a warning should be printed
-                                if (glgeWarningOutput)
-                                {
-                                    //print the warning
-                                    printf("[GLGE WARNING] tried to acess a window that was a nullpointer\n");
-                                }
-                                //skip the window
-                                break;
-                            }
-                            //get the window pointer
-                            GLGEWindow* wptr = glgeWindows[event.window.windowID-1];
-                            //check if the window pointer is a nullpointer
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
-                                //check if a warning should be printed
-                                if (glgeWarningOutput)
-                                {
-                                    //print the warning
-                                    printf("[GLGE WARNING] tried to execute a window function on an not started window\n");
-                                }
-                                //skip the window
+                                //if the acess could not be done safe, skip
                                 break;
                             }
                             //close the window
                             wptr->close();
+                            //check if the window is the main window
+                            if (event.window.windowID-1 == glgeMainWindowIndex)
+                            {
+                                //check if GLGE should close if the main window closes
+                                if (glgeExitOnMainWindowClose)
+                                {
+                                    //stop the function
+                                    running = false;
+                                }
+                            }
                             //check if all windows are closed
-                            if ((int)glgeWindows.size() == 0)
+                            if (glgeActiveWindows == 0)
                             {
                                 //stop the main loop
                                 running = false;
@@ -439,6 +504,12 @@ void glgeRunMainLoop()
         //loop over all windows
         for (int i = 0; i < (int)glgeWindows.size(); i++)
         {
+            //check if the window is a nullpointer
+            if (glgeWindows[i] == NULL)
+            {
+                //skip the window
+                continue;
+            }
             //get if the windows should close
             bool close = glgeWindows[i]->isClosingInitiated();
             //if they should close, close them
@@ -446,9 +517,19 @@ void glgeRunMainLoop()
             {
                 //close the window
                 glgeWindows[i]->close();
+                //check if the window is the main window
+                if (((unsigned int)i == glgeMainWindowIndex))
+                {
+                    //check if GLGE should close if the main window closes
+                    if (glgeExitOnMainWindowClose)
+                    {
+                        //stop the function
+                        running = false;
+                    }
+                }
             }
             //check if all windows are closed
-            if ((int)glgeWindows.size() == 0)
+            if (glgeActiveWindows == 0)
             {
                 //stop the main loop
                 running = false;
@@ -457,30 +538,20 @@ void glgeRunMainLoop()
         //loop over all windows
         for (int i = 0; i < (int)glgeWindows.size(); i++)
         {
+            //check if the window is a nullpointer
+            if (glgeWindows[i] == NULL)
+            {
+                //skip the window
+                continue;
+            }
             //get the window pointer
             GLGEWindow* wptr = glgeWindows[i];
             //check if the window poitner is a nullpointer
             if (wptr == NULL) { continue; }
-            //bind the window GL Context
-            wptr->makeCurrent();
             //call the draw function
-            wptr->callDrawFunc();
-            //call the tick function
-            wptr->callTickFunc();
-        }
-
-        //loop over all windows
-        for (int i = 0; i < (int)glgeWindows.size(); i++)
-        {
-            //set the current window
-            glgeCurrentWindowIndex = i;
-            //get the window pointer
-            GLGEWindow* wptr = glgeWindows[i];
-            //check if the window poitner is a nullpointer
-            if (wptr == NULL) { continue; }
-            //if not, draw the window
             wptr->draw();
         }
+
         //run a tick
         glgeDefaultTimer();
     }
@@ -1521,22 +1592,28 @@ void glgeSetInterpolationMode(unsigned int mode)
 
 void glgeWarpPointer(vec2 pointerPos, unsigned int space)
 {
-    //temporarely store the screen size
-    vec2 mem = glgeWindows[glgeCurrentWindowIndex]->getSize();
-    //if the space variable is true(so it is greater than 0)
-    if (space == 1)
+    //check if the space is screen space
+    if (space == GLGE_SCREEN_SPACE)
     {
-        //scale the pointer by the window size to transform it to screen space
-        mem = vec2(pointerPos.x * mem.x, pointerPos.y * mem.y);
+        //store the position
+        vec2 pos = pointerPos;
+        //move the origin to the middle of the screen
+        pos += (glgeGetScreenSize() / vec2(2));
+        //warp the mouse to the wanted pixel on screen
+        SDL_WarpMouseGlobal(pos.x, pos.y);
     }
+    //else, work in window space
     else
     {
-        //add the half window size to the position
-        mem += mem/vec2(2,2);
+        //store the position
+        vec2 pos = pointerPos;
+        //move the position to the screen middle
+        pos += vec2(0.5);
+        //scale the position to convert it from normalised window space to window screen space
+        pos = pos.scale(glgeWindows[glgeCurrentWindowIndex]->getSize());
+        //use the glut function to warp the pointer to the specified position
+        SDL_WarpMouseInWindow((SDL_Window*)glgeWindows[glgeCurrentWindowIndex]->getSDLWindow(), pos.x,pos.y);
     }
-
-    //use the glut function to warp the pointer to the specified position
-    SDL_WarpMouseInWindow((SDL_Window*)glgeWindows[glgeCurrentWindowIndex]->getSDLWindow(), mem.x, mem.y);
 }
 
 void glgeWarpPointer(float x, float y, unsigned int space)
@@ -2494,4 +2571,16 @@ void glgeFocusWindow(bool moveUp)
     }
     //get if the main window is using backface culling
     glgeWindows[glgeMainWindowIndex]->focuse(moveUp);
+}
+
+void glgeSetExitOnMainWindowClose(bool exit)
+{
+    //set the variable
+    glgeExitOnMainWindowClose = exit;
+}
+
+bool glgeGetExitOnMainWindowClose()
+{
+    //return the boolean
+    return glgeExitOnMainWindowClose;
 }

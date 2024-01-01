@@ -152,6 +152,13 @@ public:
     void setResizeFunc(void (*resizeFunc)(int, int));
 
     /**
+     * @brief set a function that is called once on window start
+     * 
+     * @param initFunc a function pointer to the windows init function
+     */
+    void setInitFunc(void (*initFunc)());
+
+    /**
      * @brief Get the Draw Func object
      * 
      * @return a function pointer to the function
@@ -173,6 +180,13 @@ public:
     void (*getResizeFunc())(int, int);
 
     /**
+     * @brief Get the initalisation Func object
+     * 
+     * @return a function pointer to the function
+     */
+    void (*getInitFunc())();
+
+    /**
      * @brief execute the draw function, if one is bound
      */
     void callDrawFunc();
@@ -191,6 +205,12 @@ public:
     void callResizeFunc(int w, int h);
 
     /**
+     * @brief execute the initalisation function, if one is bound
+     */
+    void callInitFunc();
+
+
+    /**
      * @brief reset the draw function
      */
     void clearDrawFunc();
@@ -204,6 +224,11 @@ public:
      * @brief reset the resize function
      */
     void clearResizeFunc();
+
+    /**
+     * @brief reset the initalisation function
+     */
+    void clearInitFunc();
 
     /**
      * @brief get if the window has a draw function bound
@@ -228,6 +253,14 @@ public:
      * @return false : the window dosn't have a resize function
      */
     bool getHasResizeFunc();
+
+    /**
+     * @brief get if the window has an initalisation function bound
+     * 
+     * @return true : the window currently has a init function | 
+     * @return false : the window dosn't have a init function
+     */
+    bool getHasInitFunc();
 
     /**
      * @brief Get the size of the window
@@ -817,6 +850,27 @@ public:
      */
     void makeCurrent();
 
+    /**
+     * @brief Get the Default 3D shader for this window
+     * 
+     * @return unsigned int the shader
+     */
+    int getDefault3DShader();
+
+    /**
+     * @brief Get the Default 3D Transparent Shader for this window
+     * 
+     * @return unsigned int the shader
+     */
+    int getDefault3DTransparentShader();
+
+    /**
+     * @brief Get the Default 2D Shader for this window
+     * 
+     * @return unsigned int the shader
+     */
+    int getDefault2DShader();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -835,8 +889,6 @@ private:
      * @param shader the post processing shader to get the 
      */
     void getDefaultUniformsFromPostProcessingShader(Shader* shader);
-
-    
 
     /////////////////
     //  Variables  //
@@ -868,10 +920,14 @@ private:
     bool hasTickFunc = false;
     //store if the window has a resize func
     bool hasResizeFunc = false;
+    //store if an initalisation function is bound
+    bool hasInitFunc = false;
     //store the draw func
     void (*drawFunc)();
     //store the tick func
     void (*tickFunc)();
+    //store the init func
+    void (*initFunc)();
     //store the resize func
     void (*resizeFunc)(int, int);
     //store the main camera
@@ -900,6 +956,16 @@ private:
     bool mouseGrabbed = false;
     //store if the rectangle that covers the whole screen is bound
     bool screenRectBound = false;
+
+    /*
+        Default shaders
+    */
+    //sotre the default 3D shader
+    unsigned int default3DShader = 0;
+    //store the default transparent 3D shader
+    unsigned int default3DTransShader = 0;
+    //store the default 2D shader
+    unsigned int default2DShader = 0;
     
     /*
         Window constrains

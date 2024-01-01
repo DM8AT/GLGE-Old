@@ -467,15 +467,16 @@ public:
      * 
      * @param deltaRotation the difference for the rotation
      */
-    void rotate(vec2 deltaRotation);
+    void rotate(vec3 deltaRotation);
 
     /**
      * @brief rotate the Objct
      * 
      * @param dX the difference of rotation on the x axis
      * @param dY the difference of rotation on the y axis
+     * @param dZ the difference of rotation on the z axis
      */
-    void rotate(float dX, float dY);
+    void rotate(float dX, float dY, float dZ);
 
     /**
      * @brief Get the rotation from the Objct

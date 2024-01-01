@@ -108,17 +108,8 @@ void glgeDefaultTimer()
         exit(1);
     }
 
-    //set the mouse wheel to 0
-    glgeMouse.mouseWheel = 0;
-
-    //clear the key from the last tick
-    glgeKeysThisTick.clear();
-    //clear the releasd keys
-    glgeKeysRelesdThisTick.clear();
-
     //update the main display
     SDL_GetCurrentDisplayMode(0, &glgeMainDisplay);
-
     //loop over all windows
     for (int i = 0; i < (int)glgeWindows.size(); i++)
     {
@@ -131,6 +122,14 @@ void glgeDefaultTimer()
         //if not, run a window tick
         wptr->tick();
     }
+
+    //set the mouse wheel to 0
+    glgeMouse.mouseWheel = 0;
+
+    //clear the key from the last tick
+    glgeKeysThisTick.clear();
+    //clear the releasd keys
+    glgeKeysRelesdThisTick.clear();
 
     //calculate the time to wait
     int waitTime = std::floor((1000.f/glgeMaxFPS) - (1000.f/glgeTickTime));

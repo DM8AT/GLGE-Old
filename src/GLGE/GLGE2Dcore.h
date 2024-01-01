@@ -530,6 +530,10 @@ protected:
     bool isStatic;
     //save the length of the vertex and index buffer
     unsigned int VBOLen, IBOLen;
+    //store the object UUID
+    unsigned int id = 0;
+    //store the window the buffers where created in
+    int windowID = -1;
 
     /**
      * @brief Create the buffers

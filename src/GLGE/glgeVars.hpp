@@ -60,6 +60,9 @@ extern SDL_DisplayMode glgeMainDisplay;
 //store the current window index
 extern int glgeCurrentWindowIndex;
 
+//store the amount of active glge windows
+extern unsigned int glgeActiveWindows;
+
 //should error be outputed?
 extern bool glgeErrorOutput;
 
@@ -153,9 +156,6 @@ extern bool glgeWindowIsShown;
 //store if the mouse is grabbed in the window
 extern bool glgeMouseGrabMode;
 
-//store the window id
-extern unsigned int glgeWindowID;
-
 //store the window vector
 extern std::vector<GLGEWindow*> glgeWindows;
 
@@ -164,5 +164,8 @@ extern unsigned int glgeMainWindowIndex;
 
 //store if GLEW was allready initalised
 extern bool glgeInitalisedGLEW;
+
+//store if GLGE should exit if the main window is closed
+extern bool glgeExitOnMainWindowClose;
 
 #endif

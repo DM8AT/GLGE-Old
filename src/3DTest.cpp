@@ -166,8 +166,6 @@ void tick()
     //clamp the camera rotation on the y axis
     camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
     
-    camera.setRotation(vec2(0));
-
     //if the cursor is clicked and not locked to the window, lock it to the window
     if (glgeGetMouse().leftButton && !isActive)
     {

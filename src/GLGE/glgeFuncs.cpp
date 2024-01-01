@@ -297,7 +297,7 @@ GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
         glgeHasMainWindow = true;
     }
     //create the window pointer
-    GLGEWindow* wptr = new GLGEWindow(n, s, p);
+    GLGEWindow* wptr = new GLGEWindow(n, s, p, glgeWindowFlags);
     //start the window
     wptr->start();
     //make the window the current window

@@ -11,11 +11,8 @@
 
 #include "WidgetTest.hpp"
 #include "GLGE/GLGEALL.h"
-#include "GLGE/GLGEWindow.h"
 #include <ctime>
 #include <math.h>
-
-#include "GLGE/glgeVars.hpp"
 
 //store the pointer for seconds
 Object2D clockPointerSec;
@@ -24,6 +21,13 @@ Object2D clockPointerMin;
 //store the pointer for hours
 Object2D clockPointerHour;
 
+//store the default triangle
+Object2D tri;
+//store a spinning cube
+Object spinCube;
+//store the Camera
+Camera camSecWin;
+//store a second window
 GLGEWindow win;
 
 void widgetDraw()
@@ -92,6 +96,116 @@ Mesh2D createPointerMesh(float w, float h, vec3 col)
     return Mesh2D(pointerVerts, pointerInds);
 }
 
+void secondDraw()
+{
+    //draw the triangle to the other window
+    tri.draw();
+    //draw the cube
+    spinCube.draw();
+}
+
+void secondTick()
+{
+    //update the camera
+    camSecWin.update();
+    //recalculate the projection matrix
+    camSecWin.recalculateProjection();
+    //update the triangle
+    tri.update();
+    //rotate the cube a bit
+    spinCube.rotate(vec3(0.002, 0.001, 0.0005));
+    //update the cube
+    spinCube.update();
+}
+
+void secWindowInit()
+{
+    //create the triangle
+    //set the vertices for the triangle
+    Vertex2D vertices[] = {Vertex2D(0,1,   1,0,0,1),
+                           Vertex2D(-1,-1, 0,1,0,1),
+                           Vertex2D( 1,-1, 0,0,1,1)};
+    //bind the vertices to an triangle1
+    uint indices[] = {0,1,2};
+    //set the triangle to an 2D object created out of the vertices scaled down by 0.5
+    tri = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
+
+    //create the camera
+    camSecWin = Camera(90);
+    //bind the camera
+    win.setCamera(&camSecWin);
+
+    //create the cube
+    //create the vertices
+    Vertex verts[] = {
+                                //pos   //tex   //normal
+                         //front and back
+                         Vertex(-1,-1, 1, 0,0,  0, 0, 1),
+                         Vertex( 1,-1, 1, 1,0,  0, 0, 1),
+                         Vertex(-1, 1, 1, 0,1,  0, 0, 1),
+                         Vertex( 1, 1, 1, 1,1,  0, 0, 1),
+
+                         Vertex(-1,-1,-1, 1,0,  0, 0,-1),
+                         Vertex( 1,-1,-1, 0,0,  0, 0,-1),
+                         Vertex(-1, 1,-1, 1,1,  0, 0,-1),
+                         Vertex( 1, 1,-1, 0,1,  0, 0,-1),
+
+                         //top and bottom
+                         Vertex(-1,-1, 1, 0,1,  0,-1, 0),
+                         Vertex( 1,-1, 1, 1,1,  0,-1, 0),
+                         Vertex(-1, 1, 1, 0,0,  0, 1, 0),
+                         Vertex( 1, 1, 1, 1,0,  0, 1, 0),
+
+                         Vertex(-1,-1,-1, 0,0,  0,-1, 0),
+                         Vertex( 1,-1,-1, 1,0,  0,-1, 0),
+                         Vertex(-1, 1,-1, 0,1,  0, 1, 0),
+                         Vertex( 1, 1,-1, 1,1,  0, 1, 0),
+
+                         //left and right
+                         Vertex(-1,-1, 1, 1,0, -1, 0, 0),
+                         Vertex( 1,-1, 1, 0,0,  1, 0, 0),
+                         Vertex(-1, 1, 1, 1,1, -1, 0, 0),
+                         Vertex( 1, 1, 1, 0,1,  1, 0, 0),
+
+                         Vertex(-1,-1,-1, 0,0, -1, 0, 0),
+                         Vertex( 1,-1,-1, 1,0,  1, 0, 0),
+                         Vertex(-1, 1,-1, 0,1, -1, 0, 0),
+                         Vertex( 1, 1,-1, 1,1,  1, 0, 0),
+                        };
+    //load the cube indices
+    unsigned inds[] = {
+                      //front and back
+                      0,2,1,
+                      1,2,3,
+                      4,5,6,
+                      5,7,6,
+                      //top and bottom
+                      0+8,1+8,4+8,
+                      1+8,5+8,4+8,
+                      2+8,6+8,3+8,
+                      3+8,6+8,7+8,
+                      //left and right
+                      0+16,4+16,2+16,
+                      2+16,4+16,6+16,
+                      1+16,3+16,5+16,
+                      3+16,7+16,5+16};
+    //load the Cube object
+    spinCube = Object(verts, inds, sizeof(verts), sizeof(inds), Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
+    //set the material for the cube
+    Material mat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0);
+    //make the cube unlit
+    mat.setLit(false);
+    //bind the material to the cube
+    spinCube.setMaterial(mat);
+
+    //bind a draw function to the window
+    win.setDrawFunc(secondDraw);
+    //bind a tick function to the window
+    win.setTickFunc(secondTick);
+    //set the window icon
+    win.setWindowIcon("assets/GLGEImage.png");
+}
+
 //start of the program
 void runWidgetExample()
 {
@@ -114,8 +228,6 @@ void runWidgetExample()
     //diable window resizing
     glgeSetWindowResizable(false);
 
-    glgeWindows[glgeMainWindowIndex]->makeCurrent();
-
     //create the pointer mesh for seconds
     Mesh2D m = createPointerMesh(0.05, 1, vec3(1,0,0));
     //setup the pointer for seconds
@@ -129,16 +241,25 @@ void runWidgetExample()
     //setup the pointer for hours
     clockPointerHour = Object2D(m.vertices, m.indices);
 
-    win = GLGEWindow("Hallo Welt!", 250,250);
-    win.setClearColor(1,1,1);
-    win.start();
-
     //move the window to the top right of the screen
     glgeSetWindowPosition(vec2(glgeGetScreenSize().x-glgeGetWindowSize().x + 5, glgeGetWindowPosition().y + 29.f));
     //bind the main tick function
     glgeBindMainFunc(widgetTick);
     //bind the drawing function
     glgeBindDisplayFunc(widgetDraw);
+
+    //create the second window
+    win = GLGEWindow("Hello World!", 250,250);
+    //set the clear color of the window to white
+    win.setClearColor(1,1,1);
+    //bind an initalisation function
+    win.setInitFunc(secWindowInit);
+    //mark the window as ready for updates
+    win.start();
+
+    //say that GLGE should exit once the main window closes
+    glgeSetExitOnMainWindowClose(true);
+
     //run the program
     glgeRunMainLoop();
     //close the custom window

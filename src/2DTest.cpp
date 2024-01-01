@@ -207,9 +207,6 @@ void run2Dexample()
     //setup the crosshair
     setupCrosshair();
 
-    //load and set a post processing shader directly from an file
-    glgeSetPostProsessingShader("src/Shaders/testShader.fs");
-
     //execute the script
     glgeRunMainLoop();
 

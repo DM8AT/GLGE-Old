@@ -469,6 +469,16 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     this->transparentCombineShader->recalculateUniforms();
     //say that no custom shader is bound
     this->customTransparentCombineShader = false;
+
+    //compile the default 3D shader
+    this->default3DShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
+    //compile the default 3D transparent shader
+    this->default3DTransShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
+    //compile the default 2D shader
+    this->default2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
+
+    //initalise the textures correctly by calling the resize function
+    this->resizeWindow(this->size.x, this->size.y);
 }
 
 GLGEWindow::GLGEWindow(const char* name, unsigned int width, unsigned int height, vec2 pos, unsigned int flags)
@@ -500,8 +510,16 @@ void GLGEWindow::close()
     SDL_Window* win = (SDL_Window*)this->window;
     //close the window
     SDL_DestroyWindow(win);
+    //check if this is the main window
+    if ((unsigned int)this->id-1 == glgeMainWindowIndex)
+    {
+        //say that the main window was destroyd
+        glgeHasMainWindow = false;
+    }
     //delete the window from the call stack
-    glgeWindows.erase(glgeWindows.begin() + this->id-1);
+    glgeWindows[this->id-1] = nullptr;
+    //decrease the amount of active GLGE windows
+    glgeActiveWindows -= 1;
 }
 
 void GLGEWindow::draw()
@@ -510,14 +528,6 @@ void GLGEWindow::draw()
     this->drawing = true;
     //make this the current active window
     this->makeCurrent();
-
-    //copy the last frame to another fragment shader
-    //bind the default framebuffer as read only
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-    //bind the custom framebuffer as draw only
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->lastTickFramebuffer);
-    //copy the framebuffer
-    glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     //bind the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
@@ -535,7 +545,7 @@ void GLGEWindow::draw()
     glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
 
     //set the clear color to black
-    glClearColor(0,0,0,1);
+    glClearColor(0,0,0,0);
 
     //clear the other buffers
     glClear(GL_COLOR_BUFFER_BIT);
@@ -586,6 +596,8 @@ void GLGEWindow::draw()
         //unbind the buffers
         //unbind the VBO
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //reset the depth func
+        glDepthFunc(GL_GREATER);
     }
 
     //check if backface culling is enabled
@@ -593,6 +605,8 @@ void GLGEWindow::draw()
     {
         //if it is enabled, enable backface culling
         glEnable(GL_CULL_FACE);
+        //setup the correct order
+        glCullFace(GL_BACK);
     }
     else
     {
@@ -705,7 +719,7 @@ void GLGEWindow::draw()
     }
 
     //call the custom drawing function for transparent objects
-    if(false)
+    if(this->hasDrawFunc)
     {
         //say that the second pass is the transparent pass
         this->transparentPass = true;
@@ -724,6 +738,8 @@ void GLGEWindow::draw()
         {
             //if it is enabled, enable backface culling
             glEnable(GL_CULL_FACE);
+            //setup the correct culling
+            glCullFace(GL_BACK);
         }
         else
         {
@@ -733,8 +749,8 @@ void GLGEWindow::draw()
 
         //call the draw function
         this->callDrawFunc();
-        //switch to inverted normal depth testing
-        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+        //switch to inverted normal blend func
+        glBlendFunci(4,GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 
         //bind the shader
         this->transparentCombineShader->applyShader();
@@ -878,6 +894,14 @@ void GLGEWindow::draw()
         //copy the framebuffers
         glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     }
+
+    //copy the last frame to another fragment shader
+    //bind the default framebuffer as read only
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    //bind the custom framebuffer as draw only
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->lastTickFramebuffer);
+    //copy the framebuffer
+    glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1118,6 +1142,44 @@ void GLGEWindow::setResizeFunc(void (*func)(int, int))
     this->hasResizeFunc = true;
 }
 
+void GLGEWindow::setInitFunc(void (*func)())
+{
+    //check if an error occured
+    bool error = false;
+    if(func == nullptr)
+    {
+        //print an error
+        if(glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_FUNC_IS_NULLPOINTER);
+        }
+        //say that an error occured
+        error = true;
+    }
+
+    //if an error occured, exit
+    if(error)
+    {
+        //print an exit message
+        if(glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << "\n";
+        }
+        //stop the program
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
+    }
+
+    //set the init func
+    this->initFunc = func;
+
+    //say that an init func is bound
+    this->hasInitFunc = true;
+}
+
 void (*GLGEWindow::getDrawFunc())()
 {
     //return the function, if none is bound, return 0
@@ -1134,6 +1196,12 @@ void (*GLGEWindow::getResizeFunc())(int, int)
 {
     //return the function, if none is bound, return 0
     return this->hasResizeFunc ? this->resizeFunc : NULL;
+}
+
+void (*GLGEWindow::getInitFunc())()
+{
+    //return the function, if none is bound, return 0
+    return this->hasInitFunc ? this->initFunc : NULL;
 }
 
 void GLGEWindow::callDrawFunc()
@@ -1166,6 +1234,16 @@ void GLGEWindow::callResizeFunc(int w, int h)
     }
 }
 
+void GLGEWindow::callInitFunc()
+{
+    //check if the draw function is a nullpointer
+    if (this->hasInitFunc)
+    {
+        //if it is not, call the function
+        ((void(*)())this->initFunc)();
+    }
+}
+
 void GLGEWindow::clearDrawFunc()
 {
     //set the draw function to an nullpointer
@@ -1190,6 +1268,14 @@ void GLGEWindow::clearResizeFunc()
     this->hasResizeFunc = false;
 }
 
+void GLGEWindow::clearInitFunc()
+{
+    //set the draw function to an nullpointer
+    this->initFunc = NULL;
+    //say that no draw function is bound
+    this->hasInitFunc = false;
+}
+
 bool GLGEWindow::getHasDrawFunc()
 {
     //return if a draw function is bound
@@ -1208,10 +1294,22 @@ bool GLGEWindow::getHasResizeFunc()
     return this->hasResizeFunc;
 }
 
+bool GLGEWindow::getHasInitFunc()
+{
+    //return if a resize function is bound
+    return this->hasInitFunc;
+}
+
 void GLGEWindow::start()
 {
     //add the inputed pointer
     glgeWindows[this->id-1] = this;
+    //increase the amount of active GLGE windows
+    glgeActiveWindows++;
+    //bind this to the current window
+    this->makeCurrent();
+    //call the init function
+    this->callInitFunc();
 }
 
 vec2 GLGEWindow::getPos()
@@ -1760,7 +1858,7 @@ void GLGEWindow::setFullscreenMode(bool isFullscreen)
         //use SDL to set the fullscreen
         SDL_SetWindowFullscreen((SDL_Window*)this->window, SDL_WINDOW_FULLSCREEN);
         //resize everything
-        callResizeFunc(glgeMainDisplay.w, glgeMainDisplay.h);
+        this->resizeWindow(glgeMainDisplay.w, glgeMainDisplay.h);
     }
     else
     {
@@ -1769,8 +1867,7 @@ void GLGEWindow::setFullscreenMode(bool isFullscreen)
         //set the screen size to the complete screen
         SDL_SetWindowSize((SDL_Window*)this->window, this->normSize.x, this->normSize.y);
         //resize everything
-        callResizeFunc(this->normSize.x, this->normSize.y);
-
+        this->resizeWindow(this->normSize.x, this->normSize.y);
     }
 }
 
@@ -2396,6 +2493,14 @@ void GLGEWindow::maximize(bool maximized, bool force)
         //minize the window
         SDL_RestoreWindow((SDL_Window*)this->window);
     }
+    //store the width of the window
+    int w = 0;
+    //store the height of the window
+    int h = 0;
+    //get the size of the window
+    SDL_GetWindowSize((SDL_Window*)this->window, &w, &h);
+    //call the resize function
+    this->resizeWindow(w,h);
 }
 
 bool GLGEWindow::isMaximized()
@@ -2523,4 +2628,22 @@ void GLGEWindow::makeCurrent()
     glgeCurrentWindowIndex = this->id-1;
     //bind the OpenGL context to the window
     SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
+}
+
+int GLGEWindow::getDefault3DShader()
+{
+    //return the default shader
+    return this->default3DShader;
+}
+
+int GLGEWindow::getDefault3DTransparentShader()
+{
+    //return the default shader
+    return this->default3DTransShader;
+}
+
+int GLGEWindow::getDefault2DShader()
+{
+    //return the default shader
+    return this->default2DShader;
 }
