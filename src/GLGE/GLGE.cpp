@@ -71,7 +71,25 @@ void glgeInit()
     #endif
 
     //initalise SDL
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        //if sdl throws an value different than 0, print an error
+        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
+        //exit with an error
+        exit(1);
+    }
+
+    //initalise to OpenGL 3.0
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    //say that doublebuffering should be used
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    //set the depth accuarcy
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+    //set the current window index to 0 (the first window created)
+    glgeCurrentWindowIndex = 0;
 }
 
 //first window creation methode
@@ -206,7 +224,20 @@ void glgeCreateWindow(const char* name, int width, int height, vec2 pos)
 
 void glgeSetWindowTitle(const char* title)
 {
-    SDL_SetWindowTitle(glgeMainWindow, title);
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the name of an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //change the window name
+    glgeWindows[glgeMainWindowIndex]->rename(title);
 }
 
 //set if GLGE should output errors
@@ -235,14 +266,52 @@ bool glgeGetWarningOutput()
     return glgeWarningOutput;
 }
 
+/**
+ * @brief safely get a window from the glge window stack
+ * 
+ * @param windowID the ID of the window to acess
+ * @return GLGEWindow* a pointer to the window, NULL if the window acess failed
+ */
+GLGEWindow* safeWindowAcess(unsigned int windowID)
+{
+    //check if the window pointer is 0
+    if ((windowID-1) > (unsigned int)glgeWindows.size())
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            printf("[GLGE WARNING] tried to acess a window out of range\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //get the window pointer
+    GLGEWindow* wptr = glgeWindows[windowID-1];
+    //check if the window pointer is a nullpointer
+    if (wptr == NULL)
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print the warning
+            printf("[GLGE WARNING] tried to execute a window function on an not started window\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //return the pointer
+    return wptr;
+}
+
 //start the main loop of GLGE
 void glgeRunMainLoop()
 {
-    //check if a main window is bound
-    if (glgeHasMainWindow == false)
+    //check if at least one window exists
+    if ((int)glgeWindows.size() < 1)
     {
         //print an error
-        std::cerr << "[GLGE FATAL ERROR] forgot to create window before running main loop \n";
+        std::cerr << "[GLGE FATAL ERROR] GLGE can't start the main loop until at least one window was created\n";
         //close the program
         exit(1);
     }
@@ -255,66 +324,234 @@ void glgeRunMainLoop()
     {
         //store the current SDL event
         SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
+        //check all SDL events
+        while (SDL_PollEvent(&event))
+        {
+            //check if the loop ended
+            if (!running)
+            {
+                //stop the switch
+                break;
+            }
+            //check the event type
+            switch (event.type)
+            {
                 case SDL_KEYDOWN:
+                {
                     //handle the keydown
                     glgeDefaultKeyFunc(event.key.keysym.scancode);
                     //jump to the next event
                     break;
+                }
                 case SDL_KEYUP:
+                {
                     //if the key is relsed, then handle the key up
                     glgeDefaultKeyUpFunc(event.key.keysym.scancode);
                     //jump to the next event
                     break;
+                }
                 case SDL_MOUSEBUTTONDOWN:
+                {
                     //handle a mouse button press
                     glgeDefaultMouseFunc(event.button.button, GLGE_MOUSE_BUTTON_PRESS);
                     //jump to the next event
                     break;
+                }
                 case SDL_MOUSEBUTTONUP:
+                {
                     //handle the mouse button release
                     glgeDefaultMouseFunc(event.button.button, GLGE_MOUSE_BUTTON_RELEASE);
                     //jump to the next event
                     break;
+                }
                 case SDL_MOUSEMOTION:
+                {
                     //create two integers to store the mouse position
                     int x,y;
                     //get the active mouse position
                     SDL_GetMouseState(&x,&y);
+                    //store the screen size
+                    vec2 s = glgeWindows[event.window.windowID-1]->getSize();
                     //store the mouse position
-                    glgeMouse.pos = vec2(float(x) / glgeWindowSize.x, float(y) / glgeWindowSize.y);
+                    glgeMouse.pos = vec2(float(x) / s.x, float(y) / s.y);
                     //store the pixel the mouse is on
                     glgeMouse.posPixel = vec2(x,y);
+                    //get the mouse on the screen
+                    SDL_GetGlobalMouseState(&x, &y);
+                    //store the screen size
+                    s = glgeGetScreenSize();
+                    //store the mouse position
+                    glgeMouse.screenPos = vec2(float(x) / s.x, float(y) / s.y);
+                    //store the pixel the mouse is on
+                    glgeMouse.screenPosPixel = vec2(x,y);
                     //jump to the next event
                     break;
+                }
                 case SDL_MOUSEWHEEL:
+                {
                     //handle the mouse scrolling
                     glgeDefaultMouseFunc(GLGE_MOUSE_SCROLL, event.wheel.y);
                     //jump to the next event
                     break;
+                }
                 case SDL_WINDOWEVENT:
-                    switch (event.window.event) {
+                {
+                    switch (event.window.event)
+                    {
+                        case SDL_WINDOWEVENT_MINIMIZED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //minimize the window
+                            wptr->minimize(true);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_RESTORED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //restore the window using the minimize function
+                            wptr->minimize(false);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_MAXIMIZED:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //call the maximize function
+                            wptr->maximize(true);
+                            //stop the itteration
+                            break;
+                        }
                         case SDL_WINDOWEVENT_RESIZED:
-                            //Change view port to the new window dimensions
-                            glgeDefaultResizeFunc(event.window.data1, event.window.data2);
-                            //Update window content
-                            glgeDefaultDisplay();
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //call the resize function
+                            wptr->resizeWindow(event.window.data1, event.window.data2);
+                            //stop the itteration
+                            break;
+                        }
+                        case SDL_WINDOWEVENT_CLOSE:
+                        {
+                            //store the window pointer
+                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            //check if the safe window acess was sucessfull
+                            if (wptr == NULL)
+                            {
+                                //if the acess could not be done safe, skip
+                                break;
+                            }
+                            //close the window
+                            wptr->close();
+                            //check if the window is the main window
+                            if (event.window.windowID-1 == glgeMainWindowIndex)
+                            {
+                                //check if GLGE should close if the main window closes
+                                if (glgeExitOnMainWindowClose)
+                                {
+                                    //stop the function
+                                    running = false;
+                                }
+                            }
+                            //check if all windows are closed
+                            if (glgeActiveWindows == 0)
+                            {
+                                //stop the main loop
+                                running = false;
+                            }
+                            //jump to the next window
+                            break;
+                        }
+                        //by default, stop the function
+                        default:
                             break;
                     }
-            }
-            //check if the window should close:
-            if (((event.type == SDL_QUIT) && (!glgeWindowForceOpen)) || glgeOPCloseWindow)
-            {
-                //if it should close, say that the loop is nolonger running
-                running = false;
-                //break out of the switch
-                break;
+                    //if not, stop this function
+                    break;
+                }
+                //by default, stop the function
+                default:
+                    break;
             }
         }
+        //loop over all windows
+        for (int i = 0; i < (int)glgeWindows.size(); i++)
+        {
+            //check if the window is a nullpointer
+            if (glgeWindows[i] == NULL)
+            {
+                //skip the window
+                continue;
+            }
+            //get if the windows should close
+            bool close = glgeWindows[i]->isClosingInitiated();
+            //if they should close, close them
+            if (close)
+            {
+                //close the window
+                glgeWindows[i]->close();
+                //check if the window is the main window
+                if (((unsigned int)i == glgeMainWindowIndex))
+                {
+                    //check if GLGE should close if the main window closes
+                    if (glgeExitOnMainWindowClose)
+                    {
+                        //stop the function
+                        running = false;
+                    }
+                }
+            }
+            //check if all windows are closed
+            if (glgeActiveWindows == 0)
+            {
+                //stop the main loop
+                running = false;
+            }
+        }
+        //loop over all windows
+        for (int i = 0; i < (int)glgeWindows.size(); i++)
+        {
+            //check if the window is a nullpointer
+            if (glgeWindows[i] == NULL)
+            {
+                //skip the window
+                continue;
+            }
+            //get the window pointer
+            GLGEWindow* wptr = glgeWindows[i];
+            //check if the window poitner is a nullpointer
+            if (wptr == NULL) { continue; }
+            //call the draw function
+            wptr->draw();
+        }
 
-        //draw the screen
-        glgeDefaultDisplay();
         //run a tick
         glgeDefaultTimer();
     }
@@ -323,383 +560,152 @@ void glgeRunMainLoop()
 //first function to set the clear color
 void glgeSetClearColor(float r, float g, float b, bool normalise)
 {
-    //check for errors in the input
-    bool error = false;
-    //check if the values are negative
-    if (r < 0 || g < 0 || b < 0)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        if(glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            printf(GLGE_ERROR_NEGAITVE_COLOR_VAL);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a clear color for a main window, if no main window exists\n");
         }
-        error = true;
+        //stop the function
+        return;
     }
-
-    //if the values need to be normalised, normalise them
-    if (normalise)
-    {
-        r /= 255.f;
-        g /= 255.f;
-        b /= 255.f;
-    }
-
-    //check for out of bound values
-    if (r > 1.f || g > 1.f || b > 1.f)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_COLOR_VALUE_OUT_OF_BOUNDS);
-        }
-        error = true;
-    }
-
-    //if an error occured, exit
-    if (error)
-    {
-        if(glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
-        }
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //store the clear color
-    glgeClearColor = vec4(r,g,b,1.f);
-
-    //disable the skybox
-    glgeUseSkybox = false;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setClearColor(r,g,b, normalise);
 }
 
 //second function to set the clear color
 void glgeSetClearColor(vec3 color, bool normalise)
 {
-    //check for errors in the input
-    bool error = false;
-    //check if the values are negative
-    if (color.x < 0 || color.y < 0 || color.z < 0)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        if(glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            printf(GLGE_ERROR_NEGAITVE_COLOR_VAL);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a clear color for a main window, if no main window exists\n");
         }
-        error = true;
+        //stop the function
+        return;
     }
-
-    //if the values need to be normalised, normalise them
-    if (normalise)
-    {
-        color /= vec3(255,255,255);
-    }
-
-    //check for out of bound values
-    if (color.x > 1.f || color.y > 1.f || color.z > 1.f)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_COLOR_VALUE_OUT_OF_BOUNDS);
-        }
-        error = true;
-    }
-
-    //if an error occured, exit
-    if (error)
-    {
-        if(glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
-        }
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //store the clear color
-    glgeClearColor = vec4(color.x,color.y,color.z,1.f);
-
-    //disable the skybox
-    glgeUseSkybox = false;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setClearColor(color, normalise);
 }
 
 //thired function to set the clear color
 void glgeSetClearColor(vec4 color, bool normalise)
 {
-    //check for errors in the input
-    bool error = false;
-    //check if the values are negative
-    if (color.x < 0 || color.y < 0 || color.z < 0)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        if(glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            printf(GLGE_ERROR_NEGAITVE_COLOR_VAL);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a clear color for a main window, if no main window exists\n");
         }
-        error = true;
+        //stop the function
+        return;
     }
-
-    //if the values need to be normalised, normalise them
-    if (normalise)
-    {
-        color /= vec4(255,255,255,1);
-    }
-
-    //check for out of bound values
-    if (color.x > 1.f || color.y > 1.f || color.z > 1.f)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_COLOR_VALUE_OUT_OF_BOUNDS);
-        }
-        error = true;
-    }
-
-    //if an error occured, exit
-    if (error)
-    {
-        if(glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_SET_CLEAR_COLOR << "\n";
-        }
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //store the clear color
-    glgeClearColor = vec4(color.x,color.y,color.z,1.f);
-
-    //disable the skybox
-    glgeUseSkybox = false;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setClearColor(color.x,color.y,color.z, normalise);
 }
 
 void glgeSetSkybox(const char* top, const char* bottom, const char* left, const char* right, const char* front, const char* back)
 {
-    //variables to store the image data
-    //the image width
-    int width;
-    //the image height
-    int height;
-    //the amount of channels in the image
-    int nrChannels;
-    //the image data
-    unsigned char *data;
-
-    //activate the first texture unit
-    glActiveTexture(GL_TEXTURE0);
-    //create a new skybox texture
-    glGenTextures(1, &glgeSkyboxCube);
-    //store the texture mode
-    int texMode = GL_RGB;
-    //bind the texture as a cube map
-    glBindTexture(GL_TEXTURE_CUBE_MAP, glgeSkyboxCube);
-    //load the top image
-    data = glgeLoad(top, &width, &height, &nrChannels);
-    //check if the width is valide
-    if (width > GL_MAX_TEXTURE_SIZE)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if an error should be printed
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << width << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a skybox for a main window, if no main window exists\n");
         }
-        //check if GLGE should crash on an error
-        if (glgeExitOnError)
-        {
-            //close the program with an error
-            exit(1);
-        }
+        //stop the function
+        return;
     }
-    //check if the height is valide
-    if (height > GL_MAX_TEXTURE_SIZE)
-    {
-        //check if an error should be printed
-        if (glgeErrorOutput)
-        {
-            //print an error
-            std::cerr << "[GLGE ERROR] the skybox texture was too larg: specified size was " << height << ", mixmal allowed size is " << GL_MAX_TEXTURE_BUFFER_SIZE << "\n";
-        }
-        //check if GLGE should crash on an error
-        if (glgeExitOnError)
-        {
-            //close the program with an error
-            exit(1);
-        }
-    }
-    //check if a alpha channel exists
-    if (nrChannels == 4)
-    {
-        //set the texture mode to also use an alpha channel
-        texMode = GL_RGBA;
-    }
-    else
-    {
-        //set the texture mode to only rgb
-        texMode = GL_RGB;
-    }
-    //load the image to y-positive
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 
-                0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-    //load the bottom image
-    data = glgeLoad(bottom, &width, &height, &nrChannels);
-    //load the image to y-negative
-    glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 
-        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-    //load the left image
-    data = glgeLoad(left, &width, &height, &nrChannels);
-    //load the image to x-negative
-    glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 
-        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-    //load the right image
-    data = glgeLoad(right, &width, &height, &nrChannels);
-    //load the image to x-positive
-    glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X, 
-        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-    //load the front image
-    data = glgeLoad(front, &width, &height, &nrChannels);
-    //load the image to z-positive
-    glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 
-        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-    //load the back image
-    data = glgeLoad(back, &width, &height, &nrChannels);
-    //load the image to z-negative
-    glTexImage2D(
-        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 
-        0, texMode, width, height, 0, texMode, GL_UNSIGNED_BYTE, data);
-    //clear the texture data
-    glgeImageFree(data);
-
-    //set the default texture parameters
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    //but watch out to set them to 3D
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    //say that the skybox is active
-    glgeUseSkybox = true;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setSkybox(top, bottom, left, right, front, back);
 }
 
 //bind a display func callback
 void glgeBindDisplayFunc(void (*func)())
 {
-    //check if an error occured
-    bool error = false;
-    if(func == nullptr)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //print an error
-        if(glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            printf(GLGE_ERROR_FUNC_IS_NULLPOINTER);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a display function for a main window, if no main window exists\n");
         }
-        //say that an error occured
-        error = true;
+        //stop the function
+        return;
     }
-
-    //if an error occured, exit
-    if(error)
-    {
-        //print an exit message
-        if(glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_BIND_DISPLAY_CALLBACK << "\n";
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //set the display callback
-    glgeDisplayCallback = func;
-
-    //say that an display callback is bound
-    glgeHasDisplayCallback = true;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setDrawFunc(func);
 }
 
 //debind a display func callback
 void glgeClearDisplayFunc()
 {
-    //set the display func callback to the nullpointer
-    glgeDisplayCallback = nullptr;
-
-    //say that no display function is bound
-    glgeHasDisplayCallback = false;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't clear a display function for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->clearDrawFunc();
 }
 
 //bind a main callback function
 void glgeBindMainFunc(void (*func)())
 {
-    //check if an error occured
-    bool error = false;
-    if(func == nullptr)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //print an error
-        if(glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            printf(GLGE_ERROR_FUNC_IS_NULLPOINTER);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a tick function for a main window, if no main window exists\n");
         }
-        //say that an error occured
-        error = true;
+        //stop the function
+        return;
     }
-
-    //if an error occured, exit
-    if(error)
-    {
-        //print an exit message
-        if(glgeErrorOutput)
-        {
-            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << "\n";
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //set the display callback
-    glgeMainCallback = func;
-
-    //say that an display callback is bound
-    glgeHasMainCallback = true;
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->setTickFunc(func);
 }
 
 //unbind the main callback
 void glgeClearMainFunc()
 {
-    //set the main function callback to the nullpointer
-    glgeMainCallback = nullptr;
-
-    //say that no main callback is bound
-    glgeHasMainCallback = false;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't clear a tick function for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->clearTickFunc();
 }
 
 void glgeSetMaxFPS(int fps)
@@ -758,13 +764,39 @@ int glgeGetMaxFPS()
 //return if GLGE has an additional main function bound
 bool glgeHasMainFunc()
 {
-    return glgeHasMainCallback;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get if a main window has a main func, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the window has a main func
+    return glgeWindows[glgeMainWindowIndex]->getHasTickFunc();
 }
 
 //return if GLGE has an additional display function bound
 bool glgeHasDisplayFunc()
 {
-    return glgeHasDisplayCallback;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get a draw function for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //call the function from the main window
+    return glgeWindows[glgeMainWindowIndex]->getHasDrawFunc();
 }
 
 //return if GLGE has a window bound
@@ -806,15 +838,39 @@ char* glgeGetMoveMatrixName()
 //get the aspect of the window
 float glgeGetWindowAspect()
 {
-    //return the window aspect
-    return glgeWindowAspect;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the window aspect for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0.f;
+    }
+    //call the function from the main window
+    return glgeWindows[glgeMainWindowIndex]->getWindowAspect();
 }
 
 //get the size of the window
 vec2 glgeGetWindowSize()
 {
-    //return the window size
-    return glgeWindowSize;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the window size for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return vec2(0);
+    }
+    //call the function from the main window
+    return glgeWindows[glgeMainWindowIndex]->getSize();
 }
 
 //return the pressed keys
@@ -1210,266 +1266,298 @@ Mouse glgeGetMouse()
 
 void glgeEnableBackfaceCulling()
 {
-    //say that face culling is enabled
-    glEnable(GL_CULL_FACE);
-    glgeUseCulling = true;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the backface culling for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->enableBackfaceCulling();
 }
 
 void glgeDisableBackfaceCulling()
 {
-    //say that face culling is disabled
-    glDisable(GL_CULL_FACE);
-    glgeUseCulling = false;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the backface culling for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //call the function from the main window
+    glgeWindows[glgeMainWindowIndex]->disableBackfaceCulling();
 }
 
 void glgeSwapBackfaceCulling()
 {
-    //set the face mode to the opposite it currently is
-    if (glgeUseCulling)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        glgeDisableBackfaceCulling();
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the backface culling for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    bool c = glgeWindows[glgeMainWindowIndex]->useBackfaceCulling();
+    //set the face mode to the opposite it currently is
+    if (c)
+    {
+        glgeWindows[glgeMainWindowIndex]->enableBackfaceCulling();
     }
     else
     {
-        glgeEnableBackfaceCulling();
+        glgeWindows[glgeMainWindowIndex]->disableBackfaceCulling();
     }
 }
 
 void glgeSetBackfaceCulling(bool status)
 {
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the backface culling for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+
     //set the face mode to the inputed status
     if (status)
     {
-        glgeDisableBackfaceCulling();
+        glgeWindows[glgeMainWindowIndex]->enableBackfaceCulling();
     }
     else
     {
-        glgeEnableBackfaceCulling();
+        glgeWindows[glgeMainWindowIndex]->disableBackfaceCulling();
     }
 }
 
 bool glgeGetBackfaceCullingStatus()
 {
-    //return the current backface culling mode
-    return glgeUseCulling;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get if a main window uses backface culling, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if backface culling is used
+    return glgeWindows[glgeMainWindowIndex]->useBackfaceCulling();
 }
 
 void glgeSetLightingShader(const char* lightingShaderFile)
 {
-    //create strings for the shader
-    std::string data;
-
-    //read the files
-    if (!readFile(lightingShaderFile, data))
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //output an error message
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the lighting shader for a main window, if no main window exists\n");
         }
-        //stop the script
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
+        //stop the function
+        return;
     }
 
-    //compile the shader and save it
-    glgeLightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
-
-    //get the post processing uniforms
-    bool albedo = getUniformsForLightingShader();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
-    {
-        printf(GLGE_ERROR_OCCURED_IN_FILE, lightingShaderFile);
-    }
+    //set the lighing shader
+    glgeWindows[glgeMainWindowIndex]->setLightingShader(lightingShaderFile);
 }
 
 void glgeSetLightingShader(std::string LightingShader)
 {
-    //compile the shader and save it
-    glgeLightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, LightingShader);
-
-    //get the post processing uniforms
-    bool albedo = getUniformsForLightingShader();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        printf("[GLGE ERROR INFO] Error occured in shader compiled from custom source");
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the lighting shader for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
+
+    //set the lighing shader
+    glgeWindows[glgeMainWindowIndex]->setLightingShader(LightingShader);
 }
 
 void glgeSetLightingShader(unsigned int shader)
 {
-    //store the inputed shader as the Lighting shader
-    glgeLightingShader = shader;
-
-    //get the post processing uniforms
-    bool albedo = getUniformsForLightingShader();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        printf("[GLGE ERROR INFO] Error occured in shader set by shader ID. \n                 ID : %d\n", shader);
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the lighting shader for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
+
+    //set the lighing shader
+    glgeWindows[glgeMainWindowIndex]->setLightingShader(shader);
 }
 
 Shader* glgeSetPostProsessingShader(const char* shaderFile)
 {
-    //create the new shader
-    Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, shaderFile);
-    //check if the shader contains the main image
-    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if an error should be printed
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] File " << shaderFile << 
-            " was inputed as an post-processing shader, but the uniform \"glgeMainImage\" for the input of the image is undefined" << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add a post processing shader for a main window, if no main window exists\n");
         }
+        //stop the function
+        return NULL;
     }
-    //store a new shader in the post-processing stack
-    glgePostProcessingShaders.push_back(shader);
-    //setup all default uniforms
-    getDefaultUniformsFromPostProcessingShader(shader);
-    //store the current error output state
-    bool err = glgeGetErrorOutput();
-    //disable the error output
-    glgeSetErrorOutput(false);
-    //update the shader
-    shader->recalculateUniforms();
-    //reset error output
-    glgeSetErrorOutput(err);
-    //output the shader
-    return shader;
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->addPostProcessingShader(shaderFile);
 }
 Shader* glgeSetPostProsessingShader(std::string shaderSource)
 {
-    //create the new shader
-    Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, shaderSource);
-    //check if the shader contains the main image
-    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if an error should be printed
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader" << "\n" << 
-            "Shader source: " << "\n" << shaderSource << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add a post processing shader for a main window, if no main window exists\n");
         }
+        //stop the function
+        return NULL;
     }
-    //store a new shader in the post-processing stack
-    glgePostProcessingShaders.push_back(shader);
-    //setup all default uniforms
-    getDefaultUniformsFromPostProcessingShader(shader);
-    //store the current error output state
-    bool err = glgeGetErrorOutput();
-    //disable the error output
-    glgeSetErrorOutput(false);
-    //update the shader
-    shader->recalculateUniforms();
-    //reset error output
-    glgeSetErrorOutput(err);
-    //output the shader
-    return shader;
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->addPostProcessingShader(shaderSource);
 }
 
 Shader* glgeSetPostProsessingShader(unsigned int s)
 {
-    //create the new shader
-    Shader* shader = new Shader(s);
-    //check if the shader contains the main image
-    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if an error should be printed
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by shader pointer" << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add a post processing shader for a main window, if no main window exists\n");
         }
+        //stop the function
+        return NULL;
     }
-    //store a new shader in the post-processing stack
-    glgePostProcessingShaders.push_back(shader);
-    //setup all default uniforms
-    getDefaultUniformsFromPostProcessingShader(shader);
-    //store the current error output state
-    bool err = glgeGetErrorOutput();
-    //disable the error output
-    glgeSetErrorOutput(false);
-    //update the shader
-    shader->recalculateUniforms();
-    //reset error output
-    glgeSetErrorOutput(err);
-    //output the shader
-    return shader;
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->addPostProcessingShader(s);
 }
 
-void glgeSetPostProsessingShader(Shader* shader)
+int glgeSetPostProsessingShader(Shader* shader)
 {
-    //store the shader
-    glgePostProcessingShaders.push_back(shader);
-    //check if the shader contains the main image
-    if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if an error should be printed
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] uniform \"glgeMainImage\" is undefined for post-processing shader passed by pointer" << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add a post processing shader for a main window, if no main window exists\n");
         }
+        //stop the function
+        return -1;
     }
-    //setup all default uniforms
-    getDefaultUniformsFromPostProcessingShader(shader);
-    //store the current error output state
-    bool err = glgeGetErrorOutput();
-    //disable the error output
-    glgeSetErrorOutput(false);
-    //update the shader
-    shader->recalculateUniforms();
-    //reset error output
-    glgeSetErrorOutput(err);
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->addPostProcessingShader(shader);
 }
 
 Shader* glgeGetPostProcessingShader(int index)
 {
-    //return the searched shader
-    return glgePostProcessingShaders[index];
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add get a post processing shader from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return NULL;
+    }
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->getPostProcessingShader(index);
 }
 
 int glgeGetIndexOfPostProcessingShader(Shader* shader)
 {
-    //find the index of the shader
-    std::vector<Shader*>::iterator iter = std::find(glgePostProcessingShaders.begin(), glgePostProcessingShaders.end(), shader);
-    //check if the element wasn't found
-    if (iter == glgePostProcessingShaders.cend())
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //quit the function with -1
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add get a post processing shader from an main window, if no main window exists\n");
+        }
+        //stop the function
         return -1;
     }
-    else
-    {
-        //return the index
-        return std::distance(glgePostProcessingShaders.begin(), iter);
-    }
+
+    //pass the call to the main window
+    return glgeWindows[glgeMainWindowIndex]->getPostProcessingShaderIndex(shader);
 }
 
 void glgeDeletePostProcessingShader(int index, bool del)
 {
-    //get a reference to the shader
-    Shader* shader = glgePostProcessingShaders[index];
-    //delte the shader from the post-processing stack
-    glgePostProcessingShaders.erase(glgePostProcessingShaders.begin() + index);
-    //check if the shader should be deleted
-    if (del)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //if it should be deleted, delete it
-        delete shader;
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't add get a post processing shader from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
+
+    //pass the call to the main window
+    glgeWindows[glgeMainWindowIndex]->removePostProcessingShader(index, del);
 }
 
 void glgeDeletePostProcessingShader(Shader* shader, bool del)
@@ -1504,21 +1592,28 @@ void glgeSetInterpolationMode(unsigned int mode)
 
 void glgeWarpPointer(vec2 pointerPos, unsigned int space)
 {
-    vec2 mem;
-    //if the space variable is true(so it is greater than 0)
-    if (space == 1)
+    //check if the space is screen space
+    if (space == GLGE_SCREEN_SPACE)
     {
-        //scale the pointer by the window size to transform it to screen space
-        mem = vec2(pointerPos.x * glgeWindowSize.x, pointerPos.y * glgeWindowSize.y);
+        //store the position
+        vec2 pos = pointerPos;
+        //move the origin to the middle of the screen
+        pos += (glgeGetScreenSize() / vec2(2));
+        //warp the mouse to the wanted pixel on screen
+        SDL_WarpMouseGlobal(pos.x, pos.y);
     }
+    //else, work in window space
     else
     {
-        //add the half window size to the position
-        mem += glgeWindowSize/vec2(2,2);
+        //store the position
+        vec2 pos = pointerPos;
+        //move the position to the screen middle
+        pos += vec2(0.5);
+        //scale the position to convert it from normalised window space to window screen space
+        pos = pos.scale(glgeWindows[glgeCurrentWindowIndex]->getSize());
+        //use the glut function to warp the pointer to the specified position
+        SDL_WarpMouseInWindow((SDL_Window*)glgeWindows[glgeCurrentWindowIndex]->getSDLWindow(), pos.x,pos.y);
     }
-
-    //use the glut function to warp the pointer to the specified position
-    SDL_WarpMouseInWindow(glgeMainWindow, mem.x, mem.y);
 }
 
 void glgeWarpPointer(float x, float y, unsigned int space)
@@ -1579,32 +1674,95 @@ float glgeGetCurrentElapsedTime()
 
 unsigned int glgeGetMainAlbedoMap()
 {
-    //return the main albedo texture
-    return glgeFrameAlbedoMap;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get a albedo map from a main window, if no main window exists\n");
+        }
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->getAlbedoTex();
 }
 
 unsigned int glgeGetMainNormalMap()
 {
-    //return the main normal map
-    return glgeFrameNormalMap;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get a normal map from a main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->getNormalTex();
 }
 
 unsigned int glgeGetMainPositionMap()
 {
-    //return the main position map
-    return glgeFramePositionMap;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get a position map from a main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->getPosTex();
 }
 
 unsigned int glgeGetMainRoughnessMap()
 {
-    //return the main roughness map
-    return glgeFrameRoughnessMap;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get a roughness map from a main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->getRMLTex();
 }
 
 unsigned int glgeGetLastFrame()
 {
-    //return a pointer to the last frame map
-    return glgeFrameLastTick;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the last frame from a main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->getLastFrame();
 }
 
 void glgeSetExitOnError(bool exitOnError)
@@ -1627,353 +1785,577 @@ bool glgeGetExitOnError()
 
 void glgeBindOnWindowResizeFunc(void (*func)(int, int))
 {
-    //store the inputed function, nullpointers are catched before it is called
-    glgeOnWindowResize = func;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set a resize func for a main window, if no main window exists\n");
+        }
+    }
+
+    //set the lighing shader
+    return glgeWindows[glgeMainWindowIndex]->setResizeFunc(func);
 }
 
 void glgeSetFullscreenMode(bool isFullscreen)
 {
-    //store the inputed variable to say if should be in fullscreen mode
-    glgeFullscreen = isFullscreen;
-
-    //check if it should be fullscreen
-    if (isFullscreen)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //store the current window size
-        glgeTrueWindowSize = glgeWindowSize;
-        //set the screen size to the complete screen
-        SDL_SetWindowSize(glgeMainWindow, glgeMainDisplay.w, glgeMainDisplay.h);
-        //use SDL to set the fullscreen
-        SDL_SetWindowFullscreen(glgeMainWindow, SDL_WINDOW_FULLSCREEN);
-        //resize everything
-        glgeDefaultResizeFunc(glgeMainDisplay.w, glgeMainDisplay.h);
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the fullscreen mode for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
-    else
-    {
-        //use SDL to set the window to the original size
-        SDL_SetWindowFullscreen(glgeMainWindow, 0);
-        //set the screen size to the complete screen
-        SDL_SetWindowSize(glgeMainWindow, glgeTrueWindowSize.x, glgeTrueWindowSize.y);
-        //resize everything
-        glgeDefaultResizeFunc(glgeTrueWindowSize.x, glgeTrueWindowSize.y);
-
-    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setFullscreenMode(isFullscreen);
 }
 
 void glgeToggleFullscreen()
 {
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the fullscreen mode from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
     //use glge to set the fullscreen to the inverse of the fullscreen
-    glgeSetFullscreenMode(!glgeFullscreen);
+    glgeSetFullscreenMode(!glgeWindows[glgeMainWindowIndex]->isFullscreen());
 }
 
 bool glgeIsFullscreen()
 {
-    //output the current fullscreen mode
-    return glgeFullscreen;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the fullscreen mode from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isFullscreen();
 }
 
 void glgeResizeWindow(int width, int height, bool force)
 {
-    //check if the window resize is allowed
-    if (glgeAllowWindowResize || force)
-    {
-        //change the window size using freeglut
-        SDL_SetWindowSize(glgeMainWindow, width, height);
-        //if force is enabled, set the window size parameters
-        if (force)
-        {
-            //instantly resize the parameters
-            resizeWindow(width,height);
-        }
-    }
+    //pass to the other function
+    glgeResizeWindow(vec2(width, height), force);
 }
 
 void glgeResizeWindow(vec2 size, bool force)
 {
-    //check if the window resize is allowed
-    if (glgeAllowWindowResize || force)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //change the window size using freeglut
-        SDL_SetWindowSize(glgeMainWindow, size.x, size.y);
-        //if force is enabled, set the window size parameters
-        if (force)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //instantly resize the parameters
-            resizeWindow(size.x, size.y);
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the fullscreen mode from an main window, if no main window exists\n");
         }
+        //stop the function
+        return;
     }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setSize(size, force);
 }
 
 void glgeSetWindowResizable(bool resizable)
 {
-    //set the correct window resize mode
-    SDL_SetWindowResizable(glgeMainWindow, SDL_bool(resizable));
-    //store the inputed mode
-    glgeAllowWindowResize = resizable;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the window resize mode for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setResizable(resizable);
 }
 
 void glgeToggleWindowResizable()
 {
-    //switch the state of the resize variable
-    glgeAllowWindowResize = !glgeAllowWindowResize;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't toggle the window resize mode of an main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setResizable(!glgeWindows[glgeMainWindowIndex]->isWindowResizable());
 }
 
 bool glgeIsWindowResizable()
 {
-    //output if the window can be resized
-    return glgeAllowWindowResize;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the window resize mode from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isWindowResizable();
 }
 
 void glgeSetWindowPosition(vec2 position, bool force)
 {
-    //check if the window movement is allowed
-    if (glgeAllowWindowMovement || force)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //use glut to set the window position
-        SDL_SetWindowPosition(glgeMainWindow, position.x,position.y);
-
-        //if the movement should be forced, store the new position
-        if (force)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //store the new window position
-            glgeWindowPosition = position;
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the window position of a main window, if no main window exists\n");
         }
+        //stop the function
+        return;
     }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setPos(position, force);
 }
 
 void glgeSetWindowPosition(int x, int y, bool force)
 {
-    //check if the window movement is allowed
-    if (glgeAllowWindowMovement || force)
-    {
-        //use glut to set the window position
-        SDL_SetWindowPosition(glgeMainWindow, x,y);
-
-        //if the movement should be forced, store the new position
-        if (force)
-        {
-            //store the new window position
-            glgeWindowPosition = vec2(x,y);
-        }
-    }
+    //pass to the other function
+    glgeSetWindowPosition(vec2(x,y), force);
 }
 
 vec2 glgeGetWindowPosition()
 {
-    //use glut to get the window position and return it
-    return glgeWindowPosition;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the window position from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return vec2(0);
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->getPos();
 }
 
 void glgeSetWindowMoveable(bool allowMovement)
 {
-    //store if the window is allowed to move
-    glgeAllowWindowMovement = allowMovement;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't allow or deny window movement of a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setMovable(allowMovement);
 }
 
 void glgeToggleWindowMoveable()
 {
-    //invert the allow movement
-    glgeAllowWindowMovement = !glgeAllowWindowMovement;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't allow or deny window movement of a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setMovable(!glgeWindows[glgeMainWindowIndex]->isMovable());
 }
 
 bool glgeGetWindowMoveable()
 {
-    //return if the window movement is allowed
-    return glgeAllowWindowMovement;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get window movement constrains from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isMovable();
 }
 
 void glgeSetWindowIcon(const char* file)
 {
-    //load the image
-    SDL_Surface* img = loadImage(file);
-    //check if the image was created sucessfully
-    if (!img)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if GLGE should print an error
-        if (glgeErrorOutput)
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
         {
-            //print an error
-            std::cerr << "[GLGE ERROR] failed to create SDL_Surface for image to change the window icon, SDL error: " << SDL_GetError() << "\n";
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get window movement constrains from an main window, if no main window exists\n");
         }
-        //check if GLGE should crash on an error
-        if (glgeExitOnError)
-        {
-            //stop with an error
-            exit(1);
-        }
+        //stop the function
+        return;
     }
-    //set the current application window's icon
-    SDL_SetWindowIcon(glgeMainWindow,img);
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setWindowIcon(file);
 }
 
 unsigned int glgeGetAlbedoBuffer()
 {
     //return the main albedo texture
-    return glgeFrameAlbedoMap;
+    return glgeGetMainAlbedoMap();
 }
 
 unsigned int glgeGetNormalBuffer()
 {
     //return the main normal map
-    return glgeFrameNormalMap;
+    return glgeGetMainNormalMap();
 }
 
 unsigned int glgeGetPositionBuffer()
 {
     //return the main position map
-    return glgeFramePositionMap;
+    return glgeGetMainPositionMap();
 }
 
 unsigned int glgeGetRoughnessBuffer()
 {
     //return the main roughness map
-    return glgeFrameRoughnessMap;
+    return glgeGetMainRoughnessMap();
 }
 
 unsigned int glgeGetLighningBuffer()
 {
-    //return the lit image
-    return glgeLightingImageOut;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get output texture from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->getOutTex();
 }
 
 bool glgeGetTransparencyPass()
 {
-    //return the pass status
-    return glgeTransparentOpaquePass;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get transpraent pass from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isTranparentPass();
 }
 
 void glgeSetTransparencyCombineShader(Shader* shader)
 {
-    //check if the inputed pointer is a null pointer
-    if (shader == NULL)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if warning output is enabled
+        //if not, check if an warning should be printed
         if (glgeWarningOutput)
         {
-            //print a warning
-            printf("[GLGE WARNING] A null pointer is not a valid transparent combine shader\n");
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set transprent combine shader for a main window, if no main window exists\n");
         }
         //stop the function
         return;
     }
-    //check if a custom shader is bound
-    if (!glgeHasCustomTransparentCombineShader)
-    {
-        //if not, delete the old shader
-        delete glgeTransparentCombineShader;
-    }
-    //store the shader
-    glgeTransparentCombineShader = shader;
-    //say that a custom shader is bound
-    glgeHasCustomTransparentCombineShader = true;
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setTransparencyCombineShader(shader);
 }
 
 Shader* glgeGetTransparencyCombineShader()
 {
-    //return the shader
-    return glgeTransparentCombineShader;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get transprent combine shader from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->getTransparencyCombineShader();
 }
 
 bool glgeGetIfCustomTransparentCombineShaderIsBound()
 {
-    //return the boolean
-    return glgeHasCustomTransparentCombineShader;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get if a transprent combine shader from an main window is custom, if no main window exists\n");
+        }
+        //stop the function
+        return NULL;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isCustomTransparencyCombineShader();
 }
 
 void glgeSetWindowBorderVisible(bool visible)
 {
-    //store the new window border state
-    glgeHasWindowBorder = visible;
-    //update the window border
-    SDL_SetWindowBordered(glgeMainWindow, SDL_bool(visible));
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the window border visibliety of a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setBorderVisible(visible);
 }
 
 bool glgeGetWindowBorderVisible()
 {
-    //return the current window borderd state
-    return glgeHasWindowBorder;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get the window border visibliety from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isBorderVisible();
 }
 
 void glgeSetWindowForceOpen(bool forceOpen)
 {
-    //store the new state of the variable
-    glgeWindowForceOpen = forceOpen;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't set the main window force open, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setWindowForceOpen(forceOpen);
 }
 
 bool glgeGetWindowForceOpen()
 {
-    //return the current state of the variable
-    return glgeWindowForceOpen;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get if the main window is forced open, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isWindowForceOpen();
 }
 
 void glgeCloseWindow(bool force)
 {
-    //check if this function should run
-    if (glgeWindowForceOpen && !force)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //if not, stop this function
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't initiate the closing of an main window, if no main window exists\n");
+        }
+        //stop the function
         return;
     }
-    //else, say that the window should close
-    glgeOPCloseWindow = true;
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->initiateClosing(force);
 }
 
 bool glgeGetWindowClosingInitiated()
 {
-    //return the current closing status
-    return glgeOPCloseWindow;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't get if the main window should close, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isClosingInitiated();
 }
 
 void glgeStopWindowClosing(bool force)
 {
-    //check if this function should run
-    if ((!glgeOPCloseWindow) || ((!force) && glgeOPCloseWindow))
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //stop this function
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] can't de-initiate the closing of an main window, if no main window exists\n");
+        }
+        //stop the function
         return;
     }
-    //say that the window won't be closed
-    glgeOPCloseWindow = false;
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->stopWindowClosing(force);
 }
 
 void glgeSetWindowAlwaysOnTop(bool onTop)
 {
-    //store the new state
-    glgeWindowAlwaysOnTop = onTop;
-    //update the window
-    SDL_SetWindowAlwaysOnTop(glgeMainWindow, SDL_bool(onTop));
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] set a main window always on top, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setWindowAlwaysOnTop(onTop);
 }
 
 bool glgeGetWindowAlwaysOnTop()
 {
-    //return the current on top state
-    return glgeWindowAlwaysOnTop;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is always on top, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isWindowAlwaysOnTop();
 }
 
 void glgeSetWindowBrightness(float brightness)
 {
-    //check if the brightness is less than 0
-    if (brightness < 0.f)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //check if a warning should be printed
+        //if not, check if an warning should be printed
         if (glgeWarningOutput)
         {
-            //print a warning
-            printf("[GLGE WARNING] a brightness of %f is not allowed, the brightness must be at least 0.f\n", brightness);
+            //if it should, print a warning
+            printf("[GLGE WARNING] set the brightness of a main window, if no main window exists\n");
         }
-        //stop this function
+        //stop the function
         return;
     }
-    //store the new window brightness
-    glgeWindowBrightness = brightness;
-    //update the window brightness
-    SDL_SetWindowBrightness(glgeMainWindow, brightness);
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setBrightness(brightness);
 }
 
 float glgeGetWindowBrightness()
 {
-    //return the current brightness
-    return glgeWindowBrightness;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get the brightness from an main window, if no main window exists\n");
+        }
+        //stop the function
+        return 0;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->getBrightness();
 }
 
 void glgeAddWindowFlag(int windowFlag)
@@ -2031,93 +2413,174 @@ void glgeAddWindowFlag(int windowFlag)
 
 void glgeShowHideWindow(bool show)
 {
-    //store the new show/hide state
-    glgeWindowIsShown = show;
-    //update the window
-    if (show)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //show the window
-        SDL_ShowWindow(glgeMainWindow);
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] show or hide a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
-    else
-    {
-        //hide the window
-        SDL_HideWindow(glgeMainWindow);
-    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->showHide(show);
 }
 
 bool glgeGetWindowShown()
 {
-    //return the current window show/hide state
-    return glgeWindowIsShown;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is shown or hiden, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isShown();
 }
 
-void glgeMaximizeMinimizeWindow(bool maximized, bool force)
+void glgeMaximize(bool maximized, bool force)
 {
-    //check if this function should execute
-    if (!glgeAllowWindowResize && !force)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //stop this function
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] maximize a main window, if no main window exists\n");
+        }
+        //stop the function
         return;
     }
-    //store the new state
-    glgeWindowMaximised = maximized;
-    //maximize or minize the window
-    if (maximized)
-    {
-        //maximize the window
-        SDL_MaximizeWindow(glgeMainWindow);
-    }
-    else
-    {
-        //minize the window
-        SDL_MinimizeWindow(glgeMainWindow);
-    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->maximize(maximized, force);
 }
 
 bool glgeGetWindowMaximized()
 {
-    //return the current maximized state
-    return glgeWindowMaximised;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is maximized, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isMaximized();
 }
 
 bool glgeGetWindowFocus()
 {
-    //get the input flags and maks out the input focus, then return it as an bool
-    return (bool)(SDL_GetWindowFlags(glgeMainWindow) & SDL_WINDOW_INPUT_FOCUS);
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is focused, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isFocused();
 }
 
 bool glgeGetMouseFocus()
 {
-    //get the input flags and maks out the mouse focus, then return it as an bool
-    return (bool)(SDL_GetWindowFlags(glgeMainWindow) & SDL_WINDOW_MOUSE_FOCUS);
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is focused by the mouse, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->isMouseFocused();
 }
 
 void glgeSetMouseGrabMode(bool mode)
 {
-    //update the intern mode
-    glgeMouseGrabMode = mode;
-    //update the mode for the main window
-    SDL_SetWindowMouseGrab(glgeMainWindow, SDL_bool(mode));
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] set the mouse grab mode for a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
+    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->setMouseGrabMode(mode);
 }
 
 bool glgeGetMouseGrabMode()
 {
-    //return the intern mode
-    return glgeMouseGrabMode;
+    //check if a window is bound
+    if (!glgeHasMainWindow)
+    {
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] get if a main window is grabbing the mouse, if no main window exists\n");
+        }
+        //stop the function
+        return false;
+    }
+    //get if the main window is using backface culling
+    return glgeWindows[glgeMainWindowIndex]->getMouseGrabMode();
 }
 
 void glgeFocusWindow(bool moveUp)
 {
-    //check if the window should move up
-    if (moveUp)
+    //check if a window is bound
+    if (!glgeHasMainWindow)
     {
-        //use the function that moves the window up
-        SDL_RaiseWindow(glgeMainWindow);
+        //if not, check if an warning should be printed
+        if (glgeWarningOutput)
+        {
+            //if it should, print a warning
+            printf("[GLGE WARNING] focus a main window, if no main window exists\n");
+        }
+        //stop the function
+        return;
     }
-    else
-    {
-        //use the function that dosn't move the window up
-        SDL_SetWindowInputFocus(glgeMainWindow);
-    }
+    //get if the main window is using backface culling
+    glgeWindows[glgeMainWindowIndex]->focuse(moveUp);
+}
+
+void glgeSetExitOnMainWindowClose(bool exit)
+{
+    //set the variable
+    glgeExitOnMainWindowClose = exit;
+}
+
+bool glgeGetExitOnMainWindowClose()
+{
+    //return the boolean
+    return glgeExitOnMainWindowClose;
 }

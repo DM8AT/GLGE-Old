@@ -492,8 +492,9 @@ Shader* glgeSetPostProsessingShader(unsigned int shader);
  * @brief set the post-processing shader to an allready existing shader
  * 
  * @param shader the shader object
+ * @param int the index in the post processing stack
  */
-void glgeSetPostProsessingShader(Shader* shader);
+int glgeSetPostProsessingShader(Shader* shader);
 
 /**
  * @brief get an post-processing shader by an index
@@ -540,7 +541,7 @@ void glgeSetInterpolationMode(unsigned int mode);
  * @param pointerPos the position of the pointer
  * @param space the current space of the position (GLGE_SCREEN_SPACE or GLGE_WINDOW_SPACE are valide)
  */
-void glgeWarpPointer(vec2 pointerPos, unsigned int space = GLGE_SCREEN_SPACE);
+void glgeWarpPointer(vec2 pointerPos, unsigned int space = GLGE_WINDOW_SPACE);
 
 /**
  * @brief set the position of the mouse pointer
@@ -549,7 +550,7 @@ void glgeWarpPointer(vec2 pointerPos, unsigned int space = GLGE_SCREEN_SPACE);
  * @param y the y position of the pointer
  * @param space the current space of the position (GLGE_SCREEN_SPACE or GLGE_WINDOW_SPACE are valide)
  */
-void glgeWarpPointer(float x, float y, unsigned int space = GLGE_SCREEN_SPACE);
+void glgeWarpPointer(float x, float y, unsigned int space = GLGE_WINDOW_SPACE);
 
 /**
  * @brief set the style for the cursor
@@ -916,12 +917,12 @@ void glgeShowHideWindow(bool show);
 bool glgeGetWindowShown();
 
 /**
- * @brief maximize or minimize the window
+ * @brief maximize the window
  * 
- * @param maximized true : the window will be maximized | false : the window will be minimized 
+ * @param maximized true : the window will be maximized | false : the window will be normal 
  * @param force say if this function should execute if window resizing is disabled
  */
-void glgeMaximizeMinimizeWindow(bool maximized, bool force = false);
+void glgeMaximize(bool maximized, bool force = false);
 
 /**
  * @brief get if the window is maximized or minimized
@@ -955,13 +956,33 @@ bool glgeGetMouseFocus();
 void glgeSetMouseGrabMode(bool mode);
 
 /**
- * @brief Get the Keyboard Grab Mode object
+ * @brief Get the Mouse Grab Mode
  * 
- * @return true 
- * @return false 
+ * @return true : the mouse grab is active | 
+ * @return false : the mouse grab mode is inactive
  */
 bool glgeGetMouseGrabMode();
 
+/**
+ * @brief focus one specific window
+ * 
+ * @param moveUp say if the window should move up in the stack
+ */
 void glgeFocusWindow(bool moveUp = true);
+
+/**
+ * @brief set if GLGE should stop the main loop if the main application window is exited
+ * 
+ * @param exit true : GLGE will stop if the main window is closed | false : GLGE will keep running if the main window is closed
+ */
+void glgeSetExitOnMainWindowClose(bool exit);
+
+/**
+ * @brief get if GLGE will stop the main loop once the main window is closed
+ * 
+ * @return true : GLGE will stop if the main window is closed | 
+ * @return false : GLGE will keep running if the main window is closed
+ */
+bool glgeGetExitOnMainWindowClose();
 
 #endif

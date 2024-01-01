@@ -181,58 +181,13 @@ void Light::bindShadowMapTexture(int samp)
 
 void Light::setupShadowMap()
 {
-    //generate the frame buffer for the shadow map
-    glGenFramebuffers(1, &this->shadowFBO);
-    //bind the frame buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, this->shadowFBO);
-
-    //generate the shadow map texture
-    glGenTextures(1, &this->shadowMap);
-    //bind the shadow map texture
-    glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowMap);
-
-    //load the faces for the shadow map
-    for (int  i = 0; i < 6; i++)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, glgeShadowMapResolution, glgeShadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    }
-    //set the texture parameters
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //stop the texture from looping arround
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    //store the texture as the texture for the frame buffer
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->shadowMap, 0);
-    //disable calls to the color buffer
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    //unbind the framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
 }
 
 
 
 void glgeAddGlobalLighSource(Light* l)
 {
-    //store the inputed light source, if it isn't NULL
-    if (l != nullptr)
-    {
-        glgeLights.push_back(l);
-    }
-
-    //if the amount of bound light sources is bigger than the maximum supported light sources
-    if ((int)glgeLights.size() > GLGE_LIGHT_SOURCE_MAX)
-    {
-        //write a warning if warning printing is enabled
-        if (glgeWarningOutput)
-        {
-            std::cout << GLGE_WARNING_MORE_LIGHTS_THAN_DEFAULT_SHADER_SUPPORT << (int)glgeLights.size() << "\n";
-        }
-    }
-
-    //get the needed uniforms from the pps shader
-    getLightingUniformsFromLightingPass();
+    //add the light to the main window
+    glgeWindows[glgeMainWindowIndex]->bindLight(l);
 }

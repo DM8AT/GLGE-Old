@@ -694,12 +694,16 @@ RenderTarget::RenderTarget(vec2 size)
 {
     //generate the texture and the render target
     this->generateTexture(size.x, size.y, true);
+    //store the current window index as the own window index
+    this->windowIndex = glgeCurrentWindowIndex;
 }
 
 RenderTarget::RenderTarget(int width, int height)
 {
     //generate the texture and the render target
     this->generateTexture(width, height, true);
+    //store the current window index as the own window index
+    this->windowIndex = glgeCurrentWindowIndex;
 }
 
 RenderTarget::RenderTarget(unsigned int glTexture)
@@ -718,10 +722,30 @@ RenderTarget::RenderTarget(unsigned int glTexture)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
     //generate the render target
     this->generateTexture(w,h, false);
+    //store the current window index as the own window index
+    this->windowIndex = glgeCurrentWindowIndex;
 }
 
 void RenderTarget::draw()
 {
+    //check if the object belongs to the window
+    if (glgeCurrentWindowIndex != this->windowIndex)
+    {
+        //check if an error should be printed
+        if (glgeErrorOutput)
+        {
+            //print an error
+            std::cerr << "[GLGE ERROR] Can't draw an render target in an window it was not created in.\n";
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            //close with an error
+            exit(1);
+        }
+        //stop the function
+        return;
+    }
     //check if the shader is a nullpointer
     if (this->shader == NULL)
     {
@@ -748,27 +772,14 @@ void RenderTarget::draw()
     //activate the shader
     this->shader->applyShader();
 
-    //bind the vertex array
-    glBindVertexArray(glgeScreenVAO);
-    //bind the array buffer
-    glBindBuffer(GL_ARRAY_BUFFER, glgeScreenVBO);
-    //activate the vertex attribute for the position
-    glEnableVertexAttribArray(0);
-    //load the position into the shader
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    //activate the vertex attrivute for the texture coordinate
-    glEnableVertexAttribArray(1);
-    //load the texture coordinate into the shader
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    //bind the screen rect
+    glgeWindows[this->windowIndex]->bindScreenRect();
 
     //draw the screen
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    //unbind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //deactivate the vertex attrib array pointers
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    //unbind the screen rect
+    glgeWindows[this->windowIndex]->unbindScreenRect();
 
     //unbind the shader
     this->shader->removeShader();

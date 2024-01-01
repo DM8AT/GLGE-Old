@@ -37,3 +37,5 @@
 #include "GLGEShaderCore.h"
 //include math
 #include "GLGEMath.h"
+//include the window management system
+#include "GLGEWindow.h"

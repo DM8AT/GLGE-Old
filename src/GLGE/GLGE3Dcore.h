@@ -467,15 +467,16 @@ public:
      * 
      * @param deltaRotation the difference for the rotation
      */
-    void rotate(vec2 deltaRotation);
+    void rotate(vec3 deltaRotation);
 
     /**
      * @brief rotate the Objct
      * 
      * @param dX the difference of rotation on the x axis
      * @param dY the difference of rotation on the y axis
+     * @param dZ the difference of rotation on the z axis
      */
-    void rotate(float dX, float dY);
+    void rotate(float dX, float dY, float dZ);
 
     /**
      * @brief Get the rotation from the Objct
@@ -688,6 +689,8 @@ private:
     unsigned int uuid = 0;
     //store if the object is fully transparent
     bool fullyTransparent = false;
+    //store the index of the window the object is used in
+    int windowIndex = -1;
 
     //compile the draw list
     void compileBuffers();
@@ -913,6 +916,20 @@ public:
      */
     mat4 getViewMatrix();
 
+    /**
+     * @brief Set the Window Index for the camera (this function is called if an camera is bound to an window, no need to call it again afterwards)
+     * 
+     * @param windowIndex the window index
+     */
+    void setWindowIndex(unsigned int windowIndex);
+
+    /**
+     * @brief Get the Window index from the window the camera is bound to
+     * 
+     * @return unsigned int the index of the window
+     */
+    unsigned int getWindowIndex();
+
 private:
     //store the right direction of the camera
     vec4 right = vec4(1,0,0,0);
@@ -946,6 +963,8 @@ private:
                          0,1,0,0,
                          0,0,1,0,
                          0,0,0,1);
+    //store the window index the camera is bound to
+    unsigned int windowIndex = -1;
 
     //store the location of the exposure
     unsigned int expLoc;

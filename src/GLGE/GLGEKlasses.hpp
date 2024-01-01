@@ -82,10 +82,14 @@ public:
 class Mouse
 {
 public:
-    //store the position of the mouse on the screen
+    //store the position of the mouse in the window
     vec2 pos;
-    //store the position of the mouse on the screen in pixel space
+    //store the position of the mouse in the window in pixel space
     vec2 posPixel;
+    //store the screen mouse position
+    vec2 screenPos;
+    //store the screen mouse position in pixels
+    vec2 screenPosPixel;
     //store the status of the mouse buttons
     bool leftButton, rightButton, middleButton = false;
     //store the amoung of scrolles from the mouse wheel
@@ -214,6 +218,8 @@ private:
     bool ownShader = false;
     //store a custom callback function
     void(*callback)(RenderTarget*) = NULL;
+    //store the window index of the render target
+    int windowIndex = -1;
 
     /**
      * @brief generate the texture for the render target as well as the render target it self

@@ -34,8 +34,6 @@
 
 //an pointer to the camera
 Camera2D* mainCam = NULL;
-//store the default 2D shader
-unsigned int glgeDefault2DShader;
 //store the move matrix location in the default glge 2D shader
 int glgeDefaultMoveMatLoc;
 
@@ -222,9 +220,13 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
     this->createBuffers();
 
     //set the base 2D shader
-    this->shader = glgeDefault2DShader;
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
     //set the move matrix location
     this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
 
     //update the object
     this->update();
@@ -246,9 +248,13 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
     this->createBuffers();
 
     //set the base 2D shader
-    this->shader = glgeDefault2DShader;
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
     //set the move matrix location
     this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
 
     //update the object
     this->update();
@@ -262,12 +268,17 @@ void Object2D::draw()
         //break the draw call
         return;
     }
+    //check if the window is the same it was created in
+    if (! (this->windowID == glgeCurrentWindowIndex))
+    {
+        //if not, return
+        return;
+    }
+    //disable depth testing
+    glDisable(GL_DEPTH_TEST);
     //bind the buffers
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-
-    //bind the shader
-    glUseProgram(this->shader);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
 
     //activate sub elements
     //say where the position vector is
@@ -280,6 +291,8 @@ void Object2D::draw()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, texCoord));
 
+    //bind the shader
+    glUseProgram(this->shader);
     //pass the move matrix to the shader
     glUniformMatrix3fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
 
@@ -563,6 +576,27 @@ vec2 Object2D::getAnchor()
 
 void Object2D::createBuffers()
 {
+    //check if the window ID is -1
+    if (this->windowID == -1)
+    {
+        //then store the current window ID in it
+        this->windowID = glgeCurrentWindowIndex;
+    }
+    else
+    {
+        //check if the IDs are not the same
+        if (! (this->windowID == glgeCurrentWindowIndex))
+        {
+            //if they are not the same, check if a warning should print
+            if (glgeWarningOutput)
+            {
+                //print an warning
+                printf("[GLGE WARNING] tried to setup an allready setup object in a different window\n");
+            }
+            //stop the function
+            return;
+        }
+    }
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -590,6 +624,18 @@ void Object2D::createBuffers()
 
 void Object2D::updateVertexBuffer()
 {
+    //check if the IDs are not the same
+    if (! (this->windowID == glgeCurrentWindowIndex))
+    {
+        //if they are not the same, check if a warning should print
+        if (glgeWarningOutput)
+        {
+            //print an warning
+            printf("[GLGE WARNING] tried to update an allready an object in a different window\n");
+        }
+        //stop the function
+        return;
+    }
     //delete the old buffer
     glDeleteBuffers(this->VBOLen, &this->VBO);
     //generate the vertex buffer for the object
@@ -607,6 +653,18 @@ void Object2D::updateVertexBuffer()
 
 void Object2D::updateIndexBuffer()
 {
+    //check if the IDs are not the same
+    if (! (this->windowID == glgeCurrentWindowIndex))
+    {
+        //if they are not the same, check if a warning should print
+        if (glgeWarningOutput)
+        {
+            //print an warning
+            printf("[GLGE WARNING] tried to update an allready an object in a different window\n");
+        }
+        //stop the function
+        return;
+    }
     //delete the old buffer
     glDeleteBuffers(this->IBOLen, &this->IBO);
     //generate the index buffer
@@ -646,9 +704,9 @@ void Object2D::recalculateMoveMatrix()
     //fix matrix bug
     this->moveMat.m[2][2] = -1;
     //correct the size of the object depending on the largest side of the window
-    this->moveMat = mat3(1.f/glgeWindowAspect, 0, 0,
-                         0, 1.f, 0,
-                         0, 0, 1.f) * this->moveMat;
+    this->moveMat = mat3(1.f/glgeWindows[glgeCurrentWindowIndex]->getWindowAspect(), 0, 0,
+                         0,                                                          1.f, 0,
+                         0,                                                          0, 1.f) * this->moveMat;
 }
 
 //////////
@@ -862,10 +920,8 @@ void glgeInit2DCore()
         //else, stop the function
         return;
     }
-    //initalise the 2D base shader
-    glgeDefault2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
     //get the move matrix location from the default shader
-    glgeDefaultMoveMatLoc = glgeGetUniformVar(glgeDefault2DShader, glgeCamMatrix);
+    glgeDefaultMoveMatLoc = glgeGetUniformVar(glgeWindows[glgeMainWindowIndex]->getDefault2DShader(), glgeCamMatrix);
 }
 
 void glgeBindMain2DCamera(Camera2D* camera)
