@@ -39,9 +39,9 @@ int main()
     #endif
     #if 1
     //first, write information on what to input to start the examples
-    printf("Write 0 to run the 3D example\n");
-    printf("Write 1 to run the 2D example\n");
-    printf("Write 2 to run the widget example\n");
+    printf("Type 0 to run the 3D example\n");
+    printf("Type 1 to run the 2D example\n");
+    printf("Type 2 to run the widget example\n");
 
     //then, get the user input
     int inp;
