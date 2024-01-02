@@ -7,7 +7,7 @@
  * 
  * @date 2022-12-23
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
 #ifndef _GLGE_DEFAULT_FUNCS_H_

@@ -10,6 +10,7 @@
  */
 
 #include "glgeAtlasFile.hpp"
+#include "GLGEInternal/glgeErrors.hpp"
 
 void printd(std::string data){for(ulong i=0;i<data.size();i++){if(data[i]!=0){std::cout<<data[i];}else{std::cout<<" ";}}std::cout<<"<-end\n";}
 void printdi(std::string data){for(ulong i=0;i<data.size();i++){std::cout<<(int)data[i];}std::cout<<"<-end\n";}

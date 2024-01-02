@@ -8,12 +8,9 @@
  * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
  * 
  */
-#include "glgeErrors.hpp"
 #include "CML/CMLDVec2.h"
 #include "CML/CMLDVec3.h"
 #include "CML/CMLDVec4.h"
-#include "glgeImage.h"
-#include "glgeFuncs.hpp"
 #include "CML/CMLVec2.h"
 #include "CML/CMLVec3.h"
 #include "CML/CMLVec4.h"

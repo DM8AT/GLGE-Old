@@ -5,13 +5,13 @@
  * @version 0.1
  * @date 2022-12-23
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
 
 //check for double include
-#ifndef _GLGE_DEFINES_H_
-#define _GLGE_DEFINES_H_
+#ifndef _GLGE_DEFINES_OGL_H_
+#define _GLGE_DEFINES_OGL_H_
 
 //if this is included, std::strings are needed
 #include <string>

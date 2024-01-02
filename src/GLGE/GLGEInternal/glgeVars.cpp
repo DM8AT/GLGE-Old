@@ -10,7 +10,6 @@
  */
 
 #include "glgeVars.hpp"
-#include "GLGEShaderCore.h"
 #include <map>
 
 ///////////
@@ -79,28 +78,6 @@ Keys glgeKeysRelesdThisTick = Keys();
 //store the mouse information
 Mouse glgeMouse = Mouse();
 
-//store the backface culling mode
-bool glgeUseCulling = false;
-
-//store the active color buffers
-GLenum glgeUsedColorBuffers[] = {GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, 
-                                 GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, 
-                                 GL_COLOR_ATTACHMENT7};
-
-//store the length of the unsigned buffer array
-unsigned int glgeLenUsedColorBuffers = sizeof(glgeUsedColorBuffers) / sizeof(glgeUsedColorBuffers[0]);
-
-//store all the color buffers
-GLenum glgeAllUsedColorBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, 
-                                    GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, 
-                                    GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7};
-
-//store the length of all used color buffers
-unsigned int glgeLenAllUsedColorBuffers = sizeof(glgeAllUsedColorBuffers) / sizeof(glgeAllUsedColorBuffers[0]);
-
-//store how to sample images
-GLenum glgeInterpolationMode = GL_NEAREST;
-
 //store the opperating system the application is compiled for
 int glgeOperatingSystem = -1;
 
@@ -115,9 +92,6 @@ SDL_WindowFlags glgeWindowFlags = SDL_WindowFlags(SDL_WINDOW_OPENGL | SDL_WINDOW
 
 //store the window id
 unsigned int glgeWindowID = 0;
-
-//store the window vector
-std::vector<GLGEWindow*> glgeWindows = {};
 
 //store the index of the main window in the window array
 unsigned int glgeMainWindowIndex = 0;

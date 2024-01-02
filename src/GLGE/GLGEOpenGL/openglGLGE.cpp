@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-02-09
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
 
@@ -19,15 +19,15 @@
 #endif
 
 //include the GLGE dependencys
-#include "GLGE.h"
-#include "glgeErrors.hpp"
-#include "glgeVars.hpp"
-#include "glgeFuncs.hpp"
-#include "glgeDefaultFuncs.hpp"
-#include "glgePrivDefines.hpp"
+#include "openglGLGE.h"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "openglGLGEVars.hpp"
+#include "openglGLGEFuncs.hpp"
+#include "openglGLGEDefaultFuncs.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
 
 //include acess to images
-#include "glgeImage.h"
+#include "../GLGEInternal/glgeImage.h"
 
 //include the standart librarys
 #include <math.h>
@@ -2583,4 +2583,16 @@ bool glgeGetExitOnMainWindowClose()
 {
     //return the boolean
     return glgeExitOnMainWindowClose;
+}
+
+bool glgeUsesOpenGL()
+{
+    //say that OpenGL is used
+    return true;
+}
+
+bool glgeUsesVulkan()
+{
+    //say that OpenGL is used
+    return false;
 }

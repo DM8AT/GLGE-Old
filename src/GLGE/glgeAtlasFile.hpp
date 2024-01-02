@@ -16,7 +16,6 @@
 #include <filesystem>
 
 #include "glgeAtlasErrors.hpp"
-#include "glgeErrors.hpp"
 
 #include "CML/CML.h"
 

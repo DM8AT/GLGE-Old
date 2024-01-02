@@ -1,13 +1,15 @@
 /**
- * @file GLGEMaterialCore.cpp
+ * @file openglGLGEMaterialCore.cpp
  * @author DM8AT
- * @brief in this file, all things from GLGEMaterialCore.h are defined. 
+ * @brief define the material core of GLGE
  * @version 0.1
- * @date 2023-02-23
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
+
+
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -18,13 +20,13 @@
 #endif
 
 //include GLGEMaterialCore
-#include "GLGEMaterialCore.h"
+#include "openglGLGEMaterialCore.h"
 
 //include the library core
-#include "GLGE.h"
+#include "openglGLGE.h"
 
 //include the shared variables
-#include "glgeVars.hpp"
+#include "openglGLGEVars.hpp"
 
 //includes from the default lib
 #include <iostream>

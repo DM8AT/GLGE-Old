@@ -259,6 +259,8 @@ void runWidgetExample()
 
     //say that GLGE should exit once the main window closes
     glgeSetExitOnMainWindowClose(true);
+    //switch the focus to the main window
+    glgeFocusWindow();
 
     //run the program
     glgeRunMainLoop();

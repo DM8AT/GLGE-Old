@@ -1,13 +1,14 @@
 /**
- * @file GLGEWindow.cpp
+ * @file openglGLGEWindow.cpp
  * @author DM8AT
- * @brief this file implements the functions declared in "GLGEWindow.h"
+ * @brief define the window class of GLGE
  * @version 0.1
- * @date 2023-12-19
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
+
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -17,16 +18,15 @@
 //close the if for glew
 #endif
 //include the main header
-#include "GLGEWindow.h"
+#include "openglGLGEWindow.h"
 //include GLGE dependencys
-#include "glgeVars.hpp"
-#include "glgeErrors.hpp"
-#include "glgeFuncs.hpp"
-#include "glgeImage.h"
-#include "GLGEDefines.hpp"
-#include "glgePrivDefines.hpp"
-//include GLEW
-#include <GL/glew.h>
+#include "openglGLGEVars.hpp"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "openglGLGEFuncs.hpp"
+#include "../GLGEInternal/glgeImage.h"
+#include "openglGLGEDefines.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
+
 //include default libs
 #include <iostream>
 #include <algorithm>

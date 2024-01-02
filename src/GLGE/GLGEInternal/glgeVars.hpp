@@ -15,16 +15,8 @@
 
 //include needed dependencys
 #include "GLGEKlasses.hpp"
-//include the lighting core
-#include "GLGELightingCore.h"
-//include the shader core
-#include "GLGEShaderCore.h"
-//include the window core
-#include "GLGEWindow.h"
-//include the 3D core
-#include "GLGE3Dcore.h"
 //include 4D vectors
-#include "CML/CMLVec4.h"
+#include "../CML/CMLVec4.h"
 //include the vector library
 #include <vector>
 #include <ctime>
@@ -32,11 +24,9 @@
 //include SDL2
 #ifdef _WIN32
 #include <SDL/SDL.h> /* Windows-specific SDL2 library */
-#include <SDL/SDL_opengl.h>
 #include <SDL2/SDL_misc.h>
 #else
 #include <SDL2/SDL.h> /* macOS- and GNU/Linux-specific */
-#include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_misc.h>
 #endif
 
@@ -102,24 +92,6 @@ extern Keys glgeKeysRelesdThisTick;
 //store the mouse information
 extern Mouse glgeMouse;
 
-//store the active color buffers
-extern GLenum glgeUsedColorBuffers[];
-
-//store the length of the unsigned buffer array
-extern unsigned int glgeLenUsedColorBuffers;
-
-//store all the color buffers
-extern GLenum glgeAllUsedColorBuffers[];
-
-//store the length of all used color buffers
-extern unsigned int glgeLenAllUsedColorBuffers;
-
-//store the light world position
-extern GLuint glgeLightWorldPosUniform;
-
-//store how to sample images
-extern GLenum glgeInterpolationMode;
-
 //store the opperating system the application is compiled for
 extern int glgeOperatingSystem;
 
@@ -129,35 +101,8 @@ extern bool glgeTransparentOpaquePass;
 //store how many objects have been created
 extern unsigned int glgeObjectUUID;
 
-//store if the GLGE window has a border
-extern bool glgeHasWindowBorder;
-
-//say if glge should automaticaly close on window close events
-extern bool glgeWindowForceOpen;
-
-//say if the window should be closed by glge
-extern bool glgeOPCloseWindow;
-
-//say if the window is always renderd on top
-extern bool glgeWindowAlwaysOnTop;
-
-//store how bright the window is renderd
-extern float glgeWindowBrightness;
-
 //store the window flags GLGE is using
 extern SDL_WindowFlags glgeWindowFlags;
-
-//store if the window is maximised
-extern bool glgeWindowMaximised;
-
-//store if the window is shown
-extern bool glgeWindowIsShown;
-
-//store if the mouse is grabbed in the window
-extern bool glgeMouseGrabMode;
-
-//store the window vector
-extern std::vector<GLGEWindow*> glgeWindows;
 
 //store the index of the main window in the window array
 extern unsigned int glgeMainWindowIndex;

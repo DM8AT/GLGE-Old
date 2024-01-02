@@ -18,17 +18,13 @@
 #endif
 
 //include the GLGE dependencys
-#include "glgeErrors.hpp"
-#include "GLGEKlasses.hpp"
-#include "glgeVars.hpp"
-#include "glgeFuncs.hpp"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEInternal/GLGEKlasses.hpp"
+#include "openglGLGEVars.hpp"
+#include "openglGLGEFuncs.hpp"
 
 //include math things
-#include "GLGEMath.h"
-
-//include the OpenGL dependencys
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include "../GLGEMath.h"
 
 //include the needed default librarys
 #include <iostream>

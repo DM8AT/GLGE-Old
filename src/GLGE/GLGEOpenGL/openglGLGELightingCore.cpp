@@ -1,13 +1,14 @@
 /**
- * @file GLGELightingCore.cpp
+ * @file openglGLGELightingCore.cpp
  * @author DM8AT
- * @brief define the functionality of the lights declared in GLGELightCore.h
+ * @brief define the lighting core of GLGE
  * @version 0.1
- * @date 2023-02-26
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
+
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -18,17 +19,16 @@
 #endif
 
 //include the light core 
-#include "GLGELightingCore.h"
-
-//get access to the behind the scenes variables
-#include "glgeVars.hpp"
+#include "openglGLGELightingCore.h"
+//include the internal variables
+#include "openglGLGEVars.hpp"
 //get the error strings for GLGE
-#include "glgeErrors.hpp"
+#include "../GLGEInternal/glgeErrors.hpp"
 //get access to the glge functions
-#include "glgeFuncs.hpp"
+#include "openglGLGEFuncs.hpp"
 
 //include the 4D matrices
-#include "CML/CMLMat4.h"
+#include "../CML/CMLMat4.h"
 
 //include the defalt library
 #include <iostream>

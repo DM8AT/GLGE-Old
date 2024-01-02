@@ -1,13 +1,14 @@
 /**
- * @file GLGE2Dcore.cpp
+ * @file openglGLGE2Dcore.cpp
  * @author DM8AT
- * @brief the defines for functions declared in GLGE2Dcore.h
+ * @brief define the functions for the 2D GLGE core
  * @version 0.1
- * @date 2023-01-29
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
+
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -18,11 +19,11 @@
 #endif
 
 //include the main file
-#include "GLGE2Dcore.h"
+#include "openglGLGE2Dcore.h"
 //include the GLGE dependencys
-#include "GLGEDefines.hpp"
-#include "glgePrivDefines.hpp"
-#include "glgeVars.hpp"
+#include "openglGLGEDefines.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "openglGLGEVars.hpp"
 
 //the needed default C++ libs
 #include <math.h>

@@ -1,26 +1,30 @@
 /**
- * @file glgeFuncs.h
+ * @file openglGLGEFuncs.hpp
  * @author DM8AT
- * @brief this file stores all private functions used behind the sceens by OpenGL
+ * @brief declare the behind-the-scenes functions of GLGE
  * @version 0.1
- * @date 2022-12-23
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
 
-//check for double include
-#ifndef _GLGE_FUNCS_H_
-#define _GLGE_FUNCS_H_
 
+#ifndef _GLGE_FUNCS_OGL_H_
+#define _GLGE_FUNCS_OGL_H_
 //include needed defines
 #include <string>
 
 //include the CML functions
-#include "CML/CMLVec2.h"
-
-//include the glew library
+#include "../CML/CMLVec2.h"
+//check if glew is allready included
+#ifndef _GLGE_GLEW_
+//say that glew is now included
+#define _GLGE_GLEW_
+//include glew
 #include <GL/glew.h>
+//close the if for glew
+#endif
 
 //include SDL2
 #ifdef _WIN32
@@ -34,9 +38,9 @@
 #endif
 
 //include the shaders
-#include "GLGEShaderCore.h"
+#include "openglGLGEShaderCore.h"
 //include windows
-#include "GLGEWindow.h"
+#include "openglGLGEWindow.h"
 
 /**
  * @brief Create a Window

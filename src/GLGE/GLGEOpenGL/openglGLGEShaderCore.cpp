@@ -1,21 +1,22 @@
 /**
- * @file GLGEShaderCore.cpp
+ * @file openglGLGEShaderCore.cpp
  * @author DM8AT
- * @brief define the functions for the shader core of the GLGE library
+ * @brief define the opengl dependand shader core of GLGE
  * @version 0.1
- * @date 2023-02-18
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license.
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
+ * 
  */
 
-#include "GLGEShaderCore.h"
+#include "openglGLGEShaderCore.h"
 
 //include GLGE dependencys
-#include "glgeFuncs.hpp"
-#include "glgeVars.hpp"
-#include "glgePrivDefines.hpp"
-#include "glgeErrors.hpp"
-#include "GLGEMath.h"
+#include "openglGLGEVars.hpp"
+#include "openglGLGEFuncs.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEMath.h"
 
 //include the default librarys
 #include <iostream>

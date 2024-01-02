@@ -1,13 +1,14 @@
 /**
- * @file glgeFuncs.cpp
+ * @file openglGLGEFuncs.cpp
  * @author DM8AT
- * @brief define the behind-the-sceenes functions
+ * @brief define the OpenGL dependand background functions for GLGE
  * @version 0.1
- * @date 2023-02-09
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
+
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -18,14 +19,14 @@
 #endif
 
 //include the GLGE dependencys
-#include "glgeErrors.hpp"
-#include "glgeVars.hpp"
-#include "glgeDefaultFuncs.hpp"
-#include "GLGEDefines.hpp"
-#include "GLGE.h"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "openglGLGEVars.hpp"
+#include "openglGLGEDefaultFuncs.hpp"
+#include "openglGLGEDefines.hpp"
+#include "openglGLGE.h"
 
 //include the CML dependencys
-#include "CML/CMLVec2.h"
+#include "../CML/CMLVec2.h"
 
 //include the default librarys
 #include <iostream>
@@ -33,10 +34,8 @@
 #include <cstring>
 
 //include acess to images
-#include "glgeImage.h"
+#include "../GLGEInternal/glgeImage.h"
 
-//include the OpenGL dependencys
-#include <GL/glew.h>
 
 //read a file
 bool readFile(const char* filename, std::string& output)
@@ -78,6 +77,7 @@ bool readFile(const char* filename, std::string& output)
     //return if the file could be read
     return ret;
 }
+
 
 //an copy of the shader code to make the shader handeling here easier
 

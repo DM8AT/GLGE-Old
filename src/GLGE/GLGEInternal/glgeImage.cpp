@@ -10,8 +10,8 @@
  */
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.hpp"
-#include "stb_image_write.h"
+#include "../stb_image.hpp"
+#include "../stb_image_write.h"
 
 unsigned char* glgeLoad(const char* filename, int *x, int *y, int *comp, int req_comp)
 {

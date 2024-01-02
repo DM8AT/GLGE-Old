@@ -11,7 +11,7 @@
 
 #include "GLGEMath.h"
 #include <math.h>
-#include "glgePrivDefines.hpp"
+#include "GLGEInternal/glgePrivDefines.hpp"
 
 //store the seed for the noise functions
 unsigned long glgeSeed = 0;

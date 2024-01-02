@@ -1,11 +1,11 @@
 /**
- * @file GLGE3Dcore.cpp
+ * @file openglGLGE3Dcore.cpp
  * @author DM8AT
- * @brief in this file, all files to use the 3D functions for GLGE are defined
+ * @brief define the 3D core functions and classes of GLGE
  * @version 0.1
- * @date 2022-12-23
+ * @date 2024-01-02
  * 
- * @copyright Copyright DM8AT 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright DM8AT 2024. All rights reserved. This project is released under the MIT license. 
  * 
  */
 //check if glew is allready included
@@ -18,17 +18,18 @@
 #endif
 
 //include the 3d core
-#include "GLGE3Dcore.h"
+#include "openglGLGE3Dcore.h"
 
 //include the GLGE dependencys
-#include "glgeErrors.hpp"
-#include "glgeVars.hpp"
-#include "glgeFuncs.hpp"
-#include "GLGEDefines.hpp"
-#include "glgePrivDefines.hpp"
+#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEInternal/glgeVars.hpp"
+#include "openglGLGEFuncs.hpp"
+#include "openglGLGEDefines.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "openglGLGEVars.hpp"
 
 //include needed CML librarys
-#include "CML/CMLQuaternion.h"
+#include "../CML/CMLQuaternion.h"
 
 //include the default librarys
 #include <iostream>

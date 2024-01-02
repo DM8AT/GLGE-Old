@@ -51,6 +51,21 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.5-pre
+- compleately restructured the internal source code of GLGE
+- new structure (root: GLGE/):
+   - CML
+      - the math library used by GLGE
+   - glgeDefaultShaders
+      - uncompiled source code of the GLGE default shaders in human redable form, only for complex shaders
+   - GLGEInternal
+      - all internal files used by GLGE that are graphics API unspecific
+   - GLGEOpenGL
+      - all files for GLGE that are dependand on the graphics API
+   - files ment to be included by the user
+- use "GLGE_USE_VULKAN" to switch between OpenGL and Vulkan implementation
+   - currently throws an error because the Vulkan implementation is jet to come
+- functions to get if GLGE uses OpenGL or Vulkan
 ## Update 0.4
 - added files:
    - GLGEWindow.h   : declares the window class, private variables of the window class and functions of the window class
