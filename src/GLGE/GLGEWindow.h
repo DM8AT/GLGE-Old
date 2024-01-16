@@ -17,8 +17,8 @@
 //if opengl should be used, include opengl
 #include "GLGEOpenGL/openglGLGEWindow.h"
 #else
-//else, there is currently no vulkan implementation
-#error [GLGE ERROR] the vulkan implementation is currently not there
+//else, include the vulkan implementation
+#include "GLGEVulkan/vulkanGLGEWindow.h"
 #endif
 
 #endif

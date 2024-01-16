@@ -12,7 +12,6 @@
 #ifndef _GLGE_OGL_H_
 #define _GLGE_OGL_H_
 
-
 //include CML
 #include "../CML/CML.h"
 

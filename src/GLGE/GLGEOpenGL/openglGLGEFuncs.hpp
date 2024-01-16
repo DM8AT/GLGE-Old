@@ -41,6 +41,8 @@
 #include "openglGLGEShaderCore.h"
 //include windows
 #include "openglGLGEWindow.h"
+//include the rest of the default funcs
+#include "../GLGEInternal/glgeInternalFuncs.h"
 
 /**
  * @brief Create a Window
@@ -52,16 +54,6 @@
  * @param p the position of the window
  */
 GLGEWindow* createWindow(const char* n, vec2 s, vec2 p);
-
-/**
- * @brief read a file
- * 
- * @param filename the name of the file
- * @param output a pointer to a string to write to
- * @return true the file could be read | 
- * @return false the file can't be found
- */
-bool readFile(const char* filename, std::string& output);
 
 /**
  * @brief convert an error code from OpenGL into an error string
@@ -104,15 +96,6 @@ unsigned int compileShader(const char* vertex, const char* fragment);
  * @return unsigned int the compiled shader
  */
 unsigned int compileShader(std::string fileDataVertex, std::string fileDataFragment, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile");
-
-/**
- * @brief count the number of an character in an string
- * 
- * @param str the string with to count the amount of characters in
- * @param ch the symbol to count
- * @return int the amount of symbols in the string
- */
-int count_char(std::string &str, char ch);
 
 /**
  * @brief load a file to an SDL_Surface

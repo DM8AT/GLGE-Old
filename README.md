@@ -51,6 +51,9 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.5-pre 2
+- made new folder structure a little bit bedder
+- split up a few files into multiple (so if Vulkan gets added in the future, less code needs to be re-written)
 ## Update 0.5-pre
 - compleately restructured the internal source code of GLGE
 - new structure (root: GLGE/):
