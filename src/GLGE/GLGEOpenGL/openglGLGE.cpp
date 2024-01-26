@@ -2042,6 +2042,7 @@ void glgeSetWindowIcon(const char* file)
         //stop the function
         return;
     }
+    std::cerr << glgeMainWindowIndex <<"\n";
     //get if the main window is using backface culling
     glgeWindows[glgeMainWindowIndex]->setWindowIcon(file);
 }
