@@ -1,3 +1,6 @@
+
+\mainpage notitle
+
 # GLGE
 GLGE is a C++ graphics library for creating 2D and 3D graphics. 
 
