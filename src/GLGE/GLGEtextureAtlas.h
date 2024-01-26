@@ -1,7 +1,7 @@
 /**
  * @file textureAtlas.h
  * @author JuNi4
- * @brief 
+ * @brief Texture atlas for GLGE
  * @version 0.1
  * @date 2023-02-27
  * 
@@ -25,11 +25,22 @@
 #ifndef _ATLAS_H_
 #define _ATLAS_H_
 
-// texture atlas class
+/**
+ * @brief Texture Atlas Class for managing a texture atlas
+ * 
+ * <dl class="section warning"><dt>Warning</dt><dd><ul>
+ * <li>The atlas will be reworked completely in the future.</li>
+ * <li>The atlas currently has many bugs and may not work at all.</li>
+ * </ul></dd></dl>
+ * 
+ */
 class Atlas {
     private:
 
-        // The vector for holding all the image paths
+        /**
+         * @brief A list of paths that will be included in the atlas
+         * 
+         */
         std::vector<const char*> paths;
 
         /**
@@ -115,17 +126,33 @@ class Atlas {
 
     public:
 
-        // The path of the atlas if it should be saved
+        /**
+         * @brief The path to where the atlas should be saved, if requested
+         * 
+         */
         const char * path = "assets/atlas.png";
 
-        // The path to the missing texture, this is required
+        /**
+         * @brief The path for the missing texture
+         * 
+         * <dl class="section warning"><dt>Warning</dt><dd><ul>
+         * <li>The missing texture is required at the moment but will most likley be hardcoded in future versions</li>
+         * </ul>
+         * </dd></dl>
+         * 
+         */
         const char * missing_path = "assets/missing_texture.png";
 
-        // The atlas image
+        /**
+         * @brief The image that the atlas will be
+         * 
+         */
         unsigned char* iAtlas;
 
-        // The information on where each texture on the atlas is and how wide and tall it is
-        //nlohmann::json atlasData;
+        /**
+         * @brief Information about the atlas
+         * 
+         */
         GLGEAtlasFile atlasData;
 
         /**
@@ -160,14 +187,18 @@ class Atlas {
         dvec2 getTexCoord(const char* texture, int corner, int frame = -1, int mode = 0);
     
         /**
-         * @brief Load an atlas from a file. The specified file must be png and there mus be a file with the same name but ending with .json
+         * @brief Loads an atlas from a file. The specified file must be a png and there must be a file with the same name but ending with .atlas
          *
          * @param path The path of the atlas png
          * @return bool Whether or not the atlas was loaded sucsessfully
          */
         bool loadAtlas(const char* path);
 
-        // Developement / Debug function, returns the paths vector
+        /**
+         * @brief Developement function for dumping stuff from the atlas
+         * 
+         * @return std::vector<const char*> IDK, been ages since i've made this
+         */
         std::vector<const char*> dump();
 };
 

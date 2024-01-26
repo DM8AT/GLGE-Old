@@ -1,3 +1,13 @@
+/**
+ * @file textureAtlas.h
+ * @author JuNi4
+ * @brief Texture atlas for GLGE
+ * @version 0.1
+ * @date 2023-02-27
+ * 
+ * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * 
+ */
 #include "GLGEtextureAtlas.h"
 #include "fstream"
 #include <iostream>
