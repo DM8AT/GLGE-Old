@@ -33,21 +33,42 @@
 #define GLGE_ATLAS_FILE_HEADER "GLGE_AtlasFile_1"
 
 /**
- * @brief A struct for keeping the data of the images
+ * @brief A class for keeping the data of the images in the atlas
  * 
  */
-struct GLGEAtlasImage {
+class GLGEAtlasImage {
 
+    /**
+     * @brief Construct a new GLGEAtlasImage object
+     * 
+     * @param name The name of the image / file path
+     * @param pos Position in the atlas
+     * @param size The size of the image
+     */
+    GLGEAtlasImage( std::string name = "", vec2 pos = vec2(), vec2 size = vec2() );
+
+    /**
+     * @brief The name of the image / file path
+     * 
+     */
     std::string name;
 
+    /**
+     * @brief Position in the atlas
+     * 
+     */
     vec2 pos;
 
+    /**
+     * @brief The size of the image
+     * 
+     */
     vec2 size;
 
 };
 
 /**
- * @brief Class for housing all of the atlas data
+ * @brief Class for handling the atlas file format
  * 
  */
 class GLGEAtlasFile {
@@ -66,9 +87,15 @@ class GLGEAtlasFile {
      */
     std::string fp;
 
-    // Var for reading from a file
+    /**
+     * @brief Variable for reading a file
+     * 
+     */
     std::ifstream infile;
-    // Var for writing to a file
+    /**
+     * @brief Variable for writing to a file
+     * 
+     */
     std::ofstream outfile;
 
     /**
@@ -88,6 +115,12 @@ class GLGEAtlasFile {
      */
     std::vector<uint8_t> packInt( int input, int numBytes = 4 );
 
+    /**
+     * @brief converts a byte string to an int?
+     * 
+     * @param inp The string of bytes?
+     * @return int The resulting int
+     */
     int unpackInt( std::string inp );
 
     /**

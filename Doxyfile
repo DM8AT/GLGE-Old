@@ -22,11 +22,20 @@
 # configuration file without replacing the environment variables:
 # doxygen -x_noenv [configFile]
 
+<<<<<<< HEAD
 GENERATE_TREEVIEW      = YES # required!
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/doxygen-awesome.css \
                         doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+=======
+# doxygen-awesome
+GENERATE_TREEVIEW      = YES # required!
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+HTML_EXTRA_STYLESHEET  = doxygen/doxygen-awesome-css/doxygen-awesome.css \
+                         doxygen/doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+>>>>>>> 69d3a85b2045ee241c318c4786e0a1533d0e52d5
 HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
 
 #---------------------------------------------------------------------------
@@ -54,7 +63,7 @@ PROJECT_NAME           = "GLGE"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 0.4
+PROJECT_NUMBER         = v0.5
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -913,7 +922,12 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = "src/GLGE/" "src/GLGE/CML/" "src/GLGE/GLGEOpenGL/" "src/GLGE/GLGEInternal/"
+# input_files
+INPUT                  = doxygen/MainPage.md \
+                         src/GLGE/ \
+                         src/GLGE/CML/ \
+                         src/GLGE/GLGEOpenGL/ \
+                         src/GLGE/GLGEInternal/ \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
