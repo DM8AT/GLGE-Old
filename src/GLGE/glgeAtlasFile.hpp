@@ -37,7 +37,7 @@
  * 
  */
 class GLGEAtlasImage {
-
+public:
     /**
      * @brief Construct a new GLGEAtlasImage object
      * 
