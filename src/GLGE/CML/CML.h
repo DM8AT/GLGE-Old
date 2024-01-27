@@ -7,6 +7,12 @@
  *  - 2 dimensional vector (vec2) of floates
  *  - 3 dimensional vector (vec3) of floates
  *  - 4 dimensional vector (vec4) of floates
+ *  - 2 dimensional vector (dvec2) of doubles
+ *  - 3 dimensional vector (dvec3) of doubles
+ *  - 4 dimensional vector (dvec4) of doubles
+ *  - 2 dimensional vector (ivec2) of integers
+ *  - 3 dimensional vector (ivec3) of integers
+ *  - 4 dimensional vector (ivec4) of integers
  *  - n dimensional vector (vec)  of floates
  * matrices:
  *  - 2*2 matrix (mat2) of floates (float m[2][2])
@@ -35,6 +41,12 @@
     #include "CMLVec2.h"
     #include "CMLVec3.h"
     #include "CMLVec4.h"
+    #include "CMLDVec2.h"
+    #include "CMLDVec3.h"
+    #include "CMLDVec4.h"
+    #include "CMLIVec2.h"
+    #include "CMLIVec3.h"
+    #include "CMLIVec4.h"
     #include "CMLVector.h"
 //include all the matrices
     #include "CMLMat2.h"
