@@ -25,6 +25,8 @@ Object2D clockPointerHour;
 Object2D tri;
 //store a spinning cube
 Object spinCube;
+//store an close button
+Button glgeButton;
 //store the Camera
 Camera camSecWin;
 //store a second window
@@ -102,6 +104,8 @@ void secondDraw()
     tri.draw();
     //draw the cube
     spinCube.draw();
+    //draw the button
+    glgeButton.draw();
 }
 
 void secondTick()
@@ -116,87 +120,38 @@ void secondTick()
     spinCube.rotate(vec3(0.002, 0.001, 0.0005));
     //update the cube
     spinCube.update();
+    //update the button
+    glgeButton.update();
+
+    //check if the button was pressed this tick
+    if (glgeButton.clickThisTick())
+    {
+        //print a chat message
+        printf("[GLGE INFO] You clicked the button\n");
+    }
 }
 
 void secWindowInit()
 {
-    //create the triangle
-    //set the vertices for the triangle
-    Vertex2D vertices[] = {Vertex2D(0,1,   1,0,0,1),
-                           Vertex2D(-1,-1, 0,1,0,1),
-                           Vertex2D( 1,-1, 0,0,1,1)};
-    //bind the vertices to an triangle1
-    uint indices[] = {0,1,2};
-    //set the triangle to an 2D object created out of the vertices scaled down by 0.5
-    tri = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
-
     //create the camera
     camSecWin = Camera(90);
     //bind the camera
     win.setCamera(&camSecWin);
 
-    //create the cube
-    //create the vertices
-    Vertex verts[] = {
-                                //pos   //tex   //normal
-                         //front and back
-                         Vertex(-1,-1, 1, 0,0,  0, 0, 1),
-                         Vertex( 1,-1, 1, 1,0,  0, 0, 1),
-                         Vertex(-1, 1, 1, 0,1,  0, 0, 1),
-                         Vertex( 1, 1, 1, 1,1,  0, 0, 1),
+    //set the triangle to an 2D object created out of the vertices scaled down by 0.5
+    tri = Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
 
-                         Vertex(-1,-1,-1, 1,0,  0, 0,-1),
-                         Vertex( 1,-1,-1, 0,0,  0, 0,-1),
-                         Vertex(-1, 1,-1, 1,1,  0, 0,-1),
-                         Vertex( 1, 1,-1, 0,1,  0, 0,-1),
-
-                         //top and bottom
-                         Vertex(-1,-1, 1, 0,1,  0,-1, 0),
-                         Vertex( 1,-1, 1, 1,1,  0,-1, 0),
-                         Vertex(-1, 1, 1, 0,0,  0, 1, 0),
-                         Vertex( 1, 1, 1, 1,0,  0, 1, 0),
-
-                         Vertex(-1,-1,-1, 0,0,  0,-1, 0),
-                         Vertex( 1,-1,-1, 1,0,  0,-1, 0),
-                         Vertex(-1, 1,-1, 0,1,  0, 1, 0),
-                         Vertex( 1, 1,-1, 1,1,  0, 1, 0),
-
-                         //left and right
-                         Vertex(-1,-1, 1, 1,0, -1, 0, 0),
-                         Vertex( 1,-1, 1, 0,0,  1, 0, 0),
-                         Vertex(-1, 1, 1, 1,1, -1, 0, 0),
-                         Vertex( 1, 1, 1, 0,1,  1, 0, 0),
-
-                         Vertex(-1,-1,-1, 0,0, -1, 0, 0),
-                         Vertex( 1,-1,-1, 1,0,  1, 0, 0),
-                         Vertex(-1, 1,-1, 0,1, -1, 0, 0),
-                         Vertex( 1, 1,-1, 1,1,  1, 0, 0),
-                        };
-    //load the cube indices
-    unsigned inds[] = {
-                      //front and back
-                      0,2,1,
-                      1,2,3,
-                      4,5,6,
-                      5,7,6,
-                      //top and bottom
-                      0+8,1+8,4+8,
-                      1+8,5+8,4+8,
-                      2+8,6+8,3+8,
-                      3+8,6+8,7+8,
-                      //left and right
-                      0+16,4+16,2+16,
-                      2+16,4+16,6+16,
-                      1+16,3+16,5+16,
-                      3+16,7+16,5+16};
     //load the Cube object
-    spinCube = Object(verts, inds, sizeof(verts), sizeof(inds), Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
+    spinCube = Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
     //set the material for the cube
     Material mat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0);
     //make the cube unlit
     mat.setLit(false);
     //bind the material to the cube
     spinCube.setMaterial(mat);
+
+    //load the close button
+    glgeButton = Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
 
     //bind a draw function to the window
     win.setDrawFunc(secondDraw);

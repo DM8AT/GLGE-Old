@@ -51,6 +51,15 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.5-pre 3
+- added presets for 2D and 3D objects
+   - now creation of simple geometry is really simple
+   - prefix for presets is GLGE_PRESET_
+- fixed wierd GLGE warning ("[GLGE WARNING] tried to update an allready an object in a different window" is now "[GLGE WARNING] tried to update an object in a different window")
+- added button class for simple buttons
+- documentated a lot of old functions
+   - CML is now compleatly documentated
+- added a new integer type : ivec2, ivec3 and ivec4. Like dvec or vec but with integers not with floats or doubles
 ## Update 0.5-pre 2
 - made new folder structure a little bit bedder
 - split up a few files into multiple (so if Vulkan gets added in the future, less code needs to be re-written)

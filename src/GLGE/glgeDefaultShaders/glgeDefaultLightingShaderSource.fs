@@ -150,7 +150,7 @@ void main()
 {
     vec4 col = vec4(0,0,0,0);
     color = texture(glgeAlbedoMap, texCoords);
-    normal = texture(glgeNormalMap, texCoords).xyz;
+    normal = normalize(texture(glgeNormalMap, texCoords).xyz);
     pos = texture(glgePositionMap, texCoords).xyz;
     roughness  = texture(glgeRoughnessMap, texCoords).r;
     metallic = texture(glgeRoughnessMap, texCoords).g;

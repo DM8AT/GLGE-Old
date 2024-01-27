@@ -23,3 +23,4 @@ $(BIN)/$(EXECUTABLE): $(GLGE)/CML/*.cpp $(GLGE)/*.cpp $(SRC)/*.cpp $(GLGE)/GLGEO
 
 clean:
 	-rm $(BIN)/*
+

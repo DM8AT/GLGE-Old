@@ -24,6 +24,7 @@
 #include <math.h>
 #include <sstream>
 #include <map>
+#include <algorithm>
 
 /////////////////////
 //PRIVATE FUNCTIONS//
@@ -42,6 +43,142 @@ bool has_double_slash(std::string &str)
     }
     //at this point, the loop hasn't return true, so return false
     return false;
+}
+
+unsigned int addVertexOnUintSphere(Vertex p, vec4 color, std::vector<Vertex>* vertices)
+{
+    //calculate the distance from the middle of the sphere
+    float length = std::sqrt(p.pos.x * p.pos.x + p.pos.y * p.pos.y + p.pos.z * p.pos.z);
+    //store the position of the vertex
+    vec3 pos = vec3(p.pos.x/length, p.pos.y/length, p.pos.z/length);
+    //check if the vertex exists
+    for (int i = 0; i < (int)vertices->size(); i++)
+    {
+        //if it exists, return the index of the vertex
+        if ((*vertices)[i].pos == pos)
+        {
+            return i;
+        }
+    }
+
+    //use the normalised position to generate the vertex
+    Vertex vert = Vertex(pos);
+
+    //check if the color should be stored
+    if (color.w == -1)
+    {
+        //calculate the uv coordinates
+        float u = std::atan2(pos.x, pos.z) / (2.f*M_PI) + 0.5;
+        float v = pos.y * 0.5 + 0.5;
+        //store the uv coordinates
+        vert.texCoord = vec2(u,v);
+        //set the color to black
+        vert.color = vec4(0,0,0,1);
+    }
+    else
+    {
+        //store the color
+        vert.color = color;
+    }
+    //the normal is just the position of the vertex
+    vert.normal = vert.pos;
+    //store the vertex
+    vertices->push_back(vert);
+    //return the index of the vertex
+    return (unsigned int) vertices->size()-1;
+}
+
+inline void addCircle(std::vector<Vertex>* vertices, std::vector<unsigned int>* indices, unsigned int numbers, vec4 col, vec3 pos = vec3(0), bool flip = false,
+                      bool fill = true, bool sidewaysNormals = false, vec2 texOffset = vec2(0,0), unsigned int textureMode = 0)
+{
+    //store the amount of points
+    unsigned int points = (numbers == 0) ? 32 : numbers;
+
+    //calculate the angle
+    double angle = (2.0*M_PI) / (double)points;
+
+    //store the first index
+    unsigned int first_ind = (unsigned int)vertices->size();
+
+    //generate the vertices
+    for (int i = 0; i < (int)points; i++)
+    {
+        //calculate the current angle
+        double c_angle = angle * i;
+        //store the calculated position
+        vec3 p = vec3(std::sin(c_angle), 0, std::cos(c_angle)) + pos;
+        //create the vertex
+        Vertex vert = Vertex(p);
+        //check if color should be added
+        if (col.w != -1)
+        {
+            //add the color
+            vert.color = col;
+        }
+        else
+        {
+            //clear the color
+            vert.color = vec4(0);
+            //check the texture mode
+            if (textureMode == 0)
+            {
+                //normal circle texturing
+                vert.texCoord = vec2(p.x * 0.5 + 0.5, p.z * 0.5 + 0.5) + texOffset;
+            }
+            else if (textureMode == 1)
+            {
+                //calculate u
+                float u = (float)i*2 / (float)points;
+                //check if u is larger than 1
+                if (u > 1.f)
+                {
+                    //then set u to 2 - u
+                    u = 2.f - u;
+                }
+                //1D circle wrapping
+                vert.texCoord = vec2(u, 0) + texOffset;
+            }
+            
+        }
+        //check if the normals should be sideways
+        if (sidewaysNormals)
+        {
+            //add a sideways normal
+            vert.normal = vert.pos;
+            vert.normal.normalize();
+        }
+        else
+        {
+            //add the normal vector
+            vert.normal = vec3(0, flip ? -1 : 1, 0);
+        }
+        //add the vertex
+        vertices->push_back(vert);
+    }
+
+    //check if indices should generate
+    if (!fill)
+    {
+        //if not, stop the function
+        return;
+    }
+
+    //generate the indices
+    for (int i = 0; i < (int)points - 2; i++)
+    {
+        //create a triangle
+        indices->push_back(first_ind);
+        if (flip)
+        {
+            indices->push_back(i + 1 + first_ind);
+            indices->push_back(i + 2 + first_ind);
+        }
+        else
+        {
+            indices->push_back(i + 2 + first_ind);
+            indices->push_back(i + 1 + first_ind);
+        }
+    }
 }
 
 //////////////////////
@@ -262,6 +399,13 @@ Vertex::Vertex(float x, float y, float z, float r, float g, float b, float a, fl
     this->normal.normalize();
 }
 
+//6 floats + vec4
+Vertex::Vertex(float x, float y, float z, vec4 color, float nx, float ny, float nz)
+{
+    //pass to another constructor
+    *this = Vertex(x,y,z, color.x, color.y, color.z, color.w, nx,ny,nz);
+}
+
 ///////////
 //CLASSES//
 ///////////
@@ -274,6 +418,484 @@ Vertex::Vertex(float x, float y, float z, float r, float g, float b, float a, fl
 Mesh::Mesh()
 {
     //init the object
+}
+
+Mesh::Mesh(unsigned int preset, vec4 color, unsigned int resolution)
+{
+    //store the indices for the object
+    std::vector<unsigned int> indices = {};
+    //store the vertices for the object
+    std::vector<Vertex> vertices = {};
+    
+    //check the type of used preset
+    switch (preset)
+    {
+    //check for empty objects
+    case GLGE_PRESET_EMPTY:
+        {
+            //clear the indices
+            indices.clear();
+            //clear the vertices
+            vertices.clear();
+
+            //store the vertices
+            this->vertices = vertices;
+            //store the indices
+            this->indices = indices;
+        }
+        break;
+
+    //generate a cube
+    case GLGE_PRESET_CUBE:
+        {
+            //set the indices for the cube
+            indices = {
+                //front and back
+                0,2,1,
+                1,2,3,
+                4,5,6,
+                5,7,6,
+                //top and bottom
+                0+8,1+8,4+8,
+                1+8,5+8,4+8,
+                2+8,6+8,3+8,
+                3+8,6+8,7+8,
+                //left and right
+                0+16,4+16,2+16,
+                2+16,4+16,6+16,
+                1+16,3+16,5+16,
+                3+16,7+16,5+16
+            };
+
+            //check if texture or color should be used
+            if (color.w == -1)
+            {
+                //use texture coordinates
+
+                //load the vertices from an table
+                vertices = {
+                                 //pos   //tex   //normal
+                         //front and back
+                         Vertex(-1,-1, 1,  0,0,  0, 0, 1),
+                         Vertex( 1,-1, 1,  1,0,  0, 0, 1),
+                         Vertex(-1, 1, 1,  0,1,  0, 0, 1),
+                         Vertex( 1, 1, 1,  1,1,  0, 0, 1),
+
+                         Vertex(-1,-1,-1,  1,0,  0, 0,-1),
+                         Vertex( 1,-1,-1,  0,0,  0, 0,-1),
+                         Vertex(-1, 1,-1,  1,1,  0, 0,-1),
+                         Vertex( 1, 1,-1,  0,1,  0, 0,-1),
+
+                         //top and bottom
+                         Vertex(-1,-1, 1,  0,1,  0,-1, 0),
+                         Vertex( 1,-1, 1,  1,1,  0,-1, 0),
+                         Vertex(-1, 1, 1,  0,0,  0, 1, 0),
+                         Vertex( 1, 1, 1,  1,0,  0, 1, 0),
+
+                         Vertex(-1,-1,-1,  0,0,  0,-1, 0),
+                         Vertex( 1,-1,-1,  1,0,  0,-1, 0),
+                         Vertex(-1, 1,-1,  0,1,  0, 1, 0),
+                         Vertex( 1, 1,-1,  1,1,  0, 1, 0),
+
+                         //left and right
+                         Vertex(-1,-1, 1,  1,0, -1, 0, 0),
+                         Vertex( 1,-1, 1,  0,0,  1, 0, 0),
+                         Vertex(-1, 1, 1,  1,1, -1, 0, 0),
+                         Vertex( 1, 1, 1,  0,1,  1, 0, 0),
+
+                         Vertex(-1,-1,-1,  0,0, -1, 0, 0),
+                         Vertex( 1,-1,-1,  1,0,  1, 0, 0),
+                         Vertex(-1, 1,-1,  0,1, -1, 0, 0),
+                         Vertex( 1, 1,-1,  1,1,  1, 0, 0)
+                };
+            }
+            else
+            {
+                //use color
+
+                //load the vertices
+                //load the vertices from an table
+                vertices = {
+                                 //pos   //color   //normal
+                         //front and back
+                         Vertex(-1,-1, 1,  color,  0, 0, 1),
+                         Vertex( 1,-1, 1,  color,  0, 0, 1),
+                         Vertex(-1, 1, 1,  color,  0, 0, 1),
+                         Vertex( 1, 1, 1,  color,  0, 0, 1),
+
+                         Vertex(-1,-1,-1,  color,  0, 0,-1),
+                         Vertex( 1,-1,-1,  color,  0, 0,-1),
+                         Vertex(-1, 1,-1,  color,  0, 0,-1),
+                         Vertex( 1, 1,-1,  color,  0, 0,-1),
+
+                         //top and bottom
+                         Vertex(-1,-1, 1,  color,  0,-1, 0),
+                         Vertex( 1,-1, 1,  color,  0,-1, 0),
+                         Vertex(-1, 1, 1,  color,  0, 1, 0),
+                         Vertex( 1, 1, 1,  color,  0, 1, 0),
+
+                         Vertex(-1,-1,-1,  color,  0,-1, 0),
+                         Vertex( 1,-1,-1,  color,  0,-1, 0),
+                         Vertex(-1, 1,-1,  color,  0, 1, 0),
+                         Vertex( 1, 1,-1,  color,  0, 1, 0),
+
+                         //left and right
+                         Vertex(-1,-1, 1,  color, -1, 0, 0),
+                         Vertex( 1,-1, 1,  color,  1, 0, 0),
+                         Vertex(-1, 1, 1,  color, -1, 0, 0),
+                         Vertex( 1, 1, 1,  color,  1, 0, 0),
+
+                         Vertex(-1,-1,-1,  color, -1, 0, 0),
+                         Vertex( 1,-1,-1,  color,  1, 0, 0),
+                         Vertex(-1, 1,-1,  color, -1, 0, 0),
+                         Vertex( 1, 1,-1,  color,  1, 0, 0)
+                };
+            }
+            //store the vertices
+            this->vertices = vertices;
+            //store the indices
+            this->indices = indices;
+        }
+        break;
+
+    //generate a circle
+    case GLGE_PRESET_CIRCLE:
+        {
+            //clear the indices and vertices
+            this->vertices.clear();
+            this->indices.clear();
+            //add a circle
+            addCircle(&this->vertices, &this->indices, resolution, color);
+        }
+        break;
+    
+    //generate a plane
+    case GLGE_PRESET_PLANE:
+        {
+            //generate the indices
+            indices = {0,1,2,
+                       2,1,3};
+
+            //check if color should be used
+            if (color.w == -1)
+            {
+                //use texture coordinates
+
+                vertices = {
+                    Vertex( 1,0, 1,  1,1,  0,1,0), Vertex(-1,0, 1,  0,1,  0,1,0),
+                    Vertex( 1,0,-1,  1,0,  0,1,0), Vertex(-1,0,-1,  0,0,  0,1,0)
+                };
+            }
+            else
+            {
+                //use the color parameter
+
+                vertices = {
+                    Vertex( 1,0, 1,  color,  0,1,0), Vertex(-1,0, 1,  color,  0,1,0),
+                    Vertex( 1,0,-1,  color,  0,1,0), Vertex(-1,0,-1,  color,  0,1,0)
+                };
+            }
+            //store the vertices
+            this->vertices = vertices;
+            //store the indices
+            this->indices = indices;
+        }
+        break;
+
+    //generate a uv sphere
+    case GLGE_PRESET_SPHERE:
+        {
+            //generate the list of vertices
+            std::vector<Vertex> vertices;
+            //generate the list of indices
+            std::vector<unsigned int> indices;
+
+            //thanks to Pickachuxxxx for the math. Source : https://gist.github.com/Pikachuxxxx/5c4c490a7d7679824e0e18af42918efc
+
+            //check for 0 to replace it with the default
+            if (resolution == 0)
+            {
+                //use 16 as default
+                resolution = 16;
+            }
+
+            int latitudes = resolution;
+            int longitudes = resolution;
+
+            float radius = 1.f;
+
+            float nx, ny, nz, lengthInv = 1.0f / radius;
+            // Temporary vertex
+
+            float deltaLatitude = M_PI / latitudes;
+            float deltaLongitude = 2 * M_PI / longitudes;
+            float latitudeAngle;
+            float longitudeAngle;
+
+            // Compute all vertices first except normals
+            for (int i = 0; i <= latitudes; i++)
+            {
+                latitudeAngle = M_PI / 2 - i * deltaLatitude; /* Starting -pi/2 to pi/2 */
+                float xy = radius * cosf(latitudeAngle);    /* r * cos(phi) */
+                float z = radius * sinf(latitudeAngle);     /* r * sin(phi )*/
+
+                /*
+                * We add (latitudes + 1) vertices per longitude because of equator,
+                * the North pole and South pole are not counted here, as they overlap.
+                * The first and last vertices have same position and normal, but
+                * different tex coords.
+                */
+                for (int j = 0; j <= longitudes; ++j)
+                {
+                    longitudeAngle = j * deltaLongitude;
+
+                    Vertex vertex;
+                    vertex.pos.x = xy * cosf(longitudeAngle);       /* x = r * cos(phi) * cos(theta)  */
+                    vertex.pos.z = xy * sinf(longitudeAngle);       /* y = r * cos(phi) * sin(theta) */
+                    vertex.pos.y = z;                               /* z = r * sin(phi) */
+                    if (color.w == -1)
+                    {
+                        vertex.texCoord.x = (float)j/longitudes;        /* s */
+                        vertex.texCoord.y = (float)i/latitudes;         /* t */
+                    }
+                    else
+                    {
+                        vertex.color = color;
+                    }
+
+                    // normalized vertex normal
+                    nx = vertex.pos.x * lengthInv;
+                    ny = vertex.pos.z * lengthInv;
+                    nz = vertex.pos.y * lengthInv;
+                    vertex.normal = vec3(nx, ny, nz);
+                    vertices.push_back(vertex);
+                }
+            }
+
+            /*
+            *  Indices
+            *  k1--k1+1
+            *  |  / |
+            *  | /  |
+            *  k2--k2+1
+            */
+            unsigned int k1, k2;
+            for(int i = 0; i < latitudes; ++i)
+            {
+                k1 = i * (longitudes + 1);
+                k2 = k1 + longitudes + 1;
+                // 2 Triangles per latitude block excluding the first and last longitudes blocks
+                for(int j = 0; j < longitudes; ++j, ++k1, ++k2)
+                {
+                    if (i != 0)
+                    {
+                        indices.push_back(k1);
+                        indices.push_back(k2);
+                        indices.push_back(k1 + 1);
+                    }
+
+                    if (i != (latitudes - 1))
+                    {
+                        indices.push_back(k1 + 1);
+                        indices.push_back(k2);
+                        indices.push_back(k2 + 1);
+                    }
+                }
+            }
+
+            //store the final lists
+            this->vertices = vertices;
+            this->indices = indices;
+        }
+        break;
+
+    case GLGE_PRESET_ICOSPHERE:
+        {
+            //check for 0 to replace it with the default
+            if (resolution == 0)
+            {
+                //use 1 as default
+                resolution = 1;
+            }
+
+            // create 20 triangles of the icosahedron
+            std::vector<Vertex> vertices;
+
+            // create 12 vertices of a icosahedron
+            float t = (1.0 + std::sqrt(5.0)) / 2.0;
+
+            addVertexOnUintSphere(Vertex(-1,  t,  0), color, &vertices);
+            addVertexOnUintSphere(Vertex( 1,  t,  0), color, &vertices);
+            addVertexOnUintSphere(Vertex(-1, -t,  0), color, &vertices);
+            addVertexOnUintSphere(Vertex( 1, -t,  0), color, &vertices);
+
+            addVertexOnUintSphere(Vertex( 0, -1,  t), color, &vertices);
+            addVertexOnUintSphere(Vertex( 0,  1,  t), color, &vertices);
+            addVertexOnUintSphere(Vertex( 0, -1, -t), color, &vertices);
+            addVertexOnUintSphere(Vertex( 0,  1, -t), color, &vertices);
+
+            addVertexOnUintSphere(Vertex( t,  0, -1), color, &vertices);
+            addVertexOnUintSphere(Vertex( t,  0,  1), color, &vertices);
+            addVertexOnUintSphere(Vertex(-t,  0, -1), color, &vertices);
+            addVertexOnUintSphere(Vertex(-t,  0,  1), color, &vertices);
+
+            //add the indices
+            std::vector<unsigned int> indices;
+
+            // 5 faces around point 0
+            indices.push_back(11); indices.push_back(0); indices.push_back(5);
+            indices.push_back(5); indices.push_back(0); indices.push_back(1);
+            indices.push_back(1); indices.push_back(0); indices.push_back(7);
+            indices.push_back(7); indices.push_back(0); indices.push_back(10);
+            indices.push_back(10); indices.push_back(0); indices.push_back(11);
+
+            // 5 adjacent faces
+            indices.push_back(5); indices.push_back(1); indices.push_back(9);
+            indices.push_back(11); indices.push_back(5); indices.push_back(4);
+            indices.push_back(10); indices.push_back(11); indices.push_back(2);
+            indices.push_back(7); indices.push_back(10); indices.push_back(6);
+            indices.push_back(1); indices.push_back(7); indices.push_back(8);
+
+            // 5 faces around point 3
+            indices.push_back(9); indices.push_back(3); indices.push_back(4);
+            indices.push_back(4); indices.push_back(3); indices.push_back(2);
+            indices.push_back(2); indices.push_back(3); indices.push_back(6);
+            indices.push_back(6); indices.push_back(3); indices.push_back(8);
+            indices.push_back(8); indices.push_back(3); indices.push_back(9);
+
+            // 5 adjacent faces
+            indices.push_back(9); indices.push_back(4); indices.push_back(5);
+            indices.push_back(4); indices.push_back(2); indices.push_back(11);
+            indices.push_back(2); indices.push_back(6); indices.push_back(10);
+            indices.push_back(6); indices.push_back(8); indices.push_back(7);
+            indices.push_back(8); indices.push_back(9); indices.push_back(1);
+
+            // refine triangles
+            for (int i = 0; i < (int)resolution; i++)
+            {
+                std::vector<unsigned int> newIndices;
+
+                for (int t = 0; t < (int)indices.size(); t += 3)
+                {
+                    Vertex a = vertices[indices[t]];
+                    Vertex b = vertices[indices[t+1]];
+                    Vertex c = vertices[indices[t+2]];
+
+                    vec3 m0 = (a.pos + b.pos) / vec3(2);
+                    vec3 m1 = (b.pos + c.pos) / vec3(2);
+                    vec3 m2 = (c.pos + a.pos) / vec3(2);
+
+                    unsigned int m0i = addVertexOnUintSphere(m0, color, &vertices);
+                    unsigned int m1i = addVertexOnUintSphere(m1, color, &vertices);
+                    unsigned int m2i = addVertexOnUintSphere(m2, color, &vertices);
+
+                    newIndices.push_back(indices[t  ]);newIndices.push_back(m0i);newIndices.push_back(m2i);
+                    newIndices.push_back(indices[t+1]);newIndices.push_back(m1i);newIndices.push_back(m0i);
+                    newIndices.push_back(indices[t+2]);newIndices.push_back(m2i);newIndices.push_back(m1i);
+                    newIndices.push_back(m0i);newIndices.push_back(m1i);newIndices.push_back(m2i);
+                }
+                indices.clear();
+                indices = newIndices;
+            }
+
+            //store the generated icosphere
+            this->vertices = vertices;
+            this->indices = indices;
+        }
+        break;
+
+    //add a cone
+    case GLGE_PRESET_CONE:
+        {
+            //first, add a circle
+            addCircle(&this->vertices, &this->indices, resolution, color, vec3(0,-1,0), true, true, true);
+            //add one vertex on top
+            //create the vertex at the position
+            Vertex vert = Vertex(vec3(0,1,0), vec2(0.5,1), vec3(0,1,0));
+            //check if color should be added
+            if (color.w != -1)
+            {
+                //add the color
+                vert.color = color;
+            }
+            //store the index of this vertex
+            unsigned int ver_ind = (int)this->vertices.size();
+            //add the vertex
+            this->vertices.push_back(vert);
+            //loop over all vertices
+            for (int i = 0; i < (int)ver_ind - 1; i++)
+            {
+                //add a triangle
+                this->indices.push_back(ver_ind);
+                this->indices.push_back(i+1);
+                this->indices.push_back(i);
+            }
+            //add the last triangle
+            this->indices.push_back(ver_ind);
+            this->indices.push_back(0);
+            this->indices.push_back(ver_ind-1);
+        }
+        break;
+
+    case GLGE_PRESET_CYLINDER:
+        {
+            //first, add a circle
+            addCircle(&this->vertices, &this->indices, resolution, color, vec3(0,-1,0), true, true, true);
+            //store the amount of vertices per circle
+            int circAmount = (int)this->vertices.size();
+            //then, add a second circle
+            addCircle(&this->vertices, &this->indices, resolution, color, vec3(0,1,0), false, true, true);
+            //add a circle of vertices for texture coordinates
+            addCircle(&this->vertices, &this->indices, resolution, color, vec3(0,-1,0), false, false, true, vec2(0), 1);
+            //add an unfilled circle
+            addCircle(&this->vertices, &this->indices, resolution, color, vec3(0,1,0), false, false, true, vec2(0,1), 1);
+
+            //start to fill the edges
+            for (int i = (int)this->vertices.size() - circAmount*2; i < (int)this->vertices.size()-(circAmount+1); i++)
+            {
+                //add a quad
+                //add the first tirangle
+                this->indices.push_back(i+1);
+                this->indices.push_back(i);
+                this->indices.push_back(i + circAmount);
+                //add the second triangle
+                this->indices.push_back(i+1+circAmount);
+                this->indices.push_back(i+1);
+                this->indices.push_back(i+circAmount);
+            }
+            int i = (int)this->vertices.size() - circAmount*2;
+            //add the last quad
+            //add the first tirangle
+            this->indices.push_back(i);
+            this->indices.push_back(i+(circAmount-1));
+            this->indices.push_back(i + circAmount);
+            //add the second triangle
+            this->indices.push_back(i+(circAmount-1));
+            this->indices.push_back(i+(circAmount*2 - 1));
+            this->indices.push_back(i+circAmount);
+        }
+        break;
+    
+    //default / error case
+    default:
+        {
+            //check if an error should print
+            if (glgeErrorOutput)
+            {
+                //print an error message
+                std::cerr << "[GLGE ERROR] Invalid preset used to construct an 3D object\n";
+            }
+            //check if error should stop the program
+            if (glgeExitOnError)
+            {
+                //close the program with an error
+                exit(1);
+            }
+            //stop the function
+            return;
+        }
+        break;
+    }
 }
 
 //pointer array constructor

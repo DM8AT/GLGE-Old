@@ -29,173 +29,14 @@
 #include <math.h>
 #include <iostream>
 
-//////////////
-//Local Vars//
-//////////////
+/////////////////////
+// LOCAL VARIABLES //
+/////////////////////
 
-//an pointer to the camera
-Camera2D* mainCam = NULL;
-//store the move matrix location in the default glge 2D shader
+//store the main 2D camera
+Camera2D* mainCam;
+//store the default location of the move matrix
 int glgeDefaultMoveMatLoc;
-
-///////////
-//STRUCTS//
-///////////
-
-//TRANSFORM
-
-//default constructor
-Transform2D::Transform2D()
-{
-    //init the object
-}
-
-//constructor with vector
-Transform2D::Transform2D(vec2 pos, float rot, vec2 scale)
-{
-    //save the inputed attributes
-    this->pos = pos;
-    this->rot = rot*GLGE_TO_RADIANS;
-    this->size = scale;
-}
-
-//constructor with floats
-Transform2D::Transform2D(float x, float y, float rot, vec2 scale)
-{
-    //save the inputed attributes and convert the floats to an vector
-    this->pos = vec2(x,y);
-    this->rot = rot*GLGE_TO_RADIANS;
-    this->size = scale;
-}
-
-mat3 Transform2D::getMatrix()
-{
-    //move everything to the position
-    mat3 moveMat(1,0,this->pos.x,
-                 0,1,this->pos.y,
-                 0,0,1);
-
-    //rotate everything correctly
-    mat3 rotaMat(std::cos(rot),-std::sin(rot),0,
-                 std::sin(rot), std::cos(rot),0,
-                 0,             0,            1);
-
-    //scale everything correctly
-    mat3 sizeMat(this->size.x, 0, 0,
-                 0, this->size.y, 0,
-                 0, 0,            1);
-
-    //return the multiplied matrices
-    return (moveMat * sizeMat) * rotaMat;
-}
-
-//VERTEX2D
-
-//default constructor
-Vertex2D::Vertex2D()
-{
-    //init the object
-}
-
-//constructor with vec
-Vertex2D::Vertex2D(vec2 p, vec4 color)
-{
-    //set the position to the input
-    this->pos = p;
-    //store the inputed color
-    this->color = color;
-}
-
-//constructor using floats
-Vertex2D::Vertex2D(float x, float y, vec4 color)
-{
-    //set the position to the inputs
-    this->pos = vec2(x,y);
-    //store the inputed color
-    this->color = color;
-}
-
-//vertex with a lot of arguments
-Vertex2D::Vertex2D(float x, float y, float r, float g, float b, float a)
-{
-    //set the position to the inputs
-    this->pos = vec2(x,y);
-    //store the inputed color
-    this->color = vec4(r,g,b,a);
-}
-
-//vertex with a lot of arguments and an position
-Vertex2D::Vertex2D(vec2 pos, float r, float g, float b, float a)
-{
-    //set the position to the inputs
-    this->pos = pos;
-    //store the inputed color
-    this->color = vec4(r,g,b,a);
-}
-
-//constructor with vec
-Vertex2D::Vertex2D(vec2 p, vec2 texCoord)
-{
-    //set the position to the input
-    this->pos = p;
-    //store the inputed texture coordinate
-    this->texCoord = texCoord;
-}
-
-//constructor using floats
-Vertex2D::Vertex2D(float x, float y, vec2 texCoord)
-{
-    //set the position to the inputs
-    this->pos = vec2(x,y);
-    //store the inputed texture coordinate
-    this->texCoord = texCoord;
-}
-
-//constructor with vector and floates
-Vertex2D::Vertex2D(vec2 pos, float tX, float tY)
-{
-    //store the inputed position
-    this->pos = pos;
-    //store the inputed texture coordinate
-    this->texCoord = vec2(tX,tY);
-}
-
-//constructor with a lot of floates
-Vertex2D::Vertex2D(float x, float y, float tX, float tY)
-{
-    //store the inputed position
-    this->pos = vec2(x,y);
-    //store the inputed texture coordinate
-    this->texCoord = vec2(tX,tY);
-}
-
-///////////
-//CLASSES//
-///////////
-
-//MESH2D
-
-//default constructor
-Mesh2D::Mesh2D()
-{
-    //init the object
-}
-
-//constructor with pointer array
-Mesh2D::Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices)
-{
-    //convert the pointer arrays to vectors and save them
-    this->vertices = std::vector<Vertex2D>(vertices, vertices + (sizeOfVertices/sizeof(vertices[0])));
-    this->indices = std::vector<unsigned int>(indices, indices + (sizeOfIndices/sizeof(indices[0])));
-}
-
-//constructor with vectors
-Mesh2D::Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices)
-{
-    //save the inputed vectors
-    this->vertices = vertices;
-    this->indices = indices;
-}
 
 //OBJECT 2D
 
@@ -259,6 +100,20 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
 
     //update the object
     this->update();
+}
+
+Object2D::Object2D(Mesh2D mesh, Transform2D transform, bool isStatic)
+{
+    //cast to another constructor
+    *this = Object2D(mesh.vertices, mesh.indices, transform, isStatic);
+}
+
+Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform, bool isStatic)
+{
+    //generate the mesh
+    Mesh2D mesh = Mesh2D(preset, resolution, color);
+    //cast to another constructor
+    *this = Object2D(mesh, transform, isStatic);
 }
 
 void Object2D::draw()
@@ -357,10 +212,16 @@ void Object2D::recalculateIndexBuffer(Mesh2D mesh)
 
 void Object2D::recalculateMeshBuffer(Mesh2D mesh)
 {
-    //check if a new mesh should be asigned
-    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    //store the new mesh
+    this->mesh = mesh;
+
+    //check if the mesh was initalised
+    if (this->windowID == -1)
     {
-        this->mesh = mesh;
+        //create the buffers
+        this->createBuffers();
+        //stop this function
+        return;
     }
 
     //recalculate all buffers
@@ -575,6 +436,16 @@ vec2 Object2D::getAnchor()
     return this->anchor;
 }
 
+void Object2D::setStatic(bool stat)
+{
+    this->isStatic = stat;
+}
+
+bool Object2D::getStatic()
+{
+    return this->isStatic;
+}
+
 void Object2D::createBuffers()
 {
     //check if the window ID is -1
@@ -632,13 +503,17 @@ void Object2D::updateVertexBuffer()
         if (glgeWarningOutput)
         {
             //print an warning
-            printf("[GLGE WARNING] tried to update an allready an object in a different window\n");
+            printf("[GLGE WARNING] tried to update an object in a different window\n");
         }
         //stop the function
         return;
     }
-    //delete the old buffer
-    glDeleteBuffers(this->VBOLen, &this->VBO);
+    //check if an old buffer was loaded
+    if (this->VBO != 0)
+    {
+        //delete the old buffer
+        glDeleteBuffers(this->VBOLen, &this->VBO);
+    }
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -661,13 +536,17 @@ void Object2D::updateIndexBuffer()
         if (glgeWarningOutput)
         {
             //print an warning
-            printf("[GLGE WARNING] tried to update an allready an object in a different window\n");
+            printf("[GLGE WARNING] tried to update an object in a different window\n");
         }
         //stop the function
         return;
     }
-    //delete the old buffer
-    glDeleteBuffers(this->IBOLen, &this->IBO);
+    //check if an old buffer was loaded
+    if (this->IBO != 0)
+    {
+        //delete the old buffer
+        glDeleteBuffers(this->IBOLen, &this->IBO);
+    }
     //generate the index buffer
     glGenBuffers(1, &this->IBO);
     //bind the index buffer
@@ -895,6 +774,273 @@ void Camera2D::recalculateMatrix()
 
     //set the cam mat to an product of the matrices
     this->camMat = (rotMat * scaMat * movMat);
+}
+
+////////////
+// BUTTON //
+////////////
+
+Button::Button()
+{
+    //say that the object exists
+}
+
+Button::Button(const char* texture, Transform2D transf)
+{
+    //get the size of the texture
+    vec2 size = glgeGetTextureSize(texture);
+    //calculate the normalized size
+    if (size.x > size.y)
+    {
+        //divide by the x component
+        size /= vec2(size.x);
+    }
+    else
+    {
+        //divide by the y component
+        size /= vec2(size.y);
+    }
+    //cast to another constuctor
+    *this = Button(size, vec4(0), transf);
+    //store the texture
+    this->setTexture(texture);
+}
+
+Button::Button(unsigned int width, unsigned int height, vec4 color, Transform2D transf)
+{
+    //cast to another constructor
+    *this = Button(vec2(width, height), color, transf);
+}
+
+Button::Button(vec2 size, vec4 color, Transform2D transf)
+{
+    //calculate the half size (for performance)
+    vec2 shalf = size / vec2(2);
+    //generate the vertices
+    std::vector<Vertex2D> vert = {Vertex2D( shalf.x, shalf.y, color), Vertex2D( shalf.x,-shalf.y, color),
+                                  Vertex2D(-shalf.x, shalf.y, color), Vertex2D(-shalf.x,-shalf.y, color)};
+    //load the texture coordinates
+    vert[0].texCoord = vec2(1,0);
+    vert[1].texCoord = vec2(1,1);
+    vert[2].texCoord = vec2(0,0);
+    vert[3].texCoord = vec2(0,1);
+    //generate the indices
+    std::vector<unsigned int> inds = {1,0,2, 1,2,3};
+
+    //calculate the mesh
+    this->mesh = Mesh2D(vert, inds);
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+    //store that this is a circle
+    this->isCircle = false;
+    //store the width and height
+    this->size = size;
+
+    //update the object
+    this->update();
+}
+
+Button::Button(float radius, unsigned int res, vec4 color, Transform2D transf)
+{
+    //generate the mesh from an preset
+    Mesh2D mesh = Mesh2D(GLGE_PRESET_CIRCLE, res, color);
+    //scale according to the radius
+    for (int i = 0; i < (int)mesh.vertices.size(); i++)
+    {
+        //scale the position
+        mesh.vertices[i].pos.scale(radius);
+    }
+    
+    //store the mesh
+    this->mesh = mesh;
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+    //store that this is a circle
+    this->isCircle = true;
+    //store the radius
+    this->size = vec2(radius);
+
+    //update the object
+    this->update();
+}
+
+void Button::update()
+{
+    //recalculate the move matrix
+    this->recalculateMoveMatrix();
+
+    //check if the mouse is inside the button
+    
+    //button can't be pressed if the window isn't focused
+    if (!glgeWindows[this->windowID]->isFocused())
+    {
+        //say that the button isn't focused nor pressed
+        this->clickLastTick = false;
+        this->hoverLastTick = false;
+        //stop the funcion
+        return;
+    }
+    //store the mouse position
+    vec2 p = (vec2(glgeMouse.pos.x, 1.f - glgeMouse.pos.y) / vec2(0.5)) - vec2(1);
+    //apply the window aspect ratio to the mouse position
+    p.x *= glgeWindows[this->windowID]->getWindowAspect();
+    //check if the button is a circle
+    if (this->isCircle)
+    {
+        //calculate the mouse position in object space
+        p -= this->transf.pos;
+        //check if the length is shorter than the radius
+        if (p.length() <= (this->size.x * this->transf.size.x))
+        {
+            //call the onHover function
+
+            //check for a click
+            if (glgeMouse.leftButton)
+            {
+                //set the click start this tick to the inverse of click last tick
+                this->clickThis = !this->clickLastTick;
+                //say that the button was clicked this tick
+                this->clickLastTick = true;
+                //say that the click can't stop this tick
+                this->clickStopThis = false;
+            }
+            else
+            {
+                //say that the click can't be this tick
+                this->clickThis = false;
+                //set the click end this tick to click last tick
+                this->clickStopThis = this->clickLastTick;
+                //say that the button was not clicked this tick
+                this->clickLastTick = false;
+            }
+
+            //say that the hovering can't stop this tick
+            this->hoveringStopedThis = false;
+            //set the hovering start to the inverse of the hover last tick
+            this->hoverThis = !this->hoverLastTick;
+            //say that the button was hoverd this tick
+            this->hoverLastTick = true;
+        }
+        else
+        {
+            //say that the button can't be hoverd this tick
+            this->hoverThis = false;
+            //set the button hover stop to the hover last tick
+            this->hoveringStopedThis = this->hoverLastTick;
+            //say that the button was not hoverd
+            this->hoverLastTick = false;
+            //say that the button cant be clicked
+            this->clickThis = false; this->clickLastTick = false; this->clickStopThis = false;
+        }
+    }
+    else
+    {
+        //calculate the half size
+        vec2 hsize = (this->size.scale(this->transf.size)) / vec2(2);
+        //calculat the mouse position in object space
+        p -= this->transf.pos;
+        //check if the mouse is hovering the button
+        if ((p >= vec2(0)-hsize) && (p <= hsize))
+        {
+            //call the onHover function
+
+            //check for a click
+            if (glgeMouse.leftButton)
+            {
+                //set the click start this tick to the inverse of click last tick
+                this->clickThis = !this->clickLastTick;
+                //say that the button was clicked this tick
+                this->clickLastTick = true;
+                //say that the click can't stop this tick
+                this->clickStopThis = false;
+            }
+            else
+            {
+                //say that the click can't be this tick
+                this->clickThis = false;
+                //set the click end this tick to click last tick
+                this->clickStopThis = this->clickLastTick;
+                //say that the button was not clicked this tick
+                this->clickLastTick = false;
+            }
+
+            //say that the hovering can't stop this tick
+            this->hoveringStopedThis = false;
+            //set the hovering start to the inverse of the hover last tick
+            this->hoverThis = !this->hoverLastTick;
+            //say that the button was hoverd this tick
+            this->hoverLastTick = true;
+        }
+        else
+        {
+            //say that the button can't be hoverd this tick
+            this->hoverThis = false;
+            //set the button hover stop to the hover last tick
+            this->hoveringStopedThis = this->hoverLastTick;
+            //say that the button was not hoverd
+            this->hoverLastTick = false;
+            //say that the button cant be clicked
+            this->clickThis = false; this->clickLastTick = false; this->clickStopThis = false;
+        }
+    }
+}
+
+bool Button::isClicked()
+{
+    return this->clickLastTick;
+}
+
+bool Button::isHoverd()
+{
+    return this->hoverLastTick;
+}
+
+bool Button::clickThisTick()
+{
+    return this->clickThis;
+}
+
+bool Button::hoverThisTick()
+{
+    return this->hoverThis;
+}
+
+bool Button::clickStopThisTick()
+{
+    return this->clickStopThis;
+}
+
+bool Button::hoverStopThisTick()
+{
+    return this->hoveringStopedThis;
 }
 
 /////////////

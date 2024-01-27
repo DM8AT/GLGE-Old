@@ -23,6 +23,9 @@
 //include dependencys from the default lib
 #include <string>
 
+/**
+ * @brief a simple window to handle multiple windows
+ */
 class GLGEWindow
 {
 public:

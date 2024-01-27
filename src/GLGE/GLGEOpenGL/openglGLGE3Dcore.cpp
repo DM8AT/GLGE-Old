@@ -48,6 +48,13 @@ Object::Object()
     //init the object
 }
 
+//constructor using preset
+Object::Object(unsigned int preset, vec4 color, unsigned int res, Transform transform, bool isTransparent, bool isStatic)
+{
+    //use the mesh to construct the object
+    *this = Object(Mesh(preset, color, res), transform, isTransparent, isStatic);
+}
+
 //constructor using pointer
 Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices, Transform transform, bool isTransparent, bool isStatic)
 {

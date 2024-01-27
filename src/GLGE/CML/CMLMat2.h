@@ -6,8 +6,9 @@
 /**
  * @brief mat2 is a 2*2 matrix, compleated with multiplication, scaling, addition and subtarction. It is included in CML/CMLMatrices.hpp
  */
-struct mat2
+class mat2
 {
+public:
     //define the storage array of the matrix
     float m[2][2];
 

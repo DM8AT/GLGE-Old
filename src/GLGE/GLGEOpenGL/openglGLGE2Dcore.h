@@ -12,201 +12,8 @@
 #ifndef _GLGE_2D_CORE_OGL_H_
 #define _GLGE_2D_CORE_OGL_H_
 
-
-//needed librarys
-//GLGE
-//GLGE main core
-#include "openglGLGE.h"
-
-//CML
-//a 2D vector
-#include "../CML/CMLVec2.h"
-//a 3x3 matrix
-#include "../CML/CMLMat3.h"
-
-//Basic C++
-#include <vector>
-
-///////////
-//STRUCTS//
-///////////
-
-//an 2D transform
-struct Transform2D
-{
-    //an 2D position argument
-    vec2 pos;
-    //the rotation of the object
-    float rot;
-    //the scaling of the object
-    vec2 size = vec2(1,1);
-
-    /**
-     * @brief Construct a new Transform 2D
-     * 
-     * default constructor
-     */
-    Transform2D();
-
-    /**
-     * @brief Construct a new Transform 2D
-     * 
-     * @param pos the posi
-     * @param rot 
-     * @param scale 
-     */
-    Transform2D(vec2 pos, float rot = 0, vec2 scale = vec2(1,1));
-
-    /**
-     * @brief Construct a new Transform 2D
-     * 
-     * @param x the x position of the object
-     * @param y the y position of the object
-     * @param rot the rotation of the object
-     * @param scale the scale  of the object
-     */
-    Transform2D(float x, float y, float rot = 0, vec2 scale = vec2(1,1));
-
-    /**
-     * @brief Get the Matrix for transforming an object to this scale, rot and pos
-     * 
-     * @return mat3 the transformation matrix
-     */
-    mat3 getMatrix();
-};
-
-//a 2D vertex
-struct Vertex2D
-{
-    //the position of the vertex
-    vec2 pos;
-    //store a texture coordinate
-    vec2 texCoord = vec2(0,0);
-    //store a color
-    vec4 color = vec4(0,0,0,0);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * basic constructor
-     */
-    Vertex2D();
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param pos the position of the vertex
-     * @param color the vertex color
-     */
-    Vertex2D(vec2 pos, vec4 color = vec4(1,1,1,1));
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param x the positoin on the x axis
-     * @param y the positoin on the y axis
-     * @param color the vertex color
-     */
-    Vertex2D(float x, float y, vec4 color = vec4(1,1,1,1));
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param x the position on the x axis
-     * @param y the position on the y axis
-     * @param r the amount of red in the color
-     * @param g the amount of green in the color
-     * @param b the amount of blue in the color
-     * @param a the transperency of the color
-     */
-    Vertex2D(float x, float y, float r, float g, float b, float a);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param pos the position of the vertex
-     * @param r the amount of red in the color
-     * @param g the amount of green in the color
-     * @param b the amount of blue in the color
-     * @param a the transperency of the color
-     */
-    Vertex2D(vec2 pos, float r, float g, float b, float a);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param pos the position of the vertex
-     * @param texCoord the texture coordinates
-     */
-    Vertex2D(vec2 pos, vec2 texCoord);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param x the positoin on the x axis
-     * @param y the positoin on the y axis
-     * @param texCoord the texture coordinate
-     */
-    Vertex2D(float x, float y, vec2 texCoord);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param pos the position for the vertex
-     * @param tX the x part for the texture sampling
-     * @param tY the y part for the texture sampling
-     */
-    Vertex2D(vec2 pos, float tX, float tY);
-
-    /**
-     * @brief Construct a new Vertex 2D
-     * 
-     * @param x the x position of the Vertex
-     * @param y the y position of the Vertex
-     * @param tX the x part for the texture sampling
-     * @param tY the y part for the texture sampling
-     */
-    Vertex2D(float x, float y, float tX, float tY);
-};
-
-///////////
-//CLASSES//
-///////////
-
-/**
- * @brief store a 2D mesh
- */
-class Mesh2D
-{
-public:
-    /**
-     * @brief Construct a new Mesh 2D
-     * 
-     * default constructor
-     */
-    Mesh2D();
-
-    /**
-     * @brief Construct a new Mesh 2D
-     * 
-     * @param vertices the vertices as an pointer array
-     * @param indices the indices as an pointer array
-     * @param sizeOfVertices the size of the vertex pointer array
-     * @param sizeOfIndices the size of the indices pointer array
-     */
-    Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices);
-
-    /**
-     * @brief Construct a new Mesh 2D
-     * 
-     * @param vertices the vertices in an std vector
-     * @param indices the indices in an std vector
-     */
-    Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices);
-
-    std::vector<unsigned int> indices;
-    std::vector<Vertex2D> vertices; 
-};
+//include the base classes for the 2D core
+#include "../GLGEInternal/glge2DcoreDefClasses.h"
 
 /**
  * @brief an 2D object
@@ -242,6 +49,26 @@ public:
      * @param isStatic say if the object should stay on the same screen position relative to the world
      */
     Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices, Transform2D transform = Transform2D(), bool isStatic = false);
+
+    /**
+     * @brief Construct a new 2D Object
+     * 
+     * @param mesh the mesh for the object
+     * @param transform the transform of the object
+     * @param isStatic say if the object should stay on the same screen position relative to the world
+     */
+    Object2D(Mesh2D mesh, Transform2D transform = Transform2D(), bool isStatic = false);
+
+    /**
+     * @brief Construct a new 2D object
+     * 
+     * @param preset the preset for the objcet (starting with GLGE_PRESET_)
+     * @param resolution the resolution for the preset
+     * @param color the color for the object (w = -1 for texture coordinates)
+     * @param transform the transform of the object
+     * @param isStatic say if the object should stay on the same screen position relative to the world
+     */
+    Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief draw the object to the screen
@@ -505,6 +332,21 @@ public:
      */
     vec2 getAnchor();
 
+    /**
+     * @brief Set the Static mode of the object
+     * 
+     * @param stat true : the object will be static | false : the object will be free to move arround
+     */
+    void setStatic(bool stat);
+
+    /**
+     * @brief Get the Static mode from the object
+     * 
+     * @return true : the object is static
+     * @return false : the object is free to move arround
+     */
+    bool getStatic();
+
 protected:
     //store the anchor position for the 2D Object
     vec2 anchor = vec2(0);
@@ -566,6 +408,9 @@ protected:
     void recalculateMoveMatrix();
 };
 
+/**
+ * @brief a camera to scroll around the 2D viewport
+ */
 class Camera2D
 {
 public:
@@ -786,6 +631,148 @@ private:
      * @brief recalculate the camera matrix
      */
     void recalculateMatrix();
+};
+
+//////////////////
+// BUTTON CLASS //
+//////////////////
+
+/**
+ * @brief a simple button pre-set to handle circular and rectangle buttons
+ */
+class Button : public Object2D
+{
+public:
+    /**
+     * @brief Construct a new Button
+     * 
+     * default constructor
+     */
+    Button();
+
+    /**
+     * @brief Construct a new Button
+     * 
+     * @param texture the texture to use for the button
+     * @param transf the transform for the button
+     */
+    Button(const char* texture, Transform2D transf = Transform2D());
+
+    /**
+     * @brief Construct a new Button
+     * 
+     * @param width the width of the button
+     * @param height the height of the button
+     * @param color the color of the button
+     * @param transf the transform for the button
+     */
+    Button(unsigned int width, unsigned int height, vec4 color, Transform2D transf = Transform2D());
+
+    /**
+     * @brief Construct a new Button
+     * 
+     * @param size the size of the button
+     * @param color the color of the button
+     * @param transf the transform for the button
+     */
+    Button(vec2 size, vec4 color, Transform2D transf = Transform2D());
+
+    /**
+     * @brief Construct a new Button
+     * 
+     * @param radius the radius for a circle
+     * @param res the resolution of the circle
+     * @param color the color of the button
+     * @param transf the transform for the button
+     */
+    Button(float radius, unsigned int res, vec4 color, Transform2D transf = Transform2D());
+
+    /**
+     * @brief update the object
+     */
+    void update();
+
+    /**
+     * @brief get if the button is currently clicked
+     * 
+     * @return true : the button is clicked | 
+     * @return false : the button is not clicked
+     */
+    bool isClicked();
+
+    /**
+     * @brief get if the button is hoverd
+     * 
+     * @return true : the button is hoverd | 
+     * @return false : the button is not hoverd
+     */
+    bool isHoverd();
+
+    /**
+     * @brief get if the button was clicked this tick
+     * 
+     * @return true : the button was clicked this tick | 
+     * @return false : the button was not clicked this tick
+     */
+    bool clickThisTick();
+
+    /**
+     * @brief get if the mouse moved over the button in this tick
+     * 
+     * @return true : the hovering started this tick | 
+     * @return false : the hovering did not start this tick
+     */
+    bool hoverThisTick();
+
+    /**
+     * @brief get if the click stopped this tick
+     * 
+     * @return true : the click stopped this tick | 
+     * @return false : the click did not stop this tick
+     */
+    bool clickStopThisTick();
+
+    /**
+     * @brief get if the hovering stopped this tick
+     * 
+     * @return true : the hovering did stop this tick | 
+     * @return false : the hovering did not stop this tick
+     */
+    bool hoverStopThisTick();
+
+protected:
+    /**
+     * @brief store if the button was clicked last tick
+     */
+    bool clickLastTick = false;
+    /**
+     * @brief store if the button was hoverd last tick
+     */
+    bool hoverLastTick = false;
+    /**
+     * @brief store if the button was clicked this tick
+     */
+    bool hoverThis = false;
+    /**
+     * @brief store if the button was hoverd this tick
+     */
+    bool clickThis = false;
+    /**
+     * @brief store if the button was released this tick
+     */
+    bool clickStopThis = false;
+    /**
+     * @brief store if the hovering was stopped this tick
+     */
+    bool hoveringStopedThis = false;
+    /**
+     * @brief store if a circle is used
+     */
+    bool isCircle = false;
+    /**
+     * @brief store the width and height or radius
+     */
+    vec2 size = vec2(0);
 };
 
 //FUNCTIONS

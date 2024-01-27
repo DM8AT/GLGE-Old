@@ -312,68 +312,8 @@ void floorSetup()
 //in this function the cube is set up
 void cubeSetup()
 {
-    //first, the vertices for the cube need to be created. An untextured cube would only need 8 vertices, for each point, but because
-    //the cube should be textured, each point needs to be made up of 3 vertices to handle the texture data correctly. 
-    //I know that this is not elegant, but it only needs 24 vertices for a cube, without indices a cube would need 36 vertices. 
-    Vertex vertices[] = {
-                                //pos   //tex   //normal
-                         //front and back
-                         Vertex(-1,-1, 1, 0,0,  0, 0, 1),
-                         Vertex( 1,-1, 1, 1,0,  0, 0, 1),
-                         Vertex(-1, 1, 1, 0,1,  0, 0, 1),
-                         Vertex( 1, 1, 1, 1,1,  0, 0, 1),
-
-                         Vertex(-1,-1,-1, 1,0,  0, 0,-1),
-                         Vertex( 1,-1,-1, 0,0,  0, 0,-1),
-                         Vertex(-1, 1,-1, 1,1,  0, 0,-1),
-                         Vertex( 1, 1,-1, 0,1,  0, 0,-1),
-
-                         //top and bottom
-                         Vertex(-1,-1, 1, 0,1,  0,-1, 0),
-                         Vertex( 1,-1, 1, 1,1,  0,-1, 0),
-                         Vertex(-1, 1, 1, 0,0,  0, 1, 0),
-                         Vertex( 1, 1, 1, 1,0,  0, 1, 0),
-
-                         Vertex(-1,-1,-1, 0,0,  0,-1, 0),
-                         Vertex( 1,-1,-1, 1,0,  0,-1, 0),
-                         Vertex(-1, 1,-1, 0,1,  0, 1, 0),
-                         Vertex( 1, 1,-1, 1,1,  0, 1, 0),
-
-                         //left and right
-                         Vertex(-1,-1, 1, 1,0, -1, 0, 0),
-                         Vertex( 1,-1, 1, 0,0,  1, 0, 0),
-                         Vertex(-1, 1, 1, 1,1, -1, 0, 0),
-                         Vertex( 1, 1, 1, 0,1,  1, 0, 0),
-
-                         Vertex(-1,-1,-1, 0,0, -1, 0, 0),
-                         Vertex( 1,-1,-1, 1,0,  1, 0, 0),
-                         Vertex(-1, 1,-1, 0,1, -1, 0, 0),
-                         Vertex( 1, 1,-1, 1,1,  1, 0, 0),
-                        };
-    
-    //then, the indices for the cube are created. I used values in the range of 0 to 7 to say the vertex ID and then added 8 or 16, if the triangle should
-    //show the top or bottom(8) or the left or right(16)
-    uint indices[] = {
-                      //front and back
-                      0,2,1,
-                      1,2,3,
-                      4,5,6,
-                      5,7,6,
-                      //top and bottom
-                      0+8,1+8,4+8,
-                      1+8,5+8,4+8,
-                      2+8,6+8,3+8,
-                      3+8,6+8,7+8,
-                      //left and right
-                      0+16,4+16,2+16,
-                      2+16,4+16,6+16,
-                      1+16,3+16,5+16,
-                      3+16,7+16,5+16};
-
-    //the cube mesh is asigned to it like the grass floor mesh, but an optional transform is inputed to lift the cube out of the floor. else, it would be
-    //stuck in there and that would not look good. The cube is moved up such an strange amount to prevent something called Z-Fighting
-    cube = Object(vertices, indices, sizeof(vertices), sizeof(indices), Transform(vec3(0,1.01,2),vec3(0,0,0),1));
-
+    //the cube object is constructed using a cube preset using an alpha of -1 for the color to use textures
+    cube = Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,1,2),vec3(0,0,0), 1));
     //create a material for the cube
     Material cubeMaterial = Material(glgeGetLastFrame(), GLGE_TEXTURE, 0);
     //set it to unlit

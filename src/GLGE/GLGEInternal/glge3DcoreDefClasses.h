@@ -27,6 +27,44 @@
 //say the type of an model file
 #define GLGE_OBJ 1
 
+//define the preset inputs
+
+//check if the input for texture coordinates was allready defined
+#ifndef GLGE_PRESET_USE_TEXTURE_COORDINATES
+//define the input for texture coordinates
+#define GLGE_PRESET_USE_TEXTURE_COORDINATES vec4(-1)
+#endif //GLGE_PRESET_USE_TEXTURE_COORDINATES generation
+//check if the input for a special function was allready defined
+#ifndef GLGE_PRESET_USE_SPECIAL
+//define the input for presets used for special things (like color gradients)
+#define GLGE_PRESET_USE_SPECIAL vec4(-2)
+#endif //GLGE_PRESET_USE_SPECIAL define
+
+//define the presets
+
+//check if a define for an empty object allreday exists
+#ifndef GLGE_PRESET_EMPTY
+//generate an empty object without any mesh
+#define GLGE_PRESET_EMPTY 0
+#endif //GLGE_PRESET_EMPTY creation
+//genearte an object with an cube as the mesh
+#define GLGE_PRESET_CUBE 1
+//genearte an object with an plane as the mesh
+#define GLGE_PRESET_PLANE 2
+//check if the circle allready exists
+#ifndef GLGE_PRESET_CIRCLE
+//genearte an object with an circle as the mesh
+#define GLGE_PRESET_CIRCLE 3
+#endif // GLGE_PRESET_CIRCLE generation
+//genearte an object with an sphere as the mesh
+#define GLGE_PRESET_SPHERE 4
+//genearte an object with an icosphere as the mesh
+#define GLGE_PRESET_ICOSPHERE 5
+//genearte an object with an cylinder as the mesh
+#define GLGE_PRESET_CYLINDER 6
+//genearte an object with an cone as the mesh
+#define GLGE_PRESET_CONE 7
+
 ///////////
 //STRUCTS//
 ///////////
@@ -210,6 +248,19 @@ struct Vertex
      * @param nz the normal on the z axis
      */
     Vertex(float x, float y, float z, float r, float g, float b, float a, float nx, float ny, float nz);
+
+    /**
+     * @brief Construct a new Vertex from 6 floats and one vec4
+     * 
+     * @param x the x position of the vertex
+     * @param y the y position of the vertex
+     * @param z the z position of the vertex
+     * @param color the color for the vertex
+     * @param nx the normal on the x axis
+     * @param ny the normal on the y axis
+     * @param nz the normal on the z axis
+     */
+    Vertex(float x, float y, float z, vec4 color, float nx, float ny, float nz);
 };
 
 /**
@@ -227,6 +278,15 @@ public:
      * @brief defalut constructor
      */
     Mesh();
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param preset the preset to use
+     * @param color the color for the mesh (alpha = -1 for texture coordinates)
+     * @param resolution the amount of subdivision for subdivided meshes (0 for defaults)
+     */
+    Mesh(unsigned int preset, vec4 color, unsigned int resolution = 0);
 
     /**
      * @brief Construct a new Mesh

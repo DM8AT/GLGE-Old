@@ -36,6 +36,18 @@ public:
     Object();
 
     /**
+     * @brief Construct a new Object object
+     * 
+     * @param preset the preset to use to generate the object ( starting with GLGE_PRESET_ )
+     * @param color the color to use for the constructed object (alpha = -1 to disable color and use texture coordinates)
+     * @param resolution the amount of subdivision for subdivided mehses (0 for default)
+     * @param transform an optinal transform for the object
+     * @param isTransparent say if an object is renderd in the transparent or opaque pass
+     * @param isStatic says if the object should move with the camera
+     */
+    Object(unsigned int preset, vec4 color, unsigned int resolution = 0, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
+
+    /**
      * @brief Construct a new Object
      * 
      * @param vertices a pointer array to store the vertices
