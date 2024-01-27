@@ -15,6 +15,13 @@
 void printd(std::string data){for(ulong i=0;i<data.size();i++){if(data[i]!=0){std::cout<<data[i];}else{std::cout<<" ";}}std::cout<<"<-end\n";}
 void printdi(std::string data){for(ulong i=0;i<data.size();i++){std::cout<<(int)data[i];}std::cout<<"<-end\n";}
 
+GLGEAtlasImage::GLGEAtlasImage( std::string name, vec2 pos, vec2 size )
+{
+    this->name = name;
+    this->pos = pos;
+    this->size = size;
+}
+
 // Main constructor
 GLGEAtlasFile::GLGEAtlasFile() {}
 
