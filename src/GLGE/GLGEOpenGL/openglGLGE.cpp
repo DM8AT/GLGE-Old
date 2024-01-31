@@ -371,7 +371,7 @@ void glgeRunMainLoop()
                     //get the active mouse position
                     SDL_GetMouseState(&x,&y);
                     //store the screen size
-                    vec2 s = glgeWindows[event.window.windowID-1]->getSize();
+                    vec2 s = glgeWindows[event.window.windowID-glgeWindowIndexOffset]->getSize();
                     //store the mouse position
                     glgeMouse.pos = vec2(float(x) / s.x, float(y) / s.y);
                     //store the pixel the mouse is on
@@ -471,7 +471,7 @@ void glgeRunMainLoop()
                             //close the window
                             wptr->close();
                             //check if the window is the main window
-                            if (event.window.windowID-1 == glgeMainWindowIndex)
+                            if (event.window.windowID-glgeWindowIndexOffset == glgeMainWindowIndex)
                             {
                                 //check if GLGE should close if the main window closes
                                 if (glgeExitOnMainWindowClose)
