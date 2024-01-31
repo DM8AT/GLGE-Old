@@ -275,7 +275,7 @@ bool glgeGetWarningOutput()
 GLGEWindow* safeWindowAcess(unsigned int windowID)
 {
     //check if the window pointer is 0
-    if ((windowID-1) > (unsigned int)glgeWindows.size())
+    if ((windowID-glgeWindowIndexOffset) > (unsigned int)glgeWindows.size())
     {
         //check if a warning should be printed
         if (glgeWarningOutput)
@@ -287,7 +287,7 @@ GLGEWindow* safeWindowAcess(unsigned int windowID)
         return NULL;
     }
     //get the window pointer
-    GLGEWindow* wptr = glgeWindows[windowID-1];
+    GLGEWindow* wptr = glgeWindows[windowID-glgeWindowIndexOffset];
     //check if the window pointer is a nullpointer
     if (wptr == NULL)
     {
