@@ -61,6 +61,7 @@ Upcoming features that may be added to GLGE in the future include:
    - CML is now compleatly documentated
 - added a new integer type : ivec2, ivec3 and ivec4. Like dvec or vec but with integers not with floats or doubles
 - fixed bug where SDL window index wouldn't start at 1, now window offset to SDL window indices is dynamic
+- disabled backface culling for enterprise in 3D example
 ## Update 0.5-pre 2
 - made new folder structure a little bit bedder
 - split up a few files into multiple (so if Vulkan gets added in the future, less code needs to be re-written)

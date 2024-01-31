@@ -77,8 +77,12 @@ bool isActive = true;
 void display()
 {
     //before this function is called, the complete screen gets cleared. 
+    //backface culling dosn't look good on transparent objects
+    glgeDisableBackfaceCulling();
     //draw the Enterpreis
     enterprise.draw();
+    //re-enable backface culling for the rest of the objects
+    glgeEnableBackfaceCulling();
 
     //call the draw function from the grass floor object to draw it to the screen
     grassFloor.draw();

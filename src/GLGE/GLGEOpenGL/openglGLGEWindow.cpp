@@ -1721,6 +1721,9 @@ void GLGEWindow::enableBackfaceCulling()
     {
         //if it is, update the backface culling imediatly
         glEnable(GL_CULL_FACE);
+        //restore the cull order
+        glFrontFace(GL_CCW);
+        glCullFace(GL_BACK);
     }
     //say that face culling is enabled
     this->backfaceCulling = false;
