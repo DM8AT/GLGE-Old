@@ -8,9 +8,10 @@ bin/*
 
 # Texture atlas
 assets/atlas.png
-assets/atlas.png.json
-assets/atlas_mcTest.png
+assets/atlas.png.atlas
 
 # Doxygen files
 doxygen/html
 doxygen/latex
+
+src/Shaders/custome
