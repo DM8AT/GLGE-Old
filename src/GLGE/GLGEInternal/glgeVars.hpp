@@ -113,4 +113,7 @@ extern bool glgeInitalisedGLEW;
 //store if GLGE should exit if the main window is closed
 extern bool glgeExitOnMainWindowClose;
 
+//store the conversion from SDL window index space to GLGE window index space
+extern int glgeWindowIndexOffset;
+
 #endif

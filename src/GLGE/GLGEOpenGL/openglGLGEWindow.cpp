@@ -130,6 +130,13 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     //update the window
     SDL_GL_SwapWindow((SDL_Window*)this->window);
 
+    //check if the window index offset is uninitalised (-1)
+    if (glgeWindowIndexOffset == -1)
+    {
+        //set the current index as offset (the first window should be 0)
+        glgeWindowIndexOffset = this->id;
+    }
+
     //say to cull backfasing triangles
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -511,13 +518,13 @@ void GLGEWindow::close()
     //close the window
     SDL_DestroyWindow(win);
     //check if this is the main window
-    if ((unsigned int)this->id-1 == glgeMainWindowIndex)
+    if ((unsigned int)this->id-glgeWindowIndexOffset == glgeMainWindowIndex)
     {
         //say that the main window was destroyd
         glgeHasMainWindow = false;
     }
     //delete the window from the call stack
-    glgeWindows[this->id-1] = nullptr;
+    glgeWindows[this->id-glgeWindowIndexOffset] = nullptr;
     //decrease the amount of active GLGE windows
     glgeActiveWindows -= 1;
 }
@@ -1303,7 +1310,7 @@ bool GLGEWindow::getHasInitFunc()
 void GLGEWindow::start()
 {
     //add the inputed pointer
-    glgeWindows[this->id-1] = this;
+    glgeWindows[this->id-glgeWindowIndexOffset] = this;
     //increase the amount of active GLGE windows
     glgeActiveWindows++;
     //bind this to the current window
@@ -2625,7 +2632,7 @@ void GLGEWindow::unbindScreenRect()
 void GLGEWindow::makeCurrent()
 {
     //store the window ID as currently active by OpenGL
-    glgeCurrentWindowIndex = this->id-1;
+    glgeCurrentWindowIndex = this->id-glgeWindowIndexOffset;
     //bind the OpenGL context to the window
     SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
 }
