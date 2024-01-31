@@ -1883,7 +1883,7 @@ void GLGEWindow::setCamera(Camera* cam)
     //store the inputed camera
     this->mainCamera = cam;
     //say the camera that it is bound to this window
-    cam->setWindowIndex(this->id-1);
+    cam->setWindowIndex(this->id-glgeWindowIndexOffset);
 }
 
 Camera* GLGEWindow::getCamera()
