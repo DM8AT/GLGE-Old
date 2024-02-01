@@ -681,23 +681,18 @@ void GLGEWindow::draw()
             glUniformMatrix4fv(this->projInLightingPass, 1, false, this->mainCamera->getProjectionMatrixPointer());
         }
         //pass all the lights to the shader
-        //load all light positions to the shader
         for (int i = 0; i < (int)this->lightPosInLightingPass.size(); i++)
         {
-            //pass the light position
+            //pass the position
             glUniform3f(this->lightPosInLightingPass[i], lights[i]->getPos().x, lights[i]->getPos().y, lights[i]->getPos().z);
-        }
-        //load all light colors to the shader
-        for (int i = 0; i < (int)lightColInLightingPass.size(); i++)
-        {
             //pass the light color
-            glUniform3f(lightColInLightingPass[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
-        }
-        //load all light intensitys to the shader
-        for (int i = 0; i < (int)lightIntInLightingPass.size(); i++)
-        {
-            //pass the light intensity
-            glUniform1f(lightIntInLightingPass[i], lights[i]->getInsensity());
+            glUniform3f(this->lightColInLightingPass[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
+            //pass the intensity
+            glUniform1f(this->lightIntInLightingPass[i], lights[i]->getInsensity());
+            //pass the type
+            glUniform1f(this->lightTypInLightingPass[i], lights[i]->getType());
+            //pass the direction
+            glUniform3f(this->lightDirInLightingPass[i], lights[i]->getDir().x, lights[i]->getDir().y, lights[i]->getDir().z);
         }
         //pass the amount of active lights
         glUniform1i(activeLightInLightingPass, (int)lights.size());
@@ -1655,6 +1650,10 @@ bool GLGEWindow::getLightingUniforms()
     std::string prefixLightCol = std::string("glgeLightColor[");
     //set the prefix for the light intensity
     std::string prefixLightInt = std::string("glgeLightInt[");
+    //set the prefix for the light type
+    std::string prefixLightTyp = std::string("glgeLightType[");
+    //set the prefix for the light direction
+    std::string prefixLightDir = std::string("glgeLightDir[");
 
     for (int i = 0; i < (int)this->lights.size(); i++)
     {
@@ -1664,6 +1663,10 @@ bool GLGEWindow::getLightingUniforms()
         this->lightIntInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightInt + std::to_string(i) + std::string("]")).c_str()));
         //get the uniform for the light position
         this->lightPosInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightPos + std::to_string(i) + std::string("]")).c_str()));
+        //get the uniform for the light type
+        this->lightTypInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightTyp + std::to_string(i) + std::string("]")).c_str()));
+        //get the uniform for the light direction
+        this->lightDirInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightDir + std::to_string(i) + std::string("]")).c_str()));
     }
 
     //get the uniform for the amount of active lights

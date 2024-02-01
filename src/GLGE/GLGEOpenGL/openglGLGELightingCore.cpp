@@ -47,6 +47,37 @@ Light::Light(vec3 pos, vec3 col, float intensity)
     this->color = col;
     //store the inputed intensity
     this->lightIntensity = intensity;
+    //specify the light as a point light
+    this->lightType = GLGE_LIGHT_SOURCE_TYPE_POINT;
+
+    //setup the shadow map
+    this->setupShadowMap();
+}
+
+Light::Light(vec3 pos, vec3 dir, unsigned int type, vec3 color, float intensity)
+{
+    //check if the light soure type is safe
+    if (type > 2)
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print a warning
+            printf("[GLGE WARNING] %d dose not correspont to any valid light source type\n", type);
+        }
+        //stop the function
+        return;
+    }
+    //now, everything is safe to store
+    this->lightType = type;
+    //store the inputed position
+    this->pos = pos;
+    //store the inpted color
+    this->color = color;
+    //store the inputed intensity
+    this->lightIntensity = intensity;
+    //store the direction
+    this->dir = dir;
 
     //setup the shadow map
     this->setupShadowMap();
@@ -60,6 +91,8 @@ Light::Light(float x, float y, float z, float r, float g, float b, float intensi
     this->color = vec3(r,g,b);
     //store the inputed intensity
     this->lightIntensity = intensity;
+    //specify the light as a point light
+    this->lightType = GLGE_LIGHT_SOURCE_TYPE_POINT;
 
     //setup the shadow map
     this->setupShadowMap();
@@ -177,6 +210,27 @@ void Light::bindShadowMapTexture(int samp)
     glActiveTexture(GL_TEXTURE0 + samp);
     //bind the shadow map texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowMap);
+}
+
+int Light::getType()
+{
+    //return the light source type
+    return this->lightType;
+}
+
+vec3 Light::getDir()
+{
+    //check if this is a point light
+    if (this->lightType == GLGE_LIGHT_SOURCE_TYPE_POINT)
+    {
+        //if it is, return 0
+        return vec3(0);
+    }
+    else
+    {
+        //else, return the direction
+        return this->dir;
+    }
 }
 
 void Light::setupShadowMap()

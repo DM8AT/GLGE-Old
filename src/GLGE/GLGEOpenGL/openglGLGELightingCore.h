@@ -25,13 +25,13 @@
 #define GLGE_LIGHT_SOURCE_MAX 255
 
 //define a light as a single point of light
-#define GLGE_POINT_LIGHT 0
+#define GLGE_LIGHT_SOURCE_TYPE_POINT 0
 
 //define a light as a single point of light in an direction
-#define GLGE_SPOT_LIGHT 1
+#define GLGE_LIGHT_SOURCE_TYPE_SPOT 1
 
 //define a light as a light that shines in an direction
-#define GLGE_DIRECTIONAL_LIGHT 2
+#define GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL 2
 
 /**
  * @brief store a light in the scene
@@ -56,14 +56,15 @@ public:
     Light(vec3 pos, vec3 color = vec3(1,1,1), float intensity = 1.f);
 
     /**
-     * @brief Construct a new spot Light
+     * @brief Construct a new Light source
      * 
-     * @param pos the position of the light
-     * @param dir the direction of the light
-     * @param color the light color
-     * @param intensity the light intensity
+     * @param pos the position of the light in the world (for point or spot lights)
+     * @param dir the direction of the light (for spot and directional lights)
+     * @param type the type of the light (starting with GLGE_LIGHT_SOURCE_TYPE_)
+     * @param color the color of the light source
+     * @param intensity the strength of the light source
      */
-    Light(vec3 pos, vec3 dir, vec3 color = vec3(1,1,1), float intensity = 1.f);
+    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float intensity = 1.f);
 
     /**
      * @brief Construct a new Light source
@@ -212,17 +213,35 @@ public:
      */
     void bindShadowMapTexture(int samplerID);
 
+    /**
+     * @brief Get the Type of a light source
+     * 
+     * @return int the light source type
+     */
+    int getType();
+
+    /**
+     * @brief Get the direction of the light source
+     * 
+     * @return vec3 the light direction
+     */
+    vec3 getDir();
+
 private:
     //store the light position
     vec3 pos;
     //store the light color
     vec3 color;
+    //store the light direction
+    vec3 dir = vec3(0);
     //store the light intensity
     float lightIntensity;
     //store the shadow map for the light
     unsigned int shadowFBO;
     //store the shadow map cube texture
     unsigned int shadowMap;
+    //store the light source type
+    int lightType = -1;
     //setup the shadow map
     void setupShadowMap();
 };

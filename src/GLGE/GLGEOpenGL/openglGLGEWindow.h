@@ -1062,6 +1062,10 @@ private:
     std::vector<int> lightIntInLightingPass = {};
     //store the position of the light position uniform in the Lighting Pass shader
     std::vector<int> lightPosInLightingPass = {};
+    //store the light types in the lighting pass shader
+    std::vector<int> lightTypInLightingPass = {};
+    //store the light direction in the lighting pass shader
+    std::vector<int> lightDirInLightingPass = {};
     //store the position of the active light uniform in the Lighting Pass shader
     int activeLightInLightingPass = -1;
     //store the position of the camera positin uniform in the Lighting Pass shader
