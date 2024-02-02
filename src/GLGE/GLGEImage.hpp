@@ -48,8 +48,13 @@ class Image {
     /***/
     Image();
 
-    /***/
-    void create();
+    /**
+     * @brief Creates a new image
+     * 
+     * @param size The width and height of the image
+     * @param channels The amount of channels for the image. 1 - 4
+     */
+    void create( ivec2 size, int channels );
 
     /**
      * @brief Open an image

@@ -10,6 +10,9 @@
  */
 
 #include "GLGEImage.hpp"
+#include "GLGEInternal/glgeImage.h"
+
+#include "glgeErrors.hpp"
 
 // std_image_write setup
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -21,15 +24,41 @@ Image::Image() {}
 
 // functions //
 
-/***/
-void create() {}
+/**
+ * @brief Creates a new image
+ * 
+ * @param size The width and height of the image
+ * @param channels The amount of channels for the image. 1 - 4
+ */
+void Image::create( ivec2 size, int channels )
+{
+    // calculate the size of the image
+    size_t imageSize = size.x * size.y * channels;
+ 
+    // try to allocate the memory for the atlas
+    this->image = (unsigned char*) malloc(imageSize);
+
+    // check if memory was successfully allocated
+    if(this->image == NULL) {
+        // ..print error message...
+        printf(GLGE_ERROR_ALLOCATE_MEMORY, "image creation");
+        // ...and exit (In the future, this needs to be in an if)
+        exit(1);
+    }
+
+    // clear the image once, because the image can have random colors after creation
+    this->clear(); 
+}
 
 /**
  * @brief Open an image
  * 
  * @param path The path to the image
  */
-void Image::open( const char* path ) {}
+void Image::open( const char* path )
+{
+    // open the image
+}
 
 /**
  * @brief Save the image
@@ -46,7 +75,11 @@ void Image::save( const char* path )
  * @brief Close the image
  * 
  */
-void Image::close() {}
+void Image::close()
+{
+    // free the image ( is linked to free )
+    glgeImageFree(this->image);
+}
 
 /**
  * @brief Put a pixel at the specified position
