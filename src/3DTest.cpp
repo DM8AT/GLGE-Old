@@ -73,8 +73,6 @@ float mouseSensetivity = 20.f;
 //say if the mouse is currently locked to the screen
 bool isActive = true;
 
-Shader pps;
-
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
 {
@@ -103,7 +101,6 @@ void display()
 //the tick function is called every tick. It should contain thinks like updates, but no draw calls. 
 void tick()
 {
-    pps.setCustomVec2("screenSize",glgeGetWindowSize());
     //make changes to the camera by changing its position or rotating it
 
     //calculate the cam speed for this frame, to make the movement speed framerate independend. To do that, multiply the base speed by the delta time
@@ -522,10 +519,7 @@ void run3Dexample()
     //glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
-    pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER,"src/Shaders/custome/crt.fs");
-    pps.setCustomVec2("screenSize",glgeGetWindowSize());
-    pps.recalculateUniforms();
-    glgeSetPostProsessingShader(pps.getShader());
+    glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
     //bind another post processing shader
     invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
     //set a uniform float in the shader to controll the strength for the invertion
