@@ -1,24 +1,21 @@
 /**
  * @file textureAtlas.h
- * @author JuNi4
+ * @author JuNi4 (https://github.com/juni4)
  * @brief Texture atlas for GLGE
  * @version 0.1
  * @date 2023-02-27
  * 
- * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright (c) JuNi4 2023. This project is released under the MIT license. 
  * 
  */
-#include "GLGEtextureAtlas.h"
+#include "GLGETextureAtlas.hpp"
 #include "fstream"
 #include <iostream>
 
 #include "GLGEInternal/glgeErrors.hpp"
 #include "GLGEInternal/glgeImage.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
-// FIXME(JuNi): Fix atlas images corrupting at large sizes
+// FIX(JuNi): Fix atlas images corrupting at large sizes
 
 /////////////////////////
 // Default constructor //

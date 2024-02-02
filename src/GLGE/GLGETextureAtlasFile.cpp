@@ -1,15 +1,15 @@
 /**
  * @file glgeAtlasFile.cpp
- * @author JuNi4
+ * @author JuNi4 (https://github.com/juni4)
  * @brief Definitions for glgeAtlasFile.hpp
- * @version 0.1
+ * @version 1.0
  * @date 2023-12-18
  * 
- * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright (c) JuNi4 2023. This project is released under the MIT license. 
  * 
  */
 
-#include "glgeAtlasFile.hpp"
+#include "GLGETextureAtlasFile.hpp"
 #include "GLGEInternal/glgeErrors.hpp"
 
 void printd(std::string data){for(ulong i=0;i<data.size();i++){if(data[i]!=0){std::cout<<data[i];}else{std::cout<<" ";}}std::cout<<"<-end\n";}

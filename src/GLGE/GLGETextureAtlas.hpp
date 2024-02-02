@@ -1,11 +1,11 @@
 /**
  * @file textureAtlas.h
- * @author JuNi4
+ * @author JuNi4 (https://github.com/juni4)
  * @brief Texture atlas for GLGE
  * @version 0.1
  * @date 2023-02-27
  * 
- * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright (c) JuNi4 2023. This project is released under the MIT license. 
  * 
  */
 #include "CML/CMLDVec2.h"
@@ -19,7 +19,7 @@
 #include <vector>
 #include <math.h>
 
-#include "glgeAtlasFile.hpp"
+#include "GLGETextureAtlasFile.hpp"
 
 // Include guard
 #ifndef _ATLAS_H_

@@ -1,11 +1,11 @@
 /**
  * @file glgeAtlasFile.hpp
- * @author JuNi4
+ * @author JuNi4 (https://github.com/juni4)
  * @brief A file format for storing texture atlas data for the glge game engine
- * @version 1
+ * @version 1.0
  * @date 2023-12-18
  * 
- * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright (c) JuNi4 2023. This project is released under the MIT license. 
  * 
  */
 
@@ -15,7 +15,7 @@
 #include <fstream>
 #include <filesystem>
 
-#include "glgeAtlasErrors.hpp"
+#include "GLGETextureAtlasErrors.hpp"
 
 #include "CML/CML.h"
 

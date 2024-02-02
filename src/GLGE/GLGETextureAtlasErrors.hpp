@@ -5,7 +5,7 @@
  * @version 0.0.1
  * @date 2023-12-18
  * 
- * @copyright Copyright (c) JuNi4 2023. All rights reserved. This project is released under the MIT license. 
+ * @copyright Copyright (c) JuNi4 2023. This project is released under the MIT license. 
  * 
  */
 
