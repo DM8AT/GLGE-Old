@@ -2,7 +2,7 @@
  * @file GLGEImage.hpp
  * @author JuNi4 (https://github.com/juni4)
  * @brief Image manager for stb_image
- * @version 0.1
+ * @version 1.0
  * @date 2024-02-02
  * 
  * @copyright Copyright (c) JuNi4 2024. This project is released under the MIT license. 
@@ -20,8 +20,14 @@
 /**
  * @brief Class for managing an image file
  * 
+ * Don't forget to close the image!
+ * 
  */
 class Image {
+
+    //////////////////////
+    // Private Elements //
+    //////////////////////
 
     private:
 
@@ -45,8 +51,34 @@ class Image {
 
     public:
 
-    /***/
+    /////////////////
+    // Constructor //
+    /////////////////
+
+    /**
+     * @brief Construct a new Image object
+     * 
+     */
     Image();
+
+    /**
+     * @brief Construct a new Image object with an empty image from the given parameters
+     * 
+     * @param size The size of the image
+     * @param channels The amount of channels for the image
+     */
+    Image( ivec2 size, int channels );
+
+    /**
+     * @brief Construct a new Image object with an image being loaded form a fileapth
+     * 
+     * @param path The path to the image
+     */
+    Image( const char* path );
+
+    /////////////////////
+    // Public Elements //
+    /////////////////////
 
     /**
      * @brief Creates a new image

@@ -17,9 +17,9 @@
 
 // FIX(JuNi): Fix atlas images corrupting at large sizes
 
-/////////////////////////
-// Default constructor //
-/////////////////////////
+/////////////////
+// constructor //
+/////////////////
 
 Atlas::Atlas() {}
 

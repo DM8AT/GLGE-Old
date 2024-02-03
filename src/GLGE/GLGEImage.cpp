@@ -2,7 +2,7 @@
  * @file GLGEImage.cpp
  * @author JuNi4 (https://github.com/juni4)
  * @brief Image manager for stb_image
- * @version 0.1
+ * @version 1.0
  * @date 2024-02-02
  * 
  * @copyright Copyright (c) JuNi4 2024. This project is released under the MIT license. 
@@ -14,6 +14,8 @@
 
 #include "GLGEInternal/glgeErrors.hpp"
 
+#include "GLGEMath.h"
+
 // std_image_write setup, i think it needs to be replaced be replaced with something from glge
 //#define STB_IMAGE_WRITE_IMPLEMENTATION
 //#include "stb_image_write.h"
@@ -21,6 +23,29 @@
 // Constructors
 
 Image::Image() {}
+
+/**
+ * @brief Construct a new Image object with an empty image from the given parameters
+ * 
+ * @param size The size of the image
+ * @param channels The amount of channels for the image
+ */
+Image::Image( ivec2 size, int channels )
+{
+    // call the create function
+    this->create( size, channels );
+}
+
+/**
+ * @brief Construct a new Image object with an image being loaded form a fileapth
+ * 
+ * @param path The path to the image
+ */
+Image::Image( const char* path )
+{
+    // call the open function
+    this->open( path );
+}
 
 // functions //
 
@@ -101,7 +126,7 @@ void Image::put_pixel( ivec2 pos, ivec4 col )
     int arr[4] = {col.x, col.y, col.z, col.w};
 
     // write the RGBA values
-    for (int i = 0; i < 4; i++ ) {
+    for (int i = 0; i < this->channelCount; i++ ) {
         this->image[p++] = arr[i];
     }
 }
@@ -112,14 +137,15 @@ void Image::put_pixel( ivec2 pos, ivec4 col )
  * @param pos The target position
  * @return ivec4 The color at the pixel
  */
-ivec4 Image::get_pixel( ivec2 pos ) {
+ivec4 Image::get_pixel( ivec2 pos )
+{
 
     // calculate the position in the image
     unsigned long long posX = pos.x * this->channelCount;
     unsigned long long posY = pos.y * this->size.x * this->channelCount;
 
     // create array for storing color values
-    int arr[4] = {0, 0, 0, 255};
+    int arr[4] = {0, 0, 0, 0};
 
     // go through all channels
     for (int i = 0; i < this->channelCount; i++) {
@@ -146,9 +172,27 @@ void Image::fill( ivec4 col )
  * @brief Clears the entire image
  * 
  */
-void Image::clear(){
+void Image::clear()
+{
     // go through all pixels
     for ( int i = 0; i < this->size.x * this->size.y * this->channelCount; i++ ) {
         this->image[i] = 0;
+    }
+}
+
+/**
+ * @brief Puts the image onto another image at the specified position
+ * 
+ * @param pos Target position for the image
+ * @param imgb The target image, to put the image onto
+ */
+void Image::blit( ivec2 pos, Image *imgb )
+{
+    // blit one image onto another
+    for ( int x = 0; x < glgeMax(this->size.x, imgb->size.x-pos.x); x++ ) {
+    for ( int y = 0; y < glgeMax(this->size.y, imgb->size.y-pos.y); y++ ) {
+        // set pixel
+        imgb->put_pixel( pos + ivec2(x,y), this->get_pixel(ivec2(x,y)) );
+    }
     }
 }
