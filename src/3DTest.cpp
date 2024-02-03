@@ -524,7 +524,8 @@ void run3Dexample()
     //glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
     // create post processing shader
-    pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/example_pps/crt.fs");
+    //pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/example_pps/crt.fs");
+    pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/testPostProcessingShader.fs");
     // add custom uniform
     pps.setCustomVec2("screenSize", glgeGetScreenSize());
     pps.recalculateUniforms();
