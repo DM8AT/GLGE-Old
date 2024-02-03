@@ -15,7 +15,7 @@
 #define GLGE_STB_IMAGE
 
 /**
- * @brief an call of stb_image function "stbi_load"
+ * @brief a call of stb_image function "stbi_load"
  * 
  * @param filename a path to the file
  * @param x the width of the image
@@ -40,6 +40,11 @@ void glgeSaveImage(const char* filename, ivec2 size, int channelCount, unsigned 
  * @brief free the data allocated to an image
  * 
  * @param data the allocated data
+ * 
+ * <dl class="section warning"><dt>Note:</dt>
+ * This function references 'free' but over multiple functions though the compiler will remove theese steps.
+ * </dl>
+ * 
  */
 void glgeImageFree(unsigned char* data);
 
