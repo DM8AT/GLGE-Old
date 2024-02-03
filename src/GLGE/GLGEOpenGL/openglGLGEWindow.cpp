@@ -1424,7 +1424,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //bind the texture as a cube map
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyboxTex);
     //load the top image
-    data = glgeLoad(top, &width, &height, &nrChannels);
+    data = glgeLoadImage(top, &width, &height, &nrChannels);
     //check if the width is valide
     if (width > GL_MAX_TEXTURE_SIZE)
     {
@@ -1474,7 +1474,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //clear the texture data
     glgeImageFree(data);
     //load the bottom image
-    data = glgeLoad(bottom, &width, &height, &nrChannels);
+    data = glgeLoadImage(bottom, &width, &height, &nrChannels);
     //load the image to y-negative
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 
@@ -1482,7 +1482,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //clear the texture data
     glgeImageFree(data);
     //load the left image
-    data = glgeLoad(left, &width, &height, &nrChannels);
+    data = glgeLoadImage(left, &width, &height, &nrChannels);
     //load the image to x-negative
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 
@@ -1490,7 +1490,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //clear the texture data
     glgeImageFree(data);
     //load the right image
-    data = glgeLoad(right, &width, &height, &nrChannels);
+    data = glgeLoadImage(right, &width, &height, &nrChannels);
     //load the image to x-positive
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_POSITIVE_X, 
@@ -1498,7 +1498,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //clear the texture data
     glgeImageFree(data);
     //load the front image
-    data = glgeLoad(front, &width, &height, &nrChannels);
+    data = glgeLoadImage(front, &width, &height, &nrChannels);
     //load the image to z-positive
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 
@@ -1506,7 +1506,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     //clear the texture data
     glgeImageFree(data);
     //load the back image
-    data = glgeLoad(back, &width, &height, &nrChannels);
+    data = glgeLoadImage(back, &width, &height, &nrChannels);
     //load the image to z-negative
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 

@@ -9,6 +9,8 @@
  * 
  */
 
+#include "../CML/CML.h"
+
 #ifndef GLGE_STB_IMAGE
 #define GLGE_STB_IMAGE
 
@@ -18,11 +20,21 @@
  * @param filename a path to the file
  * @param x the width of the image
  * @param y the height of the image
- * @param comp the bit size per chanel
- * @param req_comp i dont know, look at the stbi image docomentation
- * @return unsigned char* a data pointer to an image
+ * @param comp The number of channels
+ * @param req_comp The desired number of channels, usefull for only loading rgb when the image is rgba. 0 means that all channels are loaded
+ * @return unsigned char* a data pointer to an image or NULL incase of an error
  */
-unsigned char* glgeLoad(const char* filename, int *x, int *y, int *comp, int req_comp = 0);
+unsigned char* glgeLoadImage(const char* filename, int *x, int *y, int *comp, int req_comp = 0);
+
+/**
+ * @brief Save an image
+ * 
+ * @param filename The name of the image
+ * @param size The width and height of the image
+ * @param channelCount Number of channels in the image
+ * @param image The image data
+ */
+void glgeSaveImage(const char* filename, ivec2 size, int channelCount, unsigned char* image);
 
 /**
  * @brief free the data allocated to an image

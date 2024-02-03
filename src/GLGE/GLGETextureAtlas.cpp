@@ -335,7 +335,7 @@ unsigned char * Atlas::_constructs_atlas_same(int size, bool save_atlas, bool ve
             }
             // image values
             int width, height, channelCount;
-            unsigned char *img = glgeLoad(paths[imgCount], &width, &height, &channelCount);
+            unsigned char *img = glgeLoadImage(paths[imgCount], &width, &height, &channelCount);
 
             // add image info to atlas data
             GLGEAtlasImage i;
@@ -382,7 +382,7 @@ unsigned char * Atlas::_constructs_atlas_same(int size, bool save_atlas, bool ve
             std::cout << "[GLGE] [Texture Atlas] Saving image...\r";
         }
         // save atlas to the specefied location
-        stbi_write_png(this->path, w, h, c, atlasImg, w*c);
+        glgeSaveImage(this->path, ivec2(w, h), c, atlasImg);
         // save the atlas info
         this->atlasData.open( (std::string)this->path+".atlas", 'w' );
         this->atlasData.write();
@@ -429,7 +429,7 @@ unsigned char * Atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous)
         // image dimension vars
         int w, h, c;
         // load image info
-        unsigned char* img = glgeLoad(this->paths[i], &w, &h, &c);
+        unsigned char* img = glgeLoadImage(this->paths[i], &w, &h, &c);
         // check if image got loaded
         if (img == NULL) {
             // print Error
@@ -499,7 +499,7 @@ unsigned char * Atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous)
         // image dimension vars
         int w, h, c;
         // load image info
-        unsigned char* img = glgeLoad(paths[i], &w, &h, &c);
+        unsigned char* img = glgeLoadImage(paths[i], &w, &h, &c);
 
         // check if image got opened
         if (img == NULL) {
@@ -600,7 +600,7 @@ unsigned char * Atlas::_constructs_atlas_tetris(bool save_atlas, bool verbous)
             std::cout << "[GLGE] [Texture Atlas] Saving image...\r";
         }
         // save atlas to the specefied location
-        stbi_write_png(this->path, totalWidth, totalHeight, channelCount, atlasImg, totalWidth*channelCount);
+        glgeSaveImage(this->path, ivec2(totalWidth, totalHeight), channelCount, atlasImg);
         // save the atlas info
         this->atlasData.open( (std::string)this->path+".atlas", 'w' );
         this->atlasData.write();
@@ -672,7 +672,7 @@ void Atlas::_optimize_atlas(bool save_atlas) {
     // save image if requested
     if (save_atlas)  {
         // save atlas to the specefied location
-        stbi_write_png(this->path, width, height, channelCount, atlasImg, width*channelCount);
+        glgeSaveImage(this->path, ivec2(width, height), channelCount, atlasImg);
         // save the atlas info
         this->atlasData.open( (std::string)this->path+".atlas", 'w' );
         this->atlasData.write();
@@ -683,7 +683,7 @@ void Atlas::_optimize_atlas(bool save_atlas) {
 int * Atlas::_img_info(const char* path) {
     // load image
     int w, h, c; 
-    unsigned char *img = glgeLoad(path, &w, &h, &c);
+    unsigned char *img = glgeLoadImage(path, &w, &h, &c);
     // if image was not opened, print error
     if(img == NULL) {
         glgeImageFree(img);
@@ -876,7 +876,7 @@ bool Atlas::loadAtlas(const char* path)
 
     // load atlas image
     int w, h, c;
-    unsigned char* iAtlas = glgeLoad(path, &w, &h, &c);
+    unsigned char* iAtlas = glgeLoadImage(path, &w, &h, &c);
     this->iAtlas = iAtlas;
     // load atlas data
     this->atlasData.open((std::string)path+".atlas", 'r');

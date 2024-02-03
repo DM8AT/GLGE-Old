@@ -12,11 +12,11 @@
 #include "GLGEImage.hpp"
 #include "GLGEInternal/glgeImage.h"
 
-#include "glgeErrors.hpp"
+#include "GLGEInternal/glgeErrors.hpp"
 
-// std_image_write setup
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+// std_image_write setup, i think it needs to be replaced be replaced with something from glge
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
+//#include "stb_image_write.h"
 
 // Constructors
 
@@ -58,6 +58,7 @@ void Image::create( ivec2 size, int channels )
 void Image::open( const char* path )
 {
     // open the image
+    this->image = glgeLoadImage( path, &this->size.x, &this->size.y, &this->channelCount );
 }
 
 /**
@@ -67,8 +68,8 @@ void Image::open( const char* path )
  */
 void Image::save( const char* path )
 {
-    // save the image    | Width       | Height      | Channels          | Image data | Size of one row
-    stbi_write_png( path, this->size.x, this->size.x, this->channelCount, this->image, this->size.x*this->channelCount);
+    // save the image   | Size      | Channels          | Image data   //| Size of one row
+    glgeSaveImage( path, this->size, this->channelCount, this->image); //this->size.x*this->channelCount);
 }
 
 /**
@@ -136,7 +137,7 @@ ivec4 Image::get_pixel( ivec2 pos ) {
 void Image::fill( ivec4 col )
 {
     // go through all pixels
-    for ( ulong i = 0; i < this->size.x * this->size.y; i++ ) {
+    for ( int i = 0; i < this->size.x * this->size.y; i++ ) {
         this->put_pixel( ivec2(i,0) /* Cheat by having x & y in one */, col );
     }
 }
@@ -147,7 +148,7 @@ void Image::fill( ivec4 col )
  */
 void Image::clear(){
     // go through all pixels
-    for ( ulong i = 0; i < this->size.x * this->size.y * this->channelCount; i++ ) {
+    for ( int i = 0; i < this->size.x * this->size.y * this->channelCount; i++ ) {
         this->image[i] = 0;
     }
 }

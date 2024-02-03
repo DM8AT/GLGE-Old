@@ -18,7 +18,7 @@
 #include <iostream>
 
 // Atlas
-#include "GLGE/GLGEtextureAtlas.h"
+#include "GLGE/GLGETextureAtlas.hpp"
 
 //the main function, code execution will start here. The input arguments are needed to initalise the library
 int main()

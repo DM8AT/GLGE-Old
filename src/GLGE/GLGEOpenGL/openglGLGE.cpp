@@ -1215,7 +1215,7 @@ unsigned int glgeTextureFromFile(const char* name, vec2* sP)
 
     // load and generate the texture
     int width, height, nrChannels;
-    unsigned char *data = glgeLoad(name, &width, &height, &nrChannels);
+    unsigned char *data = glgeLoadImage(name, &width, &height, &nrChannels);
     if(data)
     {
         if (nrChannels == 3)
@@ -1249,7 +1249,7 @@ unsigned int glgeTextureFromFile(const char* name, vec2* sP)
 vec2 glgeGetTextureSize(const char* name)
 {
     int w, h, c;
-    unsigned char* data = glgeLoad(name, &w, &h, &c, 0);
+    unsigned char* data = glgeLoadImage(name, &w, &h, &c, 0);
     if(!data)
     {
         std::cout << "Failed to load texture file: " << name << "\n";
