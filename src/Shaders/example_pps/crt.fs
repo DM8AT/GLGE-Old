@@ -35,6 +35,7 @@ const float exposure = 1.0f;
 
 float screenHeight = 0.0f;
 
+// color "remap", converts a color to a limited amount of colors
 vec3 colorRemap( vec3 col, float cols )
 {
     // remap the colors
@@ -48,6 +49,7 @@ vec3 colorRemap( vec3 col, float cols )
     return col;
 }
 
+// chromatic aboration function, displaces where the r, g and b values are sampled from
 vec3 chromaticAboration( float intensity, vec2 red, vec2 green, vec2 blue )
 {
     // chromatic aboration red channel offset
@@ -62,7 +64,7 @@ vec3 chromaticAboration( float intensity, vec2 red, vec2 green, vec2 blue )
 
 void main()
 {
-    if ( screenSize.y == 0.0f ) { screenHeight = 1080.0f; } else { screenHeight = screenSize.y; }
+    if ( screenSize.y == 0.0f ) { screenHeight = 1000.0f; } else { screenHeight = screenSize.y; }
 
     // get color of current pixel
     vec3 col = texture(glgeMainImage, texCoords).rgb;

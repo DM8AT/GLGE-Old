@@ -105,7 +105,7 @@ void display()
 void tick()
 {
     // reset uniforms
-    pps.setCustomVec2("screenSize", glgeGetScreenSize());
+    pps.setCustomVec2("screenSize", glgeGetWindowSize());
     //make changes to the camera by changing its position or rotating it
 
     //calculate the cam speed for this frame, to make the movement speed framerate independend. To do that, multiply the base speed by the delta time
@@ -527,7 +527,7 @@ void run3Dexample()
     //pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/example_pps/crt.fs");
     pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/testPostProcessingShader.fs");
     // add custom uniform
-    pps.setCustomVec2("screenSize", glgeGetScreenSize());
+    pps.setCustomVec2("screenSize", glgeGetWindowSize());
     pps.recalculateUniforms();
     //bind a post processing shader
     glgeSetPostProsessingShader(pps.getShader());
