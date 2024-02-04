@@ -12,6 +12,7 @@
 #define _GLGE_INTERNAL_FUNCS_H_
 
 #include <string>
+#include <vector>
 
 //include the CML functions
 #include "../CML/CMLVec2.h"
@@ -37,5 +38,20 @@ bool readFile(const char* filename, std::string& output);
  * @return int the amount of symbols in the string
  */
 int count_char(std::string &str, char ch);
+
+/**
+ * @brief a pre-compile phase like in C/C++
+ * 
+ * @param source the source code of the shader
+ * @param files the allready included files
+ * @return std::string the final GLSL source code
+ */
+std::string precompileShaderSource(std::string source, std::vector<std::string> files = {});
+
+/**
+ * @brief load the include defaults for GLGE
+ * 
+ */
+void loadIncludeDefaults();
 
 #endif

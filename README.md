@@ -51,6 +51,12 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.5-1
+- added 2 new light source types:
+   - spot light: a light with a direction and angle component
+   - directional light: like a sun, direction, but no position
+- added a C-Stype #include feature to GLSL shaders
+- added default includes for GLSL shaders
 ## Update 0.5-pre 3
 - added presets for 2D and 3D objects
    - now creation of simple geometry is really simple

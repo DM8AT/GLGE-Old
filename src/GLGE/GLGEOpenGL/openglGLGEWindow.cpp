@@ -27,6 +27,11 @@
 #include "openglGLGEDefines.hpp"
 #include "../GLGEInternal/glgePrivDefines.hpp"
 
+//define the Frame buffer bit amount
+#define GLGE_FRAMEBUFFER_BIT_DEPTH GL_RGB16F
+//define the Frame buffer bit depth for high resolution
+#define GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES GL_RGB32F
+
 //include default libs
 #include <iostream>
 #include <algorithm>
@@ -166,7 +171,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainAlbedoTex);
     glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -180,7 +185,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainNormalTex);
     glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -194,7 +199,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainPosTex);
     glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -206,7 +211,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainRMLTex);
     glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -218,7 +223,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainOutTex);
     glBindTexture(GL_TEXTURE_2D, this->mainOutTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -230,7 +235,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainEIDATex);
     glBindTexture(GL_TEXTURE_2D, this->mainEIDATex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -242,7 +247,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainSolidTex);
     glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -254,7 +259,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->mainTransparentAccumTex);
     glBindTexture(GL_TEXTURE_2D, this->mainTransparentAccumTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -290,7 +295,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->lastTickTex);
     glBindTexture(GL_TEXTURE_2D, this->lastTickTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -320,7 +325,7 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glGenTextures(1, &this->postProcessingTex);
     glBindTexture(GL_TEXTURE_2D, this->postProcessingTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -367,34 +372,10 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the shaders for the default lighting shader
-    this->lightingShader = compileShader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER, "GLGE:BuildInPostProcessingVertexShader", "GLGE:BuildInPostProcessingFragmentShader");
+    this->lightShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER);
 
     //get the uniforms form the shader
-    bool albedo = this->getLightingUniforms();
-
-    //check if the albedo map was found
-    if (!albedo)
-    {
-        //check if an error should be outputed
-        if (glgeErrorOutput)
-        {
-            std::cerr << "[GLGE ERROR] Could not find albedo map in default lighthing shader for window \"" << this->name.c_str() << "\"" << "\n";
-        }
-        //close the context
-        SDL_GL_DeleteContext(this->glContext);
-        //close the window
-        SDL_DestroyWindow((SDL_Window*)this->window);
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-        //stop the function
-        return;
-    }
-
-    //get the uniform for the screen texture in the lighting shader
-    glUniform1i(glGetUniformLocation(this->lightingShader, "screenTexture"), 0);
+    this->getLightingUniforms();
 
     //create an cube of size 1
     float skyboxVerts[] = 
@@ -563,6 +544,23 @@ void GLGEWindow::draw()
     //enable depth testing
     glEnable(GL_DEPTH_TEST);
 
+    //check if backface culling is enabled
+    if (this->backfaceCulling)
+    {
+        //if it is enabled, enable backface culling
+        glEnable(GL_CULL_FACE);
+        //setup the correct order
+        glCullFace(GL_BACK);
+    }
+    else
+    {
+        //else, disable it
+        glDisable(GL_CULL_FACE);
+    }
+
+    //call the custom drawing function
+    this->callDrawFunc();
+
     //check if a skybox is active
     if (this->useSkybox)
     {
@@ -607,23 +605,6 @@ void GLGEWindow::draw()
         glDepthFunc(GL_GREATER);
     }
 
-    //check if backface culling is enabled
-    if (this->backfaceCulling)
-    {
-        //if it is enabled, enable backface culling
-        glEnable(GL_CULL_FACE);
-        //setup the correct order
-        glCullFace(GL_BACK);
-    }
-    else
-    {
-        //else, disable it
-        glDisable(GL_CULL_FACE);
-    }
-
-    //call the custom drawing function
-    this->callDrawFunc();
-
     //enable back face culling
     glEnable(GL_CULL_FACE);
     //switch the order of the backface culling to the correct order
@@ -636,86 +617,16 @@ void GLGEWindow::draw()
     {
         //if it needs, apply the lighting shader
 
-        //bind the post processing shader
-        glUseProgram(this->lightingShader);
+        //bind the lighting shader
+        this->lightShader.applyShader();
         //bind the screen rect
         this->bindScreenRect();
-        //activate the uniform texture array
-        glActiveTexture(GL_TEXTURE0);
-        //clear the cube map texture (just for safty, can't have cube map and 2D at the same time)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        //bind the framebuffer texture
-        glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
-        //activate the second texture unit
-        glActiveTexture(GL_TEXTURE1);
-        //bind the normal texture
-        glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
-        //activate the thired texture unit
-        glActiveTexture(GL_TEXTURE2);
-        //bind the position texture
-        glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
-        //activate the fourth texture unit
-        glActiveTexture(GL_TEXTURE3);
-        //bind the roughness texture
-        glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
-
-        //pass the uniforms to the shader
-        //pass the albedo map
-        glUniform1i(this->albedoInLightingPass, 0);
-        //pass the normal map
-        glUniform1i(this->normalInLightingPass, 1);
-        //pass the position map
-        glUniform1i(this->positionInLightingPass, 2);
-        //pass the roughness map
-        glUniform1i(this->roughnessInLightingPass, 3);
-        //check if a 3D camera is bound
-        if (this->mainCamera != NULL)
-        {
-            //pass the camera position
-            glUniform3f(this->camPosInLightingPass, this->mainCamera->getPos().x, this->mainCamera->getPos().y, this->mainCamera->getPos().z);
-            //pass the far plane
-            glUniform1f(this->farPlaneInLightingPass, this->mainCamera->getFarPlane());
-            //bind the camera rotation
-            glUniform3f(this->rotInLightingPass, this->mainCamera->getRotation().x, this->mainCamera->getRotation().y, glgeToRadians(180));
-            //bind the camera projection matrix
-            glUniformMatrix4fv(this->projInLightingPass, 1, false, this->mainCamera->getProjectionMatrixPointer());
-        }
-        //pass all the lights to the shader
-        for (int i = 0; i < (int)this->lightPosInLightingPass.size(); i++)
-        {
-            //pass the position
-            glUniform3f(this->lightPosInLightingPass[i], lights[i]->getPos().x, lights[i]->getPos().y, lights[i]->getPos().z);
-            //pass the light color
-            glUniform3f(this->lightColInLightingPass[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
-            //pass the intensity
-            glUniform1f(this->lightIntInLightingPass[i], lights[i]->getInsensity());
-            //pass the type
-            glUniform1f(this->lightTypInLightingPass[i], lights[i]->getType());
-            //pass the direction
-            glUniform3f(this->lightDirInLightingPass[i], lights[i]->getDir().x, lights[i]->getDir().y, lights[i]->getDir().z);
-        }
-        //pass the amount of active lights
-        glUniform1i(activeLightInLightingPass, (int)lights.size());
         
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        //unbind the normal texture
-        glBindTexture(GL_TEXTURE_2D, 0);
-        //activate the thired texture unit
-        glActiveTexture(GL_TEXTURE2);
-        //unbind the texture
-        glBindTexture(GL_TEXTURE_2D, 0);
-        //activate the second texture unit
-        glActiveTexture(GL_TEXTURE1);
-        //unbind the texture
-        glBindTexture(GL_TEXTURE_2D, 0);
-        //activate the first texture unit
-        glActiveTexture(GL_TEXTURE0);
-        //unbind the texture
-        glBindTexture(GL_TEXTURE_2D, 0);
-        //unbind the shader
-        glUseProgram(0);
+        //unbind the lighting shader
+        this->lightShader.removeShader();
         //unbind the screen rect
         this->unbindScreenRect();
     }
@@ -954,6 +865,44 @@ void GLGEWindow::tick()
 
     //call the tick function
     this->callTickFunc();
+    
+    //set the prefix for the light position
+    std::string prefixLightPos = std::string("glgeLightPos[");
+    //set the prefix for the light color
+    std::string prefixLightCol = std::string("glgeLightColor[");
+    //set the prefix for the light data
+    std::string prefixLightDat = std::string("glgeLightData[");
+    //set the prefix for the light direction
+    std::string prefixLightDir = std::string("glgeLightDir[");
+
+    //update all light data
+    for (int i = 0; i < (int)this->lights.size(); i++)
+    {
+        //get the uniform for the light color
+        this->lightShader.setCustomVec3((prefixLightCol + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getColor());
+        //get the uniform for the light data
+        this->lightShader.setCustomVec4((prefixLightDat + std::to_string(i) + std::string("]")).c_str(), vec4(
+            this->lights[i]->getType(), 
+            std::cos(this->lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
+            std::cos(this->lights[i]->getAngle() * GLGE_TO_RADIANS), 
+            this->lights[i]->getInsensity()));
+        //get the uniform for the light position
+        this->lightShader.setCustomVec3((prefixLightPos + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getPos());
+        //get the uniform for the light direction
+        this->lightShader.setCustomVec3((prefixLightDir + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getDir());
+    }
+    
+    //get the uniform for the amount of active lights
+    this->lightShader.setCustomInt("glgeActiveLights", (int)this->lights.size());
+    
+    //update the camera data
+    if (this->mainCamera != NULL)
+    {
+        //get the uniform for the camera position
+        this->lightShader.setCustomVec3("glgeCameraPos", this->mainCamera->getPos());
+        //get the camera rotation matrix in the lighting shader
+        this->lightShader.setCustomVec3("glgeCameraRot", this->mainCamera->getRotation());
+    }
 }
 
 void GLGEWindow::rename(const char* name)
@@ -1568,53 +1517,53 @@ void GLGEWindow::resizeWindow(int width, int height)
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update all the texture sizes
     //update the normal texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the position texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the roughness texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the depth and alpha texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainEIDATex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the solid lit texture
     glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the transparent accumulation texture
     glBindTexture(GL_TEXTURE_2D, this->mainTransparentAccumTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the last tick texture
     glBindTexture(GL_TEXTURE_2D, this->lastTickTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the lighting texture
     glBindTexture(GL_TEXTURE_2D, this->mainOutTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //update the post processing texture
     glBindTexture(GL_TEXTURE_2D, this->postProcessingTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1623,67 +1572,57 @@ void GLGEWindow::resizeWindow(int width, int height)
     glViewport(0,0, width,height);
 }
 
-bool GLGEWindow::getLightingUniforms()
+void GLGEWindow::getLightingUniforms()
 {
     //let the error messages set for the albedo map, you want the albedo map in most cases
-    this->albedoInLightingPass = getUniformVar(this->lightingShader, "glgeAlbedoMap");
+    this->lightShader.setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
     //next, turn the errors temporarely off
     //get if the errors are turned on
     bool error = glgeGetErrorOutput();
     //turn the errors of
     glgeSetErrorOutput(false);
     //get the unform for the normal map
-    this->normalInLightingPass = getUniformVar(this->lightingShader, "glgeNormalMap");
+    this->lightShader.setCustomTexture("glgeNormalMap", this->mainNormalTex);
     //get the uniform for the position map
-    this->positionInLightingPass = getUniformVar(this->lightingShader, "glgePositionMap");
+    this->lightShader.setCustomTexture("glgePositionMap", this->mainPosTex);
     //get the uniform for the roughness map
-    this->roughnessInLightingPass = getUniformVar(this->lightingShader, "glgeRoughnessMap");
+    this->lightShader.setCustomTexture("glgeRoughnessMap", this->mainRMLTex);
     
-    //reset the uniform list
-    this->lightColInLightingPass.clear();
-    this->lightIntInLightingPass.clear();
-    this->lightPosInLightingPass.clear();
-
     //set the prefix for the light position
     std::string prefixLightPos = std::string("glgeLightPos[");
     //set the prefix for the light color
     std::string prefixLightCol = std::string("glgeLightColor[");
     //set the prefix for the light intensity
-    std::string prefixLightInt = std::string("glgeLightInt[");
-    //set the prefix for the light type
-    std::string prefixLightTyp = std::string("glgeLightType[");
+    std::string prefixLightDat = std::string("glgeLightData[");
     //set the prefix for the light direction
     std::string prefixLightDir = std::string("glgeLightDir[");
 
     for (int i = 0; i < (int)this->lights.size(); i++)
     {
         //get the uniform for the light color
-        this->lightColInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightCol + std::to_string(i) + std::string("]")).c_str()));
+        this->lightShader.setCustomVec3((prefixLightCol + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getColor());
         //get the uniform for the light intensity
-        this->lightIntInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightInt + std::to_string(i) + std::string("]")).c_str()));
+        this->lightShader.setCustomVec4((prefixLightDat + std::to_string(i) + std::string("]")).c_str(), vec4(
+            this->lights[i]->getType(), 
+            std::cos(this->lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
+            std::cos(this->lights[i]->getAngle() * GLGE_TO_RADIANS), 
+            this->lights[i]->getInsensity()));
         //get the uniform for the light position
-        this->lightPosInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightPos + std::to_string(i) + std::string("]")).c_str()));
-        //get the uniform for the light type
-        this->lightTypInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightTyp + std::to_string(i) + std::string("]")).c_str()));
+        this->lightShader.setCustomVec3((prefixLightPos + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getPos());
         //get the uniform for the light direction
-        this->lightDirInLightingPass.push_back(getUniformVar(this->lightingShader, (prefixLightDir + std::to_string(i) + std::string("]")).c_str()));
+        this->lightShader.setCustomVec3((prefixLightDir + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getDir());
     }
 
     //get the uniform for the amount of active lights
-    this->activeLightInLightingPass = getUniformVar(this->lightingShader, "glgeActiveLights");
+    this->lightShader.setCustomInt("glgeActiveLights", (int)this->lights.size());
     //get the uniform for the camera position
-    this->camPosInLightingPass = getUniformVar(this->lightingShader, "glgeCameraPos");
-    //get the uniform for the far plane
-    this->farPlaneInLightingPass = getUniformVar(this->lightingShader, "glgeFarPlane");
+    this->lightShader.setCustomVec3("glgeCameraPos", vec3(0));
     //get the camera rotation matrix in the lighting shader
-    this->rotInLightingPass = getUniformVar(this->lightingShader, "glgeCameraRot");
-    //get the camera projection matrix in the lighting shader
-    this->projInLightingPass = getUniformVar(this->lightingShader, "glgeProject");
+    this->lightShader.setCustomVec3("glgeCameraRot", vec3(0));
+    //recalculate all uniforms
+    this->lightShader.recalculateUniforms();
     //reset the error output
     glgeSetErrorOutput(error);
-
-    //if the albedo LightingPass is -1, then there is no albedo map, so return false
-    return (this->albedoInLightingPass != -1);
 }
 
 void GLGEWindow::getDefaultUniformsFromPostProcessingShader(Shader* shader)
@@ -1772,46 +1711,28 @@ void GLGEWindow::setLightingShader(const char* shader)
     }
 
     //compile the shader and save it
-    this->lightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+    this->lightShader = Shader(GLGE_EMPTY_VERTEX_SHADER, data);
 
     //get the post processing uniforms
-    bool albedo = this->getLightingUniforms();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
-    {
-        printf(GLGE_ERROR_OCCURED_IN_FILE, shader);
-    }
+    this->getLightingUniforms();
 }
 
 void GLGEWindow::setLightingShader(std::string shader)
 {
     //compile the shader and save it
-    this->lightingShader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, shader);
+    this->lightShader = Shader(GLGE_EMPTY_VERTEX_SHADER, shader);
 
     //get the post processing uniforms
-    bool albedo = this->getLightingUniforms();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
-    {
-        printf("[GLGE ERROR INFO] Error occured in shader compiled from custom source");
-    }
+    this->getLightingUniforms();
 }
 
 void GLGEWindow::setLightingShader(unsigned int shader)
 {
     //store the inputed shader
-    this->lightingShader = shader;
+    this->lightShader = Shader(shader);
 
     //get the post processing uniforms
-    bool albedo = this->getLightingUniforms();
-
-    //if the albedo wasn't found, print out the filename
-    if (!albedo)
-    {
-        printf("[GLGE ERROR INFO] Error occured in shader set by shader ID. \n                 ID : %d\n", shader);
-    }
+    this->getLightingUniforms();
 }
 
 unsigned int GLGEWindow::getAlbedoTex()
@@ -2659,4 +2580,10 @@ int GLGEWindow::getDefault2DShader()
 {
     //return the default shader
     return this->default2DShader;
+}
+
+Shader* GLGEWindow::getLightingShader()
+{
+    //return a pointer to the current light shader
+    return &this->lightShader;
 }

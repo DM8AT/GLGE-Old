@@ -432,8 +432,10 @@ private:
     std::vector<unsigned int> lightPosLocs;
     //store the position of the light colors
     std::vector<unsigned int> lightColLocs;
-    //store the position of the light intensitys
-    std::vector<unsigned int> lightIntLocs;
+    //store the position of the light data
+    std::vector<unsigned int> lightDatLocs;
+    //store the position of the light directions
+    std::vector<unsigned int> lightDirLocs;
     //store the position for the used lights
     unsigned int usedLigtsPos;
     //store the position for the shadow maps

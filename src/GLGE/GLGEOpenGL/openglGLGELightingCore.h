@@ -22,7 +22,7 @@
 #define GLGE_LIGHT_SHADER_LOW std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 color;in vec2 texCoord;in vec3 normal;in vec3 currentPosition;uniform sampler2D Texture;uniform vec3 cameraPos;vec3 lightColor = vec3(1,1,1);vec3 lightPos = vec3(2,5,0);float ambient = 0.1;float specLight = 0.5;void main(){vec4 col = texture(Texture, texCoord);vec3 Normal = normalize(normal);vec3 lightDir = normalize(lightPos - currentPosition);vec3 viewDir = normalize(cameraPos - currentPosition);float diffuse = max(dot(normal, lightDir), 0.f);vec3 viewDirection = normalize(cameraPos - currentPosition);vec3 reflectionDirection = reflect(-lightDir, Normal);float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16.f);float specular = specAmount * specLight;FragColor = col * vec4(lightColor,1.f) * (diffuse + ambient + specular);FragColor.w = col.w;}")
 
 //define the limit an light sources for the defalut shader
-#define GLGE_LIGHT_SOURCE_MAX 255
+#define GLGE_LIGHT_SOURCE_MAX 128
 
 //define a light as a single point of light
 #define GLGE_LIGHT_SOURCE_TYPE_POINT 0
@@ -62,9 +62,10 @@ public:
      * @param dir the direction of the light (for spot and directional lights)
      * @param type the type of the light (starting with GLGE_LIGHT_SOURCE_TYPE_)
      * @param color the color of the light source
+     * @param angle the angle for a spot light in degrees
      * @param intensity the strength of the light source
      */
-    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float intensity = 1.f);
+    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float angle = 45, float intensity = 1.f);
 
     /**
      * @brief Construct a new Light source
@@ -214,6 +215,13 @@ public:
     void bindShadowMapTexture(int samplerID);
 
     /**
+     * @brief Set the type of the light source
+     * 
+     * @param type the type of the light source
+     */
+    void setType(unsigned int type);
+
+    /**
      * @brief Get the Type of a light source
      * 
      * @return int the light source type
@@ -221,11 +229,46 @@ public:
     int getType();
 
     /**
+     * @brief Set the direction of an spot or directional light
+     * 
+     * @param dir the direction for the light source
+     */
+    void setDir(vec3 dir);
+
+    /**
      * @brief Get the direction of the light source
      * 
      * @return vec3 the light direction
      */
     vec3 getDir();
+
+    /**
+     * @brief Set the Angle of the spot light
+     * 
+     * @param angle the angle in degrees
+     */
+    void setAngle(float angle);
+
+    /**
+     * @brief Get the Angle of the light source (only important for spot lights)
+     * 
+     * @return float the angle of the light source
+     */
+    float getAngle();
+
+    /**
+     * @brief Set the Intense Angle of the spot light
+     * 
+     * @param angle the intense angle in degrees
+     */
+    void setIntenseAngle(float angle);
+
+    /**
+     * @brief Get the angle the spotlight is intense in
+     * 
+     * @return float the intense angle
+     */
+    float getIntenseAngle();
 
 private:
     //store the light position
@@ -242,6 +285,10 @@ private:
     unsigned int shadowMap;
     //store the light source type
     int lightType = -1;
+    //store the spot light angle
+    float angle = 0.f;
+    //store the intense angle for the spot light
+    float intAngle = -1.f;
     //setup the shadow map
     void setupShadowMap();
 };

@@ -104,3 +104,6 @@ bool glgeExitOnMainWindowClose = true;
 
 //store the conversion from SDL window index space to GLGE window index space
 int glgeWindowIndexOffset = -1;
+
+//store the GLGE include defaults
+std::unordered_map<std::string, std::string> glgeIncludeDefaults;

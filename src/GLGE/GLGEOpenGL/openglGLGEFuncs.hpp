@@ -81,23 +81,6 @@ GLint getUniformVar(unsigned int shaderProgram, const char* name);
 void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shaderType);
 
 /**
- * @brief this function compiles the inputed two files into shaders
- * 
- * @param vertex the file for the vertex shader
- * @param fragment the file for the fragment shader
- */
-unsigned int compileShader(const char* vertex, const char* fragment);
-
-/**
- * @brief this file loads the two inputed std::vectors of strings as shader
- * 
- * @param fileDataVertex the data of the vertex shader
- * @param fileDataFragment the data of the fragment shader
- * @return unsigned int the compiled shader
- */
-unsigned int compileShader(std::string fileDataVertex, std::string fileDataFragment, const char* fileVertexShader = "NoFile", const char* fileFragmentShader = "NoFile");
-
-/**
  * @brief load a file to an SDL_Surface
  * 
  * @param file the path to the file to load

@@ -20,6 +20,8 @@
 //include the vector library
 #include <vector>
 #include <ctime>
+#include <unordered_map>
+#include <string>
 
 //include SDL2
 #ifdef _WIN32
@@ -115,5 +117,8 @@ extern bool glgeExitOnMainWindowClose;
 
 //store the conversion from SDL window index space to GLGE window index space
 extern int glgeWindowIndexOffset;
+
+//store the GLGE include defaults
+extern std::unordered_map<std::string, std::string> glgeIncludeDefaults;
 
 #endif

@@ -412,7 +412,7 @@ void windowResized(int width, int height)
 Shader calculateBloom(unsigned int img)
 {
     //specefy the amount of downsamples
-    unsigned int samples = 2;
+    unsigned int samples = 1;
     //make the first setup for the blure using the brightness map
     //set the size to half the size of the brightness map
     pingPongBlure_first.changeSize(glgeGetWindowSize()/vec2(2,2));
@@ -516,7 +516,7 @@ void run3Dexample()
     //glgeDisableBackfaceCulling();
 
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
-    //glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
+    glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
     //bind a post processing shader
     glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
@@ -612,11 +612,14 @@ void run3Dexample()
     //setup the wall
     wallSetup();
 
+    //add and store two point lights
     l2 = Light(2,5,0, 0.35,0.125,0.5, 100);
     glgeAddGlobalLighSource(&l2);
-
     light = Light(10,5,0, 1,1,1, 50);
     glgeAddGlobalLighSource(&light);
+
+    //add a sun light
+    glgeAddGlobalLighSource(new Light(vec3(0), vec3(0,-1,0.5), GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL, vec3(0.98, 0.98, 0.6), 0, 1));
 
     //disable the mouse pointer
     glgeSetCursor(GLGE_CURSOR_STYLE_NONE);

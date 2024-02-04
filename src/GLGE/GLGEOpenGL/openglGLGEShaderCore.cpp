@@ -37,13 +37,13 @@ Shader::Shader()
 Shader::Shader(const char* vertexShaderFile, const char* fragmentShaderFile)
 {
     //set the shader store variable to the compiled shader from the files
-    this->shader = compileShader(vertexShaderFile, fragmentShaderFile);
+    this->shader = glgeCompileShader(vertexShaderFile, fragmentShaderFile);
 }
 
 Shader::Shader(std::string vertexShaderData, std::string fragmentShaderData)
 {
     //set the shader store variable to the compiled shader from the strings
-    this->shader = compileShader(vertexShaderData, fragmentShaderData);
+    this->shader = glgeCompileShader(vertexShaderData, fragmentShaderData);
 }
 
 Shader::Shader(const char* shaderFile, unsigned int type)
@@ -58,13 +58,13 @@ Shader::Shader(const char* shaderFile, unsigned int type)
     if (type == GLGE_FRAGMENT_SHADER)
     {
         //set the shader store variable to the compilation of an empty vertex shader and the inputed data
-        this->shader = compileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+        this->shader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
     }
     //else, if the shader is an vertex shader
     else if (type == GLGE_VERTEX_SHADER)
     {
         //set the shader store variable to the copilation of the inputed file and an empty fragment shader
-        this->shader = compileShader(data, GLGE_EMPTY_FRAGMENT_SHADER);
+        this->shader = glgeCompileShader(data, GLGE_EMPTY_FRAGMENT_SHADER);
     }
     //if the type is invalide
     else
@@ -89,13 +89,13 @@ Shader::Shader(std::string data, unsigned int type)
     if (type == GLGE_FRAGMENT_SHADER)
     {
         //set the shader store variable to the compilation of an empty vertex shader and the inputed data
-        this->shader = compileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+        this->shader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
     }
     //else, if the shader is an vertex shader
     else if (type == GLGE_VERTEX_SHADER)
     {
         //set the shader store variable to the copilation of the inputed file and an empty fragment shader
-        this->shader = compileShader(data, GLGE_EMPTY_FRAGMENT_SHADER);
+        this->shader = glgeCompileShader(data, GLGE_EMPTY_FRAGMENT_SHADER);
     }
     //if the type is invalide
     else
@@ -160,8 +160,10 @@ void Shader::deleteShader()
 
 void Shader::addGeometryShader(std::string source)
 {
+    //pre-compile the geometry shader
+    std::string gData = precompileShaderSource(source);
     //add the shader program from the second file
-    addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
+    addShader(this->shader, gData.c_str(), GL_GEOMETRY_SHADER);
 
     //create an variable to check for success
     int success = 0;
@@ -225,61 +227,8 @@ void Shader::addGeometryShader(const char* f)
     //read the fiel
     readFile(f, source);
 
-    //add the shader program from the second file
-    addShader(this->shader, source.c_str(), GL_GEOMETRY_SHADER);
-
-    //create an variable to check for success
-    int success = 0;
-    //setup an error log
-    GLchar ErrorLog[1024] = {0};
-
-    //link the shader program
-    glLinkProgram(this->shader);
-
-    //get the program iv from the shader
-    glGetProgramiv(this->shader, GL_LINK_STATUS, &success);
-    //check if the program linking was no success
-    if (success == 0)
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            //get the error from open gl and output it with an custom message
-            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
-            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //check if the program is valide
-    glValidateProgram(this->shader);
-    //get the program iv again
-    glGetProgramiv(this->shader, GL_VALIDATE_STATUS, &success);
-    //check for success
-    if (!success)
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            //get the error from open gl and output it with an custom message
-            glGetProgramInfoLog(this->shader, sizeof(ErrorLog), NULL, ErrorLog);
-            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //get all uniforms
-    this->recalculateUniforms();
+    //cast to another function
+    this->addGeometryShader(source);
 }
 
 void Shader::updateShader(const char* vertexShaderFile, const char* fragmentShaderFile)

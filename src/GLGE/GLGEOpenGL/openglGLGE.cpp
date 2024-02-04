@@ -90,6 +90,8 @@ void glgeInit()
 
     //set the current window index to 0 (the first window created)
     glgeCurrentWindowIndex = 0;
+    //load the include defaults
+    loadIncludeDefaults();
 }
 
 //first window creation methode
@@ -990,7 +992,7 @@ int glgeGetUniformVar(unsigned int program, const char* name)
                 std::cerr << GLGE_ERROR_STR_OBJECT_GET_UNIFORM_VARIABLE << "\n";
             }
         }
-        //return 0
+        //return -1
         return -1;
     }
     //if no error occured, return the id of the uniform variable
@@ -1000,27 +1002,6 @@ int glgeGetUniformVar(unsigned int program, const char* name)
 //compile and add the shaders to this object
 unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
 {
-    //create a new shader program
-    unsigned int shaderProgram = glCreateProgram();
-
-    //check if the shader could be created
-    if (shaderProgram == 0)
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_COULD_NOT_CREATE_SHADER);
-            //say where the error occured
-            std::cerr << GLGE_ERROR_STR_OBJECT_COMPILE_SHADERS << "\n";
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
     //create strings for the shaders
     std::string vs, fs;
 
@@ -1039,8 +1020,6 @@ unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             exit(1);
         };
     }
-    //add the shader program from the first file
-    glgeAddShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
     //read the second file
     if (!readFile(fileNameFS, fs))
@@ -1057,63 +1036,9 @@ unsigned int glgeCompileShader(const char* fileNameVS, const char* fileNameFS)
             exit(1);
         };
     }
-    //add the shader program from the second file
-    glgeAddShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
-
-    //create an variable to check for success
-    int success = 0;
-    //setup an error log
-    GLchar ErrorLog[1024] = {0};
-
-    //link the shader program
-    glLinkProgram(shaderProgram);
-
-    //get the program iv from the shader
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    //check if the program linking was no success
-    if (success == 0)
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            //get the error from open gl and output it with an custom message
-            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //check if the program is valide
-    glValidateProgram(shaderProgram);
-    //get the program iv again
-    glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, &success);
-    //check for success
-    if (!success)
-    {
-        //output an error message
-        if (glgeErrorOutput)
-        {
-            //get the error from open gl and output it with an custom message
-            glGetProgramInfoLog(shaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-            printf(GLGE_ERROR_SHADER_VALIDATE_ERROR, ErrorLog);
-        }
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-    }
-
-    //say open GL to use the shader program
-    glUseProgram(shaderProgram);
-    //return the shader program in the GLGE Object
-    return shaderProgram;
+    
+    //just cast to another function
+    return glgeCompileShader(vs, fs);
 }
 
 unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataFragment)
@@ -1139,11 +1064,15 @@ unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataF
         };
     }
 
+    //pre-compile the vertex shader
+    std::string vData = precompileShaderSource(fileDataVertex);
     //add the shader program from the first file
-    glgeAddShader(shaderProgram, fileDataVertex.c_str(), GL_VERTEX_SHADER);
+    glgeAddShader(shaderProgram, vData.c_str(), GL_VERTEX_SHADER);
 
+    //pre-compile the fragment shader
+    std::string fData = precompileShaderSource(fileDataFragment);
     //add the shader program from the second file
-    glgeAddShader(shaderProgram, fileDataFragment.c_str(), GL_FRAGMENT_SHADER);
+    glgeAddShader(shaderProgram, fData.c_str(), GL_FRAGMENT_SHADER);
 
     //create an variable to check for success
     int success = 0;

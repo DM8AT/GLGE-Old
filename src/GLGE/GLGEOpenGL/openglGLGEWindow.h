@@ -875,6 +875,13 @@ public:
      */
     int getDefault2DShader();
 
+    /**
+     * @brief Get the Lighting Shader
+     * 
+     * @return Shader* a pointer to the lighting shader
+     */
+    Shader* getLightingShader();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -882,11 +889,8 @@ private:
     
     /**
      * @brief Get the uniform vars from the lighing shader
-     * 
-     * @return true : the albedo texture was found sucessfully | 
-     * @return false : the albedo texture could not be found
      */
-    bool getLightingUniforms();
+    void getLightingUniforms();
 
     /**
      * @brief Get the default uniforms from the post processing shader
@@ -1047,35 +1051,7 @@ private:
         information about the lighting shader
     */
     //store the lighting shader
-    unsigned int lightingShader = 0;
-    //store the position of the uniform for the albedo map in the post processing shader
-    int albedoInLightingPass = -1;
-    //store the position of the uniform for the normal map in the post processing shader
-    int normalInLightingPass = -1;
-    //store the position of the uniform for the position map in the post processing shader
-    int positionInLightingPass = -1;
-    //store the position of the uniform for the roughness map in the post processing shader
-    int roughnessInLightingPass = -1;
-    //store the position of the light color uniform in the Lighting Pass shader
-    std::vector<int> lightColInLightingPass = {};
-    //store the position of the light intensity uniform in the Lighting Pass shader
-    std::vector<int> lightIntInLightingPass = {};
-    //store the position of the light position uniform in the Lighting Pass shader
-    std::vector<int> lightPosInLightingPass = {};
-    //store the light types in the lighting pass shader
-    std::vector<int> lightTypInLightingPass = {};
-    //store the light direction in the lighting pass shader
-    std::vector<int> lightDirInLightingPass = {};
-    //store the position of the active light uniform in the Lighting Pass shader
-    int activeLightInLightingPass = -1;
-    //store the position of the camera positin uniform in the Lighting Pass shader
-    int camPosInLightingPass = -1;
-    //store the position of the far plane uniform in the Lighting Pass shader
-    int farPlaneInLightingPass = -1;
-    //store the rotation matrix in the lighting shader
-    int rotInLightingPass = -1;
-    //pass the projection matrix to the lighting shader
-    int projInLightingPass = -1;
+    Shader lightShader;
     //store the lights
     std::vector<Light*> lights;
 

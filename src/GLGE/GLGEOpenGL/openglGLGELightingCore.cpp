@@ -54,22 +54,10 @@ Light::Light(vec3 pos, vec3 col, float intensity)
     this->setupShadowMap();
 }
 
-Light::Light(vec3 pos, vec3 dir, unsigned int type, vec3 color, float intensity)
+Light::Light(vec3 pos, vec3 dir, unsigned int type, vec3 color, float angle, float intensity)
 {
-    //check if the light soure type is safe
-    if (type > 2)
-    {
-        //check if a warning should be printed
-        if (glgeWarningOutput)
-        {
-            //print a warning
-            printf("[GLGE WARNING] %d dose not correspont to any valid light source type\n", type);
-        }
-        //stop the function
-        return;
-    }
-    //now, everything is safe to store
-    this->lightType = type;
+    //store the type
+    this->setType(type);
     //store the inputed position
     this->pos = pos;
     //store the inpted color
@@ -78,6 +66,8 @@ Light::Light(vec3 pos, vec3 dir, unsigned int type, vec3 color, float intensity)
     this->lightIntensity = intensity;
     //store the direction
     this->dir = dir;
+    //store the angle
+    this->angle = angle;
 
     //setup the shadow map
     this->setupShadowMap();
@@ -212,10 +202,34 @@ void Light::bindShadowMapTexture(int samp)
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowMap);
 }
 
+void Light::setType(unsigned int type)
+{
+    //check if the light soure type is safe
+    if (type > 2)
+    {
+        //check if a warning should be printed
+        if (glgeWarningOutput)
+        {
+            //print a warning
+            printf("[GLGE WARNING] %d dose not correspont to any valid light source type\n", type);
+        }
+        //stop the function
+        return;
+    }
+    //now, everything is safe to store
+    this->lightType = type;
+}
+
 int Light::getType()
 {
     //return the light source type
     return this->lightType;
+}
+
+void Light::setDir(vec3 dir)
+{
+    //store the direction
+    this->dir = dir;
 }
 
 vec3 Light::getDir()
@@ -230,6 +244,48 @@ vec3 Light::getDir()
     {
         //else, return the direction
         return this->dir;
+    }
+}
+
+void Light::setAngle(float angle)
+{
+    //store the angle
+    this->angle = angle;
+}
+
+float Light::getAngle()
+{
+    //check if this is a spot light
+    if (this->lightType == GLGE_LIGHT_SOURCE_TYPE_SPOT)
+    {
+        //return the angle
+        return this->angle;
+    }
+    else
+    {
+        //else, return 0
+        return 0;
+    }
+}
+
+void Light::setIntenseAngle(float angle)
+{
+    //store the angle
+    this->intAngle = angle;
+}
+
+float Light::getIntenseAngle()
+{
+    //check if this is a spot light
+    if (this->lightType == GLGE_LIGHT_SOURCE_TYPE_SPOT)
+    {
+        //return the intense angle if it is not -1, if it is, return the angle
+        return (this->intAngle == -1) ? this->angle : this->intAngle;
+    }
+    else
+    {
+        //else, return 0
+        return 0;
     }
 }
 

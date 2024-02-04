@@ -763,7 +763,9 @@ void Object::getLightUniforms()
     //set the prefix for the light color
     std::string prefixLightCol = std::string("glgeLightColor");
     //set the prefix for the light intensity
-    std::string prefixLightInt = std::string("glgeLightInt");
+    std::string prefixLightDat = std::string("glgeLightData");
+    //set the prefix for the light direction
+    std::string prefixLightDir = std::string("glgeLightDir");
 
     //store the state of the GLGE error output
     bool outErrs = glgeErrorOutput;
@@ -775,7 +777,9 @@ void Object::getLightUniforms()
     //clear the light color vector
     this->lightColLocs.clear();
     //clear the light intensity vector
-    this->lightIntLocs.clear();
+    this->lightDatLocs.clear();
+    //clear the light direction vector
+    this->lightDirLocs.clear();
 
     for (int i = 0; i < (int)glgeWindows[this->windowIndex]->getLights().size(); i++)
     {
@@ -790,9 +794,14 @@ void Object::getLightUniforms()
         this->lightColLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
 
         //calculate the name of an uniform for the light intensity
-        uniform = prefixLightInt + std::string("[") + std::to_string(i) + std::string("]");
+        uniform = prefixLightDat + std::string("[") + std::to_string(i) + std::string("]");
         //get the uniform for the light intensity
-        this->lightIntLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
+        this->lightDatLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
+
+        //calculate the name of an uniform for the light intensity
+        uniform = prefixLightDir + std::string("[") + std::to_string(i) + std::string("]");
+        //get the uniform for the light intensity
+        this->lightDirLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
     }
 
     //get the uniform for the amount of used lights
@@ -809,38 +818,22 @@ void Object::loadLights()
     //load all light positions to the shader
     for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
     {
-        //pass the light position if it is not 0
-        if (this->lightPosLocs[i] != 0)
-        {
-            glUniform3f(this->lightPosLocs[i], lights[i]->getPos().x, lights[i]->getPos().y, lights[i]->getPos().z);
-        }
+        //pass the light position
+        glUniform3f(this->lightPosLocs[i], lights[i]->getPos().x, lights[i]->getPos().y, lights[i]->getPos().z);
+        //pass the light color
+        glUniform3f(this->lightColLocs[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
+        //pass the light data
+        glUniform4f(this->lightDatLocs[i], 
+            lights[i]->getType(), 
+            std::cos(lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
+            std::cos(lights[i]->getAngle() * GLGE_TO_RADIANS),
+            lights[i]->getInsensity());
+        //pass the light direction
+        glUniform3f(this->lightDirLocs[i], lights[i]->getDir().x, lights[i]->getDir().y, lights[i]->getDir().z);
     }
 
-    //load all light colors to the shader
-    for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
-    {
-        //pass the light color if it is not 0
-        if (this->lightColLocs[i] != 0)
-        {
-            glUniform3f(this->lightColLocs[i], lights[i]->getColor().x, lights[i]->getColor().y, lights[i]->getColor().z);
-        }
-    }
-
-    //load all light intensitys to the shader
-    for (int i = 0; i < (int)this->lightPosLocs.size(); i++)
-    {
-        //pass the light intensity if it is not 0
-        if (this->lightIntLocs[i] != 0)
-        {
-            glUniform1f(this->lightIntLocs[i], lights[i]->getInsensity());
-        }
-    }
-
-    //pass the amount of used lights to the shader if it is not 0
-    if (this->usedLigtsPos != 0)
-    {
-        glUniform1i(this->usedLigtsPos, (int)lights.size());
-    }
+    //pass the amount of used lights to the shader
+    glUniform1i(this->usedLigtsPos, (int)lights.size());
 }
 
 //////////
