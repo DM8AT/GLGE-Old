@@ -524,13 +524,7 @@ void run3Dexample()
     glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
     // create post processing shader
-    //pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/example_pps/crt.fs");
-    pps = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/testPostProcessingShader.fs");
-    // add custom uniform
-    pps.setCustomVec2("screenSize", glgeGetWindowSize());
-    pps.recalculateUniforms();
-    //bind a post processing shader
-    glgeSetPostProsessingShader(pps.getShader());
+    glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
     //bind another post processing shader
     invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
     //set a uniform float in the shader to controll the strength for the invertion
