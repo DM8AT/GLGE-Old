@@ -196,3 +196,33 @@ void Image::blit( ivec2 pos, Image *imgb )
     }
     }
 }
+
+/**
+ * @brief Get the size of the image
+ * 
+ * @return ivec2 The width and height of the image
+ */
+ivec2 Image::getSize()
+{
+    return this->size;
+}
+
+/**
+ * @brief Get the Channel Count
+ * 
+ * @return int Channel count
+ */
+int Image::getChannelCount()
+{
+    return this->channelCount;
+}
+
+/**
+ * @brief Gets the image data
+ * 
+ * @return unsigned* The image
+ */
+unsigned char* Image::data()
+{
+    return this->image;
+}

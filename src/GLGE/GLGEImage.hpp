@@ -80,6 +80,8 @@ class Image {
     // Public Elements //
     /////////////////////
 
+    // loading & saving //
+
     /**
      * @brief Creates a new image
      * 
@@ -107,6 +109,31 @@ class Image {
      * 
      */
     void close();
+
+    // image info //
+
+    /**
+     * @brief Get the size of the image
+     * 
+     * @return ivec2 The width and height of the image
+     */
+    ivec2 getSize();
+
+    /**
+     * @brief Get the Channel Count
+     * 
+     * @return int Channel count
+     */
+    int getChannelCount();
+
+    /**
+     * @brief Gets the image data
+     * 
+     * @return unsigned* The image
+     */
+    unsigned char* data();
+
+    // image manipulation //
 
     /**
      * @brief Put a pixel at the specified position
