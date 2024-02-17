@@ -20,6 +20,7 @@
 #include <math.h>
 
 #include "GLGETextureAtlasFile.hpp"
+#include "GLGEImage.hpp"
 
 // Include guard
 #ifndef _GLGE_ATLAS_H_
@@ -37,6 +38,14 @@ class Atlas {
     //////////////////////
     // Private Elements //
     //////////////////////
+
+    /**
+     * @brief The image the atlas is going to be stored in
+     * 
+     */
+    Image atlasImage;
+
+    
 
     public:
     /////////////////

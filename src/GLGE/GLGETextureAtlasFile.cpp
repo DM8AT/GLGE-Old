@@ -15,7 +15,7 @@
 void printd(std::string data){for(ulong i=0;i<data.size();i++){if(data[i]!=0){std::cout<<data[i];}else{std::cout<<" ";}}std::cout<<"<-end\n";}
 void printdi(std::string data){for(ulong i=0;i<data.size();i++){std::cout<<(int)data[i];}std::cout<<"<-end\n";}
 
-GLGEAtlasImage::GLGEAtlasImage( std::string name, vec2 pos, vec2 size )
+GLGEAtlasFile::GLGEAtlasFile( std::string name, vec2 pos, vec2 size )
 {
     this->name = name;
     this->pos = pos;
@@ -23,7 +23,7 @@ GLGEAtlasImage::GLGEAtlasImage( std::string name, vec2 pos, vec2 size )
 }
 
 // Main constructor
-GLGEAtlasFile::GLGEAtlasFile() {}
+//GLGEAtlasFile::GLGEAtlasFile() {}
 
 // open a file
 bool GLGEAtlasFile::open( std::string fp, const char mode )
@@ -136,7 +136,7 @@ bool GLGEAtlasFile::read()
     for ( int i = 0; i < textureCount; i++ )
     {
         // image data
-        GLGEAtlasImage img;
+        GLGEAtlasFile img;
         // read the first four bits for the name lenght
         int nl = this->unpackInt( data.substr(start,4) ); start += 4;
         // read the name
@@ -172,7 +172,7 @@ bool GLGEAtlasFile::close()
 // add image
 void GLGEAtlasFile::addImage( std::string name, vec2 pos, vec2 size )
 {
-    GLGEAtlasImage x;
+    GLGEAtlasFile x;
     x.name = name;
     x.pos = pos;
     x.size = size;
@@ -180,7 +180,7 @@ void GLGEAtlasFile::addImage( std::string name, vec2 pos, vec2 size )
     this->images.push_back(x);
 }
 
-void GLGEAtlasFile::addImage( GLGEAtlasImage image )
+void GLGEAtlasFile::addImage( GLGEAtlasFile image )
 {
     this->images.push_back( image );
 }
