@@ -1,4 +1,5 @@
 /**
+ *
  * @file textureAtlas.h
  * @author JuNi4 (https://github.com/juni4)
  * @brief Texture atlas for GLGE
@@ -84,10 +85,23 @@ class Atlas {
 
     // Atlas Creation //
 
-    void addImage();
+    /**
+     *
+     * @brief Adds an image to the texture atlas
+     *
+     * @param fp The file path to the image
+     *
+     */
+    void addImage( std::string fp );
+
     void removeImageByIndex();
     void removeImageByName();
 
+    /**
+     *
+     * @brief Creates the texture atlas image & data file
+     *
+     */
     void create();
 
     // Atlas Using //
