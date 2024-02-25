@@ -36,7 +36,7 @@
  * @brief A class for keeping the data of the images in the atlas
  * 
  */
-class GLGEAtlasFile {
+class GLGEAtlasImage {
 public:
     /**
      * @brief Construct a new GLGEAtlasFile object
@@ -45,7 +45,7 @@ public:
      * @param pos Position in the atlas
      * @param size The size of the image
      */
-    GLGEAtlasFile( std::string name = "", vec2 pos = vec2(), vec2 size = vec2() );
+    GLGEAtlasImage( std::string name = "", vec2 pos = vec2(), vec2 size = vec2() );
 
     /**
      * @brief The name of the image / file path
