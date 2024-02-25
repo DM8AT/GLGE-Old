@@ -46,7 +46,18 @@ class Atlas {
      */
     Image atlasImage;
 
-    
+    /***/
+    GLGEAtlasFile atlasData;
+
+    /**
+     * @brief The missing texture, returned if an image is not found
+     * 
+     */
+    const char* missingTexture;
+
+    //////////////////////////////
+    // Private Helper Functions //
+    //////////////////////////////
 
     public:
     /////////////////
@@ -94,8 +105,32 @@ class Atlas {
      */
     void addImage( std::string fp );
 
-    void removeImageByIndex();
-    void removeImageByName();
+    /**
+     * @brief Removes an atlas image by index
+     * 
+     * @param index The index of the image
+     */
+    void removeImageByIndex( int index );
+
+    /**
+     * @brief Removes an atlas image by id
+     * 
+     * @param id The id of the image
+     */
+    void removeImageByID( std::string id );
+
+    /**
+     * @brief Set the Missing Texture of the atlas using an image file
+     * 
+     * @param fp The filepath for the image
+     */
+    void setMissingTexture( std::string fp );
+    /**
+     * @brief Set the Missing Texture of the atlas using raw image data
+     * 
+     * @param data The image data
+     */
+    void setMissingTexture( const char* data );
 
     /**
      *
@@ -106,7 +141,13 @@ class Atlas {
 
     // Atlas Using //
 
-    std::vector<vec2> getTexture();
+    /**
+     * @brief Get a texture by ID
+     * 
+     * @param id The id of the texture, if not present, returns missing texture
+     * @return std::vector<vec2> The texture coordinates
+     */
+    std::vector<vec2> getTexture( std::string id );
     
 
 };
