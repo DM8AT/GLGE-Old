@@ -97,6 +97,13 @@ void RenderTarget::draw()
         return;
     }
 
+    //disable depth testing
+    glDisable(GL_DEPTH_TEST);
+    //enable color blending
+    glEnable(GL_BLEND);
+    //setup the blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     //check if a callback function is bound
     if (this->callback != NULL)
     {

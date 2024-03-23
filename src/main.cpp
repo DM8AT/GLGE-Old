@@ -44,7 +44,7 @@ int main()
     printf("Type 2 to run the widget example\n");
 
     //then, get the user input
-    int inp;
+    int inp = 0;
     std::cin >> inp;
 
     //start the example corresponding to the input

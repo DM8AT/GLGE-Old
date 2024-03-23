@@ -39,3 +39,7 @@
 #include "GLGEMath.h"
 //include the window management system
 #include "GLGEWindow.h"
+//include textures
+#include "GLGETexture.h"
+//includet compute shaders
+#include "GLGEComputeShader.h"

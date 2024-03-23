@@ -15,6 +15,10 @@
 #include "../GLGEInternal/glgeVars.hpp"
 //include the window core
 #include "openglGLGEWindow.h"
+//include the 2D core
+#include "openglGLGE2Dcore.h"
+//include the 3D core
+#include "openglGLGE3Dcore.h"
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -43,5 +47,8 @@ extern GLenum glgeInterpolationMode;
 
 //store the window vector
 extern std::vector<GLGEWindow*> glgeWindows;
+
+//store the current texture unit
+extern unsigned int glgeTextureUnit;
 
 #endif

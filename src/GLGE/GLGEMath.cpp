@@ -262,6 +262,42 @@ float glgeGetPersistance()
     return persistence;
 }
 
+unsigned int glgeClamp(unsigned int v, unsigned int min, unsigned int max)
+{
+    //check if the value is smaler than the minimal value
+    if (v < min)
+    {
+        //if it is, then the value is the minimum
+        v = min;
+    }
+    //else, if the value is greater than the maximum
+    else if (v > max)
+    {
+        //then the value is the maximum
+        v = max;
+    }
+    //return the value
+    return v;
+}
+
+int glgeClamp(int v, int min, int max)
+{
+    //check if the value is smaler than the minimal value
+    if (v < min)
+    {
+        //if it is, then the value is the minimum
+        v = min;
+    }
+    //else, if the value is greater than the maximum
+    else if (v > max)
+    {
+        //then the value is the maximum
+        v = max;
+    }
+    //return the value
+    return v;
+}
+
 float glgeClamp(float v, float min, float max)
 {
     //check if the value is smaler than the minimal value
@@ -296,6 +332,42 @@ vec4 glgeClamp(vec4 v, float min, float max)
 {
     //clamp the x,y,z and w axes independandly
     return vec4(glgeClamp(v.x, min, max), glgeClamp(v.y, min, max), glgeClamp(v.z, min, max), glgeClamp(v.w, min, max));
+}
+
+void glgeClamp(float* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec2* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec3* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec4* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(int* v, int min, int max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(unsigned int* v, unsigned int min, unsigned int max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
 }
 
 //convert the angle a to radians

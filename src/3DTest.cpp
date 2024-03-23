@@ -104,6 +104,8 @@ void display()
 //the tick function is called every tick. It should contain thinks like updates, but no draw calls. 
 void tick()
 {
+    //dont update this window if it is not focused
+    if (!glgeGetWindowFocus()) { return; }
     // reset uniforms
     pps.setCustomVec2("screenSize", glgeGetWindowSize());
     //make changes to the camera by changing its position or rotating it
@@ -321,8 +323,11 @@ void floorSetup()
 //in this function the cube is set up
 void cubeSetup()
 {
+    Mesh sphereMesh = Mesh(GLGE_PRESET_SPHERE, vec4(-1));
+    sphereMesh.applyTransform(Transform(vec3(0,2,0), vec3(0), vec3(0.5)));
+    Mesh cubeMesh = Mesh(GLGE_PRESET_CUBE, vec4(-1));
     //the cube object is constructed using a cube preset using an alpha of -1 for the color to use textures
-    cube = Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,1,2),vec3(0,0,0), 1));
+    cube = Object(cubeMesh + sphereMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
     //create a material for the cube
     Material cubeMaterial = Material(glgeGetLastFrame(), GLGE_TEXTURE, 0);
     //set it to unlit

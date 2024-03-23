@@ -88,4 +88,12 @@ void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shader
  */
 SDL_Surface* loadImage(const char* file);
 
+/**
+ * @brief convert an SDL Surface to an OpenGL texture
+ * 
+ * @param surf the surface to convert
+ * @return unsigned int the OpenGL texture
+ */
+unsigned int sdlSurfaceToOpenGLTexture(SDL_Surface* surf);
+
 #endif

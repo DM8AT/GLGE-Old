@@ -31,9 +31,17 @@ class Keys
 {
 public:
     //create a bool for all letters in the alphabet
-    bool a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z;
+    bool a=false,b=false,c=false,d=false,e=false,f=false,g=false,h=false,i=false,j=false,k=false,l=false,m=false,n=false,o=false,
+         p=false,q=false,r=false,s=false,t=false,u=false,v=false,w=false,x=false,y=false,z=false;
     //create a bool for all special keys
-    bool f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12, space, leftShift, rightShift, leftAlt, rightAlt, shift, alt, arrowRight, arrowLeft, arrowUp, arrowDown;
+    bool f1=false,f2=false,f3=false,f4=false,f5=false,f6=false,f7=false,f8=false,f9=false,f10=false,f11=false,f12=false, space=false, 
+         leftShift=false, rightShift=false, leftAlt=false, rightAlt=false, shift=false, alt=false, arrowRight=false, arrowLeft=false, 
+         arrowUp=false, arrowDown=false, 
+         key1=false, key2=false, key3=false, key4=false, key5=false, key6=false, key7=false, key8=false, key9=false, key0=false, 
+         backspace=false, enter=false, tab=false, capslockKey=false, dot=false, comma=false, dash=false, plus=false, hash=false;
+        
+    //store if capslock is active
+    bool capslock = false;
 
     /**
      * @brief Construct a new Keys 
@@ -53,15 +61,6 @@ public:
      * @brief set all keys to false
      */
     void clear();
-
-    /**
-     * @brief Get the status of one key
-     * 
-     * @param key the key to check
-     * @return true : the key is pressed | 
-     * @return false : the key is not pressed
-     */
-    bool getKey(int key);
 
     /**
      * @brief Get the status of one key

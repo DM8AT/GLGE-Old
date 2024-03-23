@@ -16,6 +16,7 @@
 //include the GLGE Dependencys
 #include "openglGLGELightingCore.h"
 #include "openglGLGE3Dcore.h"
+#include "openglGLGE2Dcore.h"
 //include CML
 #include "../CML/CMLVec2.h"
 #include "../CML/CMLVec3.h"
@@ -298,6 +299,13 @@ public:
      * @return void* a pointer of type SDL_Window* to the SDL window
      */
     void* getSDLWindow();
+
+    /**
+     * @brief get the SDL renderer for this window
+     * 
+     * @return void* a pointer to the renderer
+     */
+    void* getSDLRenderer();
 
     /**
      * @brief get the OpenGL context of the window
@@ -882,6 +890,13 @@ public:
      */
     Shader* getLightingShader();
 
+    /**
+     * @brief Get the default post processing shader
+     * 
+     * @return Shader* the default post processing shader
+     */
+    Shader* getDefaultImageShader();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -904,6 +919,8 @@ private:
 
     //store the window pointer (void* to not give acess to SDL2)
     void* window;
+    //store the SDL2 renderer
+    void* renderer;
     //store the OpenGL context (void* to not give acess to SDL2)
     void* glContext;
     //store the window ID
@@ -974,6 +991,8 @@ private:
     unsigned int default3DTransShader = 0;
     //store the default 2D shader
     unsigned int default2DShader = 0;
+    //store the default image shader
+    Shader defaultImageShader;
     
     /*
         Window constrains

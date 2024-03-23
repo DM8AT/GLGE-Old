@@ -74,14 +74,22 @@ void glgeInit()
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         //if sdl throws an value different than 0, print an error
-        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
+        std::cerr << "[FATAL GLGE ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
+        //exit with an error
+        exit(1);
+    }
+    //initalise fonts
+    if (TTF_Init() != 0)
+    {
+        //printa a fatal error
+        std::cerr << "[FATAL GLGE ERROR] GLGE failed to initalise SDL fonts, SDL font error: " << TTF_GetError() << "\n";
         //exit with an error
         exit(1);
     }
 
     //initalise to OpenGL 3.0
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
     //say that doublebuffering should be used
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -318,12 +326,17 @@ void glgeRunMainLoop()
         exit(1);
     }
 
+    //start SDL2 text input
+    SDL_StartTextInput();
+
     //store if the file should stop
     bool running = true;
 
     //run the main loop while the program is not stopped
     while (running)
     {
+        //clear whatever was written last tick
+        glgeTypedThisTick = "";
         //store the current SDL event
         SDL_Event event;
         //check all SDL events
@@ -338,6 +351,9 @@ void glgeRunMainLoop()
             //check the event type
             switch (event.type)
             {
+                case SDL_TEXTINPUT:
+                    glgeTypedThisTick += event.text.text;
+                    break;
                 case SDL_KEYDOWN:
                 {
                     //handle the keydown
@@ -552,11 +568,15 @@ void glgeRunMainLoop()
             if (wptr == NULL) { continue; }
             //call the draw function
             wptr->draw();
+            //update the window surface
+            SDL_GL_SwapWindow((SDL_Window*)wptr->getSDLWindow());
         }
 
         //run a tick
         glgeDefaultTimer();
     }
+    //stop SDL text input
+    SDL_StopTextInput();
 }
 
 //first function to set the clear color
@@ -1124,8 +1144,6 @@ unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataF
         };
     }
 
-    //say open GL to use the shader program
-    glUseProgram(shaderProgram);
     //return the shader program in the GLGE Object
     return shaderProgram;
 }
@@ -2019,20 +2037,8 @@ unsigned int glgeGetLighningBuffer()
 
 bool glgeGetTransparencyPass()
 {
-    //check if a window is bound
-    if (!glgeHasMainWindow)
-    {
-        //if not, check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            //if it should, print a warning
-            printf("[GLGE WARNING] can't get transpraent pass from an main window, if no main window exists\n");
-        }
-        //stop the function
-        return false;
-    }
-    //get if the main window is using backface culling
-    return glgeWindows[glgeMainWindowIndex]->isTranparentPass();
+    //return if the current window is in the transparency pass
+    return glgeWindows[glgeCurrentWindowIndex]->isTranparentPass();
 }
 
 void glgeSetTransparencyCombineShader(Shader* shader)

@@ -407,7 +407,7 @@ public:
      */
     void recalculateUniforms();
     
-private:
+protected:
     //store the address of the OpenGL shader
     unsigned int shader = 0;
     //store how many textures are bound

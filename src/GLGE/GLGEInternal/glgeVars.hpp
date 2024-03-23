@@ -27,9 +27,11 @@
 #ifdef _WIN32
 #include <SDL/SDL.h> /* Windows-specific SDL2 library */
 #include <SDL2/SDL_misc.h>
+#include <SDL2/SDL_ttf.h>
 #else
 #include <SDL2/SDL.h> /* macOS- and GNU/Linux-specific */
 #include <SDL2/SDL_misc.h>
+#include <SDL2/SDL_ttf.h>
 #endif
 
 ///////////
@@ -120,5 +122,8 @@ extern int glgeWindowIndexOffset;
 
 //store the GLGE include defaults
 extern std::unordered_map<std::string, std::string> glgeIncludeDefaults;
+
+//store whatever was types this tick
+extern std::string glgeTypedThisTick;
 
 #endif

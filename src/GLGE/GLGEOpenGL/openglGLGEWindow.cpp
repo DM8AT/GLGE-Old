@@ -76,6 +76,8 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     this->window = (void*)window;
     //store the window ID
     this->id = SDL_GetWindowID(window);
+    //create a renderer
+    this->renderer = SDL_CreateRenderer((SDL_Window*)this->window, -1, 0);
     //add a dummy value to the window
     glgeWindows.push_back(NULL);
 
@@ -464,6 +466,12 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     this->default3DTransShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
     //compile the default 2D shader
     this->default2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
+    //compile the default pps shader
+    this->defaultImageShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_IMAGE_FRAGMENT_SHADER);
+    //add the uniform
+    this->defaultImageShader.setCustomTexture("image", (unsigned int)0);
+    //get the uniform
+    this->defaultImageShader.recalculateUniforms();
 
     //initalise the textures correctly by calling the resize function
     this->resizeWindow(this->size.x, this->size.y);
@@ -617,10 +625,10 @@ void GLGEWindow::draw()
     {
         //if it needs, apply the lighting shader
 
-        //bind the lighting shader
-        this->lightShader.applyShader();
         //bind the screen rect
         this->bindScreenRect();
+        //bind the lighting shader
+        this->lightShader.applyShader();
         
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -818,8 +826,6 @@ void GLGEWindow::draw()
 
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //update the window surface
-    SDL_GL_SwapWindow((SDL_Window*)this->window);
 
     //say that the window is no longer drawing
     this->drawing = false;
@@ -1279,6 +1285,12 @@ void* GLGEWindow::getSDLWindow()
 {
     //return the current window pointer
     return this->window;
+}
+
+void* GLGEWindow::getSDLRenderer()
+{
+    //return the renderer
+    return this->renderer;
 }
 
 void* GLGEWindow::getGLContext()
@@ -2586,4 +2598,10 @@ Shader* GLGEWindow::getLightingShader()
 {
     //return a pointer to the current light shader
     return &this->lightShader;
+}
+
+Shader* GLGEWindow::getDefaultImageShader()
+{
+    //return the default image shader
+    return &this->defaultImageShader;
 }

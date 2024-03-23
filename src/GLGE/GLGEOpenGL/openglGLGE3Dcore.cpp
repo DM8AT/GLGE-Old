@@ -264,6 +264,11 @@ void Object::draw()
     //enable depth testing
     glEnable(GL_DEPTH_TEST);
 
+    if (!glgeWindows[this->windowIndex]->isTranparentPass())
+    {
+        //enable color blending
+        glDisable(GL_BLEND);
+    }
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
@@ -1105,7 +1110,6 @@ mat4 Camera::getViewMatrix()
 
 void Camera::setWindowIndex(unsigned int windowIndex)
 {
-
     //store the inputed window index
     this->windowIndex = windowIndex;
 

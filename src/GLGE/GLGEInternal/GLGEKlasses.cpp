@@ -47,8 +47,6 @@
 Keys::Keys()
 {
     //intialise the object
-    //set all keys to false
-    this->clear();
 }
 
 //update a key
@@ -347,101 +345,79 @@ void Keys::keyUpdate(int key, bool status)
             this->alt = (this->rightAlt || this->leftAlt);
             //exit
             break;
+        //check if the number 0 is pressed
+        case SDL_SCANCODE_0:
+            //update the down arrow
+            this->key0 = status;
+            //exit
+            break;
+        //check if the number 1 is pressed
+        case SDL_SCANCODE_1:
+            //update the down arrow
+            this->key1 = status;
+            //exit
+            break;
+        //check if the number 2 is pressed
+        case SDL_SCANCODE_2:
+            //update the down arrow
+            this->key2 = status;
+            //exit
+            break;
+        //check if the number 3 is pressed
+        case SDL_SCANCODE_3:
+            //update the down arrow
+            this->key3 = status;
+            //exit
+            break;
+        //check if the number 4 is pressed
+        case SDL_SCANCODE_4:
+            //update the down arrow
+            this->key4 = status;
+            //exit
+            break;
+        //check if the number 5 is pressed
+        case SDL_SCANCODE_5:
+            //update the down arrow
+            this->key5 = status;
+            //exit
+            break;
+        //check if the number 6 is pressed
+        case SDL_SCANCODE_6:
+            //update the down arrow
+            this->key6 = status;
+            //exit
+            break;
+        //check if the number 7 is pressed
+        case SDL_SCANCODE_7:
+            //update the down arrow
+            this->key7 = status;
+            //exit
+            break;
+        //check if the number 8 is pressed
+        case SDL_SCANCODE_8:
+            //update the down arrow
+            this->key8 = status;
+            //exit
+            break;
+        //check if the number 9 is pressed
+        case SDL_SCANCODE_9:
+            //update the down arrow
+            this->key9 = status;
+            //exit
+            break;
+        //check for backspace
+        case SDL_SCANCODE_BACKSPACE:
+            //update the down arrow
+            this->backspace = status;
+            //exit
+            break;
+        //check for enter
+        case SDL_SCANCODE_RETURN:
+            //update the down arrow
+            this->enter = status;
+            //exit
+            break;
     }
-}
-
-bool Keys::getKey(int key)
-{
-    //check for the function keys
-    //check for F1
-    if (key == SDL_SCANCODE_F1)
-    {
-        return this->f1;
-    }
-    //check for F2
-    else if (key == SDL_SCANCODE_F2)
-    {
-        return this->f2;
-    }
-    //check for F3
-    else if (key == SDL_SCANCODE_F3)
-    {
-        return this->f3;
-    }
-    //check for F4
-    else if (key == SDL_SCANCODE_F4)
-    {
-        return this->f4;
-    }
-    //check for F5
-    else if (key == SDL_SCANCODE_F5)
-    {
-        return this->f5;
-    }
-    //check for F6
-    else if (key == SDL_SCANCODE_F6)
-    {
-        return this->f6;
-    }
-    //check for F7
-    else if (key == SDL_SCANCODE_F7)
-    {
-        return this->f7;
-    }
-    //check for F8
-    else if (key == SDL_SCANCODE_F8)
-    {
-        return this->f8;
-    }
-    //check for F9
-    else if (key == SDL_SCANCODE_F9)
-    {
-        return this->f9;
-    }
-    //check for F10
-    else if (key == SDL_SCANCODE_F10)
-    {
-        return this->f10;
-    }
-    //check for F11
-    else if (key == SDL_SCANCODE_F11)
-    {
-        return this->f11;
-    }
-    //check for F12
-    else if (key == SDL_SCANCODE_F12)
-    {
-        return this->f12;
-    } 
-    //check for shift keys
-    else if (key == SDL_SCANCODE_LSHIFT)
-    {
-        return this->leftShift;
-    }
-    else if (key == SDL_SCANCODE_RSHIFT)
-    {
-        return this->rightShift;
-    }
-    //check for arrow keys
-    else if (key == SDL_SCANCODE_RIGHT)
-    {
-        return this->arrowRight;
-    }
-    else if (key == SDL_SCANCODE_LEFT)
-    {
-        return this->arrowLeft;
-    }
-    else if (key == SDL_SCANCODE_UP)
-    {
-        return this->arrowUp;
-    }
-    else if (key == SDL_SCANCODE_DOWN)
-    {
-        return this->arrowDown;
-    }
-
-    //if the key is invalide, return false
-    return false;
 }
 
 bool Keys::getKey(unsigned char key)
@@ -582,66 +558,67 @@ bool Keys::getKey(unsigned char key)
         return this->space;
     }
 
-    //if the key is not valide, return false
-    return false;
+    switch (key)
+    {
+    case '.':
+        return this->dot;
+        break;
+    case ',':
+        return this->comma;
+        break;
+    case '-':
+        return this->dash;
+        break;
+    case '+':
+        return this->plus;
+        break;
+    case '#':
+        return this->hash;
+        break;
+    case '1':
+        return this->key1;
+        break;
+    case '2':
+        return this->key2;
+        break;
+    case '3':
+        return this->key3;
+        break;
+    case '4':
+        return this->key4;
+        break;
+    case '5':
+        return this->key5;
+        break;
+    case '6':
+        return this->key6;
+        break;
+    case '7':
+        return this->key7;
+        break;
+    case '8':
+        return this->key8;
+        break;
+    case '9':
+        return this->key9;
+        break;
+    case '0':
+        return this->key0;
+        break;
+    case '\n':
+        return this->enter;
+        break;
+    
+    default:
+        //if the key is not valide, return false
+        return false;
+    }
 }
 
 void Keys::clear()
 {
-    //set all keys to false
-    this->a = false;
-    this->b = false;
-    this->c = false;
-    this->d = false;
-    this->e = false;
-    this->f = false;
-    this->g = false;
-    this->h = false;
-    this->i = false;
-    this->j = false;
-    this->k = false;
-    this->l = false;
-    this->m = false;
-    this->n = false;
-    this->o = false;
-    this->p = false;
-    this->q = false;
-    this->r = false;
-    this->s = false;
-    this->t = false;
-    this->u = false;
-    this->v = false;
-    this->w = false;
-    this->x = false;
-    this->y = false;
-    this->z = false;
-
-    //set all function keys to false
-    this->f1 = false;
-    this->f2 = false;
-    this->f3 = false;
-    this->f4 = false;
-    this->f5 = false;
-    this->f6 = false;
-    this->f7 = false;
-    this->f8 = false;
-    this->f9 = false;
-    this->f10 = false;
-    this->f11 = false;
-    this->f12 = false;
-
-    //set the misc keys to false
-    this->space = false;
-    this->leftShift = false;
-    this->rightShift = false;
-    this->leftAlt = false;
-    this->rightAlt = false;
-    this->shift = false;
-    this->alt = false;
-    this->arrowRight = false;
-    this->arrowLeft = false;
-    this->arrowUp = false;
-    this->arrowDown = false;
+    //just re-enitalise the object
+    *this = Keys();
 }
 
 //MOUSE

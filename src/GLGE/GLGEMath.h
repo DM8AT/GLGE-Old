@@ -149,6 +149,26 @@ void glgeSetPersistance(float persistance);
 float glgeGetPersistance();
 
 /**
+ * @brief clamp an integer
+ * 
+ * @param v the value to clamp
+ * @param min the minimal value, the value input should have
+ * @param max the maximal value, the value input should have
+ * @return int the clamped value
+ */
+int glgeClamp(int v, int min, int max);
+
+/**
+ * @brief clamp an integer
+ * 
+ * @param v the value to clamp
+ * @param min the minimal value, the value input should have
+ * @param max the maximal value, the value input should have
+ * @return unsigned int the clamped value
+ */
+unsigned int glgeClamp(unsigned int v, unsigned int min, unsigned int max);
+
+/**
  * @brief clamp a float
  * 
  * @param v the value to clamp
@@ -221,5 +241,59 @@ float glgeMax(float value, float min);
  * @return float the bigger value
  */
 float glgeMin(float value, float max);
+
+/**
+ * @brief clamp a float
+ * 
+ * @param v the value to clamp
+ * @param min the minimal value, the value input should have
+ * @param max the maximal value, the value input should have
+ */
+void glgeClamp(float* v, float min, float max);
+
+/**
+ * @brief clamp a vector
+ * 
+ * @param v the vector to clamp
+ * @param min the minimal value, each value of the vector should have
+ * @param max the maximal value, each value of the vector should have
+ */
+void glgeClamp(vec2* v, float min, float max);
+
+/**
+ * @brief clamp a vector
+ * 
+ * @param v the vector to clamp
+ * @param min the minimal value, each value of the vector should have
+ * @param max the maximal value, each value of the vector should have
+ */
+void glgeClamp(vec3* v, float min, float max);
+
+/**
+ * @brief clamp a vector
+ * 
+ * @param v the vector to clamp
+ * @param min the minimal value, each value of the vector should have
+ * @param max the maximal value, each value of the vector should have
+ */
+void glgeClamp(vec4* v, float min, float max);
+
+/**
+ * @brief clamp an integer
+ * 
+ * @param v the value to clamp
+ * @param min the minimal value, the value input should have
+ * @param max the maximal value, the value input should have
+ */
+void glgeClamp(int* v, int min, int max);
+
+/**
+ * @brief clamp an integer
+ * 
+ * @param v the value to clamp
+ * @param min the minimal value, the value input should have
+ * @param max the maximal value, the value input should have
+ */
+void glgeClamp(unsigned int* v, unsigned int min, unsigned int max);
 
 #endif

@@ -20,6 +20,7 @@
 
 //include the GLGE dependencys
 #include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEInternal/glgePrivDefines.hpp"
 #include "../GLGEInternal/glgeInternalFuncs.h"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
@@ -287,4 +288,31 @@ SDL_Surface* loadImage(const char* file)
     }
     //if the surface construction was sucessfull, return the surface
     return surface;
+}
+
+//convert SDL Texture to OpenGL
+unsigned int sdlSurfaceToOpenGLTexture(SDL_Surface* surf)
+{
+    SDL_Surface *newSurf = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    if (!newSurf)
+    {
+        GLGE_THROW_ERROR("Failed to copy surface to new 32 bit surface")
+    }
+    SDL_BlitSurface(surf, 0, newSurf, 0);
+
+    unsigned int ret;
+    glGenTextures(1, &ret);
+    glBindTexture(GL_TEXTURE_2D, ret);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newSurf->w, newSurf->h, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, newSurf->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return ret;
 }

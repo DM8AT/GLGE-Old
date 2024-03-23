@@ -996,6 +996,8 @@ void Shader::removeShader()
 
 void Shader::recalculateUniforms()
 {
+    //bind the shader
+    glUseProgram(this->shader);
     //load the floats
     //define a variable for the current element
     std::map<std::string, float>::iterator currF;
@@ -1086,6 +1088,8 @@ void Shader::recalculateUniforms()
         //store the position of the uniform in the corresponding element in the position map
         this->customTextureLocs[currTex->first] = glgeGetUniformVar(shader, currTex->first.c_str());
     }
+    //unbind the shader
+    glUseProgram(0);
 }
 
 /////////////

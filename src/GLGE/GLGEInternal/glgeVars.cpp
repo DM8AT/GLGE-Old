@@ -107,3 +107,6 @@ int glgeWindowIndexOffset = -1;
 
 //store the GLGE include defaults
 std::unordered_map<std::string, std::string> glgeIncludeDefaults;
+
+//store whatever was types this tick
+std::string glgeTypedThisTick = "";

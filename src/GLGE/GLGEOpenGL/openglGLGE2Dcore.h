@@ -355,25 +355,30 @@ protected:
     //store the transform of the object
     Transform2D transf;
     //store the vertex and index buffer
-    unsigned int VBO, IBO;
+    unsigned int VBO=0, IBO=0;
     //save the shader
-    int shader;
+    int shader = 0;
     //store the move matrix location
-    unsigned int moveMatLoc;
+    unsigned int moveMatLoc = 0;
     //the local matrix to make the object correct
     mat3 moveMat = mat3(1,0,0,
                         0,1,0,
                         0,0,0);
     //store a texture
-    unsigned int texture;
+    unsigned int texture = 0;
     //say if the object is static
-    bool isStatic;
+    bool isStatic = false;
     //save the length of the vertex and index buffer
-    unsigned int VBOLen, IBOLen;
+    unsigned int VBOLen=0, IBOLen=0;
     //store the object UUID
     unsigned int id = 0;
     //store the window the buffers where created in
     int windowID = -1;
+
+    /**
+     * @brief perform any setup scripts for the object that are not mesh-related
+     */
+    void superConstructor();
 
     /**
      * @brief Create the buffers
@@ -773,6 +778,223 @@ protected:
      * @brief store the width and height or radius
      */
     vec2 size = vec2(0);
+};
+
+/**
+ * @brief a simple class to render text with SDL2
+ */
+class Text : public Object2D
+{
+public:
+    /**
+     * @brief Construct a new Text
+     * 
+     * default constructor
+     */
+    Text();
+
+    /**
+     * @brief Construct a new Text
+     * 
+     * @param text the text to render
+     * @param font the font for the text
+     * @param color the color of the text
+     * @param fontSize the font size of the text
+     * @param transf the transform for the text
+     * @param dynamicMesh true : the mesh will be recalculated every time the words change | false : the mesh won't change
+     */
+    Text(const char* text, const char* font, vec4 color = vec4(0,0,0,1), int fontSize = 30, Transform2D transf = Transform2D(), bool dynamicMesh = true);
+
+    /**
+     * @brief Get the text from this text element
+     * 
+     * @return std::string the text
+     */
+    std::string getText();
+
+    /**
+     * @brief Get the path to the used font
+     * 
+     * @return std::string the path to the font
+     */
+    std::string getFont();
+
+    /**
+     * @brief Set the text for this text element
+     * 
+     * @param text the new text for the text object
+     */
+    void setText(std::string text);
+
+    /**
+     * @brief Set the font for this text element
+     * 
+     * @param fontPath the path to the font file
+     */
+    void setFont(std::string fontPath);
+
+    /**
+     * @brief Get the font scale
+     * 
+     * @return int the font scale
+     */
+    unsigned int getFontSize();
+
+    /**
+     * @brief Set the font scale factor
+     * 
+     * @param fontScale the new font scale
+     */
+    void setFontSize(unsigned int fontScale);
+
+    /**
+     * @brief get the color of the text
+     * 
+     * @return vec4 the text color
+     */
+    vec4 getTextColor();
+
+    /**
+     * @brief Set the color for the text
+     * 
+     * @param color the new text color
+     */
+    void setTextColor(vec4 color);
+
+    /**
+     * @brief Get the texture containing the text
+     * 
+     * @return int an OpenGL texture pointer for the texture
+     */
+    int getTextTexture();
+
+    /**
+     * @brief Get if dynamic meshing is activated
+     * 
+     * @return true : the mesh will be recalculated every time the words change | 
+     * @return false : the mesh won't change
+     */
+    bool getDynamicMeshing();
+
+    /**
+     * @brief Set if dynamic meshing is activated or not
+     * 
+     * @param dynamicMesh true : the mesh will be recalculated every time the words change | false : the mesh won't change
+     */
+    void setDynamicMeshing(bool dynamicMesh);
+
+protected:
+    //the text the object is displaying
+    std::string text;
+    //store the size of the texture
+    vec2 texSize;
+    //store the font size
+    unsigned int fontSize = 30;
+    //store the color of the text
+    vec4 color;
+    //store the font
+    std::string font;
+    //store if dynamic meshing is activated
+    bool dynamicMesh = true;
+
+    //update the texture
+    void updateTexture();
+};
+
+/**
+ * @brief A class to handle simple text input
+ */
+class TextInput : public Text
+{
+public:
+
+    /**
+     * @brief default constructor
+     * 
+     */
+    TextInput();
+
+    /**
+     * @brief Construct a new Text Input box
+     * 
+     * @param text the default text
+     * @param font the font for the text
+     * @param color the color of the text
+     * @param fontSize the font size of the text
+     * @param transf the transform for the text
+     */
+    TextInput(const char* text, const char* font, vec4 color = vec4(0,0,0,1), int fontSize = 30, Transform2D transf = Transform2D());
+
+    /**
+     * @brief update the text input box
+     */
+    void update();
+
+    /**
+     * @brief get if the object is currently focused
+     * 
+     * @return true : the object accepts text input | 
+     * @return false : the object is just text
+     */
+    bool isFocused();
+
+    /**
+     * @brief get if the object will cleare once it is focused
+     * 
+     * @return true : the object will clear | 
+     * @return false : the object wont clear
+     */
+    bool isEmpty();
+
+    /**
+     * @brief Set a function that should be called every time something is typed
+     * 
+     * @param func the function to call
+     */
+    void setOnTypeFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called every time something is typed
+     */
+    void (*getOnTypeFunc())();
+
+    /**
+     * @brief Set a function that should be called if the text input is enterd
+     * 
+     * @param func the function to call
+     */
+    void setOnEnterFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called if the text input is enterd
+     */
+    void (*getOnEnterFunc())();
+
+    /**
+     * @brief Set a function that should be called if the text input is exited
+     * 
+     * @param func the function to call
+     */
+    void setOnExitFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called if the text input is exited
+     */
+    void (*getOnExitFunc())();
+
+protected:
+    //store the current courser position
+    int cursourPos = 0;
+    //store if the box is focused
+    bool focused = false;
+    //store if the text is empty
+    bool empty = false;
+    //store the on tick function
+    void (*onTypeFunc)() =  NULL;
+    //store the on enter function
+    void (*onEnterFunc)() =  NULL;
+    //store the on exit function
+    void (*onExitFunc)() =  NULL;
 };
 
 //FUNCTIONS

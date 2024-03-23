@@ -51,6 +51,15 @@ Upcoming features that may be added to GLGE in the future include:
 - Texture atleasing
 
 # Changelogs
+## Update 0.5
+- added the "Test" class to handle 2D text displays
+   - inherates from the "Object2D" class
+- added support for propper transparency for 2D objects
+- added a new "Texture" class to bedder handle texture objects
+   - simple creation from files using stb_image
+   - create an empty texture with an specific size
+   - create 
+- added a new "ComputeShader" class. Compute shaders can now be used in GLGE
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

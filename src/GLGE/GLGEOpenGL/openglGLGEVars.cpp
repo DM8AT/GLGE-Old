@@ -32,3 +32,6 @@ GLenum glgeInterpolationMode = GL_NEAREST;
 
 //store the window vector
 std::vector<GLGEWindow*> glgeWindows = {};
+
+//store the current texture unit
+unsigned int glgeTextureUnit = 0;

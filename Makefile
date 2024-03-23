@@ -7,7 +7,7 @@ INCLUDE	:= include
 LIB		:= lib
 GLGE    := src/GLGE
 
-LIBRARIES	:= -lGL -lGLEW -lSDL2main -lSDL2
+LIBRARIES	:= -lGL -lGLEW -lSDL2main -lSDL2 -lSDL2_ttf
 EXECUTABLE	:= main
 
 
@@ -22,5 +22,5 @@ $(BIN)/$(EXECUTABLE): $(GLGE)/CML/*.cpp $(GLGE)/*.cpp $(SRC)/*.cpp $(GLGE)/GLGEO
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
 
 clean:
-	-rm $(BIN)/*
+	-rm $(BIN)/$(EXECUTABLE)
 

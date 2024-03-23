@@ -332,6 +332,16 @@ public:
      * @brief recalculate the normal vectors from the mesh in clockwise order
      */
     void recalculateNormals();
+
+    void applyTransform(Transform transform);
+
+    Mesh join(Mesh mesh);
+
+    void joinThis(Mesh mesh);
+
+    void operator+=(Mesh mesh);
+
+    Mesh operator+(Mesh mesh);
 };
 
 #endif

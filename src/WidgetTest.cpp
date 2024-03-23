@@ -26,11 +26,17 @@ Object2D tri;
 //store a spinning cube
 Object spinCube;
 //store an close button
-Button glgeButton;
+Button button;
 //store the Camera
 Camera camSecWin;
 //store a second window
 GLGEWindow win;
+//store a window for a compute shader example
+GLGEWindow compute;
+//store a texture for the compute shader
+Texture compOutTexture;
+//store the compute shader
+ComputeShader compShader;
 
 void widgetDraw()
 {
@@ -105,7 +111,7 @@ void secondDraw()
     //draw the cube
     spinCube.draw();
     //draw the button
-    glgeButton.draw();
+    button.draw();
 }
 
 void secondTick()
@@ -121,10 +127,10 @@ void secondTick()
     //update the cube
     spinCube.update();
     //update the button
-    glgeButton.update();
+    button.update();
 
     //check if the button was pressed this tick
-    if (glgeButton.clickThisTick())
+    if (button.clickThisTick())
     {
         //print a chat message
         printf("[GLGE INFO] You clicked the button\n");
@@ -151,7 +157,7 @@ void secWindowInit()
     spinCube.setMaterial(mat);
 
     //load the close button
-    glgeButton = Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
+    button = Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
 
     //bind a draw function to the window
     win.setDrawFunc(secondDraw);
@@ -159,6 +165,32 @@ void secWindowInit()
     win.setTickFunc(secondTick);
     //set the window icon
     win.setWindowIcon("assets/GLGEImage.png");
+}
+
+void computeDraw()
+{
+    //stop if this is the transparent pass
+    if (glgeGetTransparencyPass())
+    { return; }
+    //bind the texture
+    compOutTexture.bind(0);
+    //run the compute shader
+    compShader.dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
+    //draw the texture
+    compOutTexture.draw();
+}
+
+void computeSetup()
+{
+    compute = GLGEWindow("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
+    compute.setResizable(false);
+    compute.makeCurrent();
+    float* data = new float[(int)(compute.getSize().x*compute.getSize().y * 4)];
+    compOutTexture = Texture(compute.getSize(), GLGE_TEX_RGBA32, data);
+    delete[] data;
+    compShader = ComputeShader("src/Shaders/example.comp");
+    compute.setDrawFunc(computeDraw);
+    compute.start();
 }
 
 //start of the program
@@ -211,6 +243,9 @@ void runWidgetExample()
     win.setInitFunc(secWindowInit);
     //mark the window as ready for updates
     win.start();
+    
+    //generate a window for the compute shader example
+    computeSetup();
 
     //say that GLGE should exit once the main window closes
     glgeSetExitOnMainWindowClose(true);

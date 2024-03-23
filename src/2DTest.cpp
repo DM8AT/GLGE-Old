@@ -19,8 +19,11 @@
 //include the shader core for shader opperations
 #include "GLGE/GLGEShaderCore.h"
 
+#include "GLGE/GLGETexture.h"
+
 //include the default librarys
 #include <iostream>
+#include <math.h>
 
 //create the camera to move around in the 2D world 
 Camera2D cam;
@@ -31,23 +34,27 @@ Object2D square;
 //create an 2D object for an crosshair
 Object2D crosshair;
 
+//a simple hello world
+Text text;
+//show the current FPS
+Text FPS;
+//an text input box
+TextInput typeSomething;
+
 //set the camera speed to an variable
 float cameraSpeed = 0.05;
 
 //set the world scale to an variable so it can be changed later
 float worldScale = 1.f;
 
-//this function is called after the screen is cleared and before the buffer is swaped
-void dispFunc()
+void drawFunc()
 {
-    //in this case, the first drawn object is the lowest on the draw stack and coverd by the other objects.
-    //the object on top should be drawn first
-
-    //draw the triangle
+    //draw all objects in the order they should be displayd
     triangle.draw();
-    //draw the square
     square.draw();
-    //draw the crosshair
+    text.draw();
+    FPS.draw();
+    typeSomething.draw();
     crosshair.draw();
 }
 
@@ -56,43 +63,40 @@ void tickFunc()
 {
     //the speed of the camera is framerate dependend
 
-    //check if the w key is pressed
-    if (glgeGetKeys().w)
+    //check if the text is selected
+    if (!typeSomething.isFocused())
     {
-        //change the position of the camera up by the camera speed
-        cam.move(0,-cameraSpeed);
-    }
-    //check if the s key is pressed
-    if (glgeGetKeys().s)
-    {
-        //change the position of the camera down by the camera speed
-        cam.move(0,cameraSpeed);
-    }
-    //check if the a key is pressed
-    if (glgeGetKeys().a)
-    {
-        //change the position of the camera left by the camera speed
-        cam.move(cameraSpeed,0);
-    }
-    //check if the d key is pressed
-    if (glgeGetKeys().d)
-    {
-        //change the position of the camera right by the camera speed
-        cam.move(-cameraSpeed,0);
-    }
+        //check if the w key is pressed
+        if (glgeGetKeys().w)
+        {
+            //change the position of the camera up by the camera speed
+            cam.move(0,-cameraSpeed / worldScale);
+        }
+        //check if the s key is pressed
+        if (glgeGetKeys().s)
+        {
+            //change the position of the camera down by the camera speed
+            cam.move(0,cameraSpeed / worldScale);
+        }
+        //check if the a key is pressed
+        if (glgeGetKeys().a)
+        {
+            //change the position of the camera left by the camera speed
+            cam.move(cameraSpeed / worldScale,0);
+        }
+        //check if the d key is pressed
+        if (glgeGetKeys().d)
+        {
+            //change the position of the camera right by the camera speed
+            cam.move(-cameraSpeed / worldScale,0);
+        }
+}
 
     //change the world speed by the mouse wheel delta scroll divided by 10
     worldScale += glgeGetMouse().mouseWheel/10.f;
 
     //clamp the world scale beteween 0.1 and 3
-    if (worldScale < 0.1)
-    {
-        worldScale = 0.1;
-    }
-    else if (worldScale > 5)
-    {
-        worldScale = 5;
-    }
+    glgeClamp(&worldScale, 0.5, 5);
 
     //set the camera scale to the world scale on both axis
     cam.setScale(vec2(worldScale,worldScale));
@@ -103,22 +107,27 @@ void tickFunc()
     //rotate the triangle by 2.5 degrees
     triangle.rotate(2.5);
 
-    //update the triangle
-    triangle.update();
-    //update the square
-    square.update();
-    //update the crosshair
-    crosshair.update();
+    //update the FPS count
+    FPS.setText((std::string("FPS: ") + std::to_string(glgeGetCurrentFPS())).c_str());
+    //disable dynamic meshing after the first update
+    FPS.setDynamicMeshing(false);
+    //position the FPS counter in the top left
+    FPS.setPos(vec2(-glgeGetWindowAspect(), 1));
 
-    //write the current FPS
-    std::cout << "\rFPS: " << glgeGetCurrentFPS();
+    //update all objects
+    triangle.update();
+    square.update();
+    crosshair.update();
+    FPS.update();
+    text.update();
+    typeSomething.update();
 }
 
 //setup the triangle
 void triangleSetup()
 {
     //set the vertices for the triangle
-    Vertex2D vertices[] = {Vertex2D(0,1, 1,0,0,1),
+    Vertex2D vertices[] = {Vertex2D( 0, 1, 1,0,0,1),
                            Vertex2D(-1,-1, 0,1,0,1),
                            Vertex2D( 1,-1, 0,0,1,1)};
 
@@ -159,6 +168,13 @@ void setupCrosshair()
                            Vertex2D(0,0, 0.01,0.01),
                            Vertex2D(1,0, 0.99,0.01)};
 
+    //loop over the vertices and make them transparent
+    for (int i = 0; i < 4; i++)
+    {
+        //make the vertex a little bit transparent
+        vertices[i].color.w = 0.7;
+    }
+
     //conect them to an square
     uint indices[] = {0,1,2,
                       0,2,3};
@@ -192,8 +208,8 @@ void run2Dexample()
     //set the background color
     glgeSetClearColor(0,0,0);
 
-    //bind the function to display thinks to the screen
-    glgeBindDisplayFunc(dispFunc);
+    //bind a function that should be called to draw
+    glgeBindDisplayFunc(drawFunc);
     //bind the function that should be called every tick
     glgeBindMainFunc(tickFunc);
 
@@ -207,9 +223,15 @@ void run2Dexample()
     //setup the crosshair
     setupCrosshair();
 
+    //load the Hello World text
+    text = Text("Hello World!", "assets/FreeSerif.ttf", vec4(1,1,1,1), 120, Transform2D(vec2(-1,1), 0, vec2(0.1)));
+    //set it so it dosn't move with the camera
+    text.setStatic(false);
+    //load the FPS text
+    FPS = Text("Loading...", "assets/FreeSerif.ttf", vec4(1), 30, Transform2D(vec2(-1,1), 0, vec2(0.05)));
+    typeSomething = TextInput("Test", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
+    typeSomething.setStatic(false);
+
     //execute the script
     glgeRunMainLoop();
-
-    //add a new line befor the program closes
-    printf("\n");
 }

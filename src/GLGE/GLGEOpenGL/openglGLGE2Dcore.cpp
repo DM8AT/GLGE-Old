@@ -23,11 +23,13 @@
 //include the GLGE dependencys
 #include "openglGLGEDefines.hpp"
 #include "../GLGEInternal/glgePrivDefines.hpp"
+#include "openglGLGEFuncs.hpp"
 #include "openglGLGEVars.hpp"
 
 //the needed default C++ libs
 #include <math.h>
 #include <iostream>
+#include <algorithm>
 
 /////////////////////
 // LOCAL VARIABLES //
@@ -67,8 +69,6 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
     this->moveMatLoc = glgeDefaultMoveMatLoc;
     //get the UUID
     this->id = glgeObjectUUID;
-    //increase the object count
-    glgeObjectUUID++;
 
     //update the object
     this->update();
@@ -119,7 +119,7 @@ Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Tra
 void Object2D::draw()
 {
     //check if this is the transparent pass
-    if (glgeTransparentOpaquePass)
+    if (glgeWindows[this->windowID]->isTranparentPass())
     {
         //break the draw call
         return;
@@ -132,6 +132,10 @@ void Object2D::draw()
     }
     //disable depth testing
     glDisable(GL_DEPTH_TEST);
+    //enable color blending
+    glEnable(GL_BLEND);
+    //setup the blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
@@ -216,7 +220,7 @@ void Object2D::recalculateMeshBuffer(Mesh2D mesh)
     this->mesh = mesh;
 
     //check if the mesh was initalised
-    if (this->windowID == -1)
+    if ((this->VBO == 0) && (this->IBO == 0))
     {
         //create the buffers
         this->createBuffers();
@@ -446,6 +450,25 @@ bool Object2D::getStatic()
     return this->isStatic;
 }
 
+void Object2D::superConstructor()
+{
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //recalculate the shader uniforms
+    
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+
+    //store the transform
+    this->transf = transf;
+    //update the object
+    this->update();
+}
+
 void Object2D::createBuffers()
 {
     //check if the window ID is -1
@@ -508,12 +531,8 @@ void Object2D::updateVertexBuffer()
         //stop the function
         return;
     }
-    //check if an old buffer was loaded
-    if (this->VBO != 0)
-    {
-        //delete the old buffer
-        glDeleteBuffers(this->VBOLen, &this->VBO);
-    }
+    //delete the old buffer
+    glDeleteBuffers(1, &this->VBO);
     //generate the vertex buffer for the object
     glGenBuffers(1, &this->VBO);
     //bind the vertex buffer object to store data
@@ -541,12 +560,8 @@ void Object2D::updateIndexBuffer()
         //stop the function
         return;
     }
-    //check if an old buffer was loaded
-    if (this->IBO != 0)
-    {
-        //delete the old buffer
-        glDeleteBuffers(this->IBOLen, &this->IBO);
-    }
+    //delete the old buffer
+    glDeleteBuffers(1, &this->IBO);
     //generate the index buffer
     glGenBuffers(1, &this->IBO);
     //bind the index buffer
@@ -801,7 +816,7 @@ Button::Button(const char* texture, Transform2D transf)
         size /= vec2(size.y);
     }
     //cast to another constuctor
-    *this = Button(size, vec4(0), transf);
+    *this = Button(size, vec4(0,0,0,1), transf);
     //store the texture
     this->setTexture(texture);
 }
@@ -912,11 +927,11 @@ void Button::update()
     vec2 p = (vec2(glgeMouse.pos.x, 1.f - glgeMouse.pos.y) / vec2(0.5)) - vec2(1);
     //apply the window aspect ratio to the mouse position
     p.x *= glgeWindows[this->windowID]->getWindowAspect();
+    //calculat the mouse position in object space
+    p -= this->transf.pos;
     //check if the button is a circle
     if (this->isCircle)
     {
-        //calculate the mouse position in object space
-        p -= this->transf.pos;
         //check if the length is shorter than the radius
         if (p.length() <= (this->size.x * this->transf.size.x))
         {
@@ -965,8 +980,6 @@ void Button::update()
     {
         //calculate the half size
         vec2 hsize = (this->size.scale(this->transf.size)) / vec2(2);
-        //calculat the mouse position in object space
-        p -= this->transf.pos;
         //check if the mouse is hovering the button
         if ((p >= vec2(0)-hsize) && (p <= hsize))
         {
@@ -1041,6 +1054,407 @@ bool Button::clickStopThisTick()
 bool Button::hoverStopThisTick()
 {
     return this->hoveringStopedThis;
+}
+
+Text::Text() : Object2D()
+{}
+
+Text::Text(const char* text, const char* font, vec4 color, int fontSize, Transform2D transf, bool dynMesh)
+{
+    //store the text
+    this->text = std::string(text);
+    //store the font file
+    this->font = std::string(font);
+    //store the color
+    this->color = color;
+    //store the font size
+    this->fontSize = fontSize;
+    //generate the texture for the text
+    this->updateTexture();
+    //store dynamic meshing
+    this->dynamicMesh = dynMesh;
+
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //recalculate the shader uniforms
+    
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+
+    //store the transform
+    this->transf = transf;
+    //update the object
+    this->update();
+}
+
+std::string Text::getText()
+{
+    //return the text
+    return this->text;
+}
+
+std::string Text::getFont()
+{
+    //return the font
+    return this->font;
+}
+
+void Text::setText(std::string text)
+{
+    //store the new text
+    this->text = text;
+    //update the texture
+    this->updateTexture();
+}
+
+void Text::setFont(std::string font)
+{
+    //store the new text
+    this->font = font;
+    //update the texture
+    this->updateTexture();
+}
+
+unsigned int Text::getFontSize()
+{
+    //return the font size
+    return this->fontSize;
+}
+
+void Text::setFontSize(unsigned int size)
+{
+    //store the new text
+    this->fontSize = size;
+    //update the texture
+    this->updateTexture();
+}
+
+vec4 Text::getTextColor()
+{
+    //return the text color
+    return this->color;
+}
+
+void Text::setTextColor(vec4 col)
+{
+    //store the new text
+    this->color = col;
+    //update the texture
+    this->updateTexture();
+}
+
+int Text::getTextTexture()
+{
+    //return the texture
+    return this->texture;
+}
+
+bool Text::getDynamicMeshing()
+{
+    //return the dynamic meshing
+    return this->dynamicMesh;
+}
+
+void Text::setDynamicMeshing(bool dynMesh)
+{
+    //store the new dynamic meshing state
+    this->dynamicMesh = dynMesh;    
+}
+
+void Text::updateTexture()
+{
+    //open the requested font
+    TTF_Font *f = TTF_OpenFont(this->font.c_str(), fontSize);
+    //check if the font opening was sucessfull
+    if (!f)
+    {
+        GLGE_THROW_ERROR((std::string("Failed to open font file ") + font + std::string(" SDL Error : " + std::string(TTF_GetError()))).c_str())
+    }
+    //create the color for the surface
+    SDL_Color c = SDL_Color{(uint8_t)(this->color.x * 255), (uint8_t)(this->color.y * 255), (uint8_t)(this->color.z * 255), (uint8_t)(this->color.w * 255)};
+    //create the text surface
+    SDL_Surface* surf = TTF_RenderText_Blended(f, this->text.c_str(), c);
+    this->texSize = vec2(surf->w, surf->h);
+    //check if the surface was created
+    if (!surf)
+    {
+        GLGE_THROW_ERROR((std::string("Failed to render text message to surface") + std::string(" SDL Error : " + std::string(SDL_GetError()))).c_str())
+    }
+    //delete the old texture
+    glDeleteTextures(1, &this->texture);
+    //convert SDL Texture to OpenGL texture
+    this->texture = sdlSurfaceToOpenGLTexture(surf);
+    //check if dynamic meshing is activated
+    if (this->dynamicMesh)
+    {
+        //calculate the y size
+        vec2 s = vec2(this->texSize.x / this->texSize.y, 1);
+        //generate the vertices
+        std::vector<Vertex2D> vert = {Vertex2D(s.x, 0, 0,0,0,1), Vertex2D(s.x, -s.y, 0,0,0,1),
+                                    Vertex2D(0,   0, 0,0,0,1), Vertex2D(0,   -s.y, 0,0,0,1)};
+        //load the texture coordinates
+        vert[0].texCoord = vec2(1,0);
+        vert[1].texCoord = vec2(1,1);
+        vert[2].texCoord = vec2(0,0);
+        vert[3].texCoord = vec2(0,1);
+        //generate the indices
+        std::vector<unsigned int> inds = {1,0,2, 1,2,3};
+        //regenerate the mesh
+        this->mesh = Mesh2D(vert, inds);
+        this->recalculateMeshBuffer(Mesh2D(vert, inds));
+    }
+}
+
+TextInput::TextInput()
+{}
+
+TextInput::TextInput(const char* text, const char* font, vec4 color, int fontSize, Transform2D transf)
+{
+    //store the text
+    this->text = std::string(text);
+    //load the cursor position
+    this->cursourPos = this->text.length();
+    //check if the text is empty
+    if (this->text.empty())
+    {
+        //set the text to an space
+        this->text = " ";
+        //store that the text is empty
+        this->empty = true;
+    }
+    //store the font file
+    this->font = std::string(font);
+    //store the color
+    this->color = color;
+    //store the font size
+    this->fontSize = fontSize;
+    //generate the texture for the text
+    this->updateTexture();
+    //store dynamic meshing
+    this->dynamicMesh = true;
+
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //call the default constructor
+    this->superConstructor();
+}
+
+void TextInput::update()
+{
+    //recalculate the move matrix
+    this->recalculateMoveMatrix();
+    
+    //store the mouse position
+    vec2 p = (vec2(glgeMouse.pos.x, 1.f - glgeMouse.pos.y) / vec2(0.5)) - vec2(1);
+    //apply the window aspect ratio to the mouse position
+    p.x *= glgeWindows[this->windowID]->getWindowAspect();
+    //check if the world scale should be influenced
+    if (!this->isStatic)
+    {
+        //scale according to the camera scale
+        p /= mainCam->getScale();
+    }
+    //calculate the size
+    vec2 size = this->texSize.scale(this->transf.size) / (glgeWindows[this->windowID]->getSize().scale(vec2(0.125)));
+    //calculat the mouse position in object space
+    p -= this->transf.pos;
+    if (!this->isStatic)
+    {
+        p -= mainCam->getPos();
+    }
+    p.y *= -1.0;
+
+    //check if the mouse is hovering the button
+    if ((p >= vec2(0)) && (p <= size))
+    {
+        //check for a click
+        if (glgeMouse.leftButton && !this->focused)
+        {
+            //select this box
+            this->focused = true;
+            //check if the text is empty
+            if (this->empty)
+            {
+                //set the text to the cursor
+                this->text = "|";
+            }
+            else
+            {
+                //change the cursor to an space
+                this->text.insert(this->cursourPos, "|");
+            }
+            //check if an on enter function is bound
+            if (this->onEnterFunc != NULL)
+            {
+                //call the function
+                (*this->onEnterFunc)();
+            }
+            //update the texture
+            this->updateTexture();
+        }
+    }
+    else
+    {
+        //check for a click
+        if (glgeMouse.leftButton && this->focused)
+        {
+            //unfocus
+            this->focused = false;
+            //change the cursor to an space
+            this->text.erase(this->cursourPos, 1);
+            //check if the text is empty
+            if (this->text.empty())
+            {
+                //set the text to an space
+                this->text = " ";
+                //store that the text is empty
+                this->empty = true;
+            }
+            //check if an on exit function is bound
+            if (this->onExitFunc != NULL)
+            {
+                //call the function
+                (*this->onExitFunc)();
+            }
+            //update the texture
+            this->updateTexture();
+        }
+    }
+
+    //check if the object is focused
+    if (!this->focused)
+    {
+        //if not, return 
+        return;
+    }
+
+    //store the cursor movement
+    int deltaCourser = 0;
+
+    //check if the left arrow key was pressed
+    if (glgeKeysThisTick.arrowLeft)
+    {
+        //move the cursor left
+        deltaCourser -= 1;
+    }
+    //check if the left arrow key was pressed
+    if (glgeKeysThisTick.arrowRight)
+    {
+        //move the cursor left
+        deltaCourser += 1;
+    }
+
+    //stop if nothing was updated
+    if ((deltaCourser == 0) && glgeTypedThisTick.empty() && !glgeKeysThisTick.backspace)
+    { return; }
+
+    //store the old courser pos
+    unsigned int oldCP = this->cursourPos;
+    //move the coursor
+    this->cursourPos += deltaCourser;
+
+    //clamp the cursor position
+    glgeClamp(&this->cursourPos, 0, this->text.length()-1);
+
+    //move the visual courser
+    std::swap(this->text[oldCP], this->text[this->cursourPos]);
+
+    //check for backspace
+    if (glgeKeysThisTick.backspace)
+    {
+        //check if the text is empty
+        if (!text.empty() && (this->cursourPos > 0))
+        {
+            //check for the length of 1
+            if (text.length() == 1)
+            {
+                //set the string to an space
+                this->text = " ";
+            }
+            else
+            {
+                //delete the last character of the string
+                this->text.erase(this->cursourPos - 1, 1);
+                //move the cursor back
+                this->cursourPos -= 1;
+            }
+        }
+    }
+    else
+    {
+        //store the new text
+        this->text.insert(this->cursourPos, glgeTypedThisTick);
+        //move the cursor
+        this->cursourPos += glgeTypedThisTick.length();
+    }
+    
+    //check if an on type function is set
+    if (this->onTypeFunc != NULL)
+    {
+        //call the function
+        (*this->onTypeFunc)();
+    }
+
+    //update the texture
+    this->updateTexture();
+}
+
+bool TextInput::isFocused()
+{
+    return this->focused;
+}
+
+bool TextInput::isEmpty()
+{
+    return this->empty;
+}
+
+void TextInput::setOnTypeFunction(void (*func)())
+{
+    //store the inputed function
+    this->onTypeFunc = func;
+}
+
+void (*TextInput::getOnTypeFunc())()
+{
+    //return the function
+    return this->onTypeFunc;
+}
+
+void TextInput::setOnEnterFunction(void (*func)())
+{
+    //store the inpted function
+    this->onEnterFunc = func;
+}
+
+void (*TextInput::getOnEnterFunc())()
+{
+    //return the function
+    return this->onEnterFunc;
+}
+
+void TextInput::setOnExitFunction(void (*func)())
+{
+    //store the inpted function
+    this->onExitFunc = func;
+}
+
+void (*TextInput::getOnExitFunc())()
+{
+    //return the function
+    return this->onExitFunc;
 }
 
 /////////////

@@ -1155,3 +1155,61 @@ void Mesh::recalculateNormals()
         }
     }
 }
+
+void Mesh::applyTransform(Transform transform)
+{
+    //get the transformation matrix
+    mat4 transfMat = transform.getMatrix();
+    //get the rotation matrix
+    mat4 rotMat = transform.getRotationMatrix();
+
+    //loop over all vertices
+    for (int i = 0; i < (int)this->vertices.size(); i++)
+    {
+        //calculate a 4d position vector
+        vec4 temp = transfMat * vec4(this->vertices[i].pos,1);
+        //store the 3d part of the vector
+        this->vertices[i].pos = vec3(temp.x, temp.y, temp.z);
+        //calculate a 4d normal vector
+        temp = rotMat * vec4(this->vertices[i].normal, 1);
+        //store the 3d part of the vector
+        this->vertices[i].normal = vec3(temp.x, temp.y, temp.z);
+    }
+}
+
+Mesh Mesh::join(Mesh mesh)
+{
+    //create a list of vertices and copy the own vertices into it
+    std::vector<Vertex> newVerts = this->vertices;
+    //copy the other mesh vertices into it too
+    newVerts.insert(newVerts.end(), mesh.vertices.begin(), mesh.vertices.end());
+    
+    //create a list of indices and copy the own indices into it
+    std::vector<unsigned int> newInds = this->indices;
+    //loop over the vertices of the other mesh
+    for (int i = 0; i < (int)mesh.indices.size(); i++)
+    {
+        //add a single index from the other mesh to the new mesh and move it up by the amount of own indices
+        newInds.push_back(mesh.indices[i] + (int)this->vertices.size());
+    }
+    //return a new mesh from the new indices and vertices
+    return Mesh(newVerts, newInds);
+}
+
+void Mesh::joinThis(Mesh mesh)
+{
+    //pass to the join function
+    *this = join(mesh);
+}
+
+void Mesh::operator+=(Mesh mesh)
+{
+    //pass to the joinThis function
+    this->joinThis(mesh);
+}
+
+Mesh Mesh::operator+(Mesh mesh)
+{
+    //pass to the join function
+    return this->join(mesh);
+}
