@@ -981,6 +981,8 @@ private:
     bool mouseGrabbed = false;
     //store if the rectangle that covers the whole screen is bound
     bool screenRectBound = false;
+    //store if the window was started
+    bool started = false;
 
     /*
         Default shaders

@@ -22,7 +22,7 @@
 #include "openglGLGE2Dcore.h"
 //include the GLGE dependencys
 #include "openglGLGEDefines.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEFuncs.hpp"
 #include "openglGLGEVars.hpp"
 

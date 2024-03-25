@@ -11,11 +11,11 @@
 //incldue the main header
 #include "openglGLGETexture.hpp"
 //include the image handler
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 //include the variables
 #include "openglGLGEVars.hpp"
 //include defines
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 //default includes
 #include <iostream>
 

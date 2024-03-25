@@ -18,7 +18,7 @@
 #include "../CML/CMLVec2.h"
 
 //include the GLGE dependencys
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "glgeInternalFuncs.h"
 
 /**
  * @brief read a file

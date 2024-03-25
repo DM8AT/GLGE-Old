@@ -21,11 +21,11 @@
 #include "openglGLGE3Dcore.h"
 
 //include the GLGE dependencys
-#include "../GLGEInternal/glgeErrors.hpp"
-#include "../GLGEInternal/glgeVars.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeVars.hpp"
 #include "openglGLGEFuncs.hpp"
 #include "openglGLGEDefines.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEVars.hpp"
 
 //include needed CML librarys

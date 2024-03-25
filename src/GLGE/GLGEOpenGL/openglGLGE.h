@@ -17,7 +17,7 @@
 
 //include the public defines
 #include "openglGLGEDefines.hpp"
-#include "../GLGEInternal/GLGEKlasses.hpp"
+#include "../GLGEIndependend/GLGEKlasses.hpp"
 //include the math functions
 #include "../GLGEMath.h"
 //include the shader

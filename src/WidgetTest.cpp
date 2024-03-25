@@ -185,10 +185,10 @@ void computeSetup()
 {
     //create a new window for the compute shader example
     compute = GLGEWindow("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
+    //start the window so the window will be able to be drawn
+    compute.start();
     //disable resizing so the amount of pixels needed to compute dosn't change
     compute.setResizable(false);
-    //activate the OpenGL context from the new window
-    compute.makeCurrent();
     //create a new texture to render into
     compOutTexture = Texture(compute.getSize(), GLGE_TEX_RGBA32);
     //create the compute shader from an source file
@@ -200,8 +200,6 @@ void computeSetup()
     //bind a draw function for the window
     compute.setDrawFunc(computeDraw);
     //a tick function is not needed for the window, so don't bind one
-    //start the window so the window will now start to get drawn
-    compute.start();
 }
 
 //start of the program

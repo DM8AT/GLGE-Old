@@ -11,11 +11,11 @@
 //include the header file
 #include "openglGLGEComputeShader.hpp"
 //include the private functions
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "../GLGEIndependend/glgeInternalFuncs.h"
 //include the private vars to get OpenGL acess
 #include "openglGLGEVars.hpp"
 //include the errors
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 
 //default includes
 #include <iostream>

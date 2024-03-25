@@ -23,7 +23,7 @@
 //include the internal variables
 #include "openglGLGEVars.hpp"
 //get the error strings for GLGE
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 //get access to the glge functions
 #include "openglGLGEFuncs.hpp"
 

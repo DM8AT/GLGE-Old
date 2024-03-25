@@ -42,7 +42,7 @@
 //include windows
 #include "openglGLGEWindow.h"
 //include the rest of the default funcs
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "../GLGEIndependend/glgeInternalFuncs.h"
 
 /**
  * @brief Create a Window

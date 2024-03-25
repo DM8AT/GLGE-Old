@@ -19,9 +19,9 @@
 #endif
 
 //include the GLGE dependencys
-#include "../GLGEInternal/glgeErrors.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "../GLGEIndependend/glgeErrors.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgeInternalFuncs.h"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
 #include "openglGLGEDefines.hpp"
@@ -36,7 +36,7 @@
 #include <cstring>
 
 //include acess to images
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 
 //an copy of the shader code to make the shader handeling here easier
 

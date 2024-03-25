@@ -13,7 +13,7 @@
 
 //include the OpenGL dependencys
 #include "openglGLGEVars.hpp"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 
 #include <iostream>
 

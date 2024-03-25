@@ -20,14 +20,14 @@
 
 //include the GLGE dependencys
 #include "openglGLGE.h"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEFuncs.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 //include acess to images
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 
 //include the standart librarys
 #include <math.h>

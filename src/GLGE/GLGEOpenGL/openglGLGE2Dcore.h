@@ -13,7 +13,7 @@
 #define _GLGE_2D_CORE_OGL_H_
 
 //include the base classes for the 2D core
-#include "../GLGEInternal/glge2DcoreDefClasses.h"
+#include "../GLGEIndependend/glge2DcoreDefClasses.h"
 
 /**
  * @brief an 2D object

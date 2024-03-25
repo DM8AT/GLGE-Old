@@ -14,8 +14,8 @@
 //include GLGE dependencys
 #include "openglGLGEVars.hpp"
 #include "openglGLGEFuncs.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 #include "../GLGEMath.h"
 
 //include the default librarys

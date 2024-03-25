@@ -12,7 +12,7 @@
 #ifndef _GLGE_VARS_OGL_H_
 #define _GLGE_VARS_OGL_H_
 //include the rest of the variables
-#include "../GLGEInternal/glgeVars.hpp"
+#include "../GLGEIndependend/glgeVars.hpp"
 //include the window core
 #include "openglGLGEWindow.h"
 //include the 2D core

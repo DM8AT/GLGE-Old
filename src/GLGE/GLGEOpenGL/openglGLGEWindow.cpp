@@ -21,11 +21,11 @@
 #include "openglGLGEWindow.h"
 //include GLGE dependencys
 #include "openglGLGEVars.hpp"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 #include "openglGLGEFuncs.hpp"
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 #include "openglGLGEDefines.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 //define the Frame buffer bit amount
 #define GLGE_FRAMEBUFFER_BIT_DEPTH GL_RGB16F
@@ -1259,10 +1259,18 @@ bool GLGEWindow::getHasInitFunc()
 
 void GLGEWindow::start()
 {
+    //check if the window was allready started
+    if (this->started)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Can't start an allready started window")
+    }
     //add the inputed pointer
     glgeWindows[this->id-glgeWindowIndexOffset] = this;
     //increase the amount of active GLGE windows
     glgeActiveWindows++;
+    //say that the window is started
+    this->started = true;
     //bind this to the current window
     this->makeCurrent();
     //call the init function
@@ -1504,6 +1512,12 @@ void GLGEWindow::moveFunc(int x, int y)
 
 void GLGEWindow::resizeWindow(int width, int height)
 {
+    //bind the OpenGL context
+    //store the window ID as currently active by OpenGL
+    glgeCurrentWindowIndex = this->id-glgeWindowIndexOffset;
+    //bind the OpenGL context to the window
+    SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
+
     //update the internal parameters
     //recalculate the window aspect ratio
     this->aspect = ((float)width/(float)height);
@@ -2570,6 +2584,12 @@ void GLGEWindow::unbindScreenRect()
 
 void GLGEWindow::makeCurrent()
 {
+    //check if the window is started
+    if (!this->started)
+    {
+        //if not, throw an error
+        GLGE_THROW_ERROR("Can't bind OpenGL context of not started window")
+    }
     //store the window ID as currently active by OpenGL
     glgeCurrentWindowIndex = this->id-glgeWindowIndexOffset;
     //bind the OpenGL context to the window

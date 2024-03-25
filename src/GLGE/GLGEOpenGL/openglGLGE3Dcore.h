@@ -20,7 +20,7 @@
 #include "openglGLGE.h"
 
 //include the 3D core base
-#include "../GLGEInternal/glge3DcoreDefClasses.h"
+#include "../GLGEIndependend/glge3DcoreDefClasses.h"
 
 /**
  * @brief store an 3D object

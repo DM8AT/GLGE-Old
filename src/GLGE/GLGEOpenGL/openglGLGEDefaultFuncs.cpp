@@ -18,8 +18,8 @@
 #endif
 
 //include the GLGE dependencys
-#include "../GLGEInternal/glgeErrors.hpp"
-#include "../GLGEInternal/GLGEKlasses.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
+#include "../GLGEIndependend/GLGEKlasses.hpp"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEFuncs.hpp"
 
