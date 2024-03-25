@@ -41,6 +41,7 @@ Texture::Texture(const char* textureFile)
     {
         if (nrChannels == 3)
         {
+            //generate mipmap and upload to GPU
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
             //store the image number of chanels and encode type
@@ -49,6 +50,7 @@ Texture::Texture(const char* textureFile)
         }
         else if (nrChannels == 4)
         {
+            //generate mipmap and upload to GPU
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
             //store the image number of chanels and encode type
@@ -60,6 +62,9 @@ Texture::Texture(const char* textureFile)
     {
         std::cout << "Failed to load texture file: " << textureFile << "\n";
     }
+
+    //store the data type
+    this->type = GL_UNSIGNED_BYTE;
 
     //store the texture size
     this->size = ivec2(width, height);
@@ -89,19 +94,20 @@ Texture::Texture(unsigned int width, unsigned int height, int et, void* data, in
     }
     //store the inputed type
     this->type = dataType;
-    //generate a texture to store the last tick image
+    //generate a texture
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_2D, this->texture);
     //decode the type
     this->decode(et);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, width, height, 0, this->channels, this->type, data);
+    //set thinks like the texture wrap mode
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //unbind this texture
-    glBindTexture(GL_TEXTURE_2D, 0);
+    //store data in the texture
+    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, width, height, 0, this->channels, dataType, data);
+    //unbind the texture
+	glBindTexture(GL_TEXTURE_2D, 0);
     //store the window
     this->windowID = glgeCurrentWindowIndex;
 }
@@ -128,11 +134,11 @@ void Texture::resize(vec2 size)
     }
 
     //bind the texture
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    //set the texture parameters so it dosn't loop around the screen
+    this->bind(0);
+    //update the size
     glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, size.x, size.y, 0, this->channels, this->type, NULL);
-    //unbind this texture
-    glBindTexture(GL_TEXTURE_2D, 0);
+    //unbind the texture
+    this->unbind();
 }
 
 void Texture::resize(unsigned int width, unsigned int height)
@@ -141,37 +147,32 @@ void Texture::resize(unsigned int width, unsigned int height)
     this->resize(vec2(width, height));
 }
 
-void Texture::bind(int port)
+void Texture::bind(int port, int bindTo)
 {
     //if this texture is bound, stop the function
     if (this->binding != -1)
     { return; }
-    //check if texture unit is set to auto
-    if (port == GLGE_TEXTURE_BINDING_AUTO)
+    //store the binding location
+    this->binding = port;
+    //store the binding mode
+    this->unit = bindTo;
+    //select the unit to use
+    switch (bindTo)
     {
-        //actiave the specific texture unit
-        glActiveTexture(GL_TEXTURE0 + glgeTextureUnit);
-        //store the texture unit this texture is bound to
-        this->binding = glgeTextureUnit;
-        //increase the texture unit by 1
-        glgeTextureUnit++;
-        //say that auto was not used
-        this->autoBind = false;
+    case GLGE_TEXTURE_BIND_TEXTURE_UNIT:
+        //bind the texture to the requested unit
+        glBindTextureUnit(port, this->texture);
+        break;
+
+    case GLGE_TEXTURE_BIND_IMAGE_UNIT:
+        //bind the texture to an image unit
+        glBindImageTexture(port, this->texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+        break;
+    
+    default:
+        //throw an error
+        GLGE_THROW_ERROR("Tried to bind texture to invalid unit type");
     }
-    else
-    {
-        //activate the selected texture unit
-        glActiveTexture(GL_TEXTURE0 + port);
-        //store the binding
-        this->binding = port;
-        //cleare the texture unit
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        //say that auto was used
-        this->autoBind = true;
-    }
-    //bind the texture
-    glBindTexture(GL_TEXTURE_2D, this->texture);
 }
 
 void Texture::unbind()
@@ -181,18 +182,25 @@ void Texture::unbind()
     {
         return;
     }
-    //actiave the specific texture unit
-    glActiveTexture(GL_TEXTURE0 + this->binding);
+    //select the used unit
+    switch (this->unit)
+    {
+    case GLGE_TEXTURE_BIND_TEXTURE_UNIT:
+        //unbind the texture from the own unit
+        glBindTextureUnit(this->binding, 0);
+        break;
+
+    case GLGE_TEXTURE_BIND_IMAGE_UNIT:
+        //unbind the texture from the image unit
+        glBindImageTexture(this->binding, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+        break;
+    
+    default:
+        //just ignore it
+        break;
+    }
     //reset the texture binding
     this->binding = -1;
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //check if autobind was not used
-    if (!this->autoBind)
-    {
-        //decrease the main texture unit by one
-        glgeTextureUnit--;
-    }
 }
 
 void Texture::draw()
@@ -227,12 +235,12 @@ void Texture::draw()
 
     //get the image shader
     Shader* imgShader = glgeWindows[this->windowID]->getDefaultImageShader();
-    //set the image
-    imgShader->setCustomTexture("image", this->texture);
-    //bind the shader
-    imgShader->applyShader();
-    //bind this texture
-    this->bind();
+    //use the program
+    glUseProgram(imgShader->getShader());
+    //bind the texture
+    this->bind(glgeTextureUnit);
+    //pass the shader uniform
+    glUniform1i(glGetUniformLocation(imgShader->getShader(), "image"), glgeTextureUnit);
 
     //bind the screen rect
     glgeWindows[this->windowID]->bindScreenRect();

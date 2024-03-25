@@ -713,12 +713,12 @@ void GLGEWindow::draw()
     {
         //bind the correct framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //activate the shader
-        shader->applyShader();
         //take care of the uniforms
         getDefaultUniformsFromPostProcessingShader(shader);
         //update all uniforms
         shader->recalculateUniforms();
+        //activate the shader
+        shader->applyShader();
         //bind the screen rect
         this->bindScreenRect();
 

@@ -26,13 +26,13 @@
 bool readFile(const char* filename, std::string& output)
 {
     //create a new ifstream object containing the file
-    std::ifstream f(filename);
+    std::fstream f(filename);
 
     //check if the file can be read
     bool ret = false;
 
     //check if the file is opend
-    if(f.is_open())
+    if(f.good())
     {
         //create a variable to store a single line
         std::string line;
@@ -56,6 +56,11 @@ bool readFile(const char* filename, std::string& output)
         if(glgeErrorOutput)
         {
             printf(GLGE_ERROR_FILE_NOT_FOUND, filename);
+        }
+        //check if the program should close on an error
+        if (glgeExitOnError)
+        {
+            exit(1);
         }
     }
 

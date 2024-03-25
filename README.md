@@ -52,14 +52,25 @@ Upcoming features that may be added to GLGE in the future include:
 
 # Changelogs
 ## Update 0.5
-- added the "Test" class to handle 2D text displays
+- added the "Text" class to handle 2D text displays
    - inherates from the "Object2D" class
+- added the "TextInput" class to handle simple text inputs
+   - inherates from the "Text" class, wich inherates from the "Object2D" class
 - added support for propper transparency for 2D objects
-- added a new "Texture" class to bedder handle texture objects
+- added a new 'Texture' class to better handle texture objects
    - simple creation from files using stb_image
    - create an empty texture with an specific size
-   - create 
+      - data can be passed to the texture as an array to initalise it
+- textures can be bound to be accessed in shaders
+   - binding to texture units allows acces to the texture using texture samplers
+      - use 'GLGE_TEXTURE_BIND_TEXTURE_UNIT' as second argument in the binding function to bind to an texture sampler
+   - binding to an image unit allows read and write access in compute shaders through an image2D
+      - use 'GLGE_TEXTURE_BIND_IMAGE_UNIT' as second argument in the binding function to bind to an image unit
 - added a new "ComputeShader" class. Compute shaders can now be used in GLGE
+- transforms can be applied to an mesh with the new function 'applyTransform'
+- meshes can be joind together
+   - use '+' or 'join' to get a new joined mesh from two meshes
+   - use '+=' or 'joinThis' to join the mesh on the right side to the mesh on the left side
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

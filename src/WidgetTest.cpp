@@ -170,10 +170,11 @@ void secWindowInit()
 void computeDraw()
 {
     //stop if this is the transparent pass
-    if (glgeGetTransparencyPass())
-    { return; }
+    if (glgeGetTransparencyPass()) { return; }
     //bind the texture
-    compOutTexture.bind(0);
+    compOutTexture.bind(0, GLGE_TEXTURE_BIND_IMAGE_UNIT);
+    //update the time, divide it by 1000 so it dosn't go too fast
+    compShader.setCustomFloat("t", glgeGetDeltaTime() / 1000.f, GLGE_MODE_ADD);
     //run the compute shader
     compShader.dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
     //draw the texture
@@ -182,14 +183,24 @@ void computeDraw()
 
 void computeSetup()
 {
+    //create a new window for the compute shader example
     compute = GLGEWindow("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
+    //disable resizing so the amount of pixels needed to compute dosn't change
     compute.setResizable(false);
+    //activate the OpenGL context from the new window
     compute.makeCurrent();
-    float* data = new float[(int)(compute.getSize().x*compute.getSize().y * 4)];
-    compOutTexture = Texture(compute.getSize(), GLGE_TEX_RGBA32, data);
-    delete[] data;
-    compShader = ComputeShader("src/Shaders/example.comp");
+    //create a new texture to render into
+    compOutTexture = Texture(compute.getSize(), GLGE_TEX_RGBA32);
+    //create the compute shader from an source file
+    compShader = ComputeShader("src/Shaders/computeExample.comp");
+    //add a variable for the time
+    compShader.setCustomFloat("t", 0);
+    //update the uniform bindings
+    compShader.recalculateUniforms();
+    //bind a draw function for the window
     compute.setDrawFunc(computeDraw);
+    //a tick function is not needed for the window, so don't bind one
+    //start the window so the window will now start to get drawn
     compute.start();
 }
 

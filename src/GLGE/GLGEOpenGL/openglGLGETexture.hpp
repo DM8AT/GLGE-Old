@@ -194,6 +194,17 @@
  */
 #define GLGE_BYTE 0x1400
 
+//Defines to say wich unit type to use when binding the texture
+
+/**
+ * @brief say that the texture should bind to a texture unit. Then it can be used in texture samplers to sample the texture. 
+ */
+#define GLGE_TEXTURE_BIND_TEXTURE_UNIT 0x00
+/**
+ * @brief say that the texture should bind to an image unit. Then it can be written to in a compute shader. 
+ */
+#define GLGE_TEXTURE_BIND_IMAGE_UNIT 0x01
+
 /**
  * @brief a simple texture
  */
@@ -250,9 +261,10 @@ public:
     /**
      * @brief bind the texture
      * 
-     * @param port the port the texture should bind to. Use GLGE_TEXTURE_BINDING_AUTO for auto-select of the current max texture unit
+     * @param port the port the texture should bind to. Default is 0. 
+     * @param bindTo the sort of unit to use for binding. Default is GLGE_TEXTURE_BIND_TEXTURE_UNIT
      */
-    void bind(int port = GLGE_TEXTURE_BINDING_AUTO);
+    void bind(int port = 0, int bindTo = GLGE_TEXTURE_BIND_TEXTURE_UNIT);
 
     /**
      * @brief unbind the texture
@@ -283,6 +295,8 @@ private:
     unsigned int texture = 0;
     //store the texture binding
     int binding = -1;
+    //store the unit type
+    int unit = 0;
     //store the texture size
     ivec2 size;
     //store the encode type
@@ -295,6 +309,8 @@ private:
     int windowID = -1;
     //store if this was bound using autobind
     bool autoBind = false;
+    //store the bind intention
+    int bindIntention = 0;
 
     void decode(int encodeType);
 };
