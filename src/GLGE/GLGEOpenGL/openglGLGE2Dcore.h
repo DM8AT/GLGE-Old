@@ -941,6 +941,20 @@ public:
      */
     void setDynamicMeshing(bool dynamicMesh);
 
+    /**
+     * @brief encode the needed data to store this object
+     * 
+     * @param data the data to store in
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief decode the data to generate this object
+     * 
+     * @param data the data to use
+     */
+    void decodeHook(Data* data) override;
+
 protected:
     //the text the object is displaying
     std::string text;
@@ -1040,6 +1054,20 @@ public:
      */
     void (*getOnExitFunc())();
 
+    /**
+     * @brief encode the needed data to store this object
+     * 
+     * @param data the data to store in
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief decode the data to generate this object
+     * 
+     * @param data the data to use
+     */
+    void decodeHook(Data* data) override;
+    
 protected:
     //store the current courser position
     int cursourPos = 0;

@@ -1340,6 +1340,41 @@ void Text::setDynamicMeshing(bool dynMesh)
     this->dynamicMesh = dynMesh;    
 }
 
+void Text::encodeHook(Data* data)
+{
+    //encode the stored text
+    data->writeString(this->text);
+    //store the path to the font
+    data->writeString(this->font);
+    //store the font size
+    data->writeInt(this->fontSize);
+    //store the text color
+    data->writeVec4(this->color);
+    //store the text size
+    data->writeVec2(this->texSize);
+    //store if dynamic meshing is enabbled
+    data->writeBool(this->dynamicMesh);
+}
+
+void Text::decodeHook(Data* data)
+{
+    //decode the stored text
+    this->text = data->readString();
+    //store the path to the font
+    this->font = data->readString();
+    //store the font size
+    this->fontSize = data->readInt();
+    //store the text color
+    this->color = data->readVec4();
+    //store the text size
+    this->texSize = data->readVec2();
+    //store if dynamic meshing is enabbled
+    this->dynamicMesh = data->readBool();
+
+    //update the text
+    this->updateTexture();
+}
+
 void Text::updateTexture()
 {
     //open the requested font
@@ -1625,6 +1660,45 @@ void (*TextInput::getOnExitFunc())()
 {
     //return the function
     return this->onExitFunc;
+}
+
+void TextInput::encodeHook(Data* data)
+{
+    //encode the stored text
+    data->writeString(this->text);
+    //store the path to the font
+    data->writeString(this->font);
+    //store the font size
+    data->writeInt(this->fontSize);
+    //store the text color
+    data->writeVec4(this->color);
+    //store the text size
+    data->writeVec2(this->texSize);
+    //store if dynamic meshing is enabbled
+    data->writeBool(this->dynamicMesh);
+    //store the cursor position
+    data->writeInt(this->cursourPos);
+}
+
+void TextInput::decodeHook(Data* data)
+{
+    //decode the stored text
+    this->text = data->readString();
+    //store the path to the font
+    this->font = data->readString();
+    //store the font size
+    this->fontSize = data->readInt();
+    //store the text color
+    this->color = data->readVec4();
+    //store the text size
+    this->texSize = data->readVec2();
+    //store if dynamic meshing is enabbled
+    this->dynamicMesh = data->readBool();
+    //store the cursor position
+    this->cursourPos = data->readInt();
+
+    //update the text
+    this->updateTexture();
 }
 
 /////////////

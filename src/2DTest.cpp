@@ -233,6 +233,10 @@ void run2Dexample()
     typeSomething = TextInput("Test", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
     typeSomething.setStatic(false);
 
+    NamedObject n;
+    n.set<TextInput>(typeSomething, "input");
+    typeSomething = n.getObject<TextInput>();
+
     //execute the script
     glgeRunMainLoop();
 }
