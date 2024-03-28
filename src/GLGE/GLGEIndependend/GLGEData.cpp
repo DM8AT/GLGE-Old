@@ -187,29 +187,29 @@ void Data::writeVarLong(long a)
 void Data::writeVec2(vec2 a)
 {
     //write a float for the x component
-    this->writeFloat(a.x);
-    //write a float for the y-component
     this->writeFloat(a.y);
+    //write a float for the y-component
+    this->writeFloat(a.x);
 }
 void Data::writeVec3(vec3 a)
 {
     //write a float for the x component
-    this->writeFloat(a.x);
+    this->writeFloat(a.z);
     //write a float for the y-component
     this->writeFloat(a.y);
     //write a float for the z-component
-    this->writeFloat(a.z);
+    this->writeFloat(a.x);
 }
 void Data::writeVec4(vec4 a)
 {
     //write a float for the x component
-    this->writeFloat(a.x);
-    //write a float for the y-component
-    this->writeFloat(a.y);
-    //write a float for the z-component
-    this->writeFloat(a.z);
-    //write a float for the w-component
     this->writeFloat(a.w);
+    //write a float for the y-component
+    this->writeFloat(a.z);
+    //write a float for the z-component
+    this->writeFloat(a.y);
+    //write a float for the w-component
+    this->writeFloat(a.x);
 }
 void Data::writeMat2(mat2 a)
 {
@@ -220,7 +220,7 @@ void Data::writeMat2(mat2 a)
         for (int y = 0; y < 2; y++)
         {
             //add a floa for the element
-            this->writeFloat(a.m[x][y]);
+            this->writeFloat(a.m[(1-x)][(1-y)]);
         }
     }
 }
@@ -233,7 +233,7 @@ void Data::writeMat3(mat3 a)
         for (int y = 0; y < 3; y++)
         {
             //add a floa for the element
-            this->writeFloat(a.m[x][y]);
+            this->writeFloat(a.m[(2-x)][(2-y)]);
         }
     }
 }
@@ -246,7 +246,7 @@ void Data::writeMat4(mat4 a)
         for (int y = 0; y < 4; y++)
         {
             //add a floa for the element
-            this->writeFloat(a.m[x][y]);
+            this->writeFloat(a.m[(3-x)][(3-y)]);
         }
     }
 }

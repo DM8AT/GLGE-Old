@@ -188,15 +188,6 @@ void setupCrosshair()
     crosshair.setTexture("assets/Crosshair.png");
 }
 
-void foo()
-{
-    Object2D obj = Object2D(GLGE_PRESET_SQUARE, 0, vec4(1,0,0,1), Transform2D(vec2(1,2), 3, vec2(4,5)));
-    NamedObject n;
-    n.set<Object2D>(obj, std::string("foo"));
-
-    Object2D o = n.getObject<Object2D>();
-}
-
 //this is the main function
 void run2Dexample()
 {
@@ -225,8 +216,6 @@ void run2Dexample()
 
     //bind the camera
     glgeBindMain2DCamera(&cam);
-
-    foo();
 
     //setup the triangle
     triangleSetup();

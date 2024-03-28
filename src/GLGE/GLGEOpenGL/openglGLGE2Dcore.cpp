@@ -455,6 +455,9 @@ Data* Object2D::encode()
 {
     //store the data while it is being set up
     Data* dat = new Data();
+
+    //early encoding hook
+    this->encodeHookEarly(dat);
     
     /*
      * Store the vertices
@@ -506,15 +509,20 @@ Data* Object2D::encode()
     //store the anchor position
     dat->writeVec2(this->anchor);
 
+    //late hook
+    this->encodeHook(dat);
+
     //return the finished object data
     return dat;
 }
 
 void Object2D::decode(Data dat)
 {
+    //call early decode hook
+    this->decodeHookEarly(&dat);
+
     //create a new mesh
     Mesh2D m;
-    printf("Read start %ld %ld\n", sizeof(float), sizeof(int));
     /*
      * get the vertices
      */
@@ -571,8 +579,30 @@ void Object2D::decode(Data dat)
     this->isStatic = dat.readBool();
     //store the anchor position
     this->anchor = dat.readVec2();
+
+    //late deocde hook
+    this->decodeHook(&dat);
 }
 
+void Object2D::encodeHook(Data*)
+{
+    //override code here
+}
+
+void Object2D::encodeHookEarly(Data*)
+{
+    //override code here
+}
+
+void Object2D::decodeHook(Data*)
+{
+    //override code here
+}
+
+void Object2D::decodeHookEarly(Data*)
+{
+    //override code here
+}
 
 void Object2D::superConstructor()
 {
@@ -1178,6 +1208,22 @@ bool Button::clickStopThisTick()
 bool Button::hoverStopThisTick()
 {
     return this->hoveringStopedThis;
+}
+
+void Button::encodeHook(Data* data)
+{
+    //store the size
+    data->writeVec2(this->size);
+    //store if this is a circle
+    data->writeBool(this->isCircle);
+}
+
+void Button::decodeHook(Data* data)
+{
+    //read the size
+    this->size = data->readVec2();
+    //read if this is a circle
+    this->isCircle = data->readBool();
 }
 
 Text::Text() : Object2D()

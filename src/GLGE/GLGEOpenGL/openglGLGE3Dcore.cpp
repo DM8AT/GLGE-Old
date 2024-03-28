@@ -710,11 +710,8 @@ Data* Object::encode()
 
 void Object::decode(Data dat)
 {
-    //clear the mesh
-    //clear the vertices
-    this->mesh.vertices.clear();
-    //clear the indices
-    this->mesh.indices.clear();
+    //create a new empty mesh
+    Mesh m = Mesh();
 
     //store the amount of vertives
     long vert = dat.readLong();
@@ -732,7 +729,7 @@ void Object::decode(Data dat)
         //store the normal
         vert.normal = dat.readVec3();
         //store the vertex
-        this->mesh.vertices.push_back(vert);
+        m.vertices.push_back(vert);
     }
 
     //store the amount of indices
@@ -741,8 +738,11 @@ void Object::decode(Data dat)
     for (long i = 0; i < ind; i++)
     {
         //store the index
-        this->mesh.indices.push_back(dat.readUInt());
+        m.indices.push_back(dat.readUInt());
     }
+
+    //create an object from the mesh
+    *this = Object(m);
 
     //store the transform
     //store the position
@@ -758,8 +758,7 @@ void Object::decode(Data dat)
     this->fullyTransparent = dat.readBool();
     //store if the object is static
     this->isStatic = dat.readBool();
-
-}   
+}
 
 //PRIV
 void Object::compileBuffers()

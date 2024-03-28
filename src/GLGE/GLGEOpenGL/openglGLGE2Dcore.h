@@ -363,6 +363,34 @@ public:
      */
     void decode(Data data);
 
+    /**
+     * @brief a hook into the encoding process to use if you don't want to override the original function | TIMESTAMP: before return
+     * 
+     * @param data a pointer to the encoded data AFTER the encoding process
+     */
+    virtual void encodeHook(Data* data);
+
+    /**
+     * @brief a hook into the encoding process to use if you don't want to override the original function | TIMESTAMP: before start
+     * 
+     * @param data a pointer to the encoded data BEFORE the encoding process
+     */
+    virtual void encodeHookEarly(Data* data);
+
+    /**
+     * @brief a hook into the decoding process to use if you don't want to override the original function | TIMESTAMP: before return
+     * 
+     * @param data a pointer to the left data AFTER the decoding process
+     */
+    virtual void decodeHook(Data* data);
+
+    /**
+     * @brief a hook into the decoding process to use if you don't want to override the original function | TIMESTAMP: before start
+     * 
+     * @param data a pointer to the entire data BEFORE the decoding process
+     */
+    virtual void decodeHookEarly(Data* data);
+
 protected:
     //store the anchor position for the 2D Object
     vec2 anchor = vec2(0);
@@ -760,6 +788,20 @@ public:
      * @return false : the hovering did not stop this tick
      */
     bool hoverStopThisTick();
+
+    /**
+     * @brief a hook into the encoding process
+     * 
+     * @param data the encoded data
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief a hook into the decoding process
+     * 
+     * @param data the data to decode
+     */
+    void decodeHook(Data* data) override;
 
 protected:
     /**
