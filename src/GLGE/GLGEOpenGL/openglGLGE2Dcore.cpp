@@ -25,6 +25,7 @@
 #include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEFuncs.hpp"
 #include "openglGLGEVars.hpp"
+#include "../GLGEIndependend/GLGEData.h"
 
 //the needed default C++ libs
 #include <math.h>
@@ -449,6 +450,129 @@ bool Object2D::getStatic()
 {
     return this->isStatic;
 }
+
+Data* Object2D::encode()
+{
+    //store the data while it is being set up
+    Data* dat = new Data();
+    
+    /*
+     * Store the vertices
+     */
+    //Store the amount of vertices
+    dat->writeLong(this->mesh.vertices.size());
+    //loop over all the vertices
+    for (Vertex2D vert : this->mesh.vertices)
+    {
+        //store the vertex position
+        dat->writeVec2(vert.pos);
+        //store the vertex color;
+        dat->writeVec4(vert.color);
+        //store the vertex texture coordinate
+        dat->writeVec2(vert.texCoord);
+    }
+    
+    /*
+     * Store the indices
+     */
+    //store the amount of indices
+    dat->writeLong(this->mesh.indices.size());
+    //loop over all the indices
+    for (unsigned int ind : this->mesh.indices)
+    {
+        //store the index
+        dat->writeUInt(ind);
+    }
+
+    /*
+     * Store the transform
+     */
+    //store the position
+    dat->writeVec2(this->transf.pos);
+    //store the rotation
+    dat->writeFloat(this->transf.rot);
+    //store the scaling
+    dat->writeVec2(this->transf.size);
+
+    /*
+     * Store object attributes
+     */
+    //store the object UUID
+    dat->writeUInt(this->id);
+    //store the window id
+    dat->writeInt(this->windowID);
+    //store if the object is static
+    dat->writeBool(this->isStatic);
+    //store the anchor position
+    dat->writeVec2(this->anchor);
+
+    //return the finished object data
+    return dat;
+}
+
+void Object2D::decode(Data dat)
+{
+    //create a new mesh
+    Mesh2D m;
+    
+    /*
+     * get the vertices
+     */
+    //get the amount of vertices
+    long vs = dat.readLong();
+    //loop over all the vertices
+    for (long i = 0; i < vs; i++)
+    {
+        //create a new vertex
+        Vertex2D v;
+        //get the vertex position
+        v.pos = dat.readVec2();
+        //get the vertex color;
+        v.color = dat.readVec4();
+        //get the vertex texture coordinate
+        v.texCoord = dat.readVec2();
+        //store the vertex
+        m.vertices.push_back(v);
+    }
+    
+    /*
+     * get the indices
+     */
+    //get the amount of indices
+    long is = dat.readLong();
+    //loop over all the indices
+    for (long i = 0; i < is; i++)
+    {
+        //store the index
+        m.indices.push_back(dat.readUInt());
+    }
+
+    /*
+     * get the transform
+     */
+    //store the position
+    this->transf.pos = dat.readVec2();
+    //store the rotation
+    this->transf.rot = dat.readFloat();
+    //store the scaling
+    this->transf.size = dat.readVec2();
+
+    //re-init the object
+    *this = Object2D(m, this->transf);
+
+    /*
+     * Store object attributes
+     */
+    //store the object UUID
+    this->id = dat.readUInt();
+    //store the window id
+    this->windowID = dat.readInt();
+    //store if the object is static
+    this->isStatic = dat.readBool();
+    //store the anchor position
+    this->anchor = dat.readVec2();
+}
+
 
 void Object2D::superConstructor()
 {

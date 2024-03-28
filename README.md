@@ -22,18 +22,33 @@ Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
 # Use GLGE
-To use GLGE, you need the OpenGL developer library, GLEW, SDL2, and all default C++ libraries. 
+TODO
 
 ## Installation
-To install, download the source code and move the "GLGE" folder to your preferred location,
-updating the include path in the necessary files ("GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp"). 
-Else, there would be compilation errors. 
-
-In the make file, there is one path that needs to be updated. It is called GLGE. It defines the path to the Core library. 
+To install GLGE, download the source code or clone the project. Make sure to install following librarys:
+- OpenGL
+   - Linux: `sudo apt install libgl-dev`
+- GLEW
+   - Linux: `sudo apt install libglew-dev`
+- SDL2
+   - Linux: `sudo apt install libsdl2-dev`
+- SDL2_TTF
+   - Linux: `sudo apt install libsdl2-ttf-dev`
+also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
 
 ## Compiling
-Compiling can be done with the Makefile provided, or with your preferred method. 
-Make sure you include and compile with all the required librarys. 
+In the moment there is only a makefile set up for the GNU C/C++ Compiler. To set up your compiler of choise, see [this Section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Seting-up-an-own-compiler)
+### Using the makefile
+The makefile in the root directory of this project is set up for the GNU C/C++ under Linux. You can try compiling with the same compiler under another operating system, but I'm not sure if it will work. It defenetly dosn't work with another compiler. You must create ==two new directorys== when using the makefile. The first is called =="bin"==. There, the output files like static librarys and executables will be stored. The other is =="build"==. There, all the intermediate object files will be stored. 
+#### Compiling the library
+To compile GLGE to an static library using the makefile, start a terminal and navigate to the folder GLGE was installed into. Then, run the command `make -j GLGE` to compile the library to an static compiled library. This will create two files called "libGLGE.a" and "libCML.a" in the folder called "bin". A system for shared objects dosn't currently exist. 
+#### Using the library
+Now, to compile your own project that uses GLGE, you need to add the files "libGLGE.a" and "libCML.a", that where created by the compiler in [the previouse section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Compiling-the-library), to the .o files in the linker. An example could be:
+`g++ main.cpp libGLGE.a libCML.a -o main.exe`
+#### Compiling the examples
+To compile the example scripts included in this repository, run `make -j`. This will create all the static librarys like shown in [this section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Compiling-the-library), so they can be used afterwards. It will also create a file called "main" in the "bin" directory. This is the final executable. To try the examples, run the executable using `./bin/main` from the root directory of the project. ==Do not change into the "bin" directory to run the project.==
+### Seting up an own compiler
+To use your own compiler, compile all cpp files in the directory "src/GLGE/CML" into .o files. Then, link those .o files into a static library. Also, compile all files in "src/GLGE", "src/GLGE/GLGEIndependend" and "src/GLGE/GLGEOpenGL" into .o files and link them to a static library. When compiling your own files, make sure to link the two created static librarys to your project. 
 
 # Upcoming
 Upcoming features that may be added to GLGE in the future include:
@@ -48,7 +63,7 @@ Upcoming features that may be added to GLGE in the future include:
       - directional light
       - sun
       - light plates (some invisible shape that is emitting light)
-- Texture atleasing
+- Texture atlassing
 
 # Changelogs
 ## Update 0.5
@@ -71,6 +86,10 @@ Upcoming features that may be added to GLGE in the future include:
 - meshes can be joind together
    - use '+' or 'join' to get a new joined mesh from two meshes
    - use '+=' or 'joinThis' to join the mesh on the right side to the mesh on the left side
+- remade the makefile
+   - compiling can now be threaded. Use `-j` when compiling to enable threading. 
+   - compiling CML and GLGE to static libraris is now easy. To compile both to static librarys, run `make -j GLGE`. 
+- rewrote a part of the README.md file
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

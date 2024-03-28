@@ -24,6 +24,10 @@
 #include "openglGLGEShaderCore.h"
 //include the render targets
 #include "openglGLGERenderTarget.h"
+//include the store function
+#include "../GLGEIndependend/GLGEScene.hpp"
+//include a class for compacting data
+#include "../GLGEIndependend/GLGEData.h"
 
 ///////////
 //DEFINES//

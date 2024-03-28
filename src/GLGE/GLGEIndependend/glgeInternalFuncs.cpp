@@ -13,9 +13,6 @@
 #include "glgeErrors.hpp"
 #include "glgeVars.hpp"
 
-//include the CML dependencys
-#include "../CML/CMLVec2.h"
-
 //include the default librarys
 #include <iostream>
 #include <fstream>

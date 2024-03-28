@@ -14,6 +14,8 @@
 
 //include the base classes for the 2D core
 #include "../GLGEIndependend/glge2DcoreDefClasses.h"
+//include the base
+#include "openglGLGE.h"
 
 /**
  * @brief an 2D object
@@ -346,6 +348,20 @@ public:
      * @return false : the object is free to move arround
      */
     bool getStatic();
+
+    /**
+     * @brief endoce the object to some object data
+     * 
+     * @return glgeObjectData the encoded object data
+     */
+    Data* encode();
+
+    /**
+     * @brief set the object to some object data
+     * 
+     * @param data the data to set the object to
+     */
+    void decode(Data data);
 
 protected:
     //store the anchor position for the 2D Object

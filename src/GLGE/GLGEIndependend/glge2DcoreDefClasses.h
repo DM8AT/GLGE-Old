@@ -112,10 +112,10 @@ struct Vertex2D
 {
     //the position of the vertex
     vec2 pos = vec2(0);
-    //store a texture coordinate
-    vec2 texCoord = vec2(0,0);
     //store a color
     vec4 color = vec4(0,0,0,1);
+    //store a texture coordinate
+    vec2 texCoord = vec2(0,0);
 
     /**
      * @brief Construct a new Vertex 2D

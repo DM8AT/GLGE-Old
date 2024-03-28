@@ -24,9 +24,6 @@
 #include "glgeVars.hpp"
 #include "glgeErrors.hpp"
 
-//include freeglut
-#include <GL/glew.h>
-
 #include <iostream>
 
 //include SDL2

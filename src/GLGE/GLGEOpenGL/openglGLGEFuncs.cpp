@@ -21,7 +21,6 @@
 //include the GLGE dependencys
 #include "../GLGEIndependend/glgeErrors.hpp"
 #include "../GLGEIndependend/glgePrivDefines.hpp"
-#include "../GLGEIndependend/glgeInternalFuncs.h"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
 #include "openglGLGEDefines.hpp"

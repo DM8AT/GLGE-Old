@@ -333,14 +333,41 @@ public:
      */
     void recalculateNormals();
 
+    /**
+     * @brief apply the transform to the mesh data
+     * 
+     * @param transform the transform to apply
+     */
     void applyTransform(Transform transform);
 
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
     Mesh join(Mesh mesh);
 
+    /**
+     * @brief join an mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
     void joinThis(Mesh mesh);
 
+    /**
+     * @brief join another mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
     void operator+=(Mesh mesh);
 
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
     Mesh operator+(Mesh mesh);
 };
 
