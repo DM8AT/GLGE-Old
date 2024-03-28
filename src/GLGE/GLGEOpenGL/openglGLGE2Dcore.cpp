@@ -514,7 +514,7 @@ void Object2D::decode(Data dat)
 {
     //create a new mesh
     Mesh2D m;
-    
+    printf("Read start %ld %ld\n", sizeof(float), sizeof(int));
     /*
      * get the vertices
      */

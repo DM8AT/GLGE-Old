@@ -660,6 +660,107 @@ bool Object::getFullyTransparent()
     return this->fullyTransparent;
 }
 
+Data* Object::encode()
+{
+    //create a new data object
+    Data* dat = new Data();
+
+    //store the amount of vertives
+    dat->writeLong(this->mesh.vertices.size());
+    //loop over every vertex
+    for (Vertex vert : this->mesh.vertices)
+    {
+        //store the vertex position
+        dat->writeVec3(vert.pos);
+        //store the vertex color
+        dat->writeVec4(vert.color);
+        //store the texture coordinate
+        dat->writeVec2(vert.texCoord);
+        //store the normal
+        dat->writeVec3(vert.normal);
+    }
+
+    //store the amount of indices
+    dat->writeLong(this->mesh.indices.size());
+    //loop over every vertex
+    for (unsigned int ind : this->mesh.indices)
+    {
+        //store the index
+        dat->writeUInt(ind);
+    }
+
+    //store the transform
+    //store the position
+    dat->writeVec3(this->transf.pos);
+    //store the rotation
+    dat->writeVec3(this->transf.rot);
+    //store the scale
+    dat->writeVec3(this->transf.scale);
+
+    //store if the object is transparent
+    dat->writeBool(this->isTransparent);
+    //store if the object is fully transparent
+    dat->writeBool(this->fullyTransparent);
+    //store if the object is static
+    dat->writeBool(this->isStatic);
+
+    //return the finished data
+    return dat;
+}
+
+void Object::decode(Data dat)
+{
+    //clear the mesh
+    //clear the vertices
+    this->mesh.vertices.clear();
+    //clear the indices
+    this->mesh.indices.clear();
+
+    //store the amount of vertives
+    long vert = dat.readLong();
+    //loop over every vertex
+    for (long i = 0; i < vert; i++)
+    {
+        //create a new vertex
+        Vertex vert;
+        //store the vertex position
+        vert.pos = dat.readVec3();
+        //store the vertex color
+        vert.color = dat.readVec4();
+        //store the texture coordinate
+        vert.texCoord = dat.readVec2();
+        //store the normal
+        vert.normal = dat.readVec3();
+        //store the vertex
+        this->mesh.vertices.push_back(vert);
+    }
+
+    //store the amount of indices
+    long ind = dat.readLong();
+    //loop over every vertex
+    for (long i = 0; i < ind; i++)
+    {
+        //store the index
+        this->mesh.indices.push_back(dat.readUInt());
+    }
+
+    //store the transform
+    //store the position
+    this->transf.pos = dat.readVec3();
+    //store the rotation
+    this->transf.rot = dat.readVec3();
+    //store the scale
+    this->transf.scale = dat.readVec3();
+
+    //store if the object is transparent
+    this->isTransparent = dat.readBool();
+    //store if the object is fully transparent
+    this->fullyTransparent = dat.readBool();
+    //store if the object is static
+    this->isStatic = dat.readBool();
+
+}   
+
 //PRIV
 void Object::compileBuffers()
 {
@@ -1179,7 +1280,11 @@ mat4 Camera::calculateProjectionMatrix()
     float ar = 1;
     if (glgeHasMainWindow)
     {
-        ar = glgeWindows[this->windowIndex]->getWindowAspect();
+        //check if a window is bound to this camera
+        if (this->windowIndex != ((unsigned int)-1))
+        {
+            ar = glgeWindows[this->windowIndex]->getWindowAspect();
+        }
     }
     float zRange = far - near;
     float tHF = std::tan((fov/2.f));

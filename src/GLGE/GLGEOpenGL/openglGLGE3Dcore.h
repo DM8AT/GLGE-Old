@@ -21,6 +21,8 @@
 
 //include the 3D core base
 #include "../GLGEIndependend/glge3DcoreDefClasses.h"
+//include the data class
+#include "../GLGEIndependend/GLGEData.h"
 
 /**
  * @brief store an 3D object
@@ -395,6 +397,19 @@ public:
      * @return false : the object will render in the transparent and opaque pass if it is transparent
      */
     bool getFullyTransparent();
+
+    /**
+     * @brief encode the data to a single data object
+     * 
+     * @return Data* a pointer to the encoded data
+     */
+    Data* encode();
+    /**
+     * @brief decode the object from a signle data object
+     * 
+     * @param data the encoded data
+     */
+    void decode(Data data);
 
 private:
     //store the transform for the object

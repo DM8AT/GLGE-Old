@@ -124,7 +124,7 @@ void Data::writeULong(unsigned long a)
 }
 void Data::writeFloat(float a)
 {
-    //represent float as int
+    //pretend the float is an integer
     this->writeInt(*((int*)&a));
 }
 void Data::writeDouble(double a)
@@ -209,6 +209,7 @@ void Data::writeVec4(vec4 a)
     //write a float for the z-component
     this->writeFloat(a.z);
     //write a float for the w-component
+    this->writeFloat(a.w);
 }
 void Data::writeMat2(mat2 a)
 {
@@ -360,18 +361,35 @@ unsigned long Data::readULong()
 }
 float Data::readFloat()
 {
-    //read an integer
-    int a = this->readInt();
+    //store an integer
+    int a = 0;
+    //loop over the vector and read the float
+    for (int i = 0; i < 4; i++)
+    {
+        //store the current element
+        ((int8_t*)&a)[(3-i)] = this->data[i];
+    }
+    //delete the content
+    this->data.erase(this->data.begin(), this->data.begin()+4);
     //return a float
     return *((float*)&a);
 }
 double Data::readDouble()
 {
-    //read a long integer
-    long a = this->readLong();
-    //return a double
+    //store a long
+    long a = 0;
+    //loop over the vector and read the float
+    for (int i = 0; i < 8; i++)
+    {
+        //store the current element
+        ((int8_t*)&a)[(7-i)] = this->data[i];
+    }
+    //delete the content
+    this->data.erase(this->data.begin(), this->data.begin()+8);
+    //return a float
     return *((double*)&a);
 }
+
 std::string Data::readString()
 {
     //store the string to return
