@@ -37,16 +37,16 @@ To install GLGE, download the source code or clone the project. Make sure to ins
 also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
 
 ## Compiling
-In the moment there is only a makefile set up for the GNU C/C++ Compiler. To set up your compiler of choise, see [this Section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Seting-up-an-own-compiler)
+In the moment there is only a makefile set up for the GNU C/C++ Compiler. To set up your compiler of choise, see [this Section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#seting-up-an-own-compiler)
 ### Using the makefile
 The makefile in the root directory of this project is set up for the GNU C/C++ under Linux. You can try compiling with the same compiler under another operating system, but I'm not sure if it will work. It defenetly dosn't work with another compiler. You must create **two new directorys** when using the makefile. The first is called **"bin"**. There, the output files like static librarys and executables will be stored. The other is **"build"**. There, all the intermediate object files will be stored. 
 #### Compiling the library
 To compile GLGE to an static library using the makefile, start a terminal and navigate to the folder GLGE was installed into. Then, run the command `make -j GLGE` to compile the library to an static compiled library. This will create two files called "libGLGE.a" and "libCML.a" in the folder called "bin". A system for shared objects dosn't currently exist. 
 #### Using the library
-Now, to compile your own project that uses GLGE, you need to add the files "libGLGE.a" and "libCML.a", that where created by the compiler in [the previouse section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Compiling-the-library), to the .o files in the linker. An example could be:
+Now, to compile your own project that uses GLGE, you need to add the files "libGLGE.a" and "libCML.a", that where created by the compiler in [the previouse section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#compiling-the-library), to the .o files in the linker. An example could be:
 `g++ main.cpp libGLGE.a libCML.a -o main.exe`
 #### Compiling the examples
-To compile the example scripts included in this repository, run `make -j`. This will create all the static librarys like shown in [this section](https://github.com/DM8AT/GLGE?tab=readme-ov-file#Compiling-the-library), so they can be used afterwards. It will also create a file called "main" in the "bin" directory. This is the final executable. To try the examples, run the executable using `./bin/main` from the root directory of the project. **Do not change into the "bin" directory to run the project.**
+To compile the example scripts included in this repository, run `make -j`. This will create all the static librarys like shown in [this section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#compiling-the-library), so they can be used afterwards. It will also create a file called "main" in the "bin" directory. This is the final executable. To try the examples, run the executable using `./bin/main` from the root directory of the project. **Do not change into the "bin" directory to run the project.**
 ### Seting up an own compiler
 To use your own compiler, compile all cpp files in the directory "src/GLGE/CML" into .o files. Then, link those .o files into a static library. Also, compile all files in "src/GLGE", "src/GLGE/GLGEIndependend" and "src/GLGE/GLGEOpenGL" into .o files and link them to a static library. When compiling your own files, make sure to link the two created static librarys to your project. 
 
