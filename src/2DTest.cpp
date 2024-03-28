@@ -230,12 +230,8 @@ void run2Dexample()
     text.setStatic(false);
     //load the FPS text
     FPS = Text("Loading...", "assets/FreeSerif.ttf", vec4(1), 30, Transform2D(vec2(-1,1), 0, vec2(0.05)));
-    typeSomething = TextInput("Test", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
+    typeSomething = TextInput("Type something...", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
     typeSomething.setStatic(false);
-
-    NamedObject n;
-    n.set<TextInput>(typeSomething, "input");
-    typeSomething = n.getObject<TextInput>();
 
     //execute the script
     glgeRunMainLoop();
