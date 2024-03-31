@@ -105,16 +105,58 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
 
 Object2D::Object2D(Mesh2D mesh, Transform2D transform, bool isStatic)
 {
-    //cast to another constructor
-    *this = Object2D(mesh.vertices, mesh.indices, transform, isStatic);
+    //save an mesh
+    this->mesh = mesh;
+
+    //save the transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+
+    //update the object
+    this->update();
 }
 
 Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform, bool isStatic)
 {
     //generate the mesh
     Mesh2D mesh = Mesh2D(preset, resolution, color);
-    //cast to another constructor
-    *this = Object2D(mesh, transform, isStatic);
+    //save an mesh
+    this->mesh = mesh;
+
+    //save the transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+
+    //update the object
+    this->update();
 }
 
 Object2D::~Object2D()
@@ -979,16 +1021,88 @@ Button::Button(const char* texture, Transform2D transf)
         //divide by the y component
         size /= vec2(size.y);
     }
-    //cast to another constuctor
-    *this = Button(size, vec4(0,0,0,1), transf);
+    //calculate the half size (for performance)
+    vec2 shalf = size / vec2(2);
+    //generate the vertices
+    std::vector<Vertex2D> vert = {Vertex2D( shalf.x, shalf.y, vec4(0,0,0,1)), Vertex2D( shalf.x,-shalf.y, vec4(0,0,0,1)),
+                                  Vertex2D(-shalf.x, shalf.y, vec4(0,0,0,1)), Vertex2D(-shalf.x,-shalf.y, vec4(0,0,0,1))};
+    //load the texture coordinates
+    vert[0].texCoord = vec2(1,0);
+    vert[1].texCoord = vec2(1,1);
+    vert[2].texCoord = vec2(0,0);
+    vert[3].texCoord = vec2(0,1);
+    //generate the indices
+    std::vector<unsigned int> inds = {1,0,2, 1,2,3};
+
+    //calculate the mesh
+    this->mesh = Mesh2D(vert, inds);
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+    //store that this is a circle
+    this->isCircle = false;
+    //store the width and height
+    this->size = size;
+
+    //update the object
+    this->update();
     //store the texture
     this->setTexture(texture);
 }
 
 Button::Button(unsigned int width, unsigned int height, vec4 color, Transform2D transf)
 {
-    //cast to another constructor
-    *this = Button(vec2(width, height), color, transf);
+    //calculate the half size (for performance)
+    vec2 shalf = vec2(width, height) / vec2(2);
+    //generate the vertices
+    std::vector<Vertex2D> vert = {Vertex2D( shalf.x, shalf.y, color), Vertex2D( shalf.x,-shalf.y, color),
+                                  Vertex2D(-shalf.x, shalf.y, color), Vertex2D(-shalf.x,-shalf.y, color)};
+    //load the texture coordinates
+    vert[0].texCoord = vec2(1,0);
+    vert[1].texCoord = vec2(1,1);
+    vert[2].texCoord = vec2(0,0);
+    vert[3].texCoord = vec2(0,1);
+    //generate the indices
+    std::vector<unsigned int> inds = {1,0,2, 1,2,3};
+
+    //calculate the mesh
+    this->mesh = Mesh2D(vert, inds);
+    //save the transform
+    this->transf = transf;
+    //say that the object is static
+    this->isStatic = true;
+
+    //create the buffers
+    this->createBuffers();
+
+    //set the base 2D shader
+    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
+    //set the move matrix location
+    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    //get the UUID
+    this->id = glgeObjectUUID;
+    //increase the object count
+    glgeObjectUUID++;
+    //store that this is a circle
+    this->isCircle = false;
+    //store the width and height
+    this->size = vec2(width, height);
+
+    //update the object
+    this->update();
 }
 
 Button::Button(vec2 size, vec4 color, Transform2D transf)

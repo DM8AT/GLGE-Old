@@ -15,18 +15,18 @@
 #include <math.h>
 
 //store the pointer for seconds
-Object2D clockPointerSec;
+Object2D* clockPointerSec;
 //store the pointer for minutes
-Object2D clockPointerMin;
+Object2D* clockPointerMin;
 //store the pointer for hours
-Object2D clockPointerHour;
+Object2D* clockPointerHour;
 
 //store the default triangle
-Object2D tri;
+Object2D* tri;
 //store a spinning cube
 Object* spinCube;
 //store an close button
-Button button;
+Button* button;
 //store the Camera
 Camera camSecWin;
 //store a second window
@@ -41,11 +41,11 @@ ComputeShader compShader;
 void widgetDraw()
 {
     //draw the seconds pointer
-    clockPointerSec.draw();
+    clockPointerSec->draw();
     //draw the clock pointer
-    clockPointerMin.draw();
+    clockPointerMin->draw();
     //draw the hour pointer
-    clockPointerHour.draw();
+    clockPointerHour->draw();
 }
 
 void widgetTick()
@@ -64,16 +64,16 @@ void widgetTick()
     //calculate the current hour
     float hour = floor(((float)(time(0)%(3600*12)))/3600.f)/12.f + 1.f/12.f;
     //rotate the pointer to the current second
-    clockPointerSec.setRotation(sec * -360.f);
+    clockPointerSec->setRotation(sec * -360.f);
     //rotate the pointer to the current minute
-    clockPointerMin.setRotation(min * -360.f);
+    clockPointerMin->setRotation(min * -360.f);
     //rotate the pointer to the current hour
-    clockPointerHour.setRotation(hour * -360.f);
+    clockPointerHour->setRotation(hour * -360.f);
 
     //update the clock pointers
-    clockPointerSec.update();
-    clockPointerMin.update();
-    clockPointerHour.update();
+    clockPointerSec->update();
+    clockPointerMin->update();
+    clockPointerHour->update();
 }
 
 /**
@@ -107,11 +107,11 @@ Mesh2D createPointerMesh(float w, float h, vec3 col)
 void secondDraw()
 {
     //draw the triangle to the other window
-    tri.draw();
+    tri->draw();
     //draw the cube
     spinCube->draw();
     //draw the button
-    button.draw();
+    button->draw();
 }
 
 void secondTick()
@@ -121,16 +121,16 @@ void secondTick()
     //recalculate the projection matrix
     camSecWin.recalculateProjection();
     //update the triangle
-    tri.update();
+    tri->update();
     //rotate the cube a bit
     spinCube->rotate(vec3(0.002, 0.001, 0.0005));
     //update the cube
     spinCube->update();
     //update the button
-    button.update();
+    button->update();
 
     //check if the button was pressed this tick
-    if (button.clickThisTick())
+    if (button->clickThisTick())
     {
         //print a chat message
         printf("[GLGE INFO] You clicked the button\n");
@@ -145,7 +145,7 @@ void secWindowInit()
     win.setCamera(&camSecWin);
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
-    tri = Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
+    tri = new Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
 
     //load the Cube object
     spinCube = new Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
@@ -157,7 +157,7 @@ void secWindowInit()
     spinCube->setMaterial(mat);
 
     //load the close button
-    button = Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
+    button = new Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
 
     //bind a draw function to the window
     win.setDrawFunc(secondDraw);
@@ -233,15 +233,15 @@ void runWidgetExample()
     //create the pointer mesh for seconds
     Mesh2D m = createPointerMesh(0.05, 1, vec3(1,0,0));
     //setup the pointer for seconds
-    clockPointerSec = Object2D(m.vertices, m.indices);
+    clockPointerSec = new Object2D(m.vertices, m.indices);
     //create the pointer mesh for minutes
     m = createPointerMesh(0.1, 1, vec3(1));
     //setup the pointer for minutes
-    clockPointerMin = Object2D(m.vertices, m.indices);
+    clockPointerMin = new Object2D(m.vertices, m.indices);
     //create the pointer mesh for hours
     m = createPointerMesh(0.2, 0.8, vec3(0));
     //setup the pointer for hours
-    clockPointerHour = Object2D(m.vertices, m.indices);
+    clockPointerHour = new Object2D(m.vertices, m.indices);
 
     //move the window to the top right of the screen
     glgeSetWindowPosition(vec2(glgeGetScreenSize().x-glgeGetWindowSize().x + 5, glgeGetWindowPosition().y + 29.f));
