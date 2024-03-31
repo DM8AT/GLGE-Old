@@ -22,20 +22,12 @@
 # configuration file without replacing the environment variables:
 # doxygen -x_noenv [configFile]
 
-<<<<<<< HEAD
-GENERATE_TREEVIEW      = YES # required!
-DISABLE_INDEX          = NO
-FULL_SIDEBAR           = NO
-HTML_EXTRA_STYLESHEET  = doxygen-awesome-css/doxygen-awesome.css \
-                        doxygen-awesome-css/doxygen-awesome-sidebar-only.css
-=======
 # doxygen-awesome
 GENERATE_TREEVIEW      = YES # required!
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 HTML_EXTRA_STYLESHEET  = doxygen/doxygen-awesome-css/doxygen-awesome.css \
                          doxygen/doxygen-awesome-css/doxygen-awesome-sidebar-only.css
->>>>>>> 69d3a85b2045ee241c318c4786e0a1533d0e52d5
 HTML_COLORSTYLE        = LIGHT # required with Doxygen >= 1.9.5
 
 #---------------------------------------------------------------------------
