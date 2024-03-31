@@ -112,7 +112,7 @@ void glgeDefaultTimer()
         //set the current window
         glgeCurrentWindowIndex = i;
         //get the window pointer
-        GLGEWindow* wptr = glgeWindows[i];
+        Window* wptr = glgeWindows[i];
         //check if the window poitner is a nullpointer
         if (wptr == NULL) { continue; }
         //if not, run a window tick

@@ -31,7 +31,7 @@ unsigned int glgeLenAllUsedColorBuffers = sizeof(glgeAllUsedColorBuffers) / size
 GLenum glgeInterpolationMode = GL_NEAREST;
 
 //store the window vector
-std::vector<GLGEWindow*> glgeWindows = {};
+std::vector<WindowGLGEWindow*> glgeWindows = {};
 
 //store the current texture unit
 unsigned int glgeTextureUnit = 0;

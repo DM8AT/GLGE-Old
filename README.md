@@ -93,6 +93,7 @@ Upcoming features that may be added to GLGE in the future include:
 - transparent objects now correctly opperate with the light map
 - added destructors for 3D objects, 2D objects and Buttons
    - destructors clean up the object
+- renamed "GLGEWindow" to "Window", so it better fits the naming scheme of GLGE
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

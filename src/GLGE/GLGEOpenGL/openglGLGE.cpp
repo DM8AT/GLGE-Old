@@ -280,9 +280,9 @@ bool glgeGetWarningOutput()
  * @brief safely get a window from the glge window stack
  * 
  * @param windowID the ID of the window to acess
- * @return GLGEWindow* a pointer to the window, NULL if the window acess failed
+ * @return Window* a pointer to the window, NULL if the window acess failed
  */
-GLGEWindow* safeWindowAcess(unsigned int windowID)
+Window* safeWindowAcess(unsigned int windowID)
 {
     //check if the window pointer is 0
     if ((windowID-glgeWindowIndexOffset) > (unsigned int)glgeWindows.size())
@@ -297,7 +297,7 @@ GLGEWindow* safeWindowAcess(unsigned int windowID)
         return NULL;
     }
     //get the window pointer
-    GLGEWindow* wptr = glgeWindows[windowID-glgeWindowIndexOffset];
+    Window* wptr = glgeWindows[windowID-glgeWindowIndexOffset];
     //check if the window pointer is a nullpointer
     if (wptr == NULL)
     {
@@ -419,7 +419,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_MINIMIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -434,7 +434,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_RESTORED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -449,7 +449,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_MAXIMIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -464,7 +464,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_RESIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -479,7 +479,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_CLOSE:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -563,7 +563,7 @@ void glgeRunMainLoop()
                 continue;
             }
             //get the window pointer
-            GLGEWindow* wptr = glgeWindows[i];
+            Window* wptr = glgeWindows[i];
             //check if the window poitner is a nullpointer
             if (wptr == NULL) { continue; }
             //call the draw function

@@ -30,9 +30,9 @@ Button* button;
 //store the Camera
 Camera camSecWin;
 //store a second window
-GLGEWindow win;
+Window win;
 //store a window for a compute shader example
-GLGEWindow compute;
+Window compute;
 //store a texture for the compute shader
 Texture compOutTexture;
 //store the compute shader
@@ -184,7 +184,7 @@ void computeDraw()
 void computeSetup()
 {
     //create a new window for the compute shader example
-    compute = GLGEWindow("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
+    compute = Window("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
     //start the window so the window will be able to be drawn
     compute.start();
     //disable resizing so the amount of pixels needed to compute dosn't change
@@ -251,7 +251,7 @@ void runWidgetExample()
     glgeBindDisplayFunc(widgetDraw);
 
     //create the second window
-    win = GLGEWindow("Hello World!", 250,250);
+    win = Window("Hello World!", 250,250);
     //set the clear color of the window to white
     win.setClearColor(1,1,1);
     //bind an initalisation function

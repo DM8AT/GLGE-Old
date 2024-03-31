@@ -46,7 +46,7 @@ extern unsigned int glgeLenAllUsedColorBuffers;
 extern GLenum glgeInterpolationMode;
 
 //store the window vector
-extern std::vector<GLGEWindow*> glgeWindows;
+extern std::vector<Window*> glgeWindows;
 
 //store the current texture unit
 extern unsigned int glgeTextureUnit;

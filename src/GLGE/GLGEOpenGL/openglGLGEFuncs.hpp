@@ -53,7 +53,7 @@
  * @param s the size of the window
  * @param p the position of the window
  */
-GLGEWindow* createWindow(const char* n, vec2 s, vec2 p);
+Window* createWindow(const char* n, vec2 s, vec2 p);
 
 /**
  * @brief convert an error code from OpenGL into an error string

@@ -140,7 +140,7 @@ int getUniformVar(unsigned int program, const char* name)
  * @param s the size of the window
  * @param p the position of the window
  */
-GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
+Window* createWindow(const char* n, vec2 s, vec2 p)
 {
     //check if an window is allready created
     if (!glgeHasMainWindow)
@@ -151,7 +151,7 @@ GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
         glgeHasMainWindow = true;
     }
     //create the window pointer
-    GLGEWindow* wptr = new GLGEWindow(n, s, p, glgeWindowFlags);
+    Window* wptr = new Window(n, s, p, glgeWindowFlags);
     //start the window
     wptr->start();
     //make the window the current window

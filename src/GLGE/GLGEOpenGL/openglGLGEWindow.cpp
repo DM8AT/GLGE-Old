@@ -36,12 +36,12 @@
 #include <iostream>
 #include <algorithm>
 
-GLGEWindow::GLGEWindow()
+Window::Window()
 {
     //say that the object exists
 }
 
-GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags)
+Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
 {
     //add default flags
     flags |= (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
@@ -477,25 +477,25 @@ GLGEWindow::GLGEWindow(const char* name, vec2 size, vec2 pos, unsigned int flags
     this->resizeWindow(this->size.x, this->size.y);
 }
 
-GLGEWindow::GLGEWindow(const char* name, unsigned int width, unsigned int height, vec2 pos, unsigned int flags)
+Window::Window(const char* name, unsigned int width, unsigned int height, vec2 pos, unsigned int flags)
 {
     //just pass to another constructor
-    *this = GLGEWindow(name, vec2(width, height), pos, flags);
+    *this = Window(name, vec2(width, height), pos, flags);
 }
 
-GLGEWindow::GLGEWindow(const char* name, vec2 size, float x, float y, unsigned int flags)
+Window::Window(const char* name, vec2 size, float x, float y, unsigned int flags)
 {
     //just pass to another constructor
-    *this = GLGEWindow(name, size, vec2(x,y), flags);
+    *this = Window(name, size, vec2(x,y), flags);
 }
 
-GLGEWindow::GLGEWindow(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags)
+Window::Window(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags)
 {
     //just pass to another constructor
-    *this = GLGEWindow(name, vec2(width, height), vec2(x,y), flags);
+    *this = Window(name, vec2(width, height), vec2(x,y), flags);
 }
 
-void GLGEWindow::close()
+void Window::close()
 {
     //if this window has a window id is 0, stop the function
     if (this->id == 0)
@@ -526,7 +526,7 @@ void GLGEWindow::close()
     glgeActiveWindows -= 1;
 }
 
-void GLGEWindow::draw()
+void Window::draw()
 {
     //say that the window is currently drawing
     this->drawing = true;
@@ -841,7 +841,7 @@ void GLGEWindow::draw()
     this->drawing = false;
 }
 
-void GLGEWindow::tick()
+void Window::tick()
 {
     //store the actual window width
     int w;
@@ -921,13 +921,13 @@ void GLGEWindow::tick()
     }
 }
 
-void GLGEWindow::rename(const char* name)
+void Window::rename(const char* name)
 {
     //update the window name
     SDL_SetWindowTitle((SDL_Window*)this->window, name);
 }
 
-void GLGEWindow::setSize(vec2 size, bool force)
+void Window::setSize(vec2 size, bool force)
 {
     //check if force is not enabled
     if (!force)
@@ -959,13 +959,13 @@ void GLGEWindow::setSize(vec2 size, bool force)
     this->resizeFunc(size.x, size.y);
 }
 
-void GLGEWindow::setSize(unsigned int width, unsigned int height, bool force)
+void Window::setSize(unsigned int width, unsigned int height, bool force)
 {
     //cast the input to another function
     this->setSize(vec2(width, height), force);
 }
 
-void GLGEWindow::setPos(vec2 pos, bool force)
+void Window::setPos(vec2 pos, bool force)
 {
     //check if the movement is not forced
     if (!force)
@@ -983,19 +983,19 @@ void GLGEWindow::setPos(vec2 pos, bool force)
     this->pos = pos;
 }
 
-void GLGEWindow::setPos(float x, float y, bool force)
+void Window::setPos(float x, float y, bool force)
 {
     //pass the input to another function
     this->setPos(vec2(x,y), force);
 }
 
-std::string GLGEWindow::getName()
+std::string Window::getName()
 {
     //return the name
     return this->name;
 }
 
-void GLGEWindow::setDrawFunc(void (*func)())
+void Window::setDrawFunc(void (*func)())
 {
     //check if an error occured
     bool error = false;
@@ -1033,7 +1033,7 @@ void GLGEWindow::setDrawFunc(void (*func)())
     this->hasDrawFunc = true;
 }
 
-void GLGEWindow::setTickFunc(void (*func)())
+void Window::setTickFunc(void (*func)())
 {
     //check if an error occured
     bool error = false;
@@ -1071,7 +1071,7 @@ void GLGEWindow::setTickFunc(void (*func)())
     this->hasTickFunc = true;
 }
 
-void GLGEWindow::setResizeFunc(void (*func)(int, int))
+void Window::setResizeFunc(void (*func)(int, int))
 {
     //check if an error occured
     bool error = false;
@@ -1109,7 +1109,7 @@ void GLGEWindow::setResizeFunc(void (*func)(int, int))
     this->hasResizeFunc = true;
 }
 
-void GLGEWindow::setInitFunc(void (*func)())
+void Window::setInitFunc(void (*func)())
 {
     //check if an error occured
     bool error = false;
@@ -1147,7 +1147,7 @@ void GLGEWindow::setInitFunc(void (*func)())
     this->hasInitFunc = true;
 }
 
-void GLGEWindow::setExitFunc(void (*func)())
+void Window::setExitFunc(void (*func)())
 {
     
     //check if an error occured
@@ -1186,37 +1186,37 @@ void GLGEWindow::setExitFunc(void (*func)())
     this->hasExitFunc = true;
 }
 
-void (*GLGEWindow::getDrawFunc())()
+void (*Window::getDrawFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasDrawFunc ? this->drawFunc : NULL;
 }
 
-void (*GLGEWindow::getTickFunc())()
+void (*Window::getTickFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasTickFunc ? this->tickFunc : NULL;
 }
 
-void (*GLGEWindow::getResizeFunc())(int, int)
+void (*Window::getResizeFunc())(int, int)
 {
     //return the function, if none is bound, return 0
     return this->hasResizeFunc ? this->resizeFunc : NULL;
 }
 
-void (*GLGEWindow::getInitFunc())()
+void (*Window::getInitFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasInitFunc ? this->initFunc : NULL;
 }
 
-void (*GLGEWindow::getExitFunc())()
+void (*Window::getExitFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasExitFunc ? this->onExit : NULL;
 }
 
-void GLGEWindow::callDrawFunc()
+void Window::callDrawFunc()
 {
     //check if the draw function is a nullpointer
     if (this->hasDrawFunc)
@@ -1226,7 +1226,7 @@ void GLGEWindow::callDrawFunc()
     }
 }
 
-void GLGEWindow::callTickFunc()
+void Window::callTickFunc()
 {
     //check if the draw function is a nullpointer
     if (this->hasTickFunc)
@@ -1236,7 +1236,7 @@ void GLGEWindow::callTickFunc()
     }
 }
 
-void GLGEWindow::callResizeFunc(int w, int h)
+void Window::callResizeFunc(int w, int h)
 {
     //check if the draw function is a nullpointer
     if (this->hasResizeFunc)
@@ -1246,7 +1246,7 @@ void GLGEWindow::callResizeFunc(int w, int h)
     }
 }
 
-void GLGEWindow::callInitFunc()
+void Window::callInitFunc()
 {
     //check if the draw function is a nullpointer
     if (this->hasInitFunc)
@@ -1256,7 +1256,7 @@ void GLGEWindow::callInitFunc()
     }
 }
 
-void GLGEWindow::clearDrawFunc()
+void Window::clearDrawFunc()
 {
     //set the draw function to an nullpointer
     this->drawFunc = NULL;
@@ -1264,7 +1264,7 @@ void GLGEWindow::clearDrawFunc()
     this->hasDrawFunc = false;
 }
 
-void GLGEWindow::clearTickFunc()
+void Window::clearTickFunc()
 {
     //set the draw function to an nullpointer
     this->tickFunc = NULL;
@@ -1272,7 +1272,7 @@ void GLGEWindow::clearTickFunc()
     this->hasTickFunc = false;
 }
 
-void GLGEWindow::clearResizeFunc()
+void Window::clearResizeFunc()
 {
     //set the draw function to an nullpointer
     this->resizeFunc = NULL;
@@ -1280,7 +1280,7 @@ void GLGEWindow::clearResizeFunc()
     this->hasResizeFunc = false;
 }
 
-void GLGEWindow::clearInitFunc()
+void Window::clearInitFunc()
 {
     //set the draw function to an nullpointer
     this->initFunc = NULL;
@@ -1288,31 +1288,31 @@ void GLGEWindow::clearInitFunc()
     this->hasInitFunc = false;
 }
 
-bool GLGEWindow::getHasDrawFunc()
+bool Window::getHasDrawFunc()
 {
     //return if a draw function is bound
     return this->hasDrawFunc;
 }
 
-bool GLGEWindow::getHasTickFunc()
+bool Window::getHasTickFunc()
 {
     //return if a tick function is bound
     return this->hasTickFunc;
 }
 
-bool GLGEWindow::getHasResizeFunc()
+bool Window::getHasResizeFunc()
 {
     //return if a resize function is bound
     return this->hasResizeFunc;
 }
 
-bool GLGEWindow::getHasInitFunc()
+bool Window::getHasInitFunc()
 {
     //return if a resize function is bound
     return this->hasInitFunc;
 }
 
-void GLGEWindow::start()
+void Window::start()
 {
     //check if the window was allready started
     if (this->started)
@@ -1332,43 +1332,43 @@ void GLGEWindow::start()
     this->callInitFunc();
 }
 
-vec2 GLGEWindow::getPos()
+vec2 Window::getPos()
 {
     //return the current position
     return this->pos;
 }
 
-vec2 GLGEWindow::getSize()
+vec2 Window::getSize()
 {
     //return the size
     return this->size;
 }
 
-void* GLGEWindow::getSDLWindow()
+void* Window::getSDLWindow()
 {
     //return the current window pointer
     return this->window;
 }
 
-void* GLGEWindow::getSDLRenderer()
+void* Window::getSDLRenderer()
 {
     //return the renderer
     return this->renderer;
 }
 
-void* GLGEWindow::getGLContext()
+void* Window::getGLContext()
 {
     //return the OpenGL context
     return this->glContext;
 }
 
-void GLGEWindow::setClearColor(vec3 clearColor, bool normalise)
+void Window::setClearColor(vec3 clearColor, bool normalise)
 {
     //pass to the other function
     this->setClearColor(clearColor.x, clearColor.y, clearColor.z, normalise);
 }
 
-void GLGEWindow::setClearColor(float r, float g, float b, bool normalise)
+void Window::setClearColor(float r, float g, float b, bool normalise)
 {
     //check for errors in the input
     bool error = false;
@@ -1421,13 +1421,13 @@ void GLGEWindow::setClearColor(float r, float g, float b, bool normalise)
     this->useSkybox = false;
 }
 
-vec3 GLGEWindow::getClearColor()
+vec3 Window::getClearColor()
 {
     //return the clear color
     return this->clear;
 }
 
-void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left, const char* right, const char* front, const char* back)
+void Window::setSkybox(const char* top, const char* bottom, const char* left, const char* right, const char* front, const char* back)
 {
     //variables to store the image data
     //the image width
@@ -1553,7 +1553,7 @@ void GLGEWindow::setSkybox(const char* top, const char* bottom, const char* left
     this->useSkybox = true;
 }
 
-void GLGEWindow::moveFunc(int x, int y)
+void Window::moveFunc(int x, int y)
 {
 
     //check if it is allowed to move the window
@@ -1565,7 +1565,7 @@ void GLGEWindow::moveFunc(int x, int y)
 
 }
 
-void GLGEWindow::resizeWindow(int width, int height)
+void Window::resizeWindow(int width, int height)
 {
     //bind the OpenGL context
     //store the window ID as currently active by OpenGL
@@ -1653,7 +1653,7 @@ void GLGEWindow::resizeWindow(int width, int height)
     glViewport(0,0, width,height);
 }
 
-void GLGEWindow::getLightingUniforms()
+void Window::getLightingUniforms()
 {
     //let the error messages set for the albedo map, you want the albedo map in most cases
     this->lightShader.setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
@@ -1706,7 +1706,7 @@ void GLGEWindow::getLightingUniforms()
     glgeSetErrorOutput(error);
 }
 
-void GLGEWindow::getDefaultUniformsFromPostProcessingShader(Shader* shader)
+void Window::getDefaultUniformsFromPostProcessingShader(Shader* shader)
 {
     //check if the current pass is the first
     if (this->firstPPSPass)
@@ -1731,13 +1731,13 @@ void GLGEWindow::getDefaultUniformsFromPostProcessingShader(Shader* shader)
     shader->setCustomVec2("glgeWindowSize", this->size);
 }
 
-float GLGEWindow::getWindowAspect()
+float Window::getWindowAspect()
 {
     //return the aspect ratio
     return this->aspect;
 }
 
-void GLGEWindow::enableBackfaceCulling()
+void Window::enableBackfaceCulling()
 {
     //check if the window is currently drawing
     if (this->drawing)
@@ -1752,7 +1752,7 @@ void GLGEWindow::enableBackfaceCulling()
     this->backfaceCulling = false;
 }
 
-void GLGEWindow::disableBackfaceCulling()
+void Window::disableBackfaceCulling()
 {
     //check if the window is currently drawing
     if (this->drawing)
@@ -1764,13 +1764,13 @@ void GLGEWindow::disableBackfaceCulling()
     this->backfaceCulling = false;
 }
 
-bool GLGEWindow::useBackfaceCulling()
+bool Window::useBackfaceCulling()
 {
     //return if the window is using backface culling
     return this->backfaceCulling;
 }
 
-void GLGEWindow::setLightingShader(const char* shader)
+void Window::setLightingShader(const char* shader)
 {
     //create strings for the shader
     std::string data;
@@ -1798,7 +1798,7 @@ void GLGEWindow::setLightingShader(const char* shader)
     this->getLightingUniforms();
 }
 
-void GLGEWindow::setLightingShader(std::string shader)
+void Window::setLightingShader(std::string shader)
 {
     //compile the shader and save it
     this->lightShader = Shader(GLGE_EMPTY_VERTEX_SHADER, shader);
@@ -1807,7 +1807,7 @@ void GLGEWindow::setLightingShader(std::string shader)
     this->getLightingUniforms();
 }
 
-void GLGEWindow::setLightingShader(unsigned int shader)
+void Window::setLightingShader(unsigned int shader)
 {
     //store the inputed shader
     this->lightShader = Shader(shader);
@@ -1816,49 +1816,49 @@ void GLGEWindow::setLightingShader(unsigned int shader)
     this->getLightingUniforms();
 }
 
-unsigned int GLGEWindow::getAlbedoTex()
+unsigned int Window::getAlbedoTex()
 {
     //return the albedo texture
     return this->mainAlbedoTex;
 }
 
-unsigned int GLGEWindow::getNormalTex()
+unsigned int Window::getNormalTex()
 {
     //return the normal texture
     return this->mainNormalTex;
 }
 
-unsigned int GLGEWindow::getPosTex()
+unsigned int Window::getPosTex()
 {
     //return the position texture
     return this->mainPosTex;
 }
 
-unsigned int GLGEWindow::getRMLTex()
+unsigned int Window::getRMLTex()
 {
     //return the rml texture
     return this->mainRMLTex;
 }
 
-unsigned int GLGEWindow::getOutTex()
+unsigned int Window::getOutTex()
 {
     //return the output texture+
     return this->mainOutTex;
 }
 
-unsigned int GLGEWindow::getEIDATex()
+unsigned int Window::getEIDATex()
 {
     //return the eida texture
     return this->mainEIDATex;
 }
 
-unsigned int GLGEWindow::getLastFrame()
+unsigned int Window::getLastFrame()
 {
     //return the last frame texture
     return this->lastTickTex;
 }
 
-void GLGEWindow::setFullscreenMode(bool isFullscreen)
+void Window::setFullscreenMode(bool isFullscreen)
 {
     //store the inputed variable to say if should be in fullscreen mode
     this->fullscreen = isFullscreen;
@@ -1886,7 +1886,7 @@ void GLGEWindow::setFullscreenMode(bool isFullscreen)
     }
 }
 
-void GLGEWindow::setCamera(Camera* cam)
+void Window::setCamera(Camera* cam)
 {
     //store the inputed camera
     this->mainCamera = cam;
@@ -1894,13 +1894,13 @@ void GLGEWindow::setCamera(Camera* cam)
     cam->setWindowIndex(this->id-glgeWindowIndexOffset);
 }
 
-Camera* GLGEWindow::getCamera()
+Camera* Window::getCamera()
 {
     //return the camera
     return this->mainCamera;
 }
 
-void GLGEWindow::bindLight(Light* l)
+void Window::bindLight(Light* l)
 {
     //store the inputed light source, if it isn't NULL
     if (l != nullptr)
@@ -1926,19 +1926,19 @@ void GLGEWindow::bindLight(Light* l)
     this->getLightingUniforms();
 }
 
-std::vector<Light*> GLGEWindow::getLights()
+std::vector<Light*> Window::getLights()
 {
     //return all lights
     return this->lights;
 }
 
-unsigned int GLGEWindow::getScreenVBO()
+unsigned int Window::getScreenVBO()
 {
     //return the screen VBO
     return this->screenRectVBO;
 }
 
-int GLGEWindow::addPostProcessingShader(Shader* shader)
+int Window::addPostProcessingShader(Shader* shader)
 {
     //store the shader
     this->ppsShaderStack.push_back(shader);
@@ -1974,7 +1974,7 @@ int GLGEWindow::addPostProcessingShader(Shader* shader)
     return (int)this->ppsShaderStack.size() - 1;
 }
 
-Shader* GLGEWindow::addPostProcessingShader(const char* file)
+Shader* Window::addPostProcessingShader(const char* file)
 {
     //create the new shader
     Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, file);
@@ -2005,7 +2005,7 @@ Shader* GLGEWindow::addPostProcessingShader(const char* file)
     return shader;
 }
 
-Shader* GLGEWindow::addPostProcessingShader(std::string sc)
+Shader* Window::addPostProcessingShader(std::string sc)
 {
     //create the new shader
     Shader* shader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, sc);
@@ -2044,7 +2044,7 @@ Shader* GLGEWindow::addPostProcessingShader(std::string sc)
     return shader;
 }
 
-Shader* GLGEWindow::addPostProcessingShader(unsigned int s)
+Shader* Window::addPostProcessingShader(unsigned int s)
 {
     //create the new shader
     Shader* shader = new Shader(s);
@@ -2082,7 +2082,7 @@ Shader* GLGEWindow::addPostProcessingShader(unsigned int s)
     return shader;
 }
 
-int GLGEWindow::addPostProcessingFunction(Shader (*func)(unsigned int))
+int Window::addPostProcessingFunction(Shader (*func)(unsigned int))
 {
     //check if the function is a nullpointer
     if (func == NULL)
@@ -2108,7 +2108,7 @@ int GLGEWindow::addPostProcessingFunction(Shader (*func)(unsigned int))
     return (int)this->ppsFunctionStack.size() - 1;
 }
 
-void GLGEWindow::removePostProcessingShader(unsigned int index, bool del)
+void Window::removePostProcessingShader(unsigned int index, bool del)
 {
     //check if the index is in range
     if (index > (unsigned int)this->ppsShaderStack.size())
@@ -2144,7 +2144,7 @@ void GLGEWindow::removePostProcessingShader(unsigned int index, bool del)
     }
 }
 
-void GLGEWindow::removePostProcessingShader(Shader* shader, bool del)
+void Window::removePostProcessingShader(Shader* shader, bool del)
 {
     //first, get the index
     int i = this->getPostProcessingShaderIndex(shader);
@@ -2152,7 +2152,7 @@ void GLGEWindow::removePostProcessingShader(Shader* shader, bool del)
     this->removePostProcessingShader(i, del);
 }
 
-void GLGEWindow::removePostProcessingFunction(unsigned int index)
+void Window::removePostProcessingFunction(unsigned int index)
 {
     //check if the index is in range
     if (index > (unsigned int)this->ppsFunctionStack.size())
@@ -2176,7 +2176,7 @@ void GLGEWindow::removePostProcessingFunction(unsigned int index)
     this->ppsFunctionStack.erase(this->ppsFunctionStack.begin() + index);
 }
 
-void GLGEWindow::removePostProcessingFunction(Shader (*func)(unsigned int))
+void Window::removePostProcessingFunction(Shader (*func)(unsigned int))
 {
     //get the index of the function
     int i = this->getPostProcessingFuncIndex(func);
@@ -2184,7 +2184,7 @@ void GLGEWindow::removePostProcessingFunction(Shader (*func)(unsigned int))
     this->removePostProcessingFunction(i);
 }
 
-Shader* GLGEWindow::getPostProcessingShader(unsigned int index)
+Shader* Window::getPostProcessingShader(unsigned int index)
 {
     //check if the index is in range
     if (index > (unsigned int)this->ppsShaderStack.size())
@@ -2208,7 +2208,7 @@ Shader* GLGEWindow::getPostProcessingShader(unsigned int index)
     return this->ppsShaderStack[index];
 }
 
-int GLGEWindow::getPostProcessingShaderIndex(Shader* shader)
+int Window::getPostProcessingShaderIndex(Shader* shader)
 {
     //find the index of the shader
     std::vector<Shader*>::iterator iter = std::find(this->ppsShaderStack.begin(), this->ppsShaderStack.end(), shader);
@@ -2225,7 +2225,7 @@ int GLGEWindow::getPostProcessingShaderIndex(Shader* shader)
     }
 }
 
-Shader (*GLGEWindow::getPostProcessingFunc(unsigned int index))(unsigned int)
+Shader (*Window::getPostProcessingFunc(unsigned int index))(unsigned int)
 {
     //check if the index is in range
     if (index > (unsigned int)this->ppsFunctionStack.size())
@@ -2249,7 +2249,7 @@ Shader (*GLGEWindow::getPostProcessingFunc(unsigned int index))(unsigned int)
     return this->ppsFunctionStack[index];
 }
 
-int GLGEWindow::getPostProcessingFuncIndex(Shader (*func)(unsigned int))
+int Window::getPostProcessingFuncIndex(Shader (*func)(unsigned int))
 {
     //find the index of the shader
     std::vector<Shader (*)(unsigned int)>::iterator iter = std::find(this->ppsFunctionStack.begin(), this->ppsFunctionStack.end(), func);
@@ -2266,13 +2266,13 @@ int GLGEWindow::getPostProcessingFuncIndex(Shader (*func)(unsigned int))
     }
 }
 
-bool GLGEWindow::isFullscreen()
+bool Window::isFullscreen()
 {
     //return if the window is fullscreen
     return this->fullscreen;
 }
 
-void GLGEWindow::setResizable(bool resizable)
+void Window::setResizable(bool resizable)
 {
     //set the correct window resize mode
     SDL_SetWindowResizable((SDL_Window*)this->window, SDL_bool(resizable));
@@ -2280,25 +2280,25 @@ void GLGEWindow::setResizable(bool resizable)
     this->allowWindowResize = resizable;
 }
 
-bool GLGEWindow::isWindowResizable()
+bool Window::isWindowResizable()
 {
     //output if the window is resizable
     return this->allowWindowResize;
 }
 
-void GLGEWindow::setMovable(bool movalbe)
+void Window::setMovable(bool movalbe)
 {
     //store the boolean
     this->allowWindowMovement = movalbe;
 }
 
-bool GLGEWindow::isMovable()
+bool Window::isMovable()
 {
     //return the boolean
     return this->allowWindowMovement;
 }
 
-void GLGEWindow::setWindowIcon(const char* file)
+void Window::setWindowIcon(const char* file)
 {
     //load the image
     SDL_Surface* img = loadImage(file);
@@ -2322,13 +2322,13 @@ void GLGEWindow::setWindowIcon(const char* file)
     SDL_SetWindowIcon((SDL_Window*)this->window, img);
 }
 
-bool GLGEWindow::isTranparentPass()
+bool Window::isTranparentPass()
 {
     //return if this is the transparent pass
     return this->transparentPass;
 }
 
-void GLGEWindow::setTransparencyCombineShader(Shader* shader)
+void Window::setTransparencyCombineShader(Shader* shader)
 {
     //check if the inputed pointer is a null pointer
     if (shader == NULL)
@@ -2354,19 +2354,19 @@ void GLGEWindow::setTransparencyCombineShader(Shader* shader)
     this->customTransparentCombineShader = true;
 }
 
-Shader* GLGEWindow::getTransparencyCombineShader()
+Shader* Window::getTransparencyCombineShader()
 {
     //return the transpranet combine shader if it exists, else, return a nullpointer
     return this->customTransparentCombineShader ? this->transparentCombineShader : NULL;
 }
 
-bool GLGEWindow::isCustomTransparencyCombineShader()
+bool Window::isCustomTransparencyCombineShader()
 {
     //return if this is a custom transparent combine shader
     return this->customTransparentCombineShader;
 }
 
-void GLGEWindow::setBorderVisible(bool visible)
+void Window::setBorderVisible(bool visible)
 {
     //store the new window border state
     this->borderIsVisible = visible;
@@ -2374,25 +2374,25 @@ void GLGEWindow::setBorderVisible(bool visible)
     SDL_SetWindowBordered((SDL_Window*)this->window, SDL_bool(visible));
 }
 
-bool GLGEWindow::isBorderVisible()
+bool Window::isBorderVisible()
 {
     //return if the border is visible
     return this->borderIsVisible;
 }
 
-void GLGEWindow::setWindowForceOpen(bool forceOpen)
+void Window::setWindowForceOpen(bool forceOpen)
 {
     //store if the window is force opend
     this->forceOpen = forceOpen;
 }
 
-bool GLGEWindow::isWindowForceOpen()
+bool Window::isWindowForceOpen()
 {
     //return if the window is forced to stay open
     return this->forceOpen;
 }
 
-void GLGEWindow::initiateClosing(bool force)
+void Window::initiateClosing(bool force)
 {
     //check if this function should run
     if ((this->opClose) || ((!force) && !this->opClose))
@@ -2404,13 +2404,13 @@ void GLGEWindow::initiateClosing(bool force)
     this->opClose = true;
 }
 
-bool GLGEWindow::isClosingInitiated()
+bool Window::isClosingInitiated()
 {
     //return if closing is initiated
     return this->opClose;
 }
 
-void GLGEWindow::stopWindowClosing(bool force)
+void Window::stopWindowClosing(bool force)
 {
     //check if this function should run
     if ((!this->opClose) || ((!force) && this->opClose))
@@ -2422,7 +2422,7 @@ void GLGEWindow::stopWindowClosing(bool force)
     this->opClose = false;
 }
 
-void GLGEWindow::setWindowAlwaysOnTop(bool onTop)
+void Window::setWindowAlwaysOnTop(bool onTop)
 {
     //store the new state
     this->alwaysOnTop = onTop;
@@ -2430,13 +2430,13 @@ void GLGEWindow::setWindowAlwaysOnTop(bool onTop)
     SDL_SetWindowAlwaysOnTop((SDL_Window*)this->window, SDL_bool(onTop));
 }
 
-bool GLGEWindow::isWindowAlwaysOnTop()
+bool Window::isWindowAlwaysOnTop()
 {
     //return if the window is always on top
     return this->alwaysOnTop;
 }
 
-void GLGEWindow::setBrightness(float brightness)
+void Window::setBrightness(float brightness)
 {
     //check if the brightness is less than 0
     if (brightness < 0.f)
@@ -2456,13 +2456,13 @@ void GLGEWindow::setBrightness(float brightness)
     SDL_SetWindowBrightness((SDL_Window*)this->window, brightness);
 }
 
-float GLGEWindow::getBrightness()
+float Window::getBrightness()
 {
     //return the current brightness
     return this->brightness;
 }
 
-void GLGEWindow::showHide(bool showHide)
+void Window::showHide(bool showHide)
 {
     //store the new show/hide state
     this->shown = showHide;
@@ -2479,13 +2479,13 @@ void GLGEWindow::showHide(bool showHide)
     }
 }
 
-bool GLGEWindow::isShown()
+bool Window::isShown()
 {
     //return if the window is shown
     return this->shown;
 }
 
-void GLGEWindow::maximize(bool maximized, bool force)
+void Window::maximize(bool maximized, bool force)
 {
     //check if this function should execute
     if (!this->allowWindowResize && !force)
@@ -2518,13 +2518,13 @@ void GLGEWindow::maximize(bool maximized, bool force)
     this->resizeWindow(w,h);
 }
 
-bool GLGEWindow::isMaximized()
+bool Window::isMaximized()
 {
     //return if the window is maximized
     return this->maximized;
 }
 
-void GLGEWindow::minimize(bool min, bool force)
+void Window::minimize(bool min, bool force)
 {
     //check if this function should execute
     if (!this->allowWindowResize && !force)
@@ -2549,25 +2549,25 @@ void GLGEWindow::minimize(bool min, bool force)
     }
 }
 
-bool GLGEWindow::isMinimized()
+bool Window::isMinimized()
 {
     //return if the window is minimized
     return this->minimized;
 }
 
-bool GLGEWindow::isFocused()
+bool Window::isFocused()
 {
     //get the input flags and maks out the input focus, then return it as an bool
     return (bool)(SDL_GetWindowFlags((SDL_Window*)this->window) & SDL_WINDOW_INPUT_FOCUS);
 }
 
-bool GLGEWindow::isMouseFocused()
+bool Window::isMouseFocused()
 {
     //get the input flags and maks out the mouse focus, then return it as an bool
     return (bool)(SDL_GetWindowFlags((SDL_Window*)this->window) & SDL_WINDOW_MOUSE_FOCUS);
 }
 
-void GLGEWindow::setMouseGrabMode(bool grabbed)
+void Window::setMouseGrabMode(bool grabbed)
 {
     //update the intern mode
     this->mouseGrabbed = grabbed;
@@ -2575,13 +2575,13 @@ void GLGEWindow::setMouseGrabMode(bool grabbed)
     SDL_SetWindowMouseGrab((SDL_Window*)this->window, SDL_bool(grabbed));
 }
 
-bool GLGEWindow::getMouseGrabMode()
+bool Window::getMouseGrabMode()
 {
     //return the mouse grab mode
     return this->mouseGrabbed;
 }
 
-void GLGEWindow::focuse(bool moveUp)
+void Window::focuse(bool moveUp)
 {
     //check if the window should move up
     if (moveUp)
@@ -2596,7 +2596,7 @@ void GLGEWindow::focuse(bool moveUp)
     }
 }
 
-void GLGEWindow::bindScreenRect()
+void Window::bindScreenRect()
 {
     //check if the rect is bound
     if (this->screenRectBound)
@@ -2620,7 +2620,7 @@ void GLGEWindow::bindScreenRect()
     this->screenRectBound = true;
 }
 
-void GLGEWindow::unbindScreenRect()
+void Window::unbindScreenRect()
 {
     //check if the rect is unbound
     if (!this->screenRectBound)
@@ -2637,7 +2637,7 @@ void GLGEWindow::unbindScreenRect()
     this->screenRectBound = false;
 }
 
-void GLGEWindow::makeCurrent()
+void Window::makeCurrent()
 {
     //check if the window is started
     if (!this->started)
@@ -2651,31 +2651,31 @@ void GLGEWindow::makeCurrent()
     SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
 }
 
-int GLGEWindow::getDefault3DShader()
+int Window::getDefault3DShader()
 {
     //return the default shader
     return this->default3DShader;
 }
 
-int GLGEWindow::getDefault3DTransparentShader()
+int Window::getDefault3DTransparentShader()
 {
     //return the default shader
     return this->default3DTransShader;
 }
 
-int GLGEWindow::getDefault2DShader()
+int Window::getDefault2DShader()
 {
     //return the default shader
     return this->default2DShader;
 }
 
-Shader* GLGEWindow::getLightingShader()
+Shader* Window::getLightingShader()
 {
     //return a pointer to the current light shader
     return &this->lightShader;
 }
 
-Shader* GLGEWindow::getDefaultImageShader()
+Shader* Window::getDefaultImageShader()
 {
     //return the default image shader
     return &this->defaultImageShader;

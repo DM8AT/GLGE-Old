@@ -1,5 +1,5 @@
 /**
- * @file openglGLGEWindow.h
+ * @file openglWindow.h
  * @author DM8AT
  * @brief declare the window class of GLGE
  * @version 0.1
@@ -27,13 +27,13 @@
 /**
  * @brief a simple window to handle multiple windows
  */
-class GLGEWindow
+class Window
 {
 public:
     /**
      * @brief Default constructor for a new window
      */
-    GLGEWindow();
+    Window();
 
     /**
      * @brief Construct a new GLGE window
@@ -43,7 +43,7 @@ public:
      * @param pos the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, vec2 size, vec2 pos = vec2(0), unsigned int flags = 0);
+    Window(const char* name, vec2 size, vec2 pos = vec2(0), unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -54,7 +54,7 @@ public:
      * @param pos the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, unsigned int width, unsigned int height, vec2 pos = vec2(0), unsigned int flags = 0);
+    Window(const char* name, unsigned int width, unsigned int height, vec2 pos = vec2(0), unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -65,7 +65,7 @@ public:
      * @param y the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, vec2 size, float x, float y, unsigned int flags = 0);
+    Window(const char* name, vec2 size, float x, float y, unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -77,10 +77,10 @@ public:
      * @param y the y position in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags = 0);
+    Window(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags = 0);
 
     /**
-     * @brief Destroy the GLGEWindow
+     * @brief Destroy the Window
      */
     void close();
 
