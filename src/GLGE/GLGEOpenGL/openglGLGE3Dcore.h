@@ -95,6 +95,16 @@ public:
     Object(const char* file, int type, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
+     * @brief Destroy the Object
+     */
+    ~Object();
+
+    /**
+     * @brief delete the object
+     */
+    void destroy();
+
+    /**
      * @brief draw the object to the screen
      */
     void draw();

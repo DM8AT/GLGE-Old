@@ -29,18 +29,18 @@
 //create the camera to move around in the 2D world 
 Camera2D cam;
 //create an 2D object for an triangle
-Object2D triangle;
+Object2D* triangle;
 //create an 2D object for an square
-Object2D square;
+Object2D* square;
 //create an 2D object for an crosshair
-Object2D crosshair;
+Object2D* crosshair;
 
 //a simple hello world
-Text text;
+Text* text;
 //show the current FPS
-Text FPS;
+Text* FPS;
 //an text input box
-TextInput typeSomething;
+TextInput* typeSomething;
 
 //set the camera speed to an variable
 float cameraSpeed = 0.05;
@@ -51,12 +51,12 @@ float worldScale = 1.f;
 void drawFunc()
 {
     //draw all objects in the order they should be displayd
-    triangle.draw();
-    square.draw();
-    text.draw();
-    FPS.draw();
-    typeSomething.draw();
-    crosshair.draw();
+    triangle->draw();
+    square->draw();
+    text->draw();
+    FPS->draw();
+    typeSomething->draw();
+    crosshair->draw();
 }
 
 //this function is called once a tick
@@ -65,7 +65,7 @@ void tickFunc()
     //the speed of the camera is framerate dependend
 
     //check if the text is selected
-    if (!typeSomething.isFocused())
+    if (!typeSomething->isFocused())
     {
         //check if the w key is pressed
         if (glgeGetKeys().w)
@@ -106,22 +106,22 @@ void tickFunc()
     cam.update();
 
     //rotate the triangle by 2.5 degrees
-    triangle.rotate(2.5);
+    triangle->rotate(2.5);
 
     //update the FPS count
-    FPS.setText((std::string("FPS: ") + std::to_string(glgeGetCurrentFPS())).c_str());
+    FPS->setText((std::string("FPS: ") + std::to_string(glgeGetCurrentFPS())).c_str());
     //disable dynamic meshing after the first update
-    FPS.setDynamicMeshing(false);
+    FPS->setDynamicMeshing(false);
     //position the FPS counter in the top left
-    FPS.setPos(vec2(-glgeGetWindowAspect(), 1));
+    FPS->setPos(vec2(-glgeGetWindowAspect(), 1));
 
     //update all objects
-    triangle.update();
-    square.update();
-    crosshair.update();
-    FPS.update();
-    text.update();
-    typeSomething.update();
+    triangle->update();
+    square->update();
+    crosshair->update();
+    FPS->update();
+    text->update();
+    typeSomething->update();
 }
 
 //setup the triangle
@@ -136,7 +136,7 @@ void triangleSetup()
     uint indices[] = {0,1,2};
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
-    triangle = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0,0,0,vec2(0.5,0.5)));
+    triangle = new Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0,0,0,vec2(0.5,0.5)));
 }
 
 //setup the square
@@ -153,11 +153,11 @@ void squareSetup()
                       0,2,3};
     
     //set the square to an 2D object moved 1 right and 0.75 up and scaled down by 0.75
-    square = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(1,0.75, 0, vec2(0.75,0.75)));
+    square = new Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(1,0.75, 0, vec2(0.75,0.75)));
     //set the shader to the shader from the triangle
-    square.setShader(triangle.getShader());
+    square->setShader(triangle->getShader());
     //load the texture for the square
-    square.setTexture("assets/cubeTexture.png");
+    square->setTexture("assets/cubeTexture.png");
 }
 
 //setup the crosshair
@@ -181,11 +181,11 @@ void setupCrosshair()
                       0,2,3};
 
     //set the crosshair to an object made of the vertices and indices scaled down by 0.125 and that dose not move with the camera
-    crosshair = Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0,0, 0, vec2(0.125,0.125)), true);
+    crosshair = new Object2D(vertices, indices, sizeof(vertices), sizeof(indices), Transform2D(0,0, 0, vec2(0.125,0.125)), true);
     //set the shader to the shader from the triangle
-    crosshair.setShader(triangle.getShader());
+    crosshair->setShader(triangle->getShader());
     //load the texture for the crosshair
-    crosshair.setTexture("assets/Crosshair.png");
+    crosshair->setTexture("assets/Crosshair.png");
 }
 
 //this is the main function
@@ -225,13 +225,13 @@ void run2Dexample()
     setupCrosshair();
 
     //load the Hello World text
-    text = Text("Hello World!", "assets/FreeSerif.ttf", vec4(1,1,1,1), 120, Transform2D(vec2(-1,1), 0, vec2(0.1)));
+    text = new Text("Hello World!", "assets/FreeSerif.ttf", vec4(1,1,1,1), 120, Transform2D(vec2(-1,1), 0, vec2(0.1)));
     //set it so it dosn't move with the camera
-    text.setStatic(false);
+    text->setStatic(false);
     //load the FPS text
-    FPS = Text("Loading...", "assets/FreeSerif.ttf", vec4(1), 30, Transform2D(vec2(-1,1), 0, vec2(0.05)));
-    typeSomething = TextInput("Type something...", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
-    typeSomething.setStatic(false);
+    FPS = new Text("Loading...", "assets/FreeSerif.ttf", vec4(1), 30, Transform2D(vec2(-1,1), 0, vec2(0.05)));
+    typeSomething = new TextInput("Type something...", "assets/FreeSerif.ttf", vec4(1), 120, Transform2D(vec2(0.5,-0.5), 0, vec2(0.1)));
+    typeSomething->setStatic(false);
 
     //execute the script
     glgeRunMainLoop();

@@ -289,9 +289,44 @@ float Light::getIntenseAngle()
     }
 }
 
+void Light::encode(Data* data)
+{
+    //store the light type
+    data->writeInt(this->lightType);
+    //store the position
+    data->writeVec3(this->pos);
+    //store the direction
+    data->writeVec3(this->dir);
+    //store the color
+    data->writeVec3(this->color);
+    //store the intensity
+    data->writeFloat(this->lightIntensity);
+    //store the angle
+    data->writeFloat(this->angle);
+    //store the intense angle
+    data->writeFloat(this->intAngle);
+}
+void Light::decode(Data data)
+{
+    //store the light type
+    this->lightType = data.readInt();
+    //store the position
+    this->pos = data.readVec3();
+    //store the direction
+    this->dir = data.readVec3();
+    //store the color
+    this->color = data.readVec3();
+    //store the intensity
+    this->lightIntensity = data.readFloat();
+    //store the angle
+    this->angle = data.readFloat();
+    //store the intense angle
+    this->intAngle = data.readFloat();
+}
+
 void Light::setupShadowMap()
 {
-    
+    //shadows are currently not implemented
 }
 
 

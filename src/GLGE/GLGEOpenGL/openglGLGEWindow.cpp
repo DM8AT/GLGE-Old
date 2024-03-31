@@ -502,6 +502,14 @@ void GLGEWindow::close()
     {
         return;
     }
+    //activate the window
+    this->makeCurrent();
+    //call the on exit function
+    if (this->hasExitFunc)
+    {
+        //run the function
+        (*this->onExit)();
+    }
     //get the window pointer
     SDL_Window* win = (SDL_Window*)this->window;
     //close the window
@@ -650,6 +658,8 @@ void GLGEWindow::draw()
         glEnable(GL_DEPTH_TEST);
         //disable writes to the depth buffer
         glDepthMask(GL_FALSE);
+        //default the blend func for all buffers
+        glBlendFunc(GL_ONE, GL_ZERO);
         //switch to addaptive blending for color attachment 5 and 7
         glBlendFunci(5,GL_ONE, GL_ONE);
         glBlendFunci(7,GL_ONE, GL_ONE);
@@ -1137,6 +1147,45 @@ void GLGEWindow::setInitFunc(void (*func)())
     this->hasInitFunc = true;
 }
 
+void GLGEWindow::setExitFunc(void (*func)())
+{
+    
+    //check if an error occured
+    bool error = false;
+    if(func == nullptr)
+    {
+        //print an error
+        if(glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_FUNC_IS_NULLPOINTER);
+        }
+        //say that an error occured
+        error = true;
+    }
+
+    //if an error occured, exit
+    if(error)
+    {
+        //print an exit message
+        if(glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << "\n";
+        }
+        //stop the program
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
+    }
+
+    //set the init func
+    this->onExit = func;
+
+    //say that an init func is bound
+    this->hasExitFunc = true;
+}
+
 void (*GLGEWindow::getDrawFunc())()
 {
     //return the function, if none is bound, return 0
@@ -1159,6 +1208,12 @@ void (*GLGEWindow::getInitFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasInitFunc ? this->initFunc : NULL;
+}
+
+void (*GLGEWindow::getExitFunc())()
+{
+    //return the function, if none is bound, return 0
+    return this->hasExitFunc ? this->onExit : NULL;
 }
 
 void GLGEWindow::callDrawFunc()

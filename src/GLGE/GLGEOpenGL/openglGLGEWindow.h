@@ -164,6 +164,13 @@ public:
     void setInitFunc(void (*initFunc)());
 
     /**
+     * @brief set a function that is called once the window closes
+     * 
+     * @param initFunc a function pointer to the windows exit function
+     */
+    void setExitFunc(void (*exitFunc)());
+
+    /**
      * @brief Get the Draw Func object
      * 
      * @return a function pointer to the function
@@ -190,6 +197,13 @@ public:
      * @return a function pointer to the function
      */
     void (*getInitFunc())();
+
+    /**
+     * @brief Get the on exit Func object
+     * 
+     * @return a function pointer to the function
+     */
+    void (*getExitFunc())();
 
     /**
      * @brief execute the draw function, if one is bound
@@ -947,6 +961,8 @@ private:
     bool hasResizeFunc = false;
     //store if an initalisation function is bound
     bool hasInitFunc = false;
+    //store if an exit function is bound
+    bool hasExitFunc = false;
     //store the draw func
     void (*drawFunc)();
     //store the tick func
@@ -955,6 +971,8 @@ private:
     void (*initFunc)();
     //store the resize func
     void (*resizeFunc)(int, int);
+    //store the on exit func
+    void (*onExit)();
     //store the main camera
     Camera* mainCamera = NULL;
     //get if the window is currently drawing

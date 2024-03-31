@@ -1032,3 +1032,266 @@ unsigned int Material::getTextureByName(std::string name)
     //return the wanted element from the map
     return this->customTextures[name];
 }
+
+void Material::encode(Data* data)
+{
+    //encode the amount of integers
+    data->writeLong(this->integers.size());
+    //iterate over the integers
+    for (auto const& key : this->integers)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeInt(key.second);
+    }
+    //encode the amount of floats
+    data->writeLong(this->floats.size());
+    //iterate over the floats
+    for (auto const& key : this->floats)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeFloat(key.second);
+    }
+    //encode the amount of bools
+    data->writeLong(this->booleans.size());
+    //iterate over the bools
+    for (auto const& key : this->booleans)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeInt(key.second);
+    }
+    //encode the amount of vec2s
+    data->writeLong(this->vec2s.size());
+    //iterate over the floats
+    for (auto const& key : this->vec2s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeVec2(key.second);
+    }
+    //encode the amount of vec3s
+    data->writeLong(this->vec3s.size());
+    //iterate over the vec3s
+    for (auto const& key : this->vec3s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeVec3(key.second);
+    }
+    //encode the amount of vec4s
+    data->writeLong(this->vec4s.size());
+    //iterate over the floats
+    for (auto const& key : this->vec4s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeVec4(key.second);
+    }
+    //encode the amount of mat2s
+    data->writeLong(this->mat2s.size());
+    //iterate over the floats
+    for (auto const& key : this->mat2s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeMat2(key.second);
+    }
+    //encode the amount of mat3s
+    data->writeLong(this->mat3s.size());
+    //iterate over the mat3s
+    for (auto const& key : this->mat3s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeMat3(key.second);
+    }
+    //encode the amount of mat4s
+    data->writeLong(this->mat4s.size());
+    //iterate over the floats
+    for (auto const& key : this->mat4s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeMat4(key.second);
+    }
+    //encode the amount of textures
+    data->writeLong(this->customTextures.size());
+    //iterate over the floats
+    for (auto const& key : this->customTextureLocs)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeUInt(key.second);
+    }
+
+    //encode the roughness
+    data->writeFloat(this->roughness);
+    //encode the metallicness
+    data->writeFloat(this->metal);
+    //encode the color
+    data->writeVec4(this->color);
+    //encode if the material is lit
+    data->writeBool(this->lit);
+
+    //store the name for the normal uniform
+    data->writeString(std::string(normalUniform));
+    //store the name for the roughness uniform
+    data->writeString(std::string(roughnessUniform));
+    //store the name for the specular uniform
+    data->writeString(std::string(specularUniform));
+    //store the name for the height uniform
+    data->writeString(std::string(heightUniform));
+    //store the name for the color uniform
+    data->writeString(std::string(colorUniform));
+    //store the name for the metalic uniform
+    data->writeString(std::string(metalicUniform));
+}
+
+void Material::decode(Data data)
+{
+    //decode the amount of integers
+    long max = data.readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        int dat = data.readInt();
+        //append the pair to the uniforms
+        this->integers[key] = dat;
+    }
+    //decode the amount of floats
+    max = data.readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the float
+        float dat = data.readFloat();
+        //append the pair to the uniforms
+        this->floats[key] = dat;
+    }
+    //decode the amount of bools
+    max = data.readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the bool
+        bool dat = data.readBool();
+        //append the pair to the uniforms
+        this->booleans[key] = dat;
+    }
+    //decode the amount of vec2s
+    max = data.readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        vec2 dat = data.readVec2();
+        //append the pair to the uniforms
+        this->vec2s[key] = dat;
+    }
+    //decode the amount of vec3s
+    max = data.readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        vec3 dat = data.readVec3();
+        //append the pair to the uniforms
+        this->vec3s[key] = dat;
+    }
+    //decode the amount of vec4s
+    max = data.readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        vec4 dat = data.readVec4();
+        //append the pair to the uniforms
+        this->vec4s[key] = dat;
+    }
+    //decode the amount of mat2s
+    max = data.readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        mat2 dat = data.readMat2();
+        //append the pair to the uniforms
+        this->mat2s[key] = dat;
+    }
+    //decode the amount of mat3s
+    max = data.readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        mat3 dat = data.readMat3();
+        //append the pair to the uniforms
+        this->mat3s[key] = dat;
+    }
+    //decode the amount of mat4s
+    max = data.readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the integer
+        mat4 dat = data.readMat4();
+        //append the pair to the uniforms
+        this->mat4s[key] = dat;
+    }
+    //decode the amount of textures
+    max = data.readLong();
+    //iterate over the textures
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data.readString();
+        //store the textures
+        unsigned int dat = data.readUInt();
+        //append the pair to the uniforms
+        this->customTextures[key] = dat;
+    }
+
+    //store the name for the normal uniform
+    normalUniform = data.readString().c_str();
+    //store the name for the roughness uniform
+    roughnessUniform = data.readString().c_str();
+    //store the name for the specular uniform
+    specularUniform = data.readString().c_str();
+    //store the name for the height uniform
+    heightUniform = data.readString().c_str();
+    //store the name for the color uniform
+    colorUniform = data.readString().c_str();
+    //store the name for the metalic uniform
+    metalicUniform = data.readString().c_str();
+}

@@ -117,6 +117,16 @@ Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Tra
     *this = Object2D(mesh, transform, isStatic);
 }
 
+Object2D::~Object2D()
+{
+    //destroy the VBO
+    glDeleteBuffers(1, &this->VBO);
+    //destroy the IBO
+    glDeleteBuffers(1, &this->IBO);
+    //delete the bound texture
+    glDeleteTextures(1, &this->texture);
+}
+
 void Object2D::draw()
 {
     //check if this is the transparent pass

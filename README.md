@@ -90,6 +90,9 @@ Upcoming features that may be added to GLGE in the future include:
    - compiling can now be threaded. Use `-j` when compiling to enable threading. 
    - compiling CML and GLGE to static libraris is now easy. To compile both to static librarys, run `make -j GLGE`. 
 - rewrote a part of the README.md file
+- transparent objects now correctly opperate with the light map
+- added destructors for 3D objects, 2D objects and Buttons
+   - destructors clean up the object
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

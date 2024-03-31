@@ -73,6 +73,11 @@ public:
     Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
+     * @brief Destroy the 2D Object
+     */
+    ~Object2D();
+
+    /**
      * @brief draw the object to the screen
      */
     void draw();

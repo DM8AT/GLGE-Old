@@ -36,12 +36,25 @@ Shader::Shader()
 
 Shader::Shader(const char* vertexShaderFile, const char* fragmentShaderFile)
 {
-    //set the shader store variable to the compiled shader from the files
-    this->shader = glgeCompileShader(vertexShaderFile, fragmentShaderFile);
+    //init an string to store the data from the file
+    std::string vert;
+    //read the data form the file
+    readFile(vertexShaderFile, vert);
+    //init an string to store the data from the file
+    std::string frag;
+    //read the data form the file
+    readFile(fragmentShaderFile, frag);
+
+    //create the shader
+    *this = Shader(vert, frag);
 }
 
 Shader::Shader(std::string vertexShaderData, std::string fragmentShaderData)
 {
+    //store the vertex shader source
+    this->src.vertex = vertexShaderData;
+    //store the fragment shader source
+    this->src.fragment = fragmentShaderData;
     //set the shader store variable to the compiled shader from the strings
     this->shader = glgeCompileShader(vertexShaderData, fragmentShaderData);
 }
@@ -58,13 +71,13 @@ Shader::Shader(const char* shaderFile, unsigned int type)
     if (type == GLGE_FRAGMENT_SHADER)
     {
         //set the shader store variable to the compilation of an empty vertex shader and the inputed data
-        this->shader = glgeCompileShader(GLGE_EMPTY_VERTEX_SHADER, data);
+        *this = Shader(GLGE_EMPTY_VERTEX_SHADER, data);
     }
     //else, if the shader is an vertex shader
     else if (type == GLGE_VERTEX_SHADER)
     {
         //set the shader store variable to the copilation of the inputed file and an empty fragment shader
-        this->shader = glgeCompileShader(data, GLGE_EMPTY_FRAGMENT_SHADER);
+        *this = Shader(data, GLGE_EMPTY_FRAGMENT_SHADER);
     }
     //if the type is invalide
     else
@@ -144,6 +157,41 @@ Shader::Shader(unsigned int shader)
     this->shader = shader;
 }
 
+Shader::~Shader()
+{
+    //clear the uniform maps
+    //integer
+    this->integers.clear();
+    this->intLocs.clear();
+    //floats
+    this->floats.clear();
+    this->floatLocs.clear();
+    //bools
+    this->booleans.clear();
+    this->boolLocs.clear();
+    //vec2s
+    this->vec2s.clear();
+    this->vec2Locs.clear();
+    //vec3s
+    this->vec3s.clear();
+    this->vec3Locs.clear();
+    //vec4s
+    this->vec4s.clear();
+    this->vec4Locs.clear();
+    //mat2s
+    this->mat2s.clear();
+    this->mat2Locs.clear();
+    //mat3s
+    this->mat3s.clear();
+    this->mat3Locs.clear();
+    //mat4s
+    this->mat4s.clear();
+    this->mat4Locs.clear();
+    //textures
+    this->customTextures.clear();
+    this->customTextureLocs.clear();
+}
+
 unsigned int Shader::getShader()
 {
     //return the stored shader
@@ -160,6 +208,8 @@ void Shader::deleteShader()
 
 void Shader::addGeometryShader(std::string source)
 {
+    //store the source code
+    this->src.geometry = source;
     //pre-compile the geometry shader
     std::string gData = precompileShaderSource(source);
     //add the shader program from the second file
@@ -1090,6 +1140,285 @@ void Shader::recalculateUniforms()
     }
     //unbind the shader
     glUseProgram(0);
+}
+
+ShaderSource Shader::getSRC()
+{
+    return this->src;
+}
+
+void Shader::encode(Data* data)
+{
+    //encode the vertex source code
+    data->writeString(this->src.vertex);
+    //encode the fragment source code
+    data->writeString(this->src.fragment);
+    //encode the geometry shader source
+    data->writeString(this->src.geometry);
+
+    //encode the uniforms
+    this->encodeUniforms(data);
+
+    //call the encode hook
+    this->encodeHook(data);
+}
+void Shader::decode(Data data)
+{
+    //read the vertex source
+    std::string vert = data.readString();
+    //read the fragment shader source
+    std::string frag = data.readString();
+    //delete this shader
+    this->deleteShader();
+    //construct a new shader
+    *this = Shader(vert, frag);
+    //add a geometry shader
+    this->addGeometryShader(data.readString());
+
+    //add the uniforms
+    this->decodeUniforms(&data);
+
+    //call the decode hook
+    this->decodeHook(&data);
+
+    //update the uniforms
+    this->recalculateUniforms();
+}
+
+void Shader::encodeUniforms(Data* data)
+{
+    //encode the amount of integers
+    data->writeLong(this->integers.size());
+    //iterate over the integers
+    for (auto const& key : this->integers)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeInt(key.second);
+    }
+    //encode the amount of floats
+    data->writeLong(this->floats.size());
+    //iterate over the floats
+    for (auto const& key : this->floats)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeFloat(key.second);
+    }
+    //encode the amount of bools
+    data->writeLong(this->booleans.size());
+    //iterate over the bools
+    for (auto const& key : this->booleans)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeInt(key.second);
+    }
+    //encode the amount of vec2s
+    data->writeLong(this->vec2s.size());
+    //iterate over the floats
+    for (auto const& key : this->vec2s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeVec2(key.second);
+    }
+    //encode the amount of vec3s
+    data->writeLong(this->vec3s.size());
+    //iterate over the vec3s
+    for (auto const& key : this->vec3s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeVec3(key.second);
+    }
+    //encode the amount of vec4s
+    data->writeLong(this->vec4s.size());
+    //iterate over the floats
+    for (auto const& key : this->vec4s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeVec4(key.second);
+    }
+    //encode the amount of mat2s
+    data->writeLong(this->mat2s.size());
+    //iterate over the floats
+    for (auto const& key : this->mat2s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeMat2(key.second);
+    }
+    //encode the amount of mat3s
+    data->writeLong(this->mat3s.size());
+    //iterate over the mat3s
+    for (auto const& key : this->mat3s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the boolean
+        data->writeMat3(key.second);
+    }
+    //encode the amount of mat4s
+    data->writeLong(this->mat4s.size());
+    //iterate over the floats
+    for (auto const& key : this->mat4s)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeMat4(key.second);
+    }
+    //encode the amount of textures
+    data->writeLong(this->customTextures.size());
+    //iterate over the floats
+    for (auto const& key : this->customTextureLocs)
+    {
+        //store the key (the string)
+        data->writeString(key.first);
+        //store the integer
+        data->writeUInt(key.second);
+    }
+}
+void Shader::decodeUniforms(Data* data)
+{
+    //decode the amount of integers
+    long max = data->readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        int dat = data->readInt();
+        //append the pair to the uniforms
+        this->integers[key] = dat;
+    }
+    //decode the amount of floats
+    max = data->readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the float
+        float dat = data->readFloat();
+        //append the pair to the uniforms
+        this->floats[key] = dat;
+    }
+    //decode the amount of bools
+    max = data->readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the bool
+        bool dat = data->readBool();
+        //append the pair to the uniforms
+        this->booleans[key] = dat;
+    }
+    //decode the amount of vec2s
+    max = data->readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        vec2 dat = data->readVec2();
+        //append the pair to the uniforms
+        this->vec2s[key] = dat;
+    }
+    //decode the amount of vec3s
+    max = data->readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        vec3 dat = data->readVec3();
+        //append the pair to the uniforms
+        this->vec3s[key] = dat;
+    }
+    //decode the amount of vec4s
+    max = data->readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        vec4 dat = data->readVec4();
+        //append the pair to the uniforms
+        this->vec4s[key] = dat;
+    }
+    //decode the amount of mat2s
+    max = data->readLong();
+    //iterate over the integers
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        mat2 dat = data->readMat2();
+        //append the pair to the uniforms
+        this->mat2s[key] = dat;
+    }
+    //decode the amount of mat3s
+    max = data->readLong();
+    //iterate over the floats
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        mat3 dat = data->readMat3();
+        //append the pair to the uniforms
+        this->mat3s[key] = dat;
+    }
+    //decode the amount of mat4s
+    max = data->readLong();
+    //iterate over the bools
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the integer
+        mat4 dat = data->readMat4();
+        //append the pair to the uniforms
+        this->mat4s[key] = dat;
+    }
+    //decode the amount of textures
+    max = data->readLong();
+    //iterate over the textures
+    for (long i = 0; i < max; i++)
+    {
+        //store the key (the string)
+        std::string key = data->readString();
+        //store the textures
+        unsigned int dat = data->readUInt();
+        //append the pair to the uniforms
+        this->customTextures[key] = dat;
+    }
+}
+
+void Shader::encodeHook(Data* data)
+{
+    //override here
+}
+void Shader::decodeHook(Data* data)
+{
+    //override here
 }
 
 /////////////

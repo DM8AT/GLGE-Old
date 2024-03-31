@@ -37,20 +37,20 @@
 Camera camera;
 
 //create an instance of the Object class to store an object named cube. Default constructor is used, setup is done later
-Object cube;
+Object* cube;
 //crate an second instance of the Object class, also only default constructor
-Object grassFloor;
+Object* grassFloor;
 //create an instance of the Object class to store an object named thing. The default constructor is used. Named so, because it can be everything
 //that can be loaded from an .obj file
-Object thing;
+Object* thing;
 //this object is loaded from the file Enterpreis.obj. 
-Object enterprise;
+Object* enterprise;
 //it is a brick wall
-Object wall;
+Object* wall;
 
-Light light;
+Light* light;
 
-Light l2;
+Light* l2;
 
 Shader* invColPPS;
 
@@ -83,20 +83,20 @@ void display()
     //backface culling dosn't look good on transparent objects
     glgeDisableBackfaceCulling();
     //draw the Enterpreis
-    enterprise.draw();
+    enterprise->draw();
     //re-enable backface culling for the rest of the objects
     glgeEnableBackfaceCulling();
 
     //call the draw function from the grass floor object to draw it to the screen
-    grassFloor.draw();
+    grassFloor->draw();
     //draw the cube to the screen
-    cube.draw();
+    cube->draw();
 
     //draw the thing to the screen
-    thing.draw();
+    thing->draw();
 
     //draw the wall
-    wall.draw();
+    wall->draw();
 
     //after this function is finished, the frame buffer gets fliped and everything is drawn to the screen
 }
@@ -247,20 +247,20 @@ void tick()
     camera.update();
 
     //recalculate the height for the cube obj
-    cube.setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
+    cube->setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
 
     //secondly, update the objects, so that 
 
     //update the grass floor, to make shure the transform and projection is correct. 
-    grassFloor.update();
+    grassFloor->update();
     //update the cube
-    cube.update();
+    cube->update();
     //update the thing
-    thing.update();
+    thing->update();
     //update the enterprise
-    enterprise.update();
+    enterprise->update();
     //update the wall
-    wall.update();
+    wall->update();
 
     //set the position of the light source to be exactly at the player
     //light.setPos(camera.getPos());
@@ -309,7 +309,7 @@ void floorSetup()
     //the normal vectors of the mesh are recalculated, so it can be lit. 
     m.recalculateNormals();
     //the grass floor is constructed from the previously created mesh by overwriting the data previously stored in it with the new mesh
-    grassFloor = Object(m);
+    grassFloor = new Object(m);
 
     //an shader can be asigned to the object, but it is no longer necesery. 
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
@@ -317,7 +317,7 @@ void floorSetup()
     //then create a material for the grass floor
     Material grassFloorMat = Material("assets/grass.png", GLGE_TEXTURE, 0.2);
     //apply the material to the grass floor
-    grassFloor.setMaterial(grassFloorMat);
+    grassFloor->setMaterial(grassFloorMat);
 }
 
 //in this function the cube is set up
@@ -327,14 +327,14 @@ void cubeSetup()
     sphereMesh.applyTransform(Transform(vec3(0,2,0), vec3(0), vec3(0.5)));
     Mesh cubeMesh = Mesh(GLGE_PRESET_CUBE, vec4(-1));
     //the cube object is constructed using a cube preset using an alpha of -1 for the color to use textures
-    cube = Object(cubeMesh + sphereMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
+    cube = new Object(cubeMesh + sphereMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
     //create a material for the cube
     Material cubeMaterial = Material(glgeGetLastFrame(), GLGE_TEXTURE, 0);
     //set it to unlit
     cubeMaterial.setLit(false);
 
     //apply the material to the cube
-    cube.setMaterial(cubeMaterial);
+    cube->setMaterial(cubeMaterial);
 }
 
 //setup the thing
@@ -344,26 +344,26 @@ void thingSetup()
     Mesh m = Mesh("assets/Vertices.obj", GLGE_OBJ);
 
     //load the mesh to an object and change the position of it
-    thing = Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
+    thing = new Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
 
     //create a material for the thing
     Material thingMat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0.2);
     //apply the material to the thing
-    thing.setMaterial(thingMat);
+    thing->setMaterial(thingMat);
 }
 
 void enterpriseSetup()
 {
     //load the Enterprise object from an file, the file format is .obj
-    enterprise = Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1), true);
+    enterprise = new Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1), true);
 
     //create a material for the object
     Material mat = Material(vec4(vec3(0.25), 0.5f), 0.2, 1.0);
 
     //bind the material to the enterprise
-    enterprise.setMaterial(mat);
+    enterprise->setMaterial(mat);
     //say that the enterpreise is fully transparent
-    enterprise.setFullyTransparent(true);
+    enterprise->setFullyTransparent(true);
 }
 
 void wallSetup()
@@ -388,13 +388,13 @@ void wallSetup()
     shader.addGeometryShader("src/Shaders/geometryShader.gs");
 
     //create the Wall from an file
-    wall = Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,155,0), 1.f));
+    wall = new Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,155,0), 1.f));
 
     //bind the shader of the object
-    wall.setShader(shader.getShader());
+    wall->setShader(shader.getShader());
 
     //apply the material to the wall
-    wall.setMaterial(mat);
+    wall->setMaterial(mat);
 }
 
 void windowResized(int width, int height)
@@ -623,10 +623,10 @@ void run3Dexample()
     wallSetup();
 
     //add and store two point lights
-    l2 = Light(2,5,0, 0.35,0.125,0.5, 100);
-    glgeAddGlobalLighSource(&l2);
-    light = Light(10,5,0, 1,1,1, 50);
-    glgeAddGlobalLighSource(&light);
+    l2 = new Light(2,5,0, 0.35,0.125,0.5, 100);
+    glgeAddGlobalLighSource(l2);
+    light = new Light(10,5,0, 1,1,1, 50);
+    glgeAddGlobalLighSource(light);
 
     //add a sun light
     glgeAddGlobalLighSource(new Light(vec3(0), vec3(0,-1,0.5), GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL, vec3(0.98, 0.98, 0.6), 0, 1));
@@ -639,6 +639,13 @@ void run3Dexample()
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();
 
-    //the program will continue running after closing, until the main file finishes
-    printf("\n");
+    //delete all the object pointers
+    delete grassFloor;
+    delete cube;
+    delete enterprise;
+    delete wall;
+    delete thing;
+    //delete the light sources
+    delete light;
+    delete l2;
 }

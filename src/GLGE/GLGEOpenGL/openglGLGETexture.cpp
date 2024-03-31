@@ -37,13 +37,40 @@ Texture::Texture(const char* textureFile)
     // load and generate the texture
     int width, height, nrChannels;
     unsigned char *data = glgeLoad(textureFile, &width, &height, &nrChannels);
+    //create a new vec4 array
+    this->texData = new vec4[width*height];
+    //check if the new opperation was sucessfull
+    if (!this->texData)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Failed to allocate data to store an image");
+    }
+    //copy the data into the own data vector
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            //create a new array for the vector
+            float v[4];
+            //clear the vector
+            bzero(v, sizeof(float)*4);
+            //fill the vector with data
+            for (int i = 0; i < nrChannels; i++)
+            {
+                //store the pixel as an float between 0 and 1
+                v[i] = data[(x + y*width)*nrChannels + i] / 255.f;
+            }
+            //store the pixel
+            this->texData[x + y*width] = vec4(v[0], v[1], v[2], v[4]);
+        }
+    }
+    //check for the data type
     if(data)
     {
         if (nrChannels == 3)
         {
             //generate mipmap and upload to GPU
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
             //store the image number of chanels and encode type
             this->encodeType = GL_RGB;
             this->channels = GL_RGB;
@@ -52,7 +79,6 @@ Texture::Texture(const char* textureFile)
         {
             //generate mipmap and upload to GPU
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
             //store the image number of chanels and encode type
             this->encodeType = GL_RGBA;
             this->channels = GL_RGBA;
@@ -62,9 +88,6 @@ Texture::Texture(const char* textureFile)
     {
         std::cout << "Failed to load texture file: " << textureFile << "\n";
     }
-
-    //store the data type
-    this->type = GL_UNSIGNED_BYTE;
 
     //store the texture size
     this->size = ivec2(width, height);
@@ -82,18 +105,8 @@ Texture::Texture(vec2 size, int encodeType, void* data)
     *this = Texture(size.x, size.y, encodeType, data);
 }
 
-Texture::Texture(unsigned int width, unsigned int height, int et, void* data, int dataType)
+Texture::Texture(unsigned int width, unsigned int height, int et, void* data)
 {
-    //check if the type is valide
-    if (!((dataType == GLGE_FLOAT) || (dataType == GLGE_UNSIGNED_INT) || (dataType == GLGE_UNSIGNED_BYTE)
-          || (dataType == GLGE_INT) || (dataType == GLGE_BYTE)))
-    {
-        GLGE_THROW_ERROR("Data type " + std::to_string(dataType) + " is not a valdie type")
-        //safety return
-        return;
-    }
-    //store the inputed type
-    this->type = dataType;
     //generate a texture
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_2D, this->texture);
@@ -105,7 +118,7 @@ Texture::Texture(unsigned int width, unsigned int height, int et, void* data, in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     //store data in the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, width, height, 0, this->channels, dataType, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, width, height, 0, this->channels, GL_FLOAT, data);
     //unbind the texture
 	glBindTexture(GL_TEXTURE_2D, 0);
     //store the window
@@ -136,7 +149,7 @@ void Texture::resize(vec2 size)
     //bind the texture
     this->bind(0);
     //update the size
-    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, size.x, size.y, 0, this->channels, this->type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, size.x, size.y, 0, this->channels, GL_FLOAT, NULL);
     //unbind the texture
     this->unbind();
 }

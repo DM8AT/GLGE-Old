@@ -13,6 +13,7 @@
 #include "3DTest.hpp"
 #include "2DTest.hpp"
 #include "WidgetTest.hpp"
+#include "SceneExample.hpp"
 
 //for input and printing, iostream is included
 #include <iostream>
@@ -42,9 +43,10 @@ int main()
     printf("Type 0 to run the 3D example\n");
     printf("Type 1 to run the 2D example\n");
     printf("Type 2 to run the widget example\n");
+    printf("Type 3 to run the scene example\n");
 
     //then, get the user input
-    int inp = 2;
+    int inp = 0;
     std::cin >> inp;
 
     //start the example corresponding to the input
@@ -65,6 +67,12 @@ int main()
         //launch the widget example
         printf("\nLaunching widget example\nTo exit press F4\n");
         runWidgetExample();
+    }
+    else if (inp == 3)
+    {
+        //lauunch the scene example
+        printf("\nLaunching scene example\n");
+        runSceneExample();
     }
     //osterei
     else if (inp == 42)

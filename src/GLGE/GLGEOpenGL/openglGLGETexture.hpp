@@ -239,9 +239,8 @@ public:
      * @param height the height of the texture
      * @param encodeType the way to encode the data
      * @param data the data to put in the texture
-     * @param dataType the type of the data to encode, float by default
      */
-    Texture(unsigned int width, unsigned int height, int encodeType, void* data = NULL, int dataType = GLGE_FLOAT);
+    Texture(unsigned int width, unsigned int height, int encodeType, void* data = NULL);
 
     /**
      * @brief change the size of the texture
@@ -291,6 +290,8 @@ public:
     unsigned int getOpenGLTexture();
 
 private:
+    //store the texture data
+    vec4* texData;
     //store the texture
     unsigned int texture = 0;
     //store the texture binding
@@ -303,8 +304,6 @@ private:
     int encodeType = 0;
     //store the chanel numbers
     int channels = 0;
-    //store the type
-    int type = 0;
     //store the owner window
     int windowID = -1;
     //store if this was bound using autobind

@@ -35,6 +35,8 @@ ComputeShader::ComputeShader(const char* shaderFile)
 
 ComputeShader::ComputeShader(std::string shaderCode)
 {
+    //store the source code
+    this->src = shaderCode;
     //create a new shader program
     unsigned int shaderProgram = glCreateProgram();
 
@@ -184,4 +186,32 @@ void ComputeShader::dispatch(vec3 workgroups)
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     //unbind the shader
     this->removeShader();
+}
+
+void ComputeShader::encode(Data* data)
+{
+    //encode the source code
+    data->writeString(this->src);
+
+    //encode the uniforms
+    this->encodeUniforms(data);
+}
+
+void ComputeShader::decode(Data* data)
+{
+    //deocde the source
+    std::string src = data->readString();
+    //delete the shader
+    this->deleteShader();
+    //construct a new shader from the source
+    *this = ComputeShader(src);
+
+    //decode the uniforms
+    this->decodeUniforms(data);
+}
+
+std::string ComputeShader::getSRC()
+{
+    //return the shader code
+    return this->src;
 }

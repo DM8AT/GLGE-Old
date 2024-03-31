@@ -51,8 +51,44 @@ Object::Object()
 //constructor using preset
 Object::Object(unsigned int preset, vec4 color, unsigned int res, Transform transform, bool isTransparent, bool isStatic)
 {
-    //use the mesh to construct the object
-    *this = Object(Mesh(preset, color, res), transform, isTransparent, isStatic);
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
+    //construct and save a mesh from the pointers
+    this->mesh = Mesh(preset, color, res);
+
+    //save the inputed transform
+    this->transf = transform;
+
+    //save if the object is static
+    this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
+
+    //calculate the buffers
+    this->compileBuffers();
+
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
+    }
+    //get the uniforms
+    this->getUniforms();
+
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
+    //update the object
+    this->update();
 }
 
 //constructor using pointer
@@ -225,6 +261,30 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
     //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
     //update the object
     this->update();
+}
+
+Object::~Object()
+{
+    //destroy the object
+    this->destroy();
+    //clear light vectors
+    this->lightColLocs.clear();
+    this->lightDatLocs.clear();
+    this->lightDirLocs.clear();
+    this->lightPosLocs.clear();
+}
+
+void Object::destroy()
+{
+    //delete the VBO
+    glDeleteBuffers(1, &this->VBO);
+    //delete the IBO
+    glDeleteBuffers(1, &this->IBO);
+    //reset the window id
+    this->windowIndex = -1;
+    //clear the mesh
+    this->mesh.vertices.clear();
+    this->mesh.indices.clear();
 }
 
 //draw the object

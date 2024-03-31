@@ -15,6 +15,8 @@
 
 //include the needed math librarys
 #include "../CML/CMLVec3.h"
+//include GLGE
+#include "openglGLGE.h"
 
 //declare the base lighting shaders
 
@@ -269,6 +271,19 @@ public:
      * @return float the intense angle
      */
     float getIntenseAngle();
+
+    /**
+     * @brief encode the data of this object into some data
+     * 
+     * @param data the data to encode into
+     */
+    void encode(Data* data);
+    /**
+     * @brief decode the object from data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
 
 private:
     //store the light position

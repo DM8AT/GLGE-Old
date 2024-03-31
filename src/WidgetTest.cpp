@@ -24,7 +24,7 @@ Object2D clockPointerHour;
 //store the default triangle
 Object2D tri;
 //store a spinning cube
-Object spinCube;
+Object* spinCube;
 //store an close button
 Button button;
 //store the Camera
@@ -109,7 +109,7 @@ void secondDraw()
     //draw the triangle to the other window
     tri.draw();
     //draw the cube
-    spinCube.draw();
+    spinCube->draw();
     //draw the button
     button.draw();
 }
@@ -123,9 +123,9 @@ void secondTick()
     //update the triangle
     tri.update();
     //rotate the cube a bit
-    spinCube.rotate(vec3(0.002, 0.001, 0.0005));
+    spinCube->rotate(vec3(0.002, 0.001, 0.0005));
     //update the cube
-    spinCube.update();
+    spinCube->update();
     //update the button
     button.update();
 
@@ -148,13 +148,13 @@ void secWindowInit()
     tri = Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
 
     //load the Cube object
-    spinCube = Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
+    spinCube = new Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
     //set the material for the cube
     Material mat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0);
     //make the cube unlit
     mat.setLit(false);
     //bind the material to the cube
-    spinCube.setMaterial(mat);
+    spinCube->setMaterial(mat);
 
     //load the close button
     button = Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
@@ -200,6 +200,12 @@ void computeSetup()
     //bind a draw function for the window
     compute.setDrawFunc(computeDraw);
     //a tick function is not needed for the window, so don't bind one
+}
+
+void closeWin()
+{
+    //delete the 3D object
+    delete spinCube;
 }
 
 //start of the program
@@ -250,6 +256,8 @@ void runWidgetExample()
     win.setClearColor(1,1,1);
     //bind an initalisation function
     win.setInitFunc(secWindowInit);
+    //bind an exit function
+    win.setExitFunc(closeWin);
     //mark the window as ready for updates
     win.start();
     

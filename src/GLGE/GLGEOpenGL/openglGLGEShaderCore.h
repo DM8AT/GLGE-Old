@@ -19,6 +19,8 @@
 #include <map>
 //CML
 #include "../CML/CML.h"
+//include the data class
+#include "../GLGEIndependend/GLGEData.h"
 
 //check if the material core is allready included
 #ifndef _GLGE_MATERIAL_CORE_H_
@@ -60,6 +62,26 @@
 //define GLGE_FRAGMENT_SHADER to 2, it is needed in an constructor of the Shader class
 #define GLGE_FRAGMENT_SHADER 2
 //define GLGE_GEOMETRY_SHADER to 3, it is needed in an additional function of the shader class
+
+///////////
+//STRUCTS//
+///////////
+
+struct ShaderSource
+{
+    /**
+     * @brief store the source code for the vertex shader
+     */
+    std::string vertex;
+    /**
+     * @brief store the source code for the fragment shader
+     */
+    std::string fragment;
+    /**
+     * @brief store the source code for the geometry shader
+     */
+    std::string geometry;
+};
 
 ///////////
 //CLASSES//
@@ -140,6 +162,11 @@ public:
      * @param shader the compiled shader
      */
     Shader(unsigned int shader);
+
+    /**
+     * @brief Destroy the Shader
+     */
+    virtual ~Shader();
 
     /**
      * @brief set the shader to the current active shader
@@ -407,11 +434,59 @@ public:
      */
     void recalculateUniforms();
     
+    /**
+     * @brief get the entire shader source code
+     * 
+     * @return ShaderSource the shader source code
+     */
+    ShaderSource getSRC();
+
+    /**
+     * @brief encode the object to some data
+     * 
+     * @param data the data to encode the object into
+     */
+    void encode(Data* data);
+    /**
+     * @brief decode the object from some data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
+
+    /**
+     * @brief encode all the uniforms for the shader
+     * 
+     * @param data the data to encode into
+     */
+    void encodeUniforms(Data* data);
+    /**
+     * @brief decode all the uniforms for the shader
+     * 
+     * @param data the data to decode from
+     */
+    void decodeUniforms(Data* data);
+
+    /**
+     * @brief a hook into the encoding process
+     * 
+     * @param data the data to encode into
+     */
+    virtual void encodeHook(Data* data);
+    /**
+     * @brief a hook into the decoding process
+     * 
+     * @param data the data to decode from
+     */
+    virtual void decodeHook(Data* data);
+
 protected:
     //store the address of the OpenGL shader
     unsigned int shader = 0;
     //store how many textures are bound
     int boundTextures = 0;
+    //store the shader source
+    ShaderSource src;
 
     //custom values
 

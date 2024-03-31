@@ -4,9 +4,9 @@
 
 precision highp float;
 
-layout(location = 3) out vec4 Lit;
 layout(location = 5) out vec4 Max;
 layout(location = 7) out vec4 Col;
+layout(location = 3) out vec4 rml;
 
 uniform sampler2D glgeLitMap;
 
@@ -115,7 +115,7 @@ void main()
 
     Col = col;
     Max = vec4(0,0,1,1);
-    Lit.b = 1.f;
+    rml.rgb = vec3(rough, glgeMetalic, float(glgeLight));
 
     gl_FragDepth = gl_FragCoord.z;
 }

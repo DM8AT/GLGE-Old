@@ -12,6 +12,8 @@
 #ifndef _GLGE_MATERIAL_CORE_OGL_H_
 #define _GLGE_MATERIAL_CORE_OGL_H_
 
+//include the GLGE core
+#include "openglGLGE.h"
 
 //define things for identification
 
@@ -390,6 +392,20 @@ public:
      * @return std::string the string that describes the mode
      */
     std::string getModeString(unsigned int mode);
+
+    /**
+     * @brief encode the object into some data
+     * 
+     * @param data the data to encode into
+     */
+    void encode(Data* data);
+    /**
+     * @brief decode the object from some data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
+
 private:
     //store the positon of the roughness in the shader
     int roughnessLoc = -1;

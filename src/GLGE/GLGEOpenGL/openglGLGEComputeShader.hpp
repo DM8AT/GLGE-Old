@@ -49,6 +49,31 @@ public:
      * @param workgroups the amount of work groups to use
      */
     void dispatch(vec3 workgroups);
+
+    /**
+     * @brief encode the data for the shader
+     * 
+     * @param data the data to encode into
+     */
+    void encode(Data* data);
+
+    /**
+     * @brief decode the object from some given data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data* data);
+
+    /**
+     * @brief get the source code of the shader
+     * 
+     * @return std::string the source code of the shader
+     */
+    std::string getSRC();
+
+private:
+    //store the source code
+    std::string src;
 };
 
 #endif 
