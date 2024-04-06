@@ -45,7 +45,7 @@
  * @param filename a path to the file
  * @param x the width of the image
  * @param y the height of the image
- * @param comp the bit size per chanel
+ * @param comp the amount of chanels
  * @param req_comp i dont know, look at the stbi image docomentation
  * @return unsigned char* a data pointer to an image
  */
