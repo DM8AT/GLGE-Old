@@ -27,7 +27,7 @@
 #include <math.h>
 
 //create the camera to move around in the 2D world 
-Camera2D cam;
+Camera2D* cam;
 //create an 2D object for an triangle
 Object2D* triangle;
 //create an 2D object for an square
@@ -71,25 +71,25 @@ void tickFunc()
         if (glgeGetKeys().w)
         {
             //change the position of the camera up by the camera speed
-            cam.move(0,-cameraSpeed / worldScale);
+            cam->move(0,-cameraSpeed / worldScale);
         }
         //check if the s key is pressed
         if (glgeGetKeys().s)
         {
             //change the position of the camera down by the camera speed
-            cam.move(0,cameraSpeed / worldScale);
+            cam->move(0,cameraSpeed / worldScale);
         }
         //check if the a key is pressed
         if (glgeGetKeys().a)
         {
             //change the position of the camera left by the camera speed
-            cam.move(cameraSpeed / worldScale,0);
+            cam->move(cameraSpeed / worldScale,0);
         }
         //check if the d key is pressed
         if (glgeGetKeys().d)
         {
             //change the position of the camera right by the camera speed
-            cam.move(-cameraSpeed / worldScale,0);
+            cam->move(-cameraSpeed / worldScale,0);
         }
 }
 
@@ -100,10 +100,10 @@ void tickFunc()
     glgeClamp(&worldScale, 0.5, 5);
 
     //set the camera scale to the world scale on both axis
-    cam.setScale(vec2(worldScale,worldScale));
+    cam->setScale(vec2(worldScale,worldScale));
 
     //update the camera
-    cam.update();
+    cam->update();
 
     //rotate the triangle by 2.5 degrees
     triangle->rotate(2.5);
@@ -215,7 +215,7 @@ void run2Dexample()
     glgeBindMainFunc(tickFunc);
 
     //bind the camera
-    glgeBindMain2DCamera(&cam);
+    glgeBindMain2DCamera(cam);
 
     //setup the triangle
     triangleSetup();

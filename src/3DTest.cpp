@@ -34,7 +34,7 @@
 #include <time.h>
 
 //create the main camera, an instance of the Camera class. Default constructor is used in the moment, setup is later
-Camera camera;
+Camera* camera;
 
 //create an instance of the Object class to store an object named cube. Default constructor is used, setup is done later
 Object* cube;
@@ -55,15 +55,15 @@ Light* l2;
 Shader* invColPPS;
 
 //store the first render target for the ping-pong blure
-RenderTarget pingPongBlure_first;
+RenderTarget* pingPongBlure_first;
 //store the second render target for the ping-pong blure
-RenderTarget pingPongBlure_second;
+RenderTarget* pingPongBlure_second;
 //store a shader for the final bloom calculation
-Shader bloomShader;
+Shader* bloomShader;
 //store a shader for down sampeling
-Shader downSample;
+Shader* downSample;
 //store a shader for up sampeling
-Shader upSample;
+Shader* upSample;
 
 //set the speed for the camera, so it is constant everywhere
 float camSpeed = 0.005;
@@ -74,7 +74,7 @@ float mouseSensetivity = 20.f;
 bool isActive = true;
 
 // post processing shader object
-Shader pps;
+Shader* pps;
 
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
@@ -107,7 +107,7 @@ void tick()
     //dont update this window if it is not focused
     if (!glgeGetWindowFocus()) { return; }
     // reset uniforms
-    pps.setCustomVec2("screenSize", glgeGetWindowSize());
+    pps->setCustomVec2("screenSize", glgeGetWindowSize());
     //make changes to the camera by changing its position or rotating it
 
     //calculate the cam speed for this frame, to make the movement speed framerate independend. To do that, multiply the base speed by the delta time
@@ -133,38 +133,38 @@ void tick()
         //      x----y
         //
         //          multiply the camera speed with some sine and cosine of the inverted camera rotation on the x axis
-        camera.move(camTickSpeed*std::sin(-camera.getRotation().x),0,camTickSpeed*std::cos(-camera.getRotation().x));
+        camera->move(camTickSpeed*std::sin(-camera->getRotation().x),0,camTickSpeed*std::cos(-camera->getRotation().x));
     }
     //check if the s key is pressed
     if (glgeGetKeys().s)
     {
         //if the s key is pressed, then the camera should move backwards
         //it is basicaly the same as moving it forwards, the speed is just inverted
-        camera.move(-camTickSpeed*std::sin(-camera.getRotation().x),0,-camTickSpeed*std::cos(-camera.getRotation().x));
+        camera->move(-camTickSpeed*std::sin(-camera->getRotation().x),0,-camTickSpeed*std::cos(-camera->getRotation().x));
     }
     //check if the d key is pressed
     if (glgeGetKeys().d)
     {
         //if the d key is pressed, then the camera should strave right. It is like moving forward, but sine and cosine is inverted and the rotation is no longer inverted
-        camera.move(camTickSpeed*std::cos(camera.getRotation().x),0,camTickSpeed*std::sin(camera.getRotation().x));
+        camera->move(camTickSpeed*std::cos(camera->getRotation().x),0,camTickSpeed*std::sin(camera->getRotation().x));
     }
     //check if the a key is pressed
     if (glgeGetKeys().a)
     {
         //if a is pressed, then the camera should strave right. It is like straving left, but the speed is inverted
-        camera.move(-camTickSpeed*std::cos(camera.getRotation().x),0,-camTickSpeed*std::sin(camera.getRotation().x));
+        camera->move(-camTickSpeed*std::cos(camera->getRotation().x),0,-camTickSpeed*std::sin(camera->getRotation().x));
     }
     //check if the space bar is pressed
     if (glgeGetKeys().space)
     {
         //if the space bar is pressed, the camera flies up with the normal movement speed
-        camera.move(0,camTickSpeed,0);
+        camera->move(0,camTickSpeed,0);
     }
     //check if one of the two shift keys is pressed
     if (glgeGetKeys().shift)
     {
         //if one is pressed, then the camera should fly down. 
-        camera.move(0,-camTickSpeed,0);
+        camera->move(0,-camTickSpeed,0);
     }
 
     //here is the camera rotation
@@ -172,10 +172,10 @@ void tick()
     if (isActive)
     {
         //rotate the camera by the mouse position
-        camera.rotate((-(glgeGetMouse().pos.x-0.5f)/glgeGetDeltaTime())*mouseSensetivity, (-((glgeGetMouse().pos.y-0.5f))/glgeGetDeltaTime())*mouseSensetivity, 0);
+        camera->rotate((-(glgeGetMouse().pos.x-0.5f)/glgeGetDeltaTime())*mouseSensetivity, (-((glgeGetMouse().pos.y-0.5f))/glgeGetDeltaTime())*mouseSensetivity, 0);
     }
     //clamp the camera rotation on the y axis
-    camera.setRotation(camera.getRotation().x, glgeClamp(camera.getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
+    camera->setRotation(camera->getRotation().x, glgeClamp(camera->getRotation().y, glgeToRadians(-90), glgeToRadians(90)));
     
     //if the cursor is clicked and not locked to the window, lock it to the window
     if (glgeGetMouse().leftButton && !isActive)
@@ -242,9 +242,9 @@ void tick()
     //first, update the camera
 
     //to update the camera, recalculate the projection, this is optional, if your window will not change size
-    camera.recalculateProjection();
+    camera->recalculateProjection();
     //then, update the camera to make all transform changes work correctly
-    camera.update();
+    camera->update();
 
     //recalculate the height for the cube obj
     cube->setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
@@ -263,7 +263,7 @@ void tick()
     wall->update();
 
     //set the position of the light source to be exactly at the player
-    //light.setPos(camera.getPos());
+    //light.setPos(camera->getPos());
 
     //write the current FPS as the window title
     glgeSetWindowTitle(std::string("3D example script for GLGE : " + std::to_string(glgeGetCurrentFPS())).c_str());
@@ -425,83 +425,83 @@ Shader calculateBloom(unsigned int img)
     unsigned int samples = 1;
     //make the first setup for the blure using the brightness map
     //set the size to half the size of the brightness map
-    pingPongBlure_first.changeSize(glgeGetWindowSize()/vec2(2,2));
+    pingPongBlure_first->changeSize(glgeGetWindowSize()/vec2(2,2));
     //load the texture from the brightness map to the shader
-    downSample.setCustomTexture("image", glgeGetLighningBuffer());
+    downSample->setCustomTexture("image", glgeGetLighningBuffer());
     //pass the size of the brightness map to the shader
-    downSample.setCustomVec2("screenSize", glgeGetWindowSize());
+    downSample->setCustomVec2("screenSize", glgeGetWindowSize());
     //pass a multiplyer for the texture coordinates to the shader
-    downSample.setCustomInt("sampleMult", 2);
+    downSample->setCustomInt("sampleMult", 2);
     //bind the down sampleing shader to the render target
-    pingPongBlure_first.setShader(&downSample);
+    pingPongBlure_first->setShader(downSample);
     
     //down sample
     for (unsigned int i = 0; i < samples; i++)
     {
         //draw the first ping-pong blure
-        pingPongBlure_first.draw();
+        pingPongBlure_first->draw();
         //setup the second ping-pong blure
         //change the size of the render target by dividing the size by 2
-        pingPongBlure_second.changeSize(pingPongBlure_first.getSize()/vec2(2,2));
+        pingPongBlure_second->changeSize(pingPongBlure_first->getSize()/vec2(2,2));
         //pass the image of the other blure pass to the shader
-        downSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+        downSample->setCustomTexture("image", pingPongBlure_first->getTexture());
         //pass the size of the other render target to the shader
-        downSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+        downSample->setCustomVec2("screenSize", pingPongBlure_first->getSize());
         //multiply the texture coordinate multiplyer by 2
-        downSample.setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
+        downSample->setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
         //bind the shader (just to be sure it is correct)
-        pingPongBlure_second.setShader(&downSample);
+        pingPongBlure_second->setShader(downSample);
         //draw the blure pass
-        pingPongBlure_second.draw();
+        pingPongBlure_second->draw();
 
         //setup the blure pass for the first render target
         //set the size to half the size of the other render target
-        pingPongBlure_first.changeSize(pingPongBlure_second.getSize()/vec2(2,2));
+        pingPongBlure_first->changeSize(pingPongBlure_second->getSize()/vec2(2,2));
         //bind the output texture of the other render target
-        downSample.setCustomTexture("image", pingPongBlure_second.getTexture());
+        downSample->setCustomTexture("image", pingPongBlure_second->getTexture());
         //pass the size of the other render target
-        downSample.setCustomVec2("screenSize", pingPongBlure_second.getSize());
+        downSample->setCustomVec2("screenSize", pingPongBlure_second->getSize());
         //multiply the multiplyer for the texture coordinates by 2
-        downSample.setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
+        downSample->setCustomInt("sampleMult", 2, GLGE_MODE_MULTIPLY);
     }
     //reset the value for the sample multiplyer, make sure to divide instantly by 2 because it was multiplied one more time than drawn
-    upSample.setCustomInt("sampleMult", downSample.getIntByName("sampleMult")/2);
+    upSample->setCustomInt("sampleMult", downSample->getIntByName("sampleMult")/2);
     //up sampling
     for (unsigned int i = 0; i < samples; i++)
     {
         //set the size for the first render target to two times the size of the second render target
-        pingPongBlure_first.changeSize(pingPongBlure_second.getSize().scale(vec2(2,2)));
+        pingPongBlure_first->changeSize(pingPongBlure_second->getSize().scale(vec2(2,2)));
         //pass the output image of the second render target to the shader
-        upSample.setCustomTexture("image", pingPongBlure_second.getTexture());
+        upSample->setCustomTexture("image", pingPongBlure_second->getTexture());
         //pass the size of the second render target to the shader
-        upSample.setCustomVec2("screenSize", pingPongBlure_second.getSize());
+        upSample->setCustomVec2("screenSize", pingPongBlure_second->getSize());
         //divide the multiplyer for the texture coordinates by 2
-        upSample.setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
+        upSample->setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
         //bind the up sampeling shader to the first render target
-        pingPongBlure_first.setShader(&upSample);
+        pingPongBlure_first->setShader(upSample);
         //draw the first render target
-        pingPongBlure_first.draw();
+        pingPongBlure_first->draw();
 
         //set the size of the second render target to half the size of the first render target
-        pingPongBlure_second.changeSize(pingPongBlure_first.getSize().scale(vec2(2,2)));
+        pingPongBlure_second->changeSize(pingPongBlure_first->getSize().scale(vec2(2,2)));
         //pass the output image of the first render target to the shader
-        upSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+        upSample->setCustomTexture("image", pingPongBlure_first->getTexture());
         //pass the size of the first render target to the shader
-        upSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+        upSample->setCustomVec2("screenSize", pingPongBlure_first->getSize());
         //divide the multiplyer for the texture coordinates by 2
-        upSample.setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
+        upSample->setCustomInt("sampleMult", 2, GLGE_MODE_DIVIDE);
         //bind the up sampeling shader to the second render target
-        pingPongBlure_second.setShader(&upSample);
+        pingPongBlure_second->setShader(upSample);
         //draw the second render target
-        pingPongBlure_second.draw();
+        pingPongBlure_second->draw();
     }
 
     //pass the current texture to the bloom shader
-    bloomShader.setCustomTexture("currImage", img);
+    bloomShader->setCustomTexture("currImage", img);
     //recalgulate the uniforms for the bloom shader
-    bloomShader.recalculateUniforms();
+    bloomShader->recalculateUniforms();
     //output the bloom shader
-    return bloomShader;
+    return *bloomShader;
 }
 
 //this function is like the main function in an normal scripted, but it is called form an other file, so it is named differently. 
@@ -544,33 +544,33 @@ void run3Dexample()
     //bind a post processing funciton for bloom calculation
     glgeAddCustomPostProcessingFunc(calculateBloom);
     //setup the first render target for the blure
-    pingPongBlure_first = RenderTarget(glgeGetWindowSize());
+    pingPongBlure_first = new RenderTarget(glgeGetWindowSize());
     //setup the second render target for the blure
-    pingPongBlure_second = RenderTarget(glgeGetWindowSize());
+    pingPongBlure_second = new RenderTarget(glgeGetWindowSize());
     //setup the bloom shader
-    bloomShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/finalBloomShader.fs");
+    bloomShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/finalBloomShader.fs");
     //pass the lit image to the bloom shader
-    bloomShader.setCustomTexture("bloomMap", pingPongBlure_first.getTexture());
+    bloomShader->setCustomTexture("bloomMap", pingPongBlure_first->getTexture());
     //compile the shader for down sampeling
-    downSample = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/downSampleShader.fs");
+    downSample = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/downSampleShader.fs");
     //set down the image for the down sampeling shader
-    downSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+    downSample->setCustomTexture("image", pingPongBlure_first->getTexture());
     //set down the image size for the down sampeling shader
-    downSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+    downSample->setCustomVec2("screenSize", pingPongBlure_first->getSize());
     //set the uniform for the texture map multiplyer
-    downSample.setCustomInt("sampleMult", 1);
+    downSample->setCustomInt("sampleMult", 1);
     //recalculate the uniform variables
-    downSample.recalculateUniforms();
+    downSample->recalculateUniforms();
     //compile the shader for up sampeling
-    upSample = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/upSampleShader.fs");
+    upSample = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, "src/Shaders/upSampleShader.fs");
     //set up the image for the down sampeling shader
-    upSample.setCustomTexture("image", pingPongBlure_first.getTexture());
+    upSample->setCustomTexture("image", pingPongBlure_first->getTexture());
     //set up the image size for the down sampeling shader
-    upSample.setCustomVec2("screenSize", pingPongBlure_first.getSize());
+    upSample->setCustomVec2("screenSize", pingPongBlure_first->getSize());
     //set the uniform for the texture map multiplyer
-    upSample.setCustomInt("sampleMult", 1);
+    upSample->setCustomInt("sampleMult", 1);
     //recalculate the uniform variables
-    upSample.recalculateUniforms();
+    upSample->recalculateUniforms();
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);
@@ -600,12 +600,12 @@ void run3Dexample()
     //a window can be moved by default, so no function is needed to say that it can be moved (but you can say that it can't be moved)
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
-    camera = Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
+    camera = new Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
     //then, the camera is moved one unit up
-    camera.move(0,1,0);
+    camera->move(0,1,0);
     //after the camera is set up, the camera is bound to the library using an pointer. So, the camera can be changed and updated
     //without needing to rebind it. 
-    glgeBindCamera(&camera);
+    glgeBindCamera(camera);
 
     //then, the floor is set up. See above for greater detail
     floorSetup();
@@ -638,14 +638,4 @@ void run3Dexample()
 
     //at the end of the function, the main loop is run. This is the point where the program will start. No code behind this line will be run. 
     glgeRunMainLoop();
-
-    //delete all the object pointers
-    delete grassFloor;
-    delete cube;
-    delete enterprise;
-    delete wall;
-    delete thing;
-    //delete the light sources
-    delete light;
-    delete l2;
 }

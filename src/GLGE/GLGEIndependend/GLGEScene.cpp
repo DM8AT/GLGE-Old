@@ -94,9 +94,7 @@ Data NamedObject::getOutputData(std::string type)
 }
 
 Scene::Scene()
-{
-
-}
+{ /*Default constructor*/ }
 
 Scene::Scene(const char* sceneName, std::vector<NamedObject> objects)
 {

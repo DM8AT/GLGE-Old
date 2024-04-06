@@ -28,7 +28,7 @@ Object* spinCube;
 //store an close button
 Button* button;
 //store the Camera
-Camera camSecWin;
+Camera* camSecWin;
 //store a second window
 Window win;
 //store a window for a compute shader example
@@ -36,7 +36,7 @@ Window compute;
 //store a texture for the compute shader
 Texture* compOutTexture;
 //store the compute shader
-ComputeShader compShader;
+ComputeShader* compShader;
 
 void widgetDraw()
 {
@@ -117,9 +117,9 @@ void secondDraw()
 void secondTick()
 {
     //update the camera
-    camSecWin.update();
+    camSecWin->update();
     //recalculate the projection matrix
-    camSecWin.recalculateProjection();
+    camSecWin->recalculateProjection();
     //update the triangle
     tri->update();
     //rotate the cube a bit
@@ -140,9 +140,9 @@ void secondTick()
 void secWindowInit()
 {
     //create the camera
-    camSecWin = Camera(90);
+    camSecWin = new Camera(90);
     //bind the camera
-    win.setCamera(&camSecWin);
+    win.setCamera(camSecWin);
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
     tri = new Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
@@ -174,9 +174,9 @@ void computeDraw()
     //bind the texture
     compOutTexture->bind(0, GLGE_TEXTURE_BIND_IMAGE_UNIT);
     //update the time, divide it by 1000 so it dosn't go too fast
-    compShader.setCustomFloat("t", glgeGetDeltaTime() / 1000.f, GLGE_MODE_ADD);
+    compShader->setCustomFloat("t", glgeGetDeltaTime() / 1000.f, GLGE_MODE_ADD);
     //run the compute shader
-    compShader.dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
+    compShader->dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
     //draw the texture
     compOutTexture->draw();
 }
@@ -200,11 +200,11 @@ void computeSetup()
     //create a new texture to render into
     compOutTexture = new Texture(compute.getSize(), GLGE_TEX_RGBA32);
     //create the compute shader from an source file
-    compShader = ComputeShader("src/Shaders/computeExample.comp");
+    compShader = new ComputeShader("src/Shaders/computeExample.comp");
     //add a variable for the time
-    compShader.setCustomFloat("t", 0);
+    compShader->setCustomFloat("t", 0);
     //update the uniform bindings
-    compShader.recalculateUniforms();
+    compShader->recalculateUniforms();
     //bind a draw function for the window
     compute.setDrawFunc(computeDraw);
     //bind an exit function

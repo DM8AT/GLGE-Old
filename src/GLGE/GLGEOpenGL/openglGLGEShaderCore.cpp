@@ -1412,11 +1412,11 @@ void Shader::decodeUniforms(Data* data)
     }
 }
 
-void Shader::encodeHook(Data* data)
+void Shader::encodeHook(Data*)
 {
     //override here
 }
-void Shader::decodeHook(Data* data)
+void Shader::decodeHook(Data*)
 {
     //override here
 }

@@ -17,8 +17,7 @@
 #include "GLGE/GLGEALL.h"
 
 Object* sCube;
-Camera sCam;
-Light sLight;
+Camera* sCam;
 
 void sceneDraw()
 {
@@ -27,8 +26,8 @@ void sceneDraw()
 
 void sceneTick()
 {
-    sCam.update();
-    sCam.recalculateProjection();
+    sCam->update();
+    sCam->recalculateProjection();
 
     sCube->rotate(vec3(0.1,0.2,0.3) * M_PI/180);
     sCube->update();
@@ -44,9 +43,9 @@ void runSceneExample()
     glgeInit3DCore();
 
     //create the camera
-    sCam = Camera(90, 0.1, 100.0);
+    sCam = new Camera(90, 0.1, 100.0);
     //bind the camera
-    glgeBindCamera(&sCam);
+    glgeBindCamera(sCam);
 
     //create the cube
     sCube = new Object(GLGE_PRESET_CUBE, vec4(0,0,0,1), 0, Transform(vec3(0,0,5), vec3(0), vec3(1)));

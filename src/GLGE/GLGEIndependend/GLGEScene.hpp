@@ -148,6 +148,11 @@ public:
      */
     Scene(const char* sceneFile);
 
+    /**
+     * @brief Destroy the Scene object
+     */
+    ~Scene();
+
 private:
     //store all objects
     std::unordered_map<std::string, NamedObject> objs;
