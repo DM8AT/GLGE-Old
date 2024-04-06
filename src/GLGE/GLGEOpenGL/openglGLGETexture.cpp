@@ -355,17 +355,17 @@ vec4* Texture::getTexture()
 unsigned int Texture::indexInTexture(ivec2 pos)
 {
     //calculate a texture index
-    return pos.x*this->size.y + pos.y;
+    return pos.y*this->size.x + pos.x;
 }
 unsigned int Texture::indexInTexture(vec2 pos)
 {
     //calculate a texture index
-    return pos.x*this->size.y + pos.y;
+    return pos.y*this->size.x + pos.x;
 }
 unsigned int Texture::indexInTexture(int x, int y)
 {
     //calculate a texture index
-    return x*this->size.y + y;
+    return y*this->size.x + x;
 }
 
 void Texture::readbackTexture()
@@ -383,6 +383,8 @@ void Texture::readbackTexture()
 
 void Texture::writeTexture()
 {
+    //unbind the texture
+    this->unbind();
     //bind the texture
     this->bind();
     //upload the texture data
@@ -407,6 +409,20 @@ void Texture::storeImage(const char* file, unsigned int format, bool readback)
     glgeStoreImage(file, this->size, imgData, format);
     //free the image data
     delete[] imgData;
+}
+
+void Texture::setData(vec4* data)
+{
+    //check if the input data is 0
+    if (!data)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Tried to use a nullpointer as texture data")
+        //stop the function
+        return;
+    }
+    //store the data
+    this->texData = data;
 }
 
 ///////////////////////

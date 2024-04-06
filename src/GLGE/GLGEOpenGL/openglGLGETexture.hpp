@@ -346,6 +346,13 @@ public:
      */
     void storeImage(const char* file, unsigned int format = GLGE_IMG_TYPE_ENDING, bool readback = true);
 
+    /**
+     * @brief Store the texture data for the object
+     * 
+     * @param data the new texture data IMPORTANT: size must match texture size
+     */
+    void setData(vec4* data);
+
 private:
     //store the texture data
     vec4* texData;
