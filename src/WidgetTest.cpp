@@ -34,7 +34,7 @@ Window win;
 //store a window for a compute shader example
 Window compute;
 //store a texture for the compute shader
-Texture compOutTexture;
+Texture* compOutTexture;
 //store the compute shader
 ComputeShader compShader;
 
@@ -172,13 +172,21 @@ void computeDraw()
     //stop if this is the transparent pass
     if (glgeGetTransparencyPass()) { return; }
     //bind the texture
-    compOutTexture.bind(0, GLGE_TEXTURE_BIND_IMAGE_UNIT);
+    compOutTexture->bind(0, GLGE_TEXTURE_BIND_IMAGE_UNIT);
     //update the time, divide it by 1000 so it dosn't go too fast
     compShader.setCustomFloat("t", glgeGetDeltaTime() / 1000.f, GLGE_MODE_ADD);
     //run the compute shader
     compShader.dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
     //draw the texture
-    compOutTexture.draw();
+    compOutTexture->draw();
+}
+
+void computeClose()
+{
+    //store a screenshot of the compute shader generated image
+    compOutTexture->storeImage("test.png");
+    //delete the texture
+    delete compOutTexture;
 }
 
 void computeSetup()
@@ -190,7 +198,7 @@ void computeSetup()
     //disable resizing so the amount of pixels needed to compute dosn't change
     compute.setResizable(false);
     //create a new texture to render into
-    compOutTexture = Texture(compute.getSize(), GLGE_TEX_RGBA32);
+    compOutTexture = new Texture(compute.getSize(), GLGE_TEX_RGBA32);
     //create the compute shader from an source file
     compShader = ComputeShader("src/Shaders/computeExample.comp");
     //add a variable for the time
@@ -199,6 +207,8 @@ void computeSetup()
     compShader.recalculateUniforms();
     //bind a draw function for the window
     compute.setDrawFunc(computeDraw);
+    //bind an exit function
+    compute.setExitFunc(computeClose);
     //a tick function is not needed for the window, so don't bind one
 }
 

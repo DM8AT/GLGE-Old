@@ -243,7 +243,7 @@ SDL_Surface* loadImage(const char* file)
     int bytesPerPixel;
 
     //load the inputed file
-    unsigned char* data = glgeLoad(file, &w, &h, &bytesPerPixel);
+    unsigned char* data = glgeLoadImage(file, &w, &h, &bytesPerPixel);
 
     //Store the pitch of the image
 	int pitch;

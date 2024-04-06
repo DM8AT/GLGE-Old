@@ -67,6 +67,53 @@ Material::Material(vec4 color, float roughness, float metalic)
     this->color = color;
 }
 
+Material::~Material()
+{
+    //clear the integer map is clear
+    if (!this->integers.empty()) { this->integers.clear(); }
+    //clear the integer location map is clear
+    if (!this->intLocs.empty()) { this->intLocs.clear(); }
+    //clear the float map is clear
+    if (!this->floats.empty()) { this->floats.clear(); }
+    //clear the float location map is clear
+    if (!this->floatLocs.empty()) { this->floatLocs.clear(); }
+    //clear the bool map is clear
+    if (!this->booleans.empty()) { this->booleans.clear(); }
+    //clear the bool location map is clear
+    if (!this->boolLocs.empty()) { this->boolLocs.clear(); }
+
+    //clear the vec2 map is clear
+    if (!this->vec2s.empty()) { this->vec2s.clear(); }
+    //clear the vec2 location map is clear
+    if (!this->vec2Locs.empty()) { this->vec2Locs.clear(); }
+    //clear the vec3 map is clear
+    if (!this->vec3s.empty()) { this->vec3s.clear(); }
+    //clear the vec3 location map is clear
+    if (!this->vec3Locs.empty()) { this->vec3Locs.clear(); }
+    //clear the vec4 map is clear
+    if (!this->vec4s.empty()) { this->vec4s.clear(); }
+    //clear the vec4 location map is clear
+    if (!this->vec4Locs.empty()) { this->vec4Locs.clear(); }
+
+    //clear the mat2 map is clear
+    if (!this->mat2s.empty()) { this->mat2s.clear(); }
+    //clear the mat2 location map is clear
+    if (!this->mat2Locs.empty()) { this->mat2Locs.clear(); }
+    //clear the mat3 map is clear
+    if (!this->mat3s.empty()) { this->mat3s.clear(); }
+    //clear the mat3 location map is clear
+    if (!this->mat3Locs.empty()) { this->mat3Locs.clear(); }
+    //clear the mat4 map is clear
+    if (!this->mat4s.empty()) { this->mat4s.clear(); }
+    //clear the mat4 location map is clear
+    if (!this->mat4Locs.empty()) { this->mat4Locs.clear(); }
+
+    //clear the texture map is clear
+    if (!this->customTextures.empty()) { this->customTextures.clear(); }
+    //clear the texture location map is clear
+    if (!this->customTextureLocs.empty()) { this->customTextureLocs.clear(); }
+}
+
 void Material::setDefaultUnifromName(const char* newName, unsigned int type)
 {
     //store the new name for the specefied unifrom

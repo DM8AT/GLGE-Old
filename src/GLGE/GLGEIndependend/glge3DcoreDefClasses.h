@@ -329,6 +329,11 @@ public:
     Mesh(const char* file, int type);
 
     /**
+     * @brief Destroy the Mesh
+     */
+    ~Mesh();
+
+    /**
      * @brief recalculate the normal vectors from the mesh in clockwise order
      */
     void recalculateNormals();

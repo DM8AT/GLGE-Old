@@ -1126,6 +1126,14 @@ Mesh::Mesh(const char* file, int type)
     *this = Mesh(data,type);
 }
 
+Mesh::~Mesh()
+{
+    //clear the vertices
+    this->vertices.clear();
+    //clear the indices
+    this->indices.clear();
+}
+
 void Mesh::recalculateNormals()
 {
     for (int i = 0; i < (int)this->indices.size()/3; i++)

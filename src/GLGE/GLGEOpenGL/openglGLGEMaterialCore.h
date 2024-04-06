@@ -137,6 +137,11 @@ public:
     Material(vec4 color, float roughness, float metal = 0);
 
     /**
+     * @brief Destroy the Material
+     */
+    ~Material();
+
+    /**
      * @brief Set the Default Name for an uniform variable 
      * 
      * @param newName the new name for one of the default uniforms

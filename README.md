@@ -81,6 +81,13 @@ Upcoming features that may be added to GLGE in the future include:
       - use 'GLGE_TEXTURE_BIND_TEXTURE_UNIT' as second argument in the binding function to bind to an texture sampler
    - binding to an image unit allows read and write access in compute shaders through an image2D
       - use 'GLGE_TEXTURE_BIND_IMAGE_UNIT' as second argument in the binding function to bind to an image unit
+- made glgeImage usable in the user's scope (no sensetive functions, so it is ok)
+   - users can load images using glgeLoadImage
+   - users can store images using glgeStoreImage
+      - suppoerted formats: PNG, JPG / JPEG, BMP (Windows Bitmap), PPM
+   - added a function to convert texture data (format is one vec4 per pixel) to image data (4 uint8_t per pixel)
+- added a function to store textures
+   - suppoerted formats: PNG, JPG / JPEG, BMP (Windows Bitmap), PPM
 - added a new "ComputeShader" class. Compute shaders can now be used in GLGE
 - transforms can be applied to an mesh with the new function 'applyTransform'
 - meshes can be joind together

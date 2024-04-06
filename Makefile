@@ -103,7 +103,7 @@ $(OBJ_D)/glge3DcoreDefClasses.o: $(GLGE_IND)/glge3DcoreDefClasses.cpp $(GLGE_IND
 $(OBJ_D)/GLGEData.o: $(GLGE_IND)/GLGEData.cpp $(GLGE_IND)/GLGEData.h $(CML_ALL)
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 # Dep. on --
-$(OBJ_D)/glgeImage.o: $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h
+$(OBJ_D)/glgeImage.o: $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h $(CML_ALL)
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 # Dep. on CMLVec2, glgeVars
 $(OBJ_D)/glgeInternalFuncs.o: $(GLGE_IND)/glgeInternalFuncs.cpp $(GLGE_IND)/glgeInternalFuncs.h $(GLGE_IND)/glgeVars.cpp $(GLGE_IND)/glgeVars.hpp $(CML)/CMLVec2.cpp $(CML)/CMLVec2.h
@@ -149,7 +149,7 @@ $(OBJ_D)/openglGLGERenderTarget.o: $(GLGE_OGL)/openglGLGERenderTarget.cpp $(GLGE
 $(OBJ_D)/openglGLGEShaderCore.o: $(GLGE_OGL)/openglGLGEShaderCore.cpp $(GLGE_OGL)/openglGLGEShaderCore.h $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_IND)/GLGEData.cpp $(GLGE_IND)/GLGEData.h $(CML_ALL_FILES) $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_OGL)/openglGLGEFuncs.cpp $(GLGE_OGL)/openglGLGEFuncs.hpp $(GLGE)/GLGEMath.cpp $(GLGE)/GLGEMath.h
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 # Dep. on openglGLGE glgeImage openglGLGEVars
-$(OBJ_D)/openglGLGETexture.o: $(GLGE_OGL)/openglGLGETexture.cpp $(GLGE_OGL)/openglGLGETexture.hpp $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp
+$(OBJ_D)/openglGLGETexture.o: $(GLGE_OGL)/openglGLGETexture.cpp $(GLGE_OGL)/openglGLGETexture.hpp $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 # Dep. on glgeVars openglGLGEWindow openglGLGE2Dcore openglGLGE3Dcore
 $(OBJ_D)/openglGLGEVars.o: $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_IND)/glgeVars.cpp $(GLGE_IND)/glgeVars.hpp $(GLGE_OGL)/openglGLGEWindow.cpp $(GLGE_OGL)/openglGLGEWindow.h $(GLGE_OGL)/openglGLGE2Dcore.cpp $(GLGE_OGL)/openglGLGE2Dcore.h $(GLGE_OGL)/openglGLGE3Dcore.cpp $(GLGE_OGL)/openglGLGE3Dcore.h

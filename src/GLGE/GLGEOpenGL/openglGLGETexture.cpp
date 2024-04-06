@@ -18,6 +18,7 @@
 #include "../GLGEIndependend/glgePrivDefines.hpp"
 //default includes
 #include <iostream>
+#include <fstream>
 
 Texture::Texture()
 { /* Default constructor */ }
@@ -36,7 +37,7 @@ Texture::Texture(const char* textureFile)
 
     // load and generate the texture
     int width, height, nrChannels;
-    unsigned char *data = glgeLoad(textureFile, &width, &height, &nrChannels);
+    unsigned char *data = glgeLoadImage(textureFile, &width, &height, &nrChannels);
     //create a new vec4 array
     this->texData = new vec4[width*height];
     //check if the new opperation was sucessfull
@@ -58,10 +59,10 @@ Texture::Texture(const char* textureFile)
             for (int i = 0; i < nrChannels; i++)
             {
                 //store the pixel as an float between 0 and 1
-                v[i] = data[(x + y*width)*nrChannels + i] / 255.f;
+                v[i] = data[(x*height + y)*nrChannels + i] / 255.f;
             }
             //store the pixel
-            this->texData[x + y*width] = vec4(v[0], v[1], v[2], v[4]);
+            this->texData[x*height + y] = vec4(v[0], v[1], v[2], v[4]);
         }
     }
     //check for the data type
@@ -70,7 +71,7 @@ Texture::Texture(const char* textureFile)
         if (nrChannels == 3)
         {
             //generate mipmap and upload to GPU
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, this->texData);
             //store the image number of chanels and encode type
             this->encodeType = GL_RGB;
             this->channels = GL_RGB;
@@ -78,7 +79,7 @@ Texture::Texture(const char* textureFile)
         else if (nrChannels == 4)
         {
             //generate mipmap and upload to GPU
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, this->texData);
             //store the image number of chanels and encode type
             this->encodeType = GL_RGBA;
             this->channels = GL_RGBA;
@@ -99,13 +100,45 @@ Texture::Texture(const char* textureFile)
     this->windowID = glgeCurrentWindowIndex;
 }
 
-Texture::Texture(vec2 size, int encodeType, void* data)
+Texture::Texture(vec2 size, int et, vec4* data)
 {
-    //cast to another constructor
-    *this = Texture(size.x, size.y, encodeType, data);
+    //generate a texture
+    glGenTextures(1, &this->texture);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    //decode the type
+    this->decode(et);
+    //set thinks like the texture wrap mode
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    //store data in the texture
+    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, size.x, size.y, 0, this->channels, GL_FLOAT, data);
+    //unbind the texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+    //store the window
+    this->windowID = glgeCurrentWindowIndex;
+    //store the size
+    this->size = ivec2(size.x,size.y);
+
+    //check if the inputed data vector is a nullpointer
+    if (!data)
+    {
+        //create a new data vector
+        this->texData = new vec4[this->size.x*this->size.y];
+        //set it to all 0
+        bzero(this->texData, sizeof(vec4)*this->size.x*this->size.y);
+    }
+    else
+    {
+        //create a new data vetor
+        this->texData = new vec4[this->size.x*this->size.y];
+        //memcopy the data
+        std::memcpy(this->texData, data, sizeof(vec4)*this->size.x*this->size.y);
+    }
 }
 
-Texture::Texture(unsigned int width, unsigned int height, int et, void* data)
+Texture::Texture(unsigned int width, unsigned int height, int et, vec4* data)
 {
     //generate a texture
     glGenTextures(1, &this->texture);
@@ -123,6 +156,32 @@ Texture::Texture(unsigned int width, unsigned int height, int et, void* data)
 	glBindTexture(GL_TEXTURE_2D, 0);
     //store the window
     this->windowID = glgeCurrentWindowIndex;
+    //store the size
+    this->size = ivec2(size.x,size.y);
+
+    //check if the inputed data vector is a nullpointer
+    if (!data)
+    {
+        //create a new data vector
+        this->texData = new vec4[this->size.x*this->size.y];
+        //set it to all 0
+        bzero(this->texData, sizeof(vec4)*this->size.x*this->size.y);
+    }
+    else
+    {
+        //create a new data vetor
+        this->texData = new vec4[this->size.x*this->size.y];
+        //memcopy the data
+        std::memcpy(this->texData, data, sizeof(vec4)*this->size.x*this->size.y);
+    }
+}
+
+Texture::~Texture()
+{
+    //free the data buffer
+    delete[] this->texData;
+    //delete the open gl texture
+    glDeleteTextures(1, &this->texture);
 }
 
 void Texture::resize(vec2 size)
@@ -146,12 +205,18 @@ void Texture::resize(vec2 size)
         return;
     }
 
+    //delete the old array
+    delete[]this->texData;
+    //create a new array
+    this->texData = new vec4[(int)(size.x*size.y)];
     //bind the texture
     this->bind(0);
     //update the size
     glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, size.x, size.y, 0, this->channels, GL_FLOAT, NULL);
     //unbind the texture
     this->unbind();
+    //store the new size
+    this->size = ivec2(size.x,size.y);
 }
 
 void Texture::resize(unsigned int width, unsigned int height)
@@ -279,6 +344,69 @@ unsigned int Texture::getOpenGLTexture()
 {
     //return the texture
     return this->texture;
+}
+
+vec4* Texture::getTexture()
+{
+    //return a pointer to the texture
+    return this->texData;
+}
+
+unsigned int Texture::indexInTexture(ivec2 pos)
+{
+    //calculate a texture index
+    return pos.x*this->size.y + pos.y;
+}
+unsigned int Texture::indexInTexture(vec2 pos)
+{
+    //calculate a texture index
+    return pos.x*this->size.y + pos.y;
+}
+unsigned int Texture::indexInTexture(int x, int y)
+{
+    //calculate a texture index
+    return x*this->size.y + y;
+}
+
+void Texture::readbackTexture()
+{
+    //make sure to unbind the texture
+    this->unbind();
+    //bind the texture
+    this->bind();
+    //read the pixels back
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, this->texData);
+
+    //unbind the texture
+    this->unbind();
+}
+
+void Texture::writeTexture()
+{
+    //bind the texture
+    this->bind();
+    //upload the texture data
+    glTexImage2D(GL_TEXTURE_2D, 0, this->encodeType, this->size.x, this->size.y, 0, this->channels, GL_FLOAT, this->texData);
+    //unbind the texture
+    this->unbind();    
+}
+
+
+void Texture::storeImage(const char* file, unsigned int format, bool readback)
+{
+    //check if auto readback is enabled
+    if (readback)
+    {
+        //read the texture from the GPU
+        this->readbackTexture();
+    }
+
+    //convert the texture data to image data
+    uint8_t* imgData = glgeTextureDataToImageData(this->size, this->texData);
+    //call the image store function
+    glgeStoreImage(file, this->size, imgData, format);
+    //free the image data
+    delete[] imgData;
 }
 
 ///////////////////////

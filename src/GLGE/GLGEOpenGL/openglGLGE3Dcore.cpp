@@ -268,10 +268,10 @@ Object::~Object()
     //destroy the object
     this->destroy();
     //clear light vectors
-    this->lightColLocs.clear();
-    this->lightDatLocs.clear();
-    this->lightDirLocs.clear();
-    this->lightPosLocs.clear();
+    if (this->lightColLocs.data()){this->lightColLocs.clear();}
+    if (this->lightDatLocs.data()){this->lightDatLocs.clear();}
+    if (this->lightDirLocs.data()){this->lightDirLocs.clear();}
+    if (this->lightPosLocs.data()){this->lightPosLocs.clear();}
 }
 
 void Object::destroy()

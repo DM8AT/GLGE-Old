@@ -14,6 +14,8 @@
 
 //include the lib base
 #include "openglGLGE.h"
+//include the image wraper
+#include "../GLGEIndependend/glgeImage.h"
 
 //define the value for auto-binding
 #define GLGE_TEXTURE_BINDING_AUTO -1
@@ -230,7 +232,7 @@ public:
      * @param encodeType the way to encode the data
      * @param data the data to put in the texture
      */
-    Texture(vec2 size, int encodeType, void* data = NULL);
+    Texture(vec2 size, int encodeType, vec4* data = NULL);
 
     /**
      * @brief Construct a texture form a size
@@ -240,7 +242,12 @@ public:
      * @param encodeType the way to encode the data
      * @param data the data to put in the texture
      */
-    Texture(unsigned int width, unsigned int height, int encodeType, void* data = NULL);
+    Texture(unsigned int width, unsigned int height, int encodeType, vec4* data = NULL);
+
+    /**
+     * @brief Destroy the Texture
+     */
+    ~Texture();
 
     /**
      * @brief change the size of the texture
@@ -289,6 +296,56 @@ public:
      */
     unsigned int getOpenGLTexture();
 
+    /**
+     * @brief get a pointer to the content of the texture. The length is texture width * texture height
+     * @warning if the texture is resized, the pointer becomes invalide
+     * @return vec4* a pointer to the texture
+     */
+    vec4* getTexture();
+
+    /**
+     * @brief calculate the index in the texture
+     * 
+     * @param pos the position of the pixel to acess
+     * @return unsigned int the index in the texture array
+     */
+    unsigned int indexInTexture(ivec2 pos);
+    /**
+     * @brief calculate the index in the texture
+     * 
+     * @param pos the position of the pixel to acess
+     * @return unsigned int the index in the texture array
+     */
+    unsigned int indexInTexture(vec2 pos);
+    /**
+     * @brief calculate the index in the texture
+     * 
+     * @param x the x position of the pixel in the texture
+     * @param y the y position of the pixel in the texture
+     * @return unsigned int the index in the texture array
+     */
+    unsigned int indexInTexture(int x, int y);
+
+    /**
+     * @brief read the texture from the GPU
+     * @warning this reads back data from the GPU and may be slow. Use only when nesessary. 
+     */
+    void readbackTexture();
+
+    /**
+     * @brief uploades the texture data to the texture
+     */
+    void writeTexture();
+
+    /**
+     * @brief store the texture in a file
+     * 
+     * @param file the file to store the image in
+     * @param format the format to store the image as (DEFAULT: GLGE_IMG_TYPE_ENDING)
+     * @param readback say if the texture should be read back from the GPU before storing (DEFAULT: true)
+     */
+    void storeImage(const char* file, unsigned int format = GLGE_IMG_TYPE_ENDING, bool readback = true);
+
 private:
     //store the texture data
     vec4* texData;
@@ -311,6 +368,11 @@ private:
     //store the bind intention
     int bindIntention = 0;
 
+    /**
+     * @brief decode a type specification
+     * 
+     * @param encodeType the type to decode
+     */
     void decode(int encodeType);
 };
 
