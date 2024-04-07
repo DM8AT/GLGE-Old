@@ -46,7 +46,7 @@ int main()
     printf("Type 3 to run the scene example\n");
 
     //then, get the user input
-    int inp = 2;
+    int inp = 3;
     std::cin >> inp;
 
     //start the example corresponding to the input

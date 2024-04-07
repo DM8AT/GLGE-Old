@@ -764,6 +764,9 @@ Data* Object::encode()
     //store if the object is static
     dat->writeBool(this->isStatic);
 
+    //encode the material
+    this->mat.encode(dat);
+
     //return the finished data
     return dat;
 }
@@ -801,8 +804,10 @@ void Object::decode(Data dat)
         m.indices.push_back(dat.readUInt());
     }
 
-    //create an object from the mesh
-    *this = Object(m);
+    //say that the window index is -1 (uninitalised)
+    this->windowIndex = -1;
+    //construct and save a mesh from the pointers
+    this->mesh = m;
 
     //store the transform
     //store the position
@@ -812,12 +817,48 @@ void Object::decode(Data dat)
     //store the scale
     this->transf.scale = dat.readVec3();
 
+    //save if the object is static
+    this->isStatic = isStatic;
+    //save if the object is transparent
+    this->isTransparent = isTransparent;
+
+    //store the UUID
+    this->uuid = glgeObjectUUID;
+    //increase the glge object uuid
+    glgeObjectUUID++;
+
+    //calculate the buffers
+    this->compileBuffers();
+
+    //check if the object is transparent
+    if (this->isTransparent)
+    {
+        //bind the transparent shader
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DTransparentShader());
+    }
+    else
+    {
+        //bind the opaque shader
+        this->shader = Shader(glgeWindows[this->windowIndex]->getDefault3DShader());
+    }
+    //get the uniforms
+    this->getUniforms();
+
+    //THIS MAY CAUSE AN MEMORY ACCES ERROR, IF NO CAMERA IS BOUND!
+    //update the object
+    this->update();
+
     //store if the object is transparent
     this->isTransparent = dat.readBool();
     //store if the object is fully transparent
     this->fullyTransparent = dat.readBool();
     //store if the object is static
     this->isStatic = dat.readBool();
+
+    //load the material
+    this->mat.decode(dat);
+    //apply the shader
+    this->mat.applyShader(this->shader.getShader());
 }
 
 //PRIV
@@ -1168,8 +1209,12 @@ void Camera::move(vec3 v)
 //move the camera
 void Camera::move(float x, float y, float z)
 {
-    //change the position of the camera
-    this->transf.pos += vec3(x,y,z);
+    //just add the y component
+    this->transf.pos.y += y;
+    //add the difference of the x and z component scaled by the sine of the rotatin on the x-axis
+    this->transf.pos.x += (x - z) * std::sin(this->transf.rot.x);
+    //do the same as for x, but change the order of x and z and use cosine
+    this->transf.pos.z += (z - x) * std::cos(this->transf.rot.x);
 }
 
 vec3 Camera::getPos()

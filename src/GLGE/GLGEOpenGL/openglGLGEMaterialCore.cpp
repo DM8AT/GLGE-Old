@@ -209,7 +209,7 @@ void Material::applyShader(unsigned int shader)
     this->hasTextureLoc = glgeGetUniformVar(shader, "glgeHasTexture");
 
     //get the location of the color
-    this->colorLoc = glgeGetUniformVar(shader, this->colorUniform);
+    this->colorLoc = glgeGetUniformVar(shader, "glgeColor");
 
     //get the location of the var to say how many pictures are used
     this->usedLoc = glgeGetUniformVar(shader, GLGE_USED_TEXTURES);
@@ -1082,6 +1082,12 @@ unsigned int Material::getTextureByName(std::string name)
 
 void Material::encode(Data* data)
 {
+    //store the color
+    data->writeVec4(this->color);
+    //store the roughness
+    data->writeFloat(this->roughness);
+    //store the metallicness
+    data->writeFloat(this->metal);
     //encode the amount of integers
     data->writeLong(this->integers.size());
     //iterate over the integers
@@ -1208,6 +1214,12 @@ void Material::encode(Data* data)
 
 void Material::decode(Data data)
 {
+    //store the color
+    this->color = data.readVec4();
+    //store the roughness
+    this->roughness = data.readFloat();
+    //store the metallicness
+    this->metal = data.readFloat();
     //decode the amount of integers
     long max = data.readLong();
     //iterate over the integers

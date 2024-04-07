@@ -289,8 +289,10 @@ float Light::getIntenseAngle()
     }
 }
 
-void Light::encode(Data* data)
+Data* Light::encode()
 {
+    //create an empty data object
+    Data* data = new Data();
     //store the light type
     data->writeInt(this->lightType);
     //store the position
@@ -305,6 +307,8 @@ void Light::encode(Data* data)
     data->writeFloat(this->angle);
     //store the intense angle
     data->writeFloat(this->intAngle);
+    //return the data
+    return data;
 }
 void Light::decode(Data data)
 {

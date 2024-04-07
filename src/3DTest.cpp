@@ -73,9 +73,6 @@ float mouseSensetivity = 20.f;
 //say if the mouse is currently locked to the screen
 bool isActive = true;
 
-// post processing shader object
-Shader* pps;
-
 //create an display function, it is needed to display things on the monitor (name is not important)
 void display()
 {
@@ -106,8 +103,6 @@ void tick()
 {
     //dont update this window if it is not focused
     if (!glgeGetWindowFocus()) { return; }
-    // reset uniforms
-    pps->setCustomVec2("screenSize", glgeGetWindowSize());
     //make changes to the camera by changing its position or rotating it
 
     //calculate the cam speed for this frame, to make the movement speed framerate independend. To do that, multiply the base speed by the delta time

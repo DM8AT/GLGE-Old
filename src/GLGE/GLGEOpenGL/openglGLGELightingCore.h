@@ -275,9 +275,9 @@ public:
     /**
      * @brief encode the data of this object into some data
      * 
-     * @param data the data to encode into
+     * @param data the encoded data
      */
-    void encode(Data* data);
+    Data* encode();
     /**
      * @brief decode the object from data
      * 

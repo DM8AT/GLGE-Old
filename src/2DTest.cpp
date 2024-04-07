@@ -214,6 +214,8 @@ void run2Dexample()
     //bind the function that should be called every tick
     glgeBindMainFunc(tickFunc);
 
+    //create the 2D camera
+    cam = new Camera2D();
     //bind the camera
     glgeBindMain2DCamera(cam);
 
