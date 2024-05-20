@@ -21,1336 +21,332 @@
 
 //include GLGEMaterialCore
 #include "openglGLGEMaterialCore.h"
-
-//include the library core
-#include "openglGLGE.h"
-
-//include the shared variables
+//incldue the variables
 #include "openglGLGEVars.hpp"
-
-//includes from the default lib
-#include <iostream>
+//include the defines
+#include "openglGLGEDefines.hpp"
 
 Material::Material()
 {
-    //init the object
+    //default constructor
 }
 
-Material::Material(const char* image, const char* uniform, float roughness, float metalic)
+Material::Material(vec4 color, float roughness, bool lit, float metalic)
 {
-    //store the inputed roughness
-    this->roughness = roughness;
-    //store the inputed metalic value
-    this->metal = metalic;
-    //bind the inputed texture
-    this->setCustomTexture(uniform, image);
+    //store the color
+    this->matData.r = color.x;
+    this->matData.g = color.y;
+    this->matData.b = color.z;
+    this->matData.a = color.w;
+    //store the rougness
+    this->matData.roughness = roughness;
+    //store if the object is lit
+    this->matData.lit = lit;
+    //store the metallic ness
+    this->matData.metalic = metalic;
+    //apply to the current window
+    this->bindToWindow(glgeCurrentWindowIndex);
 }
 
-Material::Material(unsigned int texture, const char* uniform, float roughness, float metalic)
+Material::Material(Texture* texture, float roughness, bool lit, float metalic)
 {
-    //store the inputed roughness
-    this->roughness = roughness;
-    //store the inputed metalic value
-    this->metal = metalic;
-    //bind the inputed texture
-    this->setCustomTexture(uniform, texture);
+    //store the texture
+    this->ambientMap = texture;
+    //store the roughness
+    this->matData.roughness = roughness;
+    //store if the object is lit
+    this->matData.lit = lit;
+    //store the metalicness
+    this->matData.metalic = metalic;
+    //apply to the current window
+    this->bindToWindow(glgeCurrentWindowIndex);
 }
 
-Material::Material(vec4 color, float roughness, float metalic)
+Material::Material(const char* texture, float roughness, bool lit, float metalic)
 {
-    //store the inputed roughness
-    this->roughness = roughness;
-    //store the inputed metalic value
-    this->metal = metalic;
-
-    //store the inputed base color
-    this->color = color;
+    //create a new texture
+    this->ambientMap = new Texture(texture);
+    //store the roughness
+    this->matData.roughness = roughness;
+    //store if the object is lit
+    this->matData.lit = lit;
+    //store the metalicness
+    this->matData.metalic = metalic;
+    //apply to the current window
+    this->bindToWindow(glgeCurrentWindowIndex);
 }
 
 Material::~Material()
 {
-    //clear the integer map is clear
-    if (!this->integers.empty()) { this->integers.clear(); }
-    //clear the integer location map is clear
-    if (!this->intLocs.empty()) { this->intLocs.clear(); }
-    //clear the float map is clear
-    if (!this->floats.empty()) { this->floats.clear(); }
-    //clear the float location map is clear
-    if (!this->floatLocs.empty()) { this->floatLocs.clear(); }
-    //clear the bool map is clear
-    if (!this->booleans.empty()) { this->booleans.clear(); }
-    //clear the bool location map is clear
-    if (!this->boolLocs.empty()) { this->boolLocs.clear(); }
-
-    //clear the vec2 map is clear
-    if (!this->vec2s.empty()) { this->vec2s.clear(); }
-    //clear the vec2 location map is clear
-    if (!this->vec2Locs.empty()) { this->vec2Locs.clear(); }
-    //clear the vec3 map is clear
-    if (!this->vec3s.empty()) { this->vec3s.clear(); }
-    //clear the vec3 location map is clear
-    if (!this->vec3Locs.empty()) { this->vec3Locs.clear(); }
-    //clear the vec4 map is clear
-    if (!this->vec4s.empty()) { this->vec4s.clear(); }
-    //clear the vec4 location map is clear
-    if (!this->vec4Locs.empty()) { this->vec4Locs.clear(); }
-
-    //clear the mat2 map is clear
-    if (!this->mat2s.empty()) { this->mat2s.clear(); }
-    //clear the mat2 location map is clear
-    if (!this->mat2Locs.empty()) { this->mat2Locs.clear(); }
-    //clear the mat3 map is clear
-    if (!this->mat3s.empty()) { this->mat3s.clear(); }
-    //clear the mat3 location map is clear
-    if (!this->mat3Locs.empty()) { this->mat3Locs.clear(); }
-    //clear the mat4 map is clear
-    if (!this->mat4s.empty()) { this->mat4s.clear(); }
-    //clear the mat4 location map is clear
-    if (!this->mat4Locs.empty()) { this->mat4Locs.clear(); }
-
-    //clear the texture map is clear
-    if (!this->customTextures.empty()) { this->customTextures.clear(); }
-    //clear the texture location map is clear
-    if (!this->customTextureLocs.empty()) { this->customTextureLocs.clear(); }
+    //delete the ambient texture
+    delete this->ambientMap;
+    //delete the normal map
+    delete this->normalMap;
+    //delete the roughness map
+    delete this->roughnessMap;
+    //delete the metalic map
+    delete this->metalicMap;
 }
 
-void Material::setDefaultUnifromName(const char* newName, unsigned int type)
+void Material::update()
 {
-    //store the new name for the specefied unifrom
-    switch (type)
+    //check if a update is qued
+    if (!this->quedUpdate)
     {
-        //case if the new name is for a normal map
-        case GLGE_NORMAL_MAP_ID:
-            this->normalUniform = newName;
-            break;
-
-        //case if the new name is for a specular map
-        case GLGE_SPECULAR_MAP_ID:
-            this->specularUniform = newName;
-            break;
-
-        //case if the new name is for a height map
-        case GLGE_HEIGHT_MAP_ID:
-            this->heightUniform = newName;
-            break;
-
-        //case if the new name is for a color
-        case GLGE_COLOR_ID:
-            this->colorUniform = newName;
-            break;
-        
-        //default case
-        default:
-            break;
-    }
-}
-
-void Material::setNormalMap(const char* image, const char* uniformName)
-{
-    //add the normal map as an custom texture
-    this->setCustomTexture(uniformName, image);
-    //store the name of the uniform
-    this->normalUniform = uniformName;
-}
-
-void Material::setRoughnessMap(const char* image, const char* uniformName)
-{
-    //add the normal map as an custom texture
-    this->setCustomTexture(uniformName, image);
-    //store the name of the uniform
-    this->roughnessUniform = uniformName;
-}
-
-void Material::setHeightMap(const char* image, const char* uniformName)
-{
-    //add the normal map as an custom texture
-    this->setCustomTexture(uniformName, image);
-    //store the name of the uniform
-    this->heightUniform = uniformName;
-}
-
-void Material::setMetalicMap(const char* image, const char* uniformName)
-{
-    //add the normal map as an custom texture
-    this->setCustomTexture(uniformName, image);
-    //store the name of the uniform
-    this->metalicUniform = uniformName;
-
-}
-
-void Material::applyShader(unsigned int shader)
-{
-    //activate the inputed shader
-    glUseProgram(shader);
-    //store the state of the GLGE error output
-    bool err = glgeErrorOutput;
-    //disable the GLGE error output
-    glgeErrorOutput = false;
-
-    //get the location of the signal to store if the normal map is used
-    this->normIsActivLoc = glgeGetUniformVar(shader, (std::string(this->normalUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
-
-    //get the location of the signal to store if the roughness map is used
-    this->roughIsActivLoc = glgeGetUniformVar(shader, (std::string(this->roughnessUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
-
-    //get the location of the signal to store if the height map is used
-    this->highIsActiveLoc = glgeGetUniformVar(shader, (std::string(this->heightUniform)+std::string(GLGE_SUFFIX_IS_ACTIVE_TEXTURE)).c_str());
-
-    //get the location of the roughness variable
-    this->roughnessLoc = glgeGetUniformVar(shader, "glgeRoughness");
-
-    //get the location of the metalic variable
-    this->metalicLoc = glgeGetUniformVar(shader, "glgeMetalic");
-
-    //get the location of the lit parameter
-    this->litLoc = glgeGetUniformVar(shader, "glgeLit");
-
-    //get the location to say if a texture is bound
-    this->hasTextureLoc = glgeGetUniformVar(shader, "glgeHasTexture");
-
-    //get the location of the color
-    this->colorLoc = glgeGetUniformVar(shader, "glgeColor");
-
-    //get the location of the var to say how many pictures are used
-    this->usedLoc = glgeGetUniformVar(shader, GLGE_USED_TEXTURES);
-
-    //reset the error output
-    glgeErrorOutput = err;
-
-    //load all the custom variables
-
-    //load the floats
-    //define a variable for the current element
-    std::map<std::string, float>::iterator currF;
-    //loop over the elements
-    for (currF = this->floats.begin(); currF != this->floats.end(); currF++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->floatLocs[currF->first] = glgeGetUniformVar(shader, currF->first.c_str());
-    }
-    //load the integers
-    //define a variable for the current element
-    std::map<std::string, int>::iterator currI;
-    //loop over the elements
-    for (currI = this->integers.begin(); currI != this->integers.end(); currI++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->intLocs[currI->first] = glgeGetUniformVar(shader, currI->first.c_str());
-    }
-    //load the booleans
-    //define a variable for the current element
-    std::map<std::string, bool>::iterator currB;
-    //loop over the elements
-    for (currB = this->booleans.begin(); currB != this->booleans.end(); currB++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->boolLocs[currB->first] = glgeGetUniformVar(shader, currB->first.c_str());
-    }
-    //load the vec2s
-    //define a variable for the current element
-    std::map<std::string, vec2>::iterator currV2;
-    //loop over the elements
-    for (currV2 = this->vec2s.begin(); currV2 != this->vec2s.end(); currV2++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->vec2Locs[currV2->first] = glgeGetUniformVar(shader, currV2->first.c_str());
-    }
-    //load the vec3s
-    //define a variable for the current element
-    std::map<std::string, vec3>::iterator currV3;
-    //loop over the elements
-    for (currV3 = this->vec3s.begin(); currV3 != this->vec3s.end(); currV3++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->vec3Locs[currV3->first] = glgeGetUniformVar(shader, currV3->first.c_str());
-    }
-    //load the vec4s
-    //define a variable for the current element
-    std::map<std::string, vec4>::iterator currV4;
-    //loop over the elements
-    for (currV4 = this->vec4s.begin(); currV4 != this->vec4s.end(); currV4++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->vec4Locs[currV4->first] = glgeGetUniformVar(shader, currV4->first.c_str());
-    }
-    //load the mat2s
-    //define a variable for the current element
-    std::map<std::string, mat2>::iterator currM2;
-    //loop over the elements
-    for (currM2 = this->mat2s.begin(); currM2 != this->mat2s.end(); currM2++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->mat2Locs[currM2->first] = glgeGetUniformVar(shader, currM2->first.c_str());
-    }
-    //load the mat3s
-    //define a variable for the current element
-    std::map<std::string, mat3>::iterator currM3;
-    //loop over the elements
-    for (currM3 = this->mat3s.begin(); currM3 != this->mat3s.end(); currM3++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->mat3Locs[currM3->first] = glgeGetUniformVar(shader, currM3->first.c_str());
-    }
-    //load the mat4s
-    //define a variable for the current element
-    std::map<std::string, mat4>::iterator currM4;
-    //loop over the elements
-    for (currM4 = this->mat4s.begin(); currM4 != this->mat4s.end(); currM4++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->mat4Locs[currM4->first] = glgeGetUniformVar(shader, currM4->first.c_str());
-    }
-    //load the textures
-    //define a variable for the current element
-    std::map<std::string, unsigned int>::iterator currTex;
-    //loop over the elements
-    for (currTex = this->customTextures.begin(); currTex != this->customTextures.end(); currTex++)
-    {
-        //store the position of the uniform in the corresponding element in the position map
-        this->customTextureLocs[currTex->first] = glgeGetUniformVar(shader, currTex->first.c_str());
-    }
-
-    //unbind the shader
-    glUseProgram(0);
-}
-
-void Material::applyMaterial()
-{
-    //store how many materials are bound
-    this->boundTextures = 0;
-    //pass the color of the material
-    if (this->colorLoc != -1)
-    {
-        glUniform4f(this->colorLoc, this->color.x, this->color.y, this->color.z, this->color.w);
-    }
-
-    //pass the roughness to the material
-    if (this->roughnessLoc != -1)
-    {
-        glUniform1f(this->roughnessLoc, roughness);
-    }
-
-    //pass the lit parameter to the shader
-    if (this->litLoc != -1)
-    {
-        glUniform1i(this->litLoc, (int)lit);
-    }
-
-    //pass the metalic value to the material
-    if (this->metalicLoc != -1)
-    {
-        glUniform1f(this->metalicLoc, metal);
-    }
-
-    //pass if the normal map is bound
-    if (this->normIsActivLoc != -1)
-    {
-        //pass if the texture vector contains the normal map
-        glUniform1i(this->normIsActivLoc, (int)(this->customTextures[this->normalUniform] != 0));
-    }
-    //pass if the roughness map is bound
-    if (this->roughIsActivLoc != -1)
-    {
-        //pass if the texture vector contains the normal map
-        glUniform1i(this->roughIsActivLoc, (int)(this->customTextures[this->roughnessUniform] != 0));
-    }
-    //pass hasTexture if it is bound
-    if (this->hasTextureLoc != -1)
-    {
-        //pass if there is a texture
-        glUniform1i(this->hasTextureLoc, (int)this->customTextures.count(GLGE_TEXTURE));
-    }
-
-    //pass the costom floats
-    //store the current float
-    std::map<std::string, unsigned int>::iterator curr;
-    //loop over the floats
-    for (curr = this->floatLocs.begin(); curr != this->floatLocs.end(); curr++)
-    {
-        //pass the float
-        glUniform1f(curr->second, this->floats[curr->first]);
-    }
-    //pass the costom ints
-    //loop over the bools
-    for (curr = this->intLocs.begin(); curr != this->intLocs.end(); curr++)
-    {
-        //pass the ints
-        glUniform1i(curr->second, this->integers[curr->first]);
-    }
-    //pass the costom bools
-    //loop over the bools
-    for (curr = this->boolLocs.begin(); curr != this->boolLocs.end(); curr++)
-    {
-        //pass the bools
-        glUniform1i(curr->second, this->booleans[curr->first]);
-    }
-    //pass the costom vec2s
-    //loop over the vec2s
-    for (curr = this->vec2Locs.begin(); curr != this->vec2Locs.end(); curr++)
-    {
-        //pass the vec2s
-        glUniform2f(curr->second, this->vec2s[curr->first].x, this->vec2s[curr->first].y);
-    }
-    //pass the costom vec3s
-    //loop over the vec3s
-    for (curr = this->vec3Locs.begin(); curr != this->vec3Locs.end(); curr++)
-    {
-        //pass the vec3s
-        glUniform3f(curr->second, this->vec3s[curr->first].x, this->vec3s[curr->first].y, this->vec3s[curr->first].z);
-    }
-    //pass the costom vec4s
-    //loop over the vec4s
-    for (curr = this->vec4Locs.begin(); curr != this->vec4Locs.end(); curr++)
-    {
-        //pass the vec4s
-        glUniform4f(curr->second, this->vec4s[curr->first].x, this->vec4s[curr->first].y, this->vec4s[curr->first].z, this->vec4s[curr->first].w);
-    }
-    //pass the costom mat2s
-    //loop over the mat2s
-    for (curr = this->mat2Locs.begin(); curr != this->mat2Locs.end(); curr++)
-    {
-        //pass the mat2s
-        glUniformMatrix2fv(curr->second, 1, GL_FALSE, this->mat2s[curr->first].m[0]);
-    }
-    //pass the costom mat3s
-    //loop over the mat3s
-    for (curr = this->mat3Locs.begin(); curr != this->mat3Locs.end(); curr++)
-    {
-        //pass the mat3s
-        glUniformMatrix3fv(curr->second, 1, GL_FALSE, this->mat3s[curr->first].m[0]);
-    }
-    //pass the costom mat4s
-    //loop over the mat4s
-    for (curr = this->mat4Locs.begin(); curr != this->mat4Locs.end(); curr++)
-    {
-        //pass the mat4s
-        glUniformMatrix4fv(curr->second, 1, GL_FALSE, this->mat4s[curr->first].m[0]);
-    }
-    //pass the costom textures
-    //loop over the textures
-    for (curr = this->customTextureLocs.begin(); curr != this->customTextureLocs.end(); curr++)
-    {
-        //increment the amount of bound textures
-        this->boundTextures++;
-        //activate the current texture unit
-        glActiveTexture(GL_TEXTURE0 + this->boundTextures);
-        //bind the texture
-        glBindTexture(GL_TEXTURE_2D, this->customTextures[curr->first]);
-        //pass the textures
-        glUniform1i(curr->second, this->boundTextures);
-    }
-}
-
-void Material::removeMaterial()
-{
-    //loop over all bound texture units and bind 0
-    for (int i = this->boundTextures; i > 0; i--)
-    {
-        //bind the current texture unit
-        glActiveTexture(GL_TEXTURE0 + i);
-        //bind the texture to 0
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    //set the texture unit to 0
-    glActiveTexture(GL_TEXTURE0);
-}
-
-void Material::setLit(bool l)
-{
-    //store the lit parameters
-    this->lit = l;
-}
-
-void Material::setCustomFloat(std::string name, float value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->floats[name] = value;
-        //stop this script
+        //if not, stop the function
         return;
     }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
+    //check if the correct window is active
+    if (glgeCurrentWindowIndex != this->windowId)
     {
-        //add the floats
-        this->floats[name] += value;
-        //stop this script
-        return;
+        //throw an error
+        GLGE_THROW_ERROR("Can't update a material in an window it is not bound to")
     }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
+    //check if the ambient texture exists
+    if (this->ambientMap != NULL)
     {
-        //subtract the floats
-        this->floats[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the floats
-        this->floats[name] *= value;
-        //stop this script
-        return;
-    }
-    //divide the value
-    if (mode == GLGE_MODE_DIVIDE)
-    {
-        //divide the floats
-        this->floats[name] /= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"float\"" << "\n";
-    }
-}
-
-void Material::setCustomInt(std::string name, int value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->integers[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the ints
-        this->integers[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the ints
-        this->integers[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the ints
-        this->integers[name] *= value;
-        //stop this script
-        return;
-    }
-    //divide the value
-    if (mode == GLGE_MODE_DIVIDE)
-    {
-        //divide the ints
-        this->integers[name] /= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"integer\"" << "\n";
-    }
-}
-
-void Material::setCustomBool(std::string name, bool value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->booleans[name] = value;
-        //stop this script
-        return;
-    }
-    //and the value
-    if (mode == GLGE_MODE_AND)
-    {
-        //and the bools
-        this->booleans[name] = this->booleans[name] && value;
-        //stop this script
-        return;
-    }
-    //or the value
-    if (mode == GLGE_MODE_OR)
-    {
-        //or the bools
-        this->booleans[name] = this->booleans[name] || value;
-        //stop this script
-        return;
-    }
-    //not the value
-    if (mode == GLGE_MODE_NOT)
-    {
-        //not the bool
-        this->booleans[name] = !value;
-        //stop this script
-        return;
-    }
-    //nand the value
-    if (mode == GLGE_MODE_NAND)
-    {
-        //nand the bools
-        this->booleans[name] = !(value && this->booleans[name]);
-        //stop this script
-        return;
-    }
-    //nor the value
-    if (mode == GLGE_MODE_NOR)
-    {
-        //nor the bools
-        this->booleans[name] = !(value || this->booleans[name]);
-        //stop this script
-        return;
-    }
-    //xor the value
-    if (mode == GLGE_MODE_XOR)
-    {
-        //xor the bools
-        this->booleans[name] = (value ? !this->booleans[name] : this->booleans[name]);
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"boolean\"" << "\n";
-    }
-}
-
-void Material::setCustomVec2(std::string name, vec2 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->vec2s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the vec2s
-        this->vec2s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the vec2s
-        this->vec2s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the vec2s
-        this->vec2s[name] = this->vec2s[name].scale(value);
-        //stop this script
-        return;
-    }
-    //divide the value
-    if (mode == GLGE_MODE_DIVIDE)
-    {
-        //divide the vec2s
-        this->vec2s[name] /= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec2\"" << "\n";
-    }
-}
-
-void Material::setCustomVec3(std::string name, vec3 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->vec3s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the vec3s
-        this->vec3s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the vec3s
-        this->vec3s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the vec3s
-        this->vec3s[name] = this->vec3s[name].scale(value);
-        //stop this script
-        return;
-    }
-    //divide the value
-    if (mode == GLGE_MODE_DIVIDE)
-    {
-        //divide the vec3s
-        this->vec3s[name] /= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec3\"" << "\n";
-    }
-}
-
-void Material::setCustomVec4(std::string name, vec4 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->vec4s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the vec4s
-        this->vec4s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the vec4s
-        this->vec4s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the vec4s
-        this->vec4s[name] = this->vec4s[name].scale(value);
-        //stop this script
-        return;
-    }
-    //divide the value
-    if (mode == GLGE_MODE_DIVIDE)
-    {
-        //divide the vec4s
-        this->vec4s[name] /= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"vec4\"" << "\n";
-    }
-}
-
-void Material::setCustomMat2(std::string name, mat2 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->mat2s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the mat2s
-        this->mat2s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the mat2s
-        this->mat2s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the mat2s
-        this->mat2s[name] *= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat2\"" << "\n";
-    }
-}
-
-void Material::setCustomMat3(std::string name, mat3 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->mat3s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the mat3s
-        this->mat3s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the mat3s
-        this->mat3s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the mat3s
-        this->mat3s[name] *= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat3\"" << "\n";
-    }
-}
-
-void Material::setCustomMat4(std::string name, mat4 value, unsigned int mode)
-{
-    //set the value
-    if (mode == GLGE_MODE_SET)
-    {
-        //set the value
-        this->mat4s[name] = value;
-        //stop this script
-        return;
-    }
-    //add the value
-    if (mode == GLGE_MODE_ADD)
-    {
-        //add the mat4s
-        this->mat4s[name] += value;
-        //stop this script
-        return;
-    }
-    //subtract the value
-    if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //subtract the mat4s
-        this->mat4s[name] -= value;
-        //stop this script
-        return;
-    }
-    //multiply the value
-    if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //multiply the mat4s
-        this->mat4s[name] *= value;
-        //stop this script
-        return;
-    }
-    //if the script reaches this point, the inputed mode is not supported : print a warning
-
-    //check if the warning output is active
-    if (glgeWarningOutput)
-    {
-        //print a warning
-        std::cerr << "[GLGE WARNING] Mode \"" << this->getModeString(mode).c_str() << "\" is not supported for a variable of type \"mat4\"" << "\n";
-    }
-}
-
-void Material::setCustomTexture(std::string name, char* file)
-{
-    //load the file into the map
-    this->customTextures[name] = glgeTextureFromFile(file);
-}
-
-void Material::setCustomTexture(std::string name, std::string file)
-{
-    //load the file into the map
-    this->customTextures[name] = glgeTextureFromFile(file.c_str());
-}
-
-void Material::setCustomTexture(std::string name, unsigned int texture)
-{
-    //store the inputed texture pointer
-    this->customTextures[name] = texture;
-}
-
-std::string Material::getModeString(unsigned int mode)
-{
-    //check if the mode is set
-    if (mode == GLGE_MODE_SET)
-    {
-        //return the mode string
-        return std::string("set");
-    }
-    //check if the mode is add
-    else if (mode == GLGE_MODE_ADD)
-    {
-        //return the mode string
-        return std::string("add");
-    }
-    //check if the mode is subtract
-    else if (mode == GLGE_MODE_SUBTRACT)
-    {
-        //return the mode string
-        return std::string("subtract");
-    }
-    //check if the mode is multiply
-    else if (mode == GLGE_MODE_MULTIPLY)
-    {
-        //return the mode string
-        return std::string("multiply");
-    }
-    //check if the mode is divide
-    else if (mode == GLGE_MODE_DIVIDE)
-    {
-        //return the mode string
-        return std::string("divide");
-    }
-    //check if the mode is cross
-    else if (mode == GLGE_MODE_CROSS)
-    {
-        //return the mode string
-        return std::string("cross");
-    }
-    //check if the mode is and
-    else if (mode == GLGE_MODE_AND)
-    {
-        //return the mode string
-        return std::string("and");
-    }
-    //check if the mode is or
-    else if (mode == GLGE_MODE_OR)
-    {
-        //return the mode string
-        return std::string("or");
-    }
-    //check if the mode is not
-    else if (mode == GLGE_MODE_NOT)
-    {
-        //return the mode string
-        return std::string("not");
-    }
-    //check if the mode is nand
-    else if (mode == GLGE_MODE_NAND)
-    {
-        //return the mode string
-        return std::string("nand");
-    }
-    //check if the mode is nor
-    else if (mode == GLGE_MODE_NOR)
-    {
-        //return the mode string
-        return std::string("nor");
-    }
-    //check if the mode is xor
-    else if (mode == GLGE_MODE_XOR)
-    {
-        //return the mode string
-        return std::string("cor");
+        //update the albdeo map
+        this->matData.ambientTex = this->ambientMap->getHandler();
+        //say that the ambient map exists
+        this->matData.ambientTexActive = 1;
     }
     else
     {
-        //if the mode can't be found, return an error
-        return (std::string("mode ") + std::to_string(mode) + std::string(" dose not exist"));
+        //update the albdeo map
+        this->matData.ambientTex = 0;
+        //say that no ambient map exists
+        this->matData.ambientTexActive = 0;
     }
+    //check if the normal texture exists
+    if (this->normalMap != NULL)
+    {
+        //update the normal map
+        this->matData.normalMapTex = this->normalMap->getHandler();
+        //say that the normal map exists
+        this->matData.normalMapActive = 1;
+    }
+    else
+    {
+        //update the normal map
+        this->matData.normalMapTex = 0;
+        //say that no normal map exists
+        this->matData.normalMapActive = 0;
+    }
+    //check if the roughness texture exists
+    if (this->roughnessMap != NULL)
+    {
+        //update the roughness map
+        this->matData.roughnessMap = this->roughnessMap->getHandler();
+        //say that the roughness map exists
+        this->matData.roughnessMapActive = 1;
+    }
+    else
+    {
+        //update the roughness map
+        this->matData.roughnessMap = 0;
+        //say that no roughness map exists
+        this->matData.roughnessMapActive = 0;
+    }
+    //check if the metalic texture exists
+    if (this->metalicMap != NULL)
+    {
+        //update the metalic map
+        this->matData.metalicMap = this->metalicMap->getHandler();
+        //say that the metalic map exists
+        this->matData.metalicMapActive = 1;
+    }
+    else
+    {
+        //update the metalic map
+        this->matData.metalicMap = 0;
+        //say that no metalic map exists
+        this->matData.metalicMapActive = 0;
+    }
+
+    //bind the uniform buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
+    //send the data to the gpu
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(MaterialData), &this->matData, GL_STATIC_DRAW);
+    //say that the update is done
+    this->quedUpdate = false;
 }
 
-float Material::getFloatByName(std::string name)
+void Material::bindToWindow(unsigned int windowId)
 {
-    //return the wanted element from the map
-    return this->floats[name];
+    //store the window id
+    this->windowId = windowId;
+    //create a new buffer
+    glCreateBuffers(1, &this->ubo);
+    //say that an update should be done
+    this->quedUpdate = true;
+    //update the object
+    this->update();
 }
 
-int Material::getIntByName(std::string name)
+void Material::setColor(vec4 color)
 {
-    //return the wanted element from the map
-    return this->integers[name];
+    //store the new color
+    this->matData.r = color.x;
+    this->matData.g = color.y;
+    this->matData.b = color.z;
+    this->matData.a = color.w;
+    //say that an update is qued
+    this->quedUpdate = true;
 }
 
-bool Material::getBoolByName(std::string name)
+void Material::setColor(float r, float g, float b, float a)
 {
-    //return the wanted element from the map
-    return this->booleans[name];
+    //cast to another function
+    this->setColor(vec4(r,g,b,a));
 }
 
-vec2 Material::getVec2ByName(std::string name)
+vec4 Material::getColor()
 {
-    //return the wanted element from the map
-    return this->vec2s[name];
+    //return the color
+    return vec4(
+        this->matData.r,
+        this->matData.g,
+        this->matData.b,
+        this->matData.a
+    );
 }
 
-vec3 Material::getVec3ByName(std::string name)
+void Material::setRoughness(float roughness)
 {
-    //return the wanted element from the map
-    return this->vec3s[name];
+    //store the new roughness
+    this->matData.roughness = roughness;
+    //say that an update is qued
+    this->quedUpdate = true;
 }
 
-vec4 Material::getVec4ByName(std::string name)
+float Material::getRoughness()
 {
-    //return the wanted element from the map
-    return this->vec4s[name];
+    //return the roughenss
+    return this->matData.roughness;
 }
 
-mat2 Material::getMat2ByName(std::string name)
+void Material::setMetalic(float metalic)
 {
-    //return the wanted element from the map
-    return this->mat2s[name];
+    //store the new metallic value
+    this->matData.metalic = metalic;
+    //say that an update is qued
+    this->quedUpdate = true;
 }
 
-mat3 Material::getMat3ByName(std::string name)
+float Material::getMetalic()
 {
-    //return the wanted element from the map
-    return this->mat3s[name];
+    //return the metalic value
+    return this->matData.metalic;
 }
 
-mat4 Material::getMat4ByName(std::string name)
+void Material::setLit(bool lit)
 {
-    //return the wanted element from the map
-    return this->mat4s[name];
+    //store the new lit value
+    this->matData.lit = lit;
+    //say that an update is qued
+    this->quedUpdate = true;
 }
 
-unsigned int Material::getTextureByName(std::string name)
+bool Material::isLit()
 {
-    //return the wanted element from the map
-    return this->customTextures[name];
+    //return the lit value
+    return this->matData.lit;
+}
+
+void Material::setAmbientTexture(Texture* texture)
+{
+    //store the new ambient texture
+    this->ambientMap = texture;
+    //say that an update is qued
+    this->quedUpdate = true;
+}
+
+void Material::setAmbientTexture(const char* texture)
+{
+    //create a new texture and cast to another function
+    this->setAmbientTexture(new Texture(texture));
+}
+
+Texture* Material::getAmbientTexture()
+{
+    //return the ambient texture
+    return this->ambientMap;
+}
+
+void Material::setNormalMap(Texture* normalMap)
+{
+    //store the new normal map
+    this->normalMap = normalMap;
+    //say that an update is qued
+    this->quedUpdate = true;
+}
+
+void Material::setNormalMap(const char* texture)
+{
+    //create a new texutre and cast to another function
+    this->setNormalMap(new Texture(texture));
+}
+
+Texture* Material::getNormalMap()
+{
+    //return the normal map
+    return this->normalMap;
+}
+
+void Material::setRoughnessMap(Texture* roughnessMap)
+{
+    //store the new roughenss map
+    this->roughnessMap = roughnessMap;
+    //say that an update is qued
+    this->quedUpdate = true;
+}
+
+void Material::setRoughnessMap(const char* texture)
+{
+    //create a new texture and cast to another function
+    this->setRoughnessMap(new Texture(texture));
+}
+
+Texture* Material::getRoughnessMap()
+{
+    //return the rougness map
+    return this->roughnessMap;
+}
+
+void Material::setMetalicMap(Texture* metalicMap)
+{
+    //store the new metalic map
+    this->metalicMap = metalicMap;
+    //say that an update is qued
+    this->quedUpdate = true;
+}
+
+void Material::setMetalicMap(const char* texture)
+{
+    //create a new texture and cast to another function
+    this->setMetalicMap(new Texture(texture));
+}
+
+Texture* Material::getMetalicMap()
+{
+    //return the metalic map
+    return this->metalicMap;
+}
+
+void Material::apply()
+{
+    //bind the ubo
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, this->ubo);
 }
 
 void Material::encode(Data* data)
 {
-    //store the color
-    data->writeVec4(this->color);
-    //store the roughness
-    data->writeFloat(this->roughness);
-    //store the metallicness
-    data->writeFloat(this->metal);
-    //encode the amount of integers
-    data->writeLong(this->integers.size());
-    //iterate over the integers
-    for (auto const& key : this->integers)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeInt(key.second);
-    }
-    //encode the amount of floats
-    data->writeLong(this->floats.size());
-    //iterate over the floats
-    for (auto const& key : this->floats)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeFloat(key.second);
-    }
-    //encode the amount of bools
-    data->writeLong(this->booleans.size());
-    //iterate over the bools
-    for (auto const& key : this->booleans)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the boolean
-        data->writeInt(key.second);
-    }
-    //encode the amount of vec2s
-    data->writeLong(this->vec2s.size());
-    //iterate over the floats
-    for (auto const& key : this->vec2s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeVec2(key.second);
-    }
-    //encode the amount of vec3s
-    data->writeLong(this->vec3s.size());
-    //iterate over the vec3s
-    for (auto const& key : this->vec3s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the boolean
-        data->writeVec3(key.second);
-    }
-    //encode the amount of vec4s
-    data->writeLong(this->vec4s.size());
-    //iterate over the floats
-    for (auto const& key : this->vec4s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeVec4(key.second);
-    }
-    //encode the amount of mat2s
-    data->writeLong(this->mat2s.size());
-    //iterate over the floats
-    for (auto const& key : this->mat2s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeMat2(key.second);
-    }
-    //encode the amount of mat3s
-    data->writeLong(this->mat3s.size());
-    //iterate over the mat3s
-    for (auto const& key : this->mat3s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the boolean
-        data->writeMat3(key.second);
-    }
-    //encode the amount of mat4s
-    data->writeLong(this->mat4s.size());
-    //iterate over the floats
-    for (auto const& key : this->mat4s)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeMat4(key.second);
-    }
-    //encode the amount of textures
-    data->writeLong(this->customTextures.size());
-    //iterate over the floats
-    for (auto const& key : this->customTextureLocs)
-    {
-        //store the key (the string)
-        data->writeString(key.first);
-        //store the integer
-        data->writeUInt(key.second);
-    }
-
-    //encode the roughness
-    data->writeFloat(this->roughness);
-    //encode the metallicness
-    data->writeFloat(this->metal);
-    //encode the color
-    data->writeVec4(this->color);
-    //encode if the material is lit
-    data->writeBool(this->lit);
-
-    //store the name for the normal uniform
-    data->writeString(std::string(normalUniform));
-    //store the name for the roughness uniform
-    data->writeString(std::string(roughnessUniform));
-    //store the name for the specular uniform
-    data->writeString(std::string(specularUniform));
-    //store the name for the height uniform
-    data->writeString(std::string(heightUniform));
-    //store the name for the color uniform
-    data->writeString(std::string(colorUniform));
-    //store the name for the metalic uniform
-    data->writeString(std::string(metalicUniform));
+    //write all of the own data
+    data->writeBytes((uint8_t*)&this->matData, sizeof(matData));
 }
 
 void Material::decode(Data data)
 {
-    //store the color
-    this->color = data.readVec4();
-    //store the roughness
-    this->roughness = data.readFloat();
-    //store the metallicness
-    this->metal = data.readFloat();
-    //decode the amount of integers
-    long max = data.readLong();
-    //iterate over the integers
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        int dat = data.readInt();
-        //append the pair to the uniforms
-        this->integers[key] = dat;
-    }
-    //decode the amount of floats
-    max = data.readLong();
-    //iterate over the floats
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the float
-        float dat = data.readFloat();
-        //append the pair to the uniforms
-        this->floats[key] = dat;
-    }
-    //decode the amount of bools
-    max = data.readLong();
-    //iterate over the bools
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the bool
-        bool dat = data.readBool();
-        //append the pair to the uniforms
-        this->booleans[key] = dat;
-    }
-    //decode the amount of vec2s
-    max = data.readLong();
-    //iterate over the integers
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        vec2 dat = data.readVec2();
-        //append the pair to the uniforms
-        this->vec2s[key] = dat;
-    }
-    //decode the amount of vec3s
-    max = data.readLong();
-    //iterate over the floats
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        vec3 dat = data.readVec3();
-        //append the pair to the uniforms
-        this->vec3s[key] = dat;
-    }
-    //decode the amount of vec4s
-    max = data.readLong();
-    //iterate over the bools
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        vec4 dat = data.readVec4();
-        //append the pair to the uniforms
-        this->vec4s[key] = dat;
-    }
-    //decode the amount of mat2s
-    max = data.readLong();
-    //iterate over the integers
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        mat2 dat = data.readMat2();
-        //append the pair to the uniforms
-        this->mat2s[key] = dat;
-    }
-    //decode the amount of mat3s
-    max = data.readLong();
-    //iterate over the floats
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        mat3 dat = data.readMat3();
-        //append the pair to the uniforms
-        this->mat3s[key] = dat;
-    }
-    //decode the amount of mat4s
-    max = data.readLong();
-    //iterate over the bools
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the integer
-        mat4 dat = data.readMat4();
-        //append the pair to the uniforms
-        this->mat4s[key] = dat;
-    }
-    //decode the amount of textures
-    max = data.readLong();
-    //iterate over the textures
-    for (long i = 0; i < max; i++)
-    {
-        //store the key (the string)
-        std::string key = data.readString();
-        //store the textures
-        unsigned int dat = data.readUInt();
-        //append the pair to the uniforms
-        this->customTextures[key] = dat;
-    }
-
-    //store the name for the normal uniform
-    normalUniform = data.readString().c_str();
-    //store the name for the roughness uniform
-    roughnessUniform = data.readString().c_str();
-    //store the name for the specular uniform
-    specularUniform = data.readString().c_str();
-    //store the name for the height uniform
-    heightUniform = data.readString().c_str();
-    //store the name for the color uniform
-    colorUniform = data.readString().c_str();
-    //store the name for the metalic uniform
-    metalicUniform = data.readString().c_str();
+    //read the material data
+    this->matData = *(MaterialData*)data.readBytes(sizeof(matData));
 }

@@ -19,6 +19,8 @@
 #include "openglGLGE2Dcore.h"
 //include the 3D core
 #include "openglGLGE3Dcore.h"
+//include light sources
+#include "openglGLGELightingCore.h"
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -50,5 +52,8 @@ extern std::vector<Window*> glgeWindows;
 
 //store the current texture unit
 extern unsigned int glgeTextureUnit;
+
+//store the current light source that is casting shadows
+extern Light* glgeCurrentShadowCaster;
 
 #endif

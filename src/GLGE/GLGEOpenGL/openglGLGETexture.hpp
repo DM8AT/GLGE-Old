@@ -232,7 +232,7 @@ public:
      * @param encodeType the way to encode the data
      * @param data the data to put in the texture
      */
-    Texture(vec2 size, int encodeType, vec4* data = NULL);
+    Texture(vec2 size, int encodeType, vec4* data);
 
     /**
      * @brief Construct a texture form a size
@@ -243,6 +243,14 @@ public:
      * @param data the data to put in the texture
      */
     Texture(unsigned int width, unsigned int height, int encodeType, vec4* data = NULL);
+
+    /**
+     * @brief Construct a texture from an openGL texture
+     * 
+     * @param openGLTex the open gl texture
+     * @param encodeType the way the texture is encoded
+     */
+    Texture(unsigned int openGLTex, unsigned int encodeType);
 
     /**
      * @brief Destroy the Texture
@@ -353,6 +361,13 @@ public:
      */
     void setData(vec4* data);
 
+    /**
+     * @brief Get the texture handler
+     * 
+     * @return uint64_t the texture handler
+     */
+    uint64_t getHandler();
+
 private:
     //store the texture data
     vec4* texData;
@@ -374,6 +389,8 @@ private:
     bool autoBind = false;
     //store the bind intention
     int bindIntention = 0;
+    //store the texture handler
+    uint64_t handler = 0;
 
     /**
      * @brief decode a type specification

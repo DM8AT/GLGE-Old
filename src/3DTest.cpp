@@ -45,8 +45,6 @@ Object* grassFloor;
 Object* thing;
 //this object is loaded from the file Enterpreis.obj. 
 Object* enterprise;
-//it is a brick wall
-Object* wall;
 
 Light* light;
 
@@ -92,9 +90,6 @@ void display()
     //draw the thing to the screen
     thing->draw();
 
-    //draw the wall
-    wall->draw();
-
     //after this function is finished, the frame buffer gets fliped and everything is drawn to the screen
 }
 
@@ -128,27 +123,33 @@ void tick()
         //      x----y
         //
         //          multiply the camera speed with some sine and cosine of the inverted camera rotation on the x axis
-        camera->move(camTickSpeed*std::sin(-camera->getRotation().x),0,camTickSpeed*std::cos(-camera->getRotation().x));
+        camera->move(0,0,camTickSpeed);
     }
     //check if the s key is pressed
     if (glgeGetKeys().s)
     {
         //if the s key is pressed, then the camera should move backwards
         //it is basicaly the same as moving it forwards, the speed is just inverted
-        camera->move(-camTickSpeed*std::sin(-camera->getRotation().x),0,-camTickSpeed*std::cos(-camera->getRotation().x));
+        camera->move(0,0,-camTickSpeed);
     }
+    //store the camera angle
+    vec3 rot = camera->getRotation();
+    //temporeraly rotate the camera 90 degrees right
+    camera->rotate(vec2(glgeToRadians(90),0));
     //check if the d key is pressed
     if (glgeGetKeys().d)
     {
         //if the d key is pressed, then the camera should strave right. It is like moving forward, but sine and cosine is inverted and the rotation is no longer inverted
-        camera->move(camTickSpeed*std::cos(camera->getRotation().x),0,camTickSpeed*std::sin(camera->getRotation().x));
+        camera->move(camTickSpeed,0,0);
     }
     //check if the a key is pressed
     if (glgeGetKeys().a)
     {
         //if a is pressed, then the camera should strave right. It is like straving left, but the speed is inverted
-        camera->move(-camTickSpeed*std::cos(camera->getRotation().x),0,-camTickSpeed*std::sin(camera->getRotation().x));
+        camera->move(-camTickSpeed,0,0);
     }
+    //rotate the camera back
+    camera->setRotation(rot.x, rot.y);
     //check if the space bar is pressed
     if (glgeGetKeys().space)
     {
@@ -236,13 +237,11 @@ void tick()
 
     //first, update the camera
 
-    //to update the camera, recalculate the projection, this is optional, if your window will not change size
-    camera->recalculateProjection();
     //then, update the camera to make all transform changes work correctly
     camera->update();
 
     //recalculate the height for the cube obj
-    cube->setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
+    //cube->setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
 
     //secondly, update the objects, so that 
 
@@ -254,8 +253,6 @@ void tick()
     thing->update();
     //update the enterprise
     enterprise->update();
-    //update the wall
-    wall->update();
 
     //set the position of the light source to be exactly at the player
     //light.setPos(camera->getPos());
@@ -310,7 +307,7 @@ void floorSetup()
         //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
         //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then create a material for the grass floor
-    Material grassFloorMat = Material("assets/grass.png", GLGE_TEXTURE, 0.2);
+    Material* grassFloorMat = new Material("assets/grass.png", 0.2);
     //apply the material to the grass floor
     grassFloor->setMaterial(grassFloorMat);
 }
@@ -324,9 +321,9 @@ void cubeSetup()
     //the cube object is constructed using a cube preset using an alpha of -1 for the color to use textures
     cube = new Object(cubeMesh + sphereMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
     //create a material for the cube
-    Material cubeMaterial = Material(glgeGetLastFrame(), GLGE_TEXTURE, 0);
+    Material* cubeMaterial = new Material("assets/GLGEImage.png", 0);
     //set it to unlit
-    cubeMaterial.setLit(false);
+    cubeMaterial->setLit(false);
 
     //apply the material to the cube
     cube->setMaterial(cubeMaterial);
@@ -342,7 +339,7 @@ void thingSetup()
     thing = new Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
 
     //create a material for the thing
-    Material thingMat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0.2);
+    Material* thingMat = new Material("assets/cubeTexture.png", 0.2);
     //apply the material to the thing
     thing->setMaterial(thingMat);
 }
@@ -353,43 +350,12 @@ void enterpriseSetup()
     enterprise = new Object("assets/Enterpreis.obj", GLGE_OBJ, Transform(vec3(0,10,0), vec3(5,10,6), 1), true);
 
     //create a material for the object
-    Material mat = Material(vec4(vec3(0.25), 0.5f), 0.2, 1.0);
+    Material* mat = new Material(vec4(vec3(0.25), 0.5f), 0.25, 1.0);
 
     //bind the material to the enterprise
     enterprise->setMaterial(mat);
     //say that the enterpreise is fully transparent
     enterprise->setFullyTransparent(true);
-}
-
-void wallSetup()
-{
-    //create the material for the wall
-    Material mat;
-    //load the albedo to the material
-    mat = Material("assets/WallTexture/harshbricks-albedo.png", GLGE_TEXTURE, 0.2);
-
-    //load the normal map to the material
-    mat.setNormalMap("assets/WallTexture/harshbricks-normal.png", GLGE_NORMAL_MAP);
-
-    //load the roughness map
-    mat.setRoughnessMap("assets/WallTexture/harshbricks-roughness.png", GLGE_ROUGHNESS_MAP);
-
-    //load the height map
-    mat.setHeightMap("assets/WallTexture/harshbricks-height5-16.png");
-
-    //create a shader for the wall
-    Shader shader = Shader("src/Shaders/vertexShader.vs", "src/Shaders/fragmentShader330.fs");
-    //set a geometry shader for the wall
-    shader.addGeometryShader("src/Shaders/geometryShader.gs");
-
-    //create the Wall from an file
-    wall = new Object("assets/Wall.obj", GLGE_OBJ, Transform(vec3(5,0.1,2), vec3(0,155,0), 1.f));
-
-    //bind the shader of the object
-    wall->setShader(shader.getShader());
-
-    //apply the material to the wall
-    wall->setMaterial(mat);
 }
 
 void windowResized(int width, int height)
@@ -595,9 +561,7 @@ void run3Dexample()
     //a window can be moved by default, so no function is needed to say that it can be moved (but you can say that it can't be moved)
 
     //the camera is bound before the objects are set up, because else there would be an memory access error
-    camera = new Camera(90, 0.1,1000, Transform(vec3(0,0,-3),vec3(0,0,0),1));
-    //then, the camera is moved one unit up
-    camera->move(0,1,0);
+    camera = new Camera(90, 0.1,1000, Transform(vec3(0,2,-1),vec3(0,0,0),1));
     //after the camera is set up, the camera is bound to the library using an pointer. So, the camera can be changed and updated
     //without needing to rebind it. 
     glgeBindCamera(camera);
@@ -614,8 +578,6 @@ void run3Dexample()
     glgeSetInterpolationMode(GLGE_LINEAR);
     //setup the enterprise object
     enterpriseSetup();
-    //setup the wall
-    wallSetup();
 
     //add and store two point lights
     l2 = new Light(2,5,0, 0.35,0.125,0.5, 100);
@@ -625,6 +587,9 @@ void run3Dexample()
 
     //add a sun light
     glgeAddGlobalLighSource(new Light(vec3(0), vec3(0,-1,0.5), GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL, vec3(0.98, 0.98, 0.6), 0, 1));
+    glgeAddGlobalLighSource(new Light(vec3(0,3,0), vec3(0,glgeToRadians(-90),0), GLGE_LIGHT_SOURCE_TYPE_SPOT, vec3(1), 45.f, 1000));
+
+    glgeSetExitOnError(false);
 
     //disable the mouse pointer
     glgeSetCursor(GLGE_CURSOR_STYLE_NONE);

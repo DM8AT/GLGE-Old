@@ -36,6 +36,27 @@
 #define GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL 2
 
 /**
+ * @brief describes how the data looks that is transferd to the GPU
+ */
+struct LightData
+{
+    //store the light color (w for intensity)
+    vec4 color = vec4(0);
+    //store the light direction
+    vec3 dir = vec3(0);
+    //store the intense angle
+    float intAngle = 0;
+    //store the light position
+    vec3 pos = vec3(0);
+    //store the angle
+    float angle = 0;
+    //store the handel of the shadow map
+    uint64_t shadowMap = 0;
+    //store the light source type
+    int type = 0;
+};
+
+/**
  * @brief store a light in the scene
  */
 class Light
@@ -285,27 +306,80 @@ public:
      */
     void decode(Data data);
 
+    /**
+     * @brief Get the matrix to transform anything into light space
+     * 
+     * @return mat4 the light space matrix
+     */
+    mat4 getLightMat();
+
+    /**
+     * @brief make this the current shadow caster
+     */
+    void makeCurrentShadowCaster();
+
+    /**
+     * @brief Get the Shadow Map handler
+     * 
+     * @return int the shadow map handler
+     */
+    int getShadowMap();
+
+    /**
+     * @brief bind the shadow map texture
+     */
+    void bind();
+
+    /**
+     * @brief unbind the shadow map texture
+     */
+    void unbind();
+
+    /**
+     * @brief Get the data from the light that should be send to the GPU
+     * 
+     * @return LightData the data for the GPU
+     */
+    LightData getLightData();
+
+    /**
+     * @brief get if the light should update
+     * 
+     * @return true : the light data should update | 
+     * @return false : the light data dosn't needs to be updated
+     */
+    bool shouldUpdate();
+
+    /**
+     * @brief say that the update is done
+     */
+    void updateDone();
+
+    /**
+     * @brief say that an update should be done
+     */
+    void queueUpdate();
+
 private:
-    //store the light position
-    vec3 pos;
-    //store the light color
-    vec3 color;
-    //store the light direction
-    vec3 dir = vec3(0);
-    //store the light intensity
-    float lightIntensity;
-    //store the shadow map for the light
+    //store the lights data
+    LightData lightDat;
+    //store the light space matrix
+    mat4 lightSpaceMat;
+    //store the shadow depth map
+    unsigned int shadowDepth;
+    //store the shadow map texture
+    unsigned int shadowMapTex;
+    //store the shadow map FBO
     unsigned int shadowFBO;
-    //store the shadow map cube texture
-    unsigned int shadowMap;
-    //store the light source type
-    int lightType = -1;
-    //store the spot light angle
-    float angle = 0.f;
-    //store the intense angle for the spot light
-    float intAngle = -1.f;
-    //setup the shadow map
+    //store the shadow map texture unit
+    unsigned int texUnit;
+    //store if an update is needed
+    bool needsUpdate;
+    /**
+     * @brief initalises the shadow map
+     */
     void setupShadowMap();
+    void updateLightMat();
 };
 
 /**

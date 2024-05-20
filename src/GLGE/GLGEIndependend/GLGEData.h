@@ -165,6 +165,13 @@ public:
      * @param a the quaternion to add
      */
     void writeQuaternion(Quaternion a);
+    /**
+     * @brief write an abituary amount of data
+     * 
+     * @param data the data to write
+     * @param size the size of the data
+     */
+    void writeBytes(uint8_t* data, size_t size);
 
     /**
      * @brief read a bool from the stored data
@@ -292,6 +299,13 @@ public:
      * @return Quaternion the read quaternion
      */
     Quaternion readQuaternion();
+    /**
+     * @brief read an abituary amount of data
+     * 
+     * @param size the size of the data to read
+     * @return uint8_t* the read data
+     */
+    uint8_t* readBytes(size_t size);
 
     /**
      * @brief Get the raw data

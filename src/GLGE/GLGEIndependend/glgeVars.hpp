@@ -126,4 +126,10 @@ extern std::unordered_map<std::string, std::string> glgeIncludeDefaults;
 //store whatever was types this tick
 extern std::string glgeTypedThisTick;
 
+//specefy if the current pass is the shadow pass
+extern bool glgeShadowPass;
+
+//store the index of the current shadow caster
+extern int glgeShadowCasterIndex;
+
 #endif

@@ -561,6 +561,8 @@ void glgeRunMainLoop()
                 running = false;
             }
         }
+        //run a tick
+        glgeDefaultTimer();
         //loop over all windows
         for (int i = 0; i < (int)glgeWindows.size(); i++)
         {
@@ -574,14 +576,37 @@ void glgeRunMainLoop()
             Window* wptr = glgeWindows[i];
             //check if the window poitner is a nullpointer
             if (wptr == NULL) { continue; }
+            //store the currently active window
+            glgeCurrentWindowIndex = i;
+            //activate the window
+            wptr->makeCurrent();
+            //call the tick function
+            wptr->tick();
             //call the draw function
             wptr->draw();
             //update the window surface
             SDL_GL_SwapWindow((SDL_Window*)wptr->getSDLWindow());
         }
+        //set the mouse wheel to 0
+        glgeMouse.mouseWheel = 0;
 
-        //run a tick
-        glgeDefaultTimer();
+        //clear the key from the last tick
+        glgeKeysThisTick.clear();
+        //clear the releasd keys
+        glgeKeysRelesdThisTick.clear();
+
+        //calculate the time to wait
+        int waitTime = std::floor((1000.f/glgeMaxFPS) - (1000.f/glgeTickTime));
+
+        //check if the wait time is negative
+        if (waitTime < 0)
+        {
+            //if it is, set it to 0
+            waitTime = 0;
+        }
+
+        //limit the framerate
+        SDL_Delay(waitTime);
     }
     //stop SDL text input
     SDL_StopTextInput();

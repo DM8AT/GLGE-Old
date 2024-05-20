@@ -65,9 +65,11 @@ Object::Object(unsigned int preset, vec4 color, unsigned int res, Transform tran
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
+    //update the window model matrix ubo
+    glgeWindows[glgeCurrentWindowIndex]->resizeModelSSBO();
 
     //calculate the buffers
     this->compileBuffers();
@@ -108,9 +110,11 @@ Object::Object(Vertex* vertices, unsigned int* indices, unsigned int sizeVertice
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
+    //update the window model matrix ubo
+    glgeWindows[glgeCurrentWindowIndex]->resizeModelSSBO();
 
     //calculate the buffers
     this->compileBuffers();
@@ -151,9 +155,11 @@ Object::Object(std::vector<Vertex> vertices, std::vector<unsigned int> indices, 
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
+    //update the window model matrix ubo
+    glgeWindows[glgeCurrentWindowIndex]->resizeModelSSBO();
 
     //calculate the buffers
     this->compileBuffers();
@@ -194,9 +200,11 @@ Object::Object(Mesh mesh, Transform transform, bool isTransparent, bool isStatic
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
+    //update the window model matrix ubo
+    glgeWindows[glgeCurrentWindowIndex]->resizeModelSSBO();
 
     //calculate the buffers
     this->compileBuffers();
@@ -237,9 +245,11 @@ Object::Object(const char* file, int type, Transform transform, bool isTranspare
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
+    //update the window model matrix ubo
+    glgeWindows[glgeCurrentWindowIndex]->resizeModelSSBO();
 
     //calculate the buffers
     this->compileBuffers();
@@ -308,6 +318,14 @@ void Object::draw()
         //stop the function
         return;
     }
+    //check for the shadow pass
+    if (glgeShadowPass && (!this->isTransparent))
+    {
+        //call the shadow draw function
+        this->shadowDraw();
+        //stop this function
+        return;
+    }
     //check if the current object belongs to the current pass
     if (!this->isTransparent && glgeWindows[this->windowIndex]->isTranparentPass())
     {
@@ -332,6 +350,7 @@ void Object::draw()
     //bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->ubo);
 
     //bind the transparent extra data
     if (this->isTransparent)
@@ -343,8 +362,19 @@ void Object::draw()
     //bind the shader
     this->shader.applyShader();
 
+    int shadowCasters = 0;
+    //loop over all the light sources
+    for (int i = 0; i < (int)glgeWindows[this->windowIndex]->getLights().size(); i++)
+    {
+        if (glgeWindows[this->windowIndex]->getLights()[i]->getType() != GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL) { continue; }
+        //pass the texture handler
+        glUniform1i(glGetUniformLocation(this->shader.getShader(), ("glgeShadowMap[" + std::to_string(shadowCasters) + "]").c_str()), glgeWindows[this->windowIndex]->getLights()[i]->getShadowMap()+1);
+        shadowCasters++;
+    }
+    glUniform1i(glGetUniformLocation(this->shader.getShader(), "glgeActiveShadowCasters"), shadowCasters);
+
     //Bind the material
-    this->mat.applyMaterial();
+    this->mat->apply();
 
     //always input the color argument
     //activate sub elements
@@ -371,9 +401,6 @@ void Object::draw()
 
     //unbind the texture for the shadow map
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    //unbind the material
-    this->mat.removeMaterial();
 
     //deactivate the sub elements
     //deactivate the position argument
@@ -413,22 +440,22 @@ void Object::update()
     }
     //recalculate the move matrix
     this->recalculateMatrices();
-    //push the camera matrix
-    this->shader.setCustomMat4(glgeCamMatrix, this->camMat);
-    //push the model matrix to the shader
-    this->shader.setCustomMat4("modelMat", this->modelMat);
-    //push the camera position to the shader
-    this->shader.setCustomVec3("cameraPos", glgeWindows[this->windowIndex]->getCamera()->getPos());
-    //push the camera rotation to the shader
-    this->shader.setCustomVec3("cameraLook", glgeWindows[this->windowIndex]->getCamera()->getRotation());
-    //push the rotation matrix to the shader
-    this->shader.setCustomMat4("rotMat", this->rotMat);
-    //push the far plane to the shader
-    this->shader.setCustomFloat("farPlane", glgeWindows[this->windowIndex]->getCamera()->getFarPlane());
+
+    //update the own UBO
+    glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
+    //buffer the data
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(ObjectData), &this->objData, GL_DYNAMIC_DRAW);
+    //check if a material is applied
+    if (mat != NULL)
+    {
+        //update the material
+        this->mat->update();
+    }
+
     //push the screen resolution to the shader
     this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[this->windowIndex]->getSize());
-    //push the uuid to the shader
-    this->shader.setCustomInt("glgeObjectUUID", this->uuid);
+    //update the amount of active light sources
+    this->shader.setCustomInt("glgeActiveLights", (int)glgeWindows[this->windowIndex]->getLights().size());
 
     //check if the object is transparent
     if (this->isTransparent)
@@ -676,18 +703,16 @@ Mesh Object::getMesh()
     return this->mesh;
 }
 
-void Object::setMaterial(Material mat)
+void Object::setMaterial(Material* mat)
 {
     //store the inputed material
     this->mat = mat;
-    //update the material of the object
-    this->mat.applyShader(this->shader.getShader());
 }
 
 Material* Object::getMaterial()
 {
     //return a pointer to the material stored in the object
-    return &this->mat;
+    return this->mat;
 }
 
 Shader* Object::getShaderP()
@@ -765,7 +790,7 @@ Data* Object::encode()
     dat->writeBool(this->isStatic);
 
     //encode the material
-    this->mat.encode(dat);
+    this->mat->encode(dat);
 
     //return the finished data
     return dat;
@@ -823,7 +848,7 @@ void Object::decode(Data dat)
     this->isTransparent = isTransparent;
 
     //store the UUID
-    this->uuid = glgeObjectUUID;
+    this->objData.uuid = glgeObjectUUID;
     //increase the glge object uuid
     glgeObjectUUID++;
 
@@ -856,9 +881,7 @@ void Object::decode(Data dat)
     this->isStatic = dat.readBool();
 
     //load the material
-    this->mat.decode(dat);
-    //apply the shader
-    this->mat.applyShader(this->shader.getShader());
+    this->mat->decode(dat);
 }
 
 //PRIV
@@ -909,13 +932,9 @@ void Object::shaderSetup(const char* vs, const char* fs)
 void Object::recalculateMatrices()
 {
     //save the model matrix
-    this->modelMat = this->transf.getMatrix();
-    //get the camera
-    Camera* cam = glgeWindows[this->windowIndex]->getCamera();
-    //set the move matrix to the product of 3 matrices
-    this->camMat = cam->getProjectionMatrix() * cam->getRotMat() * cam->getTransformMat();
+    this->objData.modelMat = this->transf.getMatrix();
     //recalculate the rotation matrix
-    this->rotMat = this->transf.getRotationMatrix();
+    this->objData.rotMat = this->transf.getRotationMatrix();
 }
 
 void Object::getUniforms()
@@ -924,24 +943,18 @@ void Object::getUniforms()
     bool outErrs = glgeErrorOutput;
     //deactivate GLGE errors
     glgeErrorOutput = false;
-    //store the camera
-    Camera* cam = glgeWindows[this->windowIndex]->getCamera();
-    //push the camera matrix
-    this->shader.setCustomMat4(glgeCamMatrix, this->camMat);
-    //push the model matrix to the shader
-    this->shader.setCustomMat4("modelMat", this->modelMat);
-    //push the camera position to the shader
-    this->shader.setCustomVec3("cameraPos", cam->getPos());
-    //push the camera rotation to the shader
-    this->shader.setCustomVec3("cameraLook", cam->getRotation());
-    //push the rotation matrix to the shader
-    this->shader.setCustomMat4("rotMat", this->rotMat);
-    //push the far plane to the shader
-    this->shader.setCustomFloat("farPlane", cam->getFarPlane());
+
+    //get the position of the uniform block index
+    this->uboIndex = glGetUniformBlockIndex(this->shader.getShader(), "glgeObjectData");
+    //create a new uniform buffer
+    glGenBuffers(1, &this->ubo);
+    //bind the buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
+    //allocate enough size for the data
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(ObjectData), NULL, GL_DYNAMIC_DRAW);
+
     //add the screen resolution
     this->shader.setCustomVec2("glgeScreenResolution", glgeWindows[this->windowIndex]->getSize());
-    //push the uuid to the shader
-    this->shader.setCustomInt("glgeObjectUUID", this->uuid);
 
     //check if the object is transparent
     if (this->isTransparent)
@@ -952,14 +965,21 @@ void Object::getUniforms()
         //add the depth and alpha buffer
         this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeWindows[this->windowIndex]->getEIDATex());
     }
+    //only add the shadow stuff to solid objects
+    else
+    {
+        //loop over all lights
+        for (int i = 0; i < GLGE_LIGHT_SOURCE_MAX; i++)
+        {
+            //add the uniform for the light space matrix
+            this->shader.setCustomMat4("glgeLightSpaceMat[" + std::to_string(i) + "]", mat4());
+        }
+    }
 
     //get all uniform positions
     this->shader.recalculateUniforms();
     //reset GLGE error output
     glgeErrorOutput = outErrs;
-
-    //recalculate the uniforms of the material
-    this->mat.applyShader(this->shader.getShader());
 }
 
 void Object::getLightUniforms()
@@ -1009,7 +1029,6 @@ void Object::getLightUniforms()
         //get the uniform for the light intensity
         this->lightDirLocs.push_back(glgeGetUniformVar(this->shader.getShader(), uniform.c_str()));
     }
-
     //get the uniform for the amount of used lights
     this->usedLigtsPos = glgeGetUniformVar(this->shader.getShader(), "glgeActiveLights");
 
@@ -1042,6 +1061,58 @@ void Object::loadLights()
     glUniform1i(this->usedLigtsPos, (int)lights.size());
 }
 
+void Object::shadowDraw()
+{
+    //get the shadow shader from the window
+    Shader* sShader = glgeWindows[glgeCurrentWindowIndex]->getShadowShader();
+    //pass the light matrix
+    sShader->setCustomMat4("glgeLightSpaceMat", glgeCurrentShadowCaster->getLightMat());
+    //also store the shadow matrix
+    this->shader.setCustomMat4("glgeLightSpaceMat[" + std::to_string(glgeShadowCasterIndex) + "]", glgeCurrentShadowCaster->getLightMat());
+    //activate the shadow shader
+    sShader->applyShader();
+
+    //bind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->ubo);
+
+    //always input the color argument
+    //activate sub elements
+    //say where the position vector is
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, pos));
+    //say where the color is
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, color));
+    //say where the texCoords are
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, texCoord));
+    //say where the normals are
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(struct Vertex, normal));
+
+    glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+
+    //unbind the texture for the shadow map
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    //deactivate the sub elements
+    //deactivate the position argument
+    glDisableVertexAttribArray(0);
+    //deactivate the color argument
+    glDisableVertexAttribArray(1);
+    //deactivate the texCoord argument
+    glDisableVertexAttribArray(2);
+
+    //unbind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //remove the shadow shader
+    sShader->removeShader();
+}
+
 //////////
 //CAMERA//
 //////////
@@ -1053,14 +1124,13 @@ Camera::Camera()
 {
     //initalise the object
     //default for FOV: 90
-    this->fov = 90*GLGE_TO_RADIANS;
+    this->camData.fov = 90*GLGE_TO_RADIANS;
     //default for near plane: 0.1
-    this->near = 0.1;
+    this->camData.near = 0.1;
     //default for far plane: 100
-    this->far = 100;
+    this->camData.far = 100;
     //instantiate the own updates
     this->update();
-    this->recalculateProjection();
 }
 
 //initalise with parameters
@@ -1131,9 +1201,9 @@ Camera::Camera(float FOV, float near, double far, Transform transform)
     }
 
     //if no error occured, store the variables
-    this->fov = FOV*GLGE_TO_RADIANS;
-    this->near = near;
-    this->far = far;
+    this->camData.fov = FOV*GLGE_TO_RADIANS;
+    this->camData.near = near;
+    this->camData.far = far;
     this->transf = transform;
 }
 
@@ -1142,32 +1212,44 @@ void Camera::update()
 {
     //recalculate the view matrices
     this->calculateViewMatrix();
+    //recalculate the projection
+    this->recalculateProjection();
+    //update the position
+    this->camData.pos = this->transf.pos;
+    //update the rotation
+    this->camData.rot = this->transf.rot;
+    //update the main camera matrix
+    this->camData.camMat = this->camData.projMat * this->camData.rotMat * this->camData.transMat;
+    //update the ubo
+    glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
+    //store the data
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraData), &this->camData, GL_DYNAMIC_DRAW);
 }
 
 //update the projection matrix
 void Camera::recalculateProjection()
 {
     //recalculate the projection matrix
-    this->projectionMatrix = this->calculateProjectionMatrix();
+    this->camData.projMat = this->calculateProjectionMatrix();
 }
 
 mat4 Camera::getRotMat()
 {
     //return the rotation matrix
-    return this->rotMat;
+    return this->camData.rotMat;
 }
 
 mat4 Camera::getTransformMat()
 {
     //return the transformation matrix
-    return this->transMat;
+    return this->camData.transMat;
 }
 
 //get the projection matrix
 mat4 Camera::getProjectionMatrix()
 {
     //return the projection matrix
-    return this->projectionMatrix;
+    return this->camData.projMat;
 }
 
 //movement stuff
@@ -1261,56 +1343,44 @@ vec3 Camera::getRotation()
 void Camera::setFOV(float f)
 {
     //apply the new fov
-    this->fov = f*GLGE_TO_RADIANS;
+    this->camData.fov = f*GLGE_TO_RADIANS;
 }
 
 //change the field of view
 void Camera::sizeFOV(float df)
 {
     //change the fov
-    this->fov += (df*GLGE_TO_RADIANS);
+    this->camData.fov += (df*GLGE_TO_RADIANS);
 }
 
 float Camera::getFOV()
 {
     //return the fov
-    return this->fov;
+    return this->camData.fov;
 }
 
 float Camera::getFarPlane()
 {
     //return the far cliping plane
-    return this->far;
+    return this->camData.far;
 }
 
 float* Camera::getRotMatPointer()
 {
     //return a pointer to the rotation matrix
-    return &this->rotMat.m[0][0];
+    return &this->camData.rotMat.m[0][0];
 }
 
 float* Camera::getProjectionMatrixPointer()
 {
     //return a pointer to the rotation matrix
-    return &this->projectionMatrix.m[0][0];
+    return &this->camData.projMat.m[0][0];
 }
 
 float* Camera::getTransformMatPointer()
 {
     //return a pointer to the transformation matrix
-    return &this->transMat.m[0][0];
-}
-
-float* Camera::getViewMatrixPointer()
-{
-    //return a pointer to the view matrix
-    return &this->viewMatrix.m[0][0];
-}
-
-mat4 Camera::getViewMatrix()
-{
-    //return the view matrix
-    return this->viewMatrix;
+    return &this->camData.transMat.m[0][0];
 }
 
 void Camera::setWindowIndex(unsigned int windowIndex)
@@ -1318,12 +1388,24 @@ void Camera::setWindowIndex(unsigned int windowIndex)
     //store the inputed window index
     this->windowIndex = windowIndex;
 
+    //create a new uniform buffer
+    glGenBuffers(1, &this->ubo);
+    //bind the buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
+    //allocate enough size for the data
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraData), NULL, GL_DYNAMIC_DRAW);
 }
 
 unsigned int Camera::getWindowIndex()
 {
     //return the window index
     return this->windowIndex;
+}
+
+void Camera::readyForDraw()
+{
+    //bind the ubo
+    glBindBufferBase(GL_UNIFORM_BUFFER,1,this->ubo);
 }
 
 //PRIVATE
@@ -1362,21 +1444,18 @@ void Camera::calculateViewMatrix()
 
     //setup the view matrix
     //IMPORTANT: the vectors are in reversd order!
-    this->rotMat = mat4(U.z,U.y,U.x,0,
-                        V.z,V.y,V.x,0,
-                        N.z,N.y,N.x,0,
-                        0,  0,  0,  1);
+    this->camData.rotMat = mat4(U.z,U.y,U.x,0,
+                                V.z,V.y,V.x,0,
+                                N.z,N.y,N.x,0,
+                                0,  0,  0,  1);
 
     /*vec4 o = this->transf.getRotationMatrix() * vec4(1,1,1,1);
     this->rotMat = glgeLookAt(this->transf.pos, vec3(o.x,o.y,o.z), vec3(0,1,0));*/
 
-    this->transMat = mat4(1,0,0,-transf.pos.x,
-                          0,1,0,-transf.pos.y,
-                          0,0,1,-transf.pos.z,
-                          0,0,0,1);
-
-    //store the complete view matrix
-    this->viewMatrix = this->transMat*this->rotMat;
+    this->camData.transMat = mat4(1,0,0,-transf.pos.x,
+                                  0,1,0,-transf.pos.y,
+                                  0,0,1,-transf.pos.z,
+                                  0,0,0,1);
 }
 
 mat4 Camera::calculateProjectionMatrix()
@@ -1390,12 +1469,12 @@ mat4 Camera::calculateProjectionMatrix()
             ar = glgeWindows[this->windowIndex]->getWindowAspect();
         }
     }
-    float zRange = far - near;
-    float tHF = std::tan((fov/2.f));
+    float zRange = this->camData.far - this->camData.near;
+    float tHF = std::tan((this->camData.fov/2.f));
 
     return mat4(1.f/(tHF*ar), 0.f, 0.f, 0.f,
                 0.f, 1/tHF, 0.f, 0.f,
-                0.f, 0.f, (-near - far)/zRange, (2.f*far * near) / zRange,
+                0.f, 0.f, (-this->camData.near - this->camData.far)/zRange, (2.f*this->camData.far * this->camData.near) / zRange,
                 0.f, 0.f, 1.f, 0.f);
 }
 

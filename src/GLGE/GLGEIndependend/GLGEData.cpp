@@ -9,6 +9,7 @@
  */
 
 #include "GLGEData.h"
+#include "glgePrivDefines.hpp"
 
 #define SEGMENT_BITS 0x7F
 #define CONTINUE_BITS 0x80
@@ -254,6 +255,11 @@ void Data::writeQuaternion(Quaternion a)
 {
     //pass to an vec4 write
     this->writeVec4(vec4(a.w, a.x,a.y,a.z));
+}
+void Data::writeBytes(uint8_t* data, size_t size)
+{
+    //add the data to the own data
+    this->data.insert(this->data.end(), data, data+size);
 }
 
 int8_t* Data::getData()
@@ -523,4 +529,23 @@ Quaternion Data::readQuaternion()
 {
     //read a float for the angle and a vector 3 for the position
     return Quaternion(this->readFloat(), this->readVec3());
+}
+uint8_t* Data::readBytes(size_t size)
+{
+    //safty check
+    if (size > this->data.size())
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Cant read " + std::to_string(size) + " bytes from array of size " + std::to_string(this->data.size()))
+        //stop the function
+        return NULL;
+    }
+    //make an byte array with enough size
+    uint8_t* dat = new uint8_t[size];
+    //copy the data over
+    memcpy(dat, this->data.data(), size);
+    //delete the data from the own data
+    this->data.erase(this->data.begin(), this->data.begin()+size);
+    //return the data
+    return dat;
 }

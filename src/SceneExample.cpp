@@ -130,6 +130,8 @@ void runSceneExample()
                   "assets/skybox/front.jpg",
                   "assets/skybox/back.jpg");
 
+    glgeSetExitOnError(false);
+
     //run the main loop
     glgeRunMainLoop();
 }

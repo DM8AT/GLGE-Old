@@ -35,3 +35,6 @@ std::vector<Window*> glgeWindows = {};
 
 //store the current texture unit
 unsigned int glgeTextureUnit = 0;
+
+//store the current light source that is casting shadows
+Light* glgeCurrentShadowCaster = NULL;

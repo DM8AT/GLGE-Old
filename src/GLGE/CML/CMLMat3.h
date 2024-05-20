@@ -9,7 +9,11 @@
 class mat3
 {
 public:
-    float m[3][3];
+    float m[3][3] = {
+        {1,0,0},
+        {0,1,0},
+        {0,0,1}
+    };
 
     /**
      * @brief default constructor

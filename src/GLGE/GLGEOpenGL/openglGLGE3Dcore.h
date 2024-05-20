@@ -362,7 +362,7 @@ public:
      * 
      * @param material the new material for the object
      */
-    void setMaterial(Material material);
+    void setMaterial(Material* material);
 
     /**
      * @brief Get the Material from the object
@@ -422,6 +422,18 @@ public:
     void decode(Data data);
 
 private:
+    /**
+     * @brief the same as the buffer for the object data on the GPU
+     */
+    struct ObjectData
+    {
+        //the model matrix of the object
+        mat4 modelMat;
+        //the rotation matrix of the object
+        mat4 rotMat;
+        //the objects uuid
+        unsigned int uuid;
+    };
     //store the transform for the object
     Transform transf;
     //store a mesh
@@ -437,22 +449,12 @@ private:
                         0,1,0,0,
                         0,0,1,0,
                         0,0,0,1);
-    //this matrix is needed to calculate the lighting
-    mat4 modelMat = mat4(1,0,0,0,
-                         0,1,0,0,
-                         0,0,1,0,
-                         0,0,0,1);
-    //store the rotation matrix
-    mat4 rotMat = mat4(1,0,0,0,
-                       0,1,0,0,
-                       0,0,1,0,
-                       0,0,0,1);
     //store if the object is static
     bool isStatic;
     //store the length of the index and vertex vuffer
     unsigned int VBOLen, IBOLen;
     //store the material of the object
-    Material mat;
+    Material* mat = 0;
     //store the position of the light positions
     std::vector<unsigned int> lightPosLocs;
     //store the position of the light colors
@@ -465,8 +467,12 @@ private:
     unsigned int usedLigtsPos;
     //store the position for the shadow maps
     unsigned int shadowMapSamplerLoc;
-    //store the object UUID
-    unsigned int uuid = 0;
+    //store the own ubo (uniform buffer object)
+    unsigned int ubo = 0;
+    //store the position of the uniform block index
+    int uboIndex = -1;
+    //store the own object data
+    ObjectData objData;
     //store if the object is fully transparent
     bool fullyTransparent = false;
     //store the index of the window the object is used in
@@ -488,6 +494,11 @@ private:
     void getLightUniforms();
     //load the light uniforms to the shader
     void loadLights();
+
+    /**
+     * @brief the draw function if this is a shadow pass
+     */
+    void shadowDraw();
 };
 
 /**
@@ -710,7 +721,36 @@ public:
      */
     unsigned int getWindowIndex();
 
+    /**
+     * @brief make the camera ready to draw from this perspective
+     */
+    void readyForDraw();
+
 private:
+    /**
+     * @brief the data that should be send to the GPU
+     */
+    struct CameraData
+    {
+        //store the whole camera matrix
+        mat4 camMat;
+        //store the projection matrix
+        mat4 projMat;
+        //store the transformation matrix
+        mat4 transMat;
+        //store the rotation matrix
+        mat4 rotMat;
+        //store the camera position
+        vec3 pos;
+        //store the camera rotation
+        vec3 rot;
+        //store the near clipping plane
+        float near;
+        //store the far clipping plane
+        float far;
+        //store the field of view
+        float fov;
+    };
     //store the right direction of the camera
     vec4 right = vec4(1,0,0,0);
     //store the left direction of the camera
@@ -723,38 +763,19 @@ private:
     vec4 forward = vec4(0,0,1,0);
     //store the backwards direction of the camera
     vec4 backward = vec4(0,0,-1,0);
-    //store the position of the camera in camera space
-    vec4 position = vec4(0,0,0,1);
-    //store the field of view for the camera
-    float fov = 90.f;
-    //store the near cliping plane
-    float near = 0.1f;
-    //store the far cliping plane
-    double far = 10.0;
     //store the transform of the camera
     Transform transf;
-    //store the rotation matrix
-    mat4 rotMat = mat4(1,0,0,0,
-                       0,1,0,0,
-                       0,0,1,0,
-                       0,0,0,1);
-    //store the transformation matrix
-    mat4 transMat = mat4(1,0,0,0,
-                         0,1,0,0,
-                         0,0,1,0,
-                         0,0,0,1);
     //store the window index the camera is bound to
     unsigned int windowIndex = -1;
+    //store the camera data
+    CameraData camData;
+    //store the ubo
+    unsigned int ubo;
 
     //store the location of the exposure
     unsigned int expLoc;
     //store the exposure
     float exposure = 0.1;
-
-    //store the view matrix
-    mat4 viewMatrix;
-    //store the projection matrix
-    mat4 projectionMatrix;
 
     //calculate the view matrix
     void calculateViewMatrix();

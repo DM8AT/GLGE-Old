@@ -118,8 +118,6 @@ void secondTick()
 {
     //update the camera
     camSecWin->update();
-    //recalculate the projection matrix
-    camSecWin->recalculateProjection();
     //update the triangle
     tri->update();
     //rotate the cube a bit
@@ -150,9 +148,9 @@ void secWindowInit()
     //load the Cube object
     spinCube = new Object(GLGE_PRESET_CUBE, vec4(-1), 0, Transform(vec3(0,0,1), vec3(0,0,0), vec3(0.25)));
     //set the material for the cube
-    Material mat = Material("assets/cubeTexture.png", GLGE_TEXTURE, 0);
+    Material* mat = new Material("assets/cubeTexture.png", 0);
     //make the cube unlit
-    mat.setLit(false);
+    mat->setLit(false);
     //bind the material to the cube
     spinCube->setMaterial(mat);
 
@@ -198,7 +196,7 @@ void computeSetup()
     //disable resizing so the amount of pixels needed to compute dosn't change
     compute.setResizable(false);
     //create a new texture to render into
-    compOutTexture = new Texture(compute.getSize(), GLGE_TEX_RGBA32);
+    compOutTexture = new Texture(compute.getSize(), GLGE_TEX_RGBA32, 0);
     //create the compute shader from an source file
     compShader = new ComputeShader("src/Shaders/computeExample.comp");
     //add a variable for the time

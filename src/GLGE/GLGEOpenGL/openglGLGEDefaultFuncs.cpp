@@ -106,39 +106,6 @@ void glgeDefaultTimer()
 
     //update the main display
     SDL_GetCurrentDisplayMode(0, &glgeMainDisplay);
-    //loop over all windows
-    for (int i = 0; i < (int)glgeWindows.size(); i++)
-    {
-        //set the current window
-        glgeCurrentWindowIndex = i;
-        //get the window pointer
-        Window* wptr = glgeWindows[i];
-        //check if the window poitner is a nullpointer
-        if (wptr == NULL) { continue; }
-        //if not, run a window tick
-        wptr->tick();
-    }
-
-    //set the mouse wheel to 0
-    glgeMouse.mouseWheel = 0;
-
-    //clear the key from the last tick
-    glgeKeysThisTick.clear();
-    //clear the releasd keys
-    glgeKeysRelesdThisTick.clear();
-
-    //calculate the time to wait
-    int waitTime = std::floor((1000.f/glgeMaxFPS) - (1000.f/glgeTickTime));
-
-    //check if the wait time is negative
-    if (waitTime < 0)
-    {
-        //if it is, set it to 0
-        waitTime = 0;
-    }
-
-    //limit the framerate
-    SDL_Delay(waitTime);
 }
 
 //default keyboard function

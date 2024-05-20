@@ -110,3 +110,9 @@ std::unordered_map<std::string, std::string> glgeIncludeDefaults;
 
 //store whatever was types this tick
 std::string glgeTypedThisTick = "";
+
+//specefy if the current pass is the shadow pass
+bool glgeShadowPass = false;
+
+//store the index of the current shadow caster
+int glgeShadowCasterIndex = 0;

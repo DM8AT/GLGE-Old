@@ -38,6 +38,12 @@ Texture::Texture(const char* textureFile)
     // load and generate the texture
     int width, height, nrChannels;
     unsigned char *data = glgeLoadImage(textureFile, &width, &height, &nrChannels);
+    //check if the data could be read
+    if (!data)
+    {
+        //if not, throw an error
+        GLGE_THROW_ERROR("Failed to load texture file: " + std::string(textureFile))
+    }
     //create a new vec4 array
     this->texData = new vec4[width*height];
     //check if the new opperation was sucessfull
@@ -62,33 +68,16 @@ Texture::Texture(const char* textureFile)
                 v[i] = data[(x*height + y)*nrChannels + i] / 255.f;
             }
             //store the pixel
-            this->texData[x*height + y] = vec4(v[0], v[1], v[2], v[4]);
+            this->texData[x*height + y] = vec4(v[0], v[1], v[2], v[3]);
         }
     }
-    //check for the data type
-    if(data)
-    {
-        if (nrChannels == 3)
-        {
-            //generate mipmap and upload to GPU
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, this->texData);
-            //store the image number of chanels and encode type
-            this->encodeType = GL_RGB;
-            this->channels = GL_RGB;
-        }
-        else if (nrChannels == 4)
-        {
-            //generate mipmap and upload to GPU
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, this->texData);
-            //store the image number of chanels and encode type
-            this->encodeType = GL_RGBA;
-            this->channels = GL_RGBA;
-        }
-    }
-    else
-    {
-        std::cout << "Failed to load texture file: " << textureFile << "\n";
-    }
+    //generate mipmap and upload to GPU
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, this->texData);
+    //make a mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
+    //store the image number of chanels and encode type
+    this->encodeType = GL_RGBA;
+    this->channels = GL_RGBA;
 
     //store the texture size
     this->size = ivec2(width, height);
@@ -174,6 +163,14 @@ Texture::Texture(unsigned int width, unsigned int height, int et, vec4* data)
         //memcopy the data
         std::memcpy(this->texData, data, sizeof(vec4)*this->size.x*this->size.y);
     }
+}
+
+Texture::Texture(unsigned int openGLTex, unsigned int encodeType)
+{
+    //store the new open gl texture as your own
+    this->texture = openGLTex;
+    //decode the encode type
+    this->decode(encodeType);    
 }
 
 Texture::~Texture()
@@ -550,4 +547,18 @@ void Texture::decode(int encodeType)
 
         return;
     }
+}
+
+uint64_t Texture::getHandler()
+{
+    //check if the handler exists
+    if (this->handler == 0)
+    {
+        //create the texture handler
+        this->handler = glGetTextureHandleARB(this->texture);
+        //make the handler usefull
+        glMakeTextureHandleResidentARB(this->handler);
+    }
+    //return the handler
+    return this->handler;
 }

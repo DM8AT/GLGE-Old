@@ -173,7 +173,7 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glGenTextures(1, &this->mainAlbedoTex);
     glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -187,7 +187,7 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glGenTextures(1, &this->mainNormalTex);
     glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -201,7 +201,7 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glGenTextures(1, &this->mainPosTex);
     glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -248,8 +248,9 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     //generate a texture to store the depth information
     glGenTextures(1, &this->mainSolidTex);
     glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
+
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -473,6 +474,36 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     //get the uniform
     this->defaultImageShader.recalculateUniforms();
 
+    //create the shadow shader
+    this->shadowShader = Shader("src/Shaders/shadowShader.vert", std::string("#version 330 core\n;void main(){}"));
+    //add a uniform for the light space matrix
+    this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
+    //add a uniform for the model matrix
+    this->shadowShader.setCustomMat4("glgeModelMat", mat4());
+    //update the uniforms
+    this->shadowShader.recalculateUniforms();
+
+    //create a new uniform buffer
+    glCreateBuffers(1, &this->lightUBO);
+    //bind it as a uniform buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
+    //allocate enough space for an integer and 128 light sources
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(LightData)*129, 0, GL_STATIC_DRAW);
+    //unbind the buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    //bind the buffer to location 3
+    glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
+    //create a new buffer
+    glCreateBuffers(1, &this->modelMatSSBO);
+    //bind the UBO
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
+    //unbind the buffer
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    //bind the buffer to location 4
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
+    //clear the buffer for the light data
+    bzero(this->lightDatas, sizeof(LightData)*129);
+
     //initalise the textures correctly by calling the resize function
     this->resizeWindow(this->size.x, this->size.y);
 }
@@ -532,8 +563,70 @@ void Window::draw()
 {
     //say that the window is currently drawing
     this->drawing = true;
-    //make this the current active window
-    this->makeCurrent();
+    //check if a main camera is bound
+    if (this->mainCamera)
+    {
+        //make the main camera ready to draw
+        this->mainCamera->readyForDraw();
+    }
+
+    //store if the light data should update
+    bool updateLight = false;
+    //loop over all windows
+    for (int i = 0; i < (int)this->lights.size(); i++)
+    {
+        //get if a update is needed
+        if (this->lights[i]->shouldUpdate())
+        {
+            //store that an update should execute
+            updateLight = true;
+            //store the new light data
+            ((LightData*)(this->lightDatas + 16))[i] = this->lights[i]->getLightData();
+            //say that the update is now done
+            this->lights[i]->updateDone();
+        }
+    }
+    //check if an update is needed
+    if (updateLight)
+    {
+        //update the light count
+        *(int*)this->lightDatas = (int)this->lights.size();
+        //bind the ubo
+        glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
+        //store the data
+        glBufferData(GL_UNIFORM_BUFFER, 129*sizeof(LightData), this->lightDatas, GL_STATIC_DRAW);
+        //unbind the buffer
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        //bind the buffer to the correct slot
+        glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
+    }
+
+    //mark the beginning of the shadow pass
+    glgeShadowPass = true;
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    //disable blending
+    glDisable(GL_BLEND);
+    //set the clear color
+    glClearColor(0,0,0,0);
+    //bind the shadow mapping framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->shadowFBO);
+    //loop over all light sources
+    for (size_t i = 0; i < this->lights.size(); i++)
+    {
+        //check if the light source type is supported
+        if (this->lights[i]->getType() != GLGE_LIGHT_SOURCE_TYPE_SPOT) { continue; }
+        //bind the current shadow caster
+        this->lights[i]->makeCurrentShadowCaster();
+        //say that the active light is the current
+        glgeCurrentShadowCaster = this->lights[i];
+        //draw the scene geometry
+        this->callDrawFunc();
+    }
+    //end the shadow pass
+    glgeShadowPass = false;
+    //correct the OpenGL viewport
+    glViewport(0,0, this->size.x,this->size.y);
 
     //bind the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
@@ -576,8 +669,18 @@ void Window::draw()
         glDisable(GL_CULL_FACE);
     }
 
+    for (int i = 0; i < (int)this->lights.size(); i++)
+    {
+        this->lights[i]->bind();
+    }
+
     //call the custom drawing function
     this->callDrawFunc();
+
+    for (int i = 0; i < (int)this->lights.size(); i++)
+    {
+        this->lights[i]->unbind();
+    }
 
     //check if a skybox is active
     if (this->useSkybox)
@@ -1600,18 +1703,18 @@ void Window::resizeWindow(int width, int height)
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update all the texture sizes
     //update the normal texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the position texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the roughness texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
@@ -1626,7 +1729,7 @@ void Window::resizeWindow(int width, int height)
     //update the solid lit texture
     glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     //update the transparent accumulation texture
     glBindTexture(GL_TEXTURE_2D, this->mainTransparentAccumTex);
@@ -2681,4 +2784,42 @@ Shader* Window::getDefaultImageShader()
 {
     //return the default image shader
     return &this->defaultImageShader;
+}
+
+Shader* Window::getShadowShader()
+{
+    //return a pointer to the shadow shader
+    return &this->shadowShader;
+}
+
+void Window::resizeModelSSBO()
+{
+    //bind the buffer
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
+    //make space for the data
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(mat4)*glgeObjectUUID, 0, GL_STATIC_DRAW);
+    //bind the data to the chanal
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
+}
+
+LightData* Window::getLightData()
+{
+    //get a pointer to the data
+    LightData* ret = ((LightData*)(&(this->lightDatas[sizeof(int) + (sizeof(LightData)*lightCount)])));
+    //increase the amount of lights
+    this->lightCount++;
+    //return the pointer 
+    return ret;
+}
+
+LightData* Window::setLightData(LightData data)
+{
+    //store the data
+    *((LightData*)(&(this->lightDatas[sizeof(int) + (sizeof(LightData)*lightCount)]))) = data;
+    //get a pointer to the data
+    LightData* ret = (LightData*)&this->lightDatas[this->lightCount];
+    //increase the amount of lights
+    this->lightCount++;
+    //return the pointer
+    return ret;
 }

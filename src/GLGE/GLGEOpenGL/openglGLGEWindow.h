@@ -911,6 +911,33 @@ public:
      */
     Shader* getDefaultImageShader();
 
+    /**
+     * @brief Get the shader used for the shadow map passes
+     * 
+     * @return Shader* a pointer to the shadow shader
+     */
+    Shader* getShadowShader();
+
+    /**
+     * @brief add an object to the model mat ubo
+     */
+    void resizeModelSSBO();
+
+    /**
+     * @brief Get the data for a new light source
+     * 
+     * @return LightData* the place to store that data in
+     */
+    LightData* getLightData();
+
+    /**
+     * @brief Set the data from an loaded light source
+     * 
+     * @param data the data from the object
+     * @return LightData* the new pointer to the data
+     */
+    LightData* setLightData(LightData data);
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -1003,6 +1030,24 @@ private:
     bool started = false;
 
     /*
+        Shadow pass stuff
+    */
+    //store the framebuffer for shadow mapping
+    unsigned int shadowFBO = 0;
+    //store the depth texture for shadow mapping
+    unsigned int shadowDepth = 0;
+    //store the screen space textures
+    unsigned int shadowTex = 0;
+    //store the data for all the lights
+    unsigned int lightUBO = 0;
+    //store the model matrixes for the shadow calculation
+    unsigned int modelMatSSBO = 0;
+    //store the data for all the lights
+    uint8_t lightDatas[sizeof(LightData)*129];
+    //store the light count
+    unsigned int lightCount = 0;
+
+    /*
         Default shaders
     */
     //sotre the default 3D shader
@@ -1013,6 +1058,8 @@ private:
     unsigned int default2DShader = 0;
     //store the default image shader
     Shader defaultImageShader;
+    //store the shadow shader
+    Shader shadowShader;
     
     /*
         Window constrains
