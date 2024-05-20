@@ -34,6 +34,7 @@ To install GLGE, download the source code or clone the project. Make sure to ins
    - Linux: `sudo apt install libsdl2-dev`
 - SDL2_TTF
    - Linux: `sudo apt install libsdl2-ttf-dev`
+   
 also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
 
 ## Compiling
