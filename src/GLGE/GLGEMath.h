@@ -28,11 +28,11 @@ mat4 glgeLookAt(vec3 eye, vec3 center, vec3 up = vec3(0,1,0));
  * @brief rotate a vector
  * this function works with quaternions, so it gives back the rotated vector instantly
  * @param angle the angle to rotate the vector
- * @param v the vector to rotate
- * @param target the target to rotate the vector to
+ * @param axis the vector to rotate around
+ * @param vec the vector to rotate
  * @return vec3 the rotated vector
  */
-vec3 glgeRotateVector(float angle, vec3 v, vec3 target);
+vec3 glgeRotateVector(float angle, vec3 axis, vec3 vec);
 
 /**
  * @brief linearly interpolate two floats
@@ -295,5 +295,58 @@ void glgeClamp(int* v, int min, int max);
  * @param max the maximal value, the value input should have
  */
 void glgeClamp(unsigned int* v, unsigned int min, unsigned int max);
+
+/**
+ * @brief create a rotation quaternion from a given axis
+ * 
+ * @param angle the angle to rotate, in radians
+ * @param axis the axis to rotate around
+ * @return Quaternion the rotation quaternion
+ */
+Quaternion glgeCreateRotationQuaternion(float angle, vec3 axis);
+
+/**
+ * @brief convert a set of angles to a quaternion
+ * 
+ * @param eulerAngle the set of angles
+ * @return Quaternion the quaternion represenation
+ */
+Quaternion glgeEulerToQuaternion(vec3 eulerAngle);
+
+/**
+ * @brief convert a set of angles to a quaternion
+ * 
+ * @param x the angle around the x axis
+ * @param y the angle around the y axis
+ * @param z the angle around the z axis
+ * @return Quaternion the quaternion representation
+ */
+Quaternion glgeEulerToQuaternion(float x, float y, float z);
+
+/**
+ * @brief convert a quaternion to euler angles
+ * 
+ * @param q the quaternion to convert
+ * @return vec3 the euler angles in a vector
+ */
+vec3 glgeQuaternionToEuler(Quaternion q);
+
+/**
+ * @brief convert a set of angles to a direction
+ * 
+ * @param angles the set of angles
+ * @return vec3 the calculated direction
+ */
+vec3 glgeAngleToDir(vec3 angles);
+
+/**
+ * @brief convert a set of angles to a direction
+ * 
+ * @param x the angle around the x axis
+ * @param y the angle around the y axis
+ * @param z the angle around the z axis
+ * @return vec3 the calculated direction
+ */
+vec3 glgeAngleToDir(float x, float y, float z);
 
 #endif

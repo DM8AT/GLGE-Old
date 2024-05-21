@@ -349,4 +349,6 @@ void Material::decode(Data data)
 {
     //read the material data
     this->matData = *(MaterialData*)data.readBytes(sizeof(matData));
+    //apply to the current window
+    this->bindToWindow(glgeCurrentWindowIndex);
 }

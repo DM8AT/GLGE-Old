@@ -103,6 +103,8 @@ Upcoming features that may be added to GLGE in the future include:
    - destructors clean up the object
 - renamed "GLGEWindow" to "Window", so it better fits the naming scheme of GLGE
 - updated the way the shaders access uniforms, now using uniform buffers instead of passing everything all the time, hoping this improves performance
+- added simple shadow mapping for spotlights
+- updated the way scenes safe, it should be faster now. WARNING: old scenes won't work with the new version
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

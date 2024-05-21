@@ -217,15 +217,16 @@ public:
      * 
      * @param rotation the new rotation for the Objct
      */
-    void setRotation(vec2 rotation);
+    void setRotation(vec3 rotation);
 
     /**
      * @brief Set the Rotation of the Objct
      * 
      * @param x the x rotation for the Objct
      * @param y the y rotation for the Objct
+     * @param z the z rotation for the Object
      */
-    void setRotation(float x, float y);
+    void setRotation(float x, float y, float z);
 
     /**
      * @brief rotate the Objct

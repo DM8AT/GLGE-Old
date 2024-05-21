@@ -564,17 +564,17 @@ vec3 Object::getPos()
 }
 
 //set the rotation of the object
-void Object::setRotation(vec2 r)
+void Object::setRotation(vec3 r)
 {
     //apply the new rotation
-    this->transf.rot = vec3(r.x,r.y,0);
+    this->transf.rot = r;
 }
 
 //set the rotation of the object
-void Object::setRotation(float x, float y)
+void Object::setRotation(float x, float y, float z)
 {
     //apply the new rotation
-    this->transf.rot = vec3(x,y,0);
+    this->transf.rot = vec3(x,y,z);
 }
 
 //rotate the object
@@ -881,6 +881,9 @@ void Object::decode(Data dat)
     this->isStatic = dat.readBool();
 
     //load the material
+    //create a new material
+    this->mat = new Material();
+    //decode the material data
     this->mat->decode(dat);
 }
 

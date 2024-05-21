@@ -50,6 +50,8 @@ struct LightData
     vec3 pos = vec3(0);
     //store the angle
     float angle = 0;
+    //store the light position matrix
+    mat4 lightSpaceMat;
     //store the handel of the shadow map
     uint64_t shadowMap = 0;
     //store the light source type
@@ -88,7 +90,7 @@ public:
      * @param angle the angle for a spot light in degrees
      * @param intensity the strength of the light source
      */
-    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float angle = 45, float intensity = 1.f);
+    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float angle = 0.79, float intensity = 1.f);
 
     /**
      * @brief Construct a new Light source
@@ -226,18 +228,6 @@ public:
     float getInsensity();
 
     /**
-     * @brief bind the shadow map for this light
-     */
-    void bindShadowMap();
-
-    /**
-     * @brief bind the shadow map texture
-     * 
-     * @param samplerID the id of the OpenGL sampler it should be bound to
-     */
-    void bindShadowMapTexture(int samplerID);
-
-    /**
      * @brief Set the type of the light source
      * 
      * @param type the type of the light source
@@ -363,8 +353,6 @@ public:
 private:
     //store the lights data
     LightData lightDat;
-    //store the light space matrix
-    mat4 lightSpaceMat;
     //store the shadow depth map
     unsigned int shadowDepth;
     //store the shadow map texture

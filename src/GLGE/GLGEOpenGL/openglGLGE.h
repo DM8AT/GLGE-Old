@@ -987,4 +987,9 @@ bool glgeUsesOpenGL();
  */
 bool glgeUsesVulkan();
 
+/**
+ * @brief get the typename like it would be stored in a file
+ */
+#define glgeGetTypeName(T) std::string(typeid(T).name())
+
 #endif

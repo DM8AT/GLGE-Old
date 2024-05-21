@@ -50,6 +50,7 @@ Light* light;
 
 Light* l2;
 
+Light* spot;
 Shader* invColPPS;
 
 //store the first render target for the ping-pong blure
@@ -244,6 +245,9 @@ void tick()
     //cube->setPos(0, 1.5 + std::sin(glgeToDegrees(glgeGetCurrentElapsedTime() * 0.00001)) / 2.f, 0);
 
     //secondly, update the objects, so that 
+
+    //rotate the spot light a bit
+    spot->setDir(glgeRotateVector(glgeToRadians(1),vec3(0,1,0),spot->getDir()));
 
     //update the grass floor, to make shure the transform and projection is correct. 
     grassFloor->update();
@@ -587,9 +591,10 @@ void run3Dexample()
 
     //add a sun light
     glgeAddGlobalLighSource(new Light(vec3(0), vec3(0,-1,0.5), GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL, vec3(0.98, 0.98, 0.6), 0, 1));
-    glgeAddGlobalLighSource(new Light(vec3(0,3,0), vec3(0,glgeToRadians(-90),0), GLGE_LIGHT_SOURCE_TYPE_SPOT, vec3(1), 45.f, 1000));
-
-    glgeSetExitOnError(false);
+    //create a spot light (the blue spinny light on the floor)
+    spot = new Light(vec3(0,0.1,0), glgeAngleToDir(0,0,0), GLGE_LIGHT_SOURCE_TYPE_SPOT, vec3(0.1,0.1,1), glgeToRadians(45.f), 10000);
+    //add the spot light to the light sources
+    glgeAddGlobalLighSource(spot);
 
     //disable the mouse pointer
     glgeSetCursor(GLGE_CURSOR_STYLE_NONE);

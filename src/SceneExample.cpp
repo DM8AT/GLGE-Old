@@ -38,7 +38,7 @@ void sceneTick()
     //set the rotation speed for the camera
     float rotSpeed = 0.05;
     //move the camera to the rotaion center
-    sCam->set(0,0,5);
+    sCam->set(0,0,0);
     //rotate the camera by a small amount
     sCam->rotate(vec2((glgeToRadians(0.5) * glgeGetDeltaTime()) * rotSpeed,0));
     //move the camera back by 5 units
@@ -70,13 +70,13 @@ void decodeScene(Scene* scene)
         std::string type = obj->getTypeName();
 
         //check if the type is a 3D object
-        if (type == typeid(Object).name())
+        if (type == glgeGetTypeName(Object))
         {
             //if it is, add it to all the 3D objects
             sObjects.push_back(obj->getObject<Object>());
         }
         //check if the type is a light source
-        else if (type == typeid(Light).name())
+        else if (type == glgeGetTypeName(Light))
         {
             //if it is, add it as an global light souce
             glgeAddGlobalLighSource(obj->getObject<Light>());
@@ -97,13 +97,13 @@ void runSceneExample()
     sCam = new Camera(90, 0.1, 100.0);
     //bind the camera
     glgeBindCamera(sCam);
+    //clear all objects in the scene
+    sObjects.clear();
 
-    //bind the draw function
-    glgeBindDisplayFunc(sceneDraw);
-    //bind the tick function
-    glgeBindMainFunc(sceneTick);
-
-    // create post processing shader
+    //////////////////////////////////
+    // SIMPLE POST PROCESSING SETUP //
+    //////////////////////////////////
+    //create post processing shader
     glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
     //bind another post processing shader
     Shader* invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
@@ -111,6 +111,11 @@ void runSceneExample()
     invColPPS->setCustomFloat("strength", 1);
     //recalculate the positions of the uniforms
     invColPPS->recalculateUniforms();
+
+    //bind the draw function
+    glgeBindDisplayFunc(sceneDraw);
+    //bind the tick function
+    glgeBindMainFunc(sceneTick);
 
     //set the icon of the window
     glgeSetWindowIcon("assets/GLGEImage.png");

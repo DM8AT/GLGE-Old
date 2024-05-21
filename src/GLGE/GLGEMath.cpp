@@ -18,60 +18,38 @@ unsigned long glgeSeed = 0;
 
 mat4 glgeLookAt(vec3 eye, vec3 center, vec3 up)
 {
-    //create 3 vectors for the collums of the output matrix
-    vec3 a,b,c;
+    //create the u,v,n vectors
+    vec3 u,v,n;
+    //create the forward vector (n)
+    n = (eye - center);
+    //normalize the forward vector
+    n.normalize();
+    //create the right vector (u)
+    u = up.cross(n);
+    //normalize the vector
+    u.normalize();
+    //create the new up vector (v)
+    v = n.cross(u);
 
-    //get the difference from the eye to the center
-    c = eye-center;
-    //normalise that difference
-    c.normalize();
-
-    //store the up vector in b
-    b = up;
-    //a is a cross product from b and c
-    a = b.cross(c);
-    //recalculate the b vector
-    b = c.cross(a);
-
-    //normalise the length of a and b
-    a.normalize();
-    b.normalize();
-
-    //create the output matrix
-    mat4 out;
-
-    //store the elements in the matrix
-    out.m[0][0] = a.x;
-    out.m[1][0] = a.y;
-    out.m[2][0] = a.z;
-    out.m[3][0] = -(a*eye);
-    out.m[0][1] = b.x;
-    out.m[1][1] = b.y;
-    out.m[2][1] = b.z;
-    out.m[3][1] = -(b*eye);
-    out.m[0][2] = c.x;
-    out.m[1][2] = c.y;
-    out.m[2][2] = c.z;
-    out.m[3][2] = -(c*eye);
-    out.m[0][3] = 0;
-    out.m[1][3] = 0;
-    out.m[2][3] = 0;
-    out.m[3][3] = 1.0f;
-
-    //return the matrix
-    return out;
+    //return the final transformation matrix
+    return mat4(
+        u.x, u.y, u.z, -(eye * u),
+        v.x, v.y, v.z, -(eye * v),
+        n.x, n.y, n.z, -(eye * n),
+        0,0,0,1
+    );
 }
 
-vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
+vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
 {
     //create a rotation quaternion from the vector input and the angle
-    Quaternion RotationQ = Quaternion(angle, v);
+    Quaternion RotationQ = Quaternion(angle, axis);
 
     //conjugate the rotation quaternion
     Quaternion ConjugateQ = RotationQ.conjugate();
 
     //do some quaternion magic, I don't understand this part compleatly
-    Quaternion W = (RotationQ * target) * ConjugateQ;
+    Quaternion W = (RotationQ * v) * ConjugateQ;
 
     //return the vector component of the quaternions
     return vec3(W.x,W.y,W.z);
@@ -394,4 +372,81 @@ float glgeMin(float value, float max)
 {
     //if the value is less than max, return the value, else max
     return (max >= value) ? max : value;
+}
+
+Quaternion glgeCreateRotationQuaternion(float angle, vec3 axis)
+{
+    //articel to check the math: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    //create the quaternion to return
+    Quaternion q;
+    //pre-calculate the sin of the half angle, so it is only calculate once
+    float sinh = std::sin(angle/2.f);
+    //set the angle
+    q.w = std::cos(angle / 2.f);
+    //calcualte the axis part of the quaternion
+    q.x = sinh * axis.x;
+    q.y = sinh * axis.y;
+    q.z = sinh * axis.z;
+    //return the finished quaternion
+    return q;
+}
+
+Quaternion glgeEulerToQuaternion(vec3 rot)
+{
+    //math: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    //pre-calculate all posibilitys for sin and cosin
+    float cr = std::cos(rot.x * 0.5);
+    float sr = std::sin(rot.x * 0.5);
+    float cp = std::cos(rot.y * 0.5);
+    float sp = std::sin(rot.y * 0.5);
+    float cy = std::cos(rot.z * 0.5);
+    float sy = std::sin(rot.z * 0.5);
+    //create the quaternion to return
+    Quaternion q;
+    //calculate the quaternion from the sin and cos precalculations
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+    //return the quaternion
+    return q;
+}
+
+Quaternion glgeEulerToQuaternion(float x, float y, float z)
+{
+    //cast to another function
+    return glgeEulerToQuaternion(vec3(x,y,z));
+}
+
+vec3 glgeQuaternionToEuler(Quaternion q)
+{
+    //math: https://danceswithcode.net/engineeringnotes/quaternions/quaternions.html
+    //pre-compute this, it gets used twice
+    float tmp = q.w*q.w - q.x*q.x - q.y*q.y - q.z*q.z;
+    //calculate the rotation around the x axis
+    float x = std::atan2(2*(q.w*q.x - q.y*q.z),tmp);
+    //calculate the rotation around the y axis
+    float y = std::asin(2*(q.w*q.y - q.x*q.z));
+    //calculate the rotation around the z axis
+    float z = std::atan2(2*(q.w*q.z - q.x*q.y),tmp);
+    //return the finished rotations as vector
+    return vec3(x,y,z);
+}
+
+vec3 glgeAngleToDir(vec3 rot)
+{
+    //convert the inputed rotation to a quaternion
+    Quaternion euler = glgeEulerToQuaternion(rot);
+    //rotate the z-axis as quaternion around the point
+    Quaternion q = euler * Quaternion(0,0,0,1) * euler.invert();
+    //extract the direction vector
+    vec3 dir = vec3(q.x,q.y,q.z);
+    //return the extracted direction
+    return dir;
+}
+
+vec3 glgeAngleToDir(float x, float y, float z)
+{
+    //cast to another function
+    return glgeAngleToDir(vec3(x,y,z));
 }

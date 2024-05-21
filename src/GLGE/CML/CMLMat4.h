@@ -142,6 +142,15 @@ public:
      * @param s the scalr to scale with
      */
     void operator*=(float s);
+    /**
+     * @brief compare two matrices
+     * 
+     * @param mat the matrix to compare with
+     * 
+     * @return true : both matrices are equal | 
+     * @return false : the matrices are different
+     */
+    bool operator==(mat4 mat);
 };
 
 #endif

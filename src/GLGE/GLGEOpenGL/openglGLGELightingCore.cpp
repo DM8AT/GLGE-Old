@@ -68,8 +68,9 @@ Light::Light(vec3 pos, vec3 dir, unsigned int type, vec3 col, float angle, float
     this->lightDat.color.w = intensity;
     //store the direction
     this->lightDat.dir = dir;
-    //store the angle
+    //store the angles
     this->lightDat.angle = angle;
+    this->lightDat.intAngle = 0;
 
     //setup the shadow map
     this->setupShadowMap();
@@ -86,6 +87,9 @@ Light::Light(float x, float y, float z, float r, float g, float b, float intensi
     this->lightDat.color.w = intensity;
     //specify the light as a point light
     this->lightDat.type = GLGE_LIGHT_SOURCE_TYPE_POINT;
+
+    //setup the shadow map
+    this->setupShadowMap();
 }
 
 //set the position of the light source
@@ -324,6 +328,8 @@ void Light::decode(Data data)
 {
     //read the own data
     this->lightDat = *(LightData*)data.readBytes(sizeof(this->lightDat));
+    //setup the shadow map
+    this->setupShadowMap();
     //say that the light needs to be updated
     this->needsUpdate = true;
 }
@@ -331,7 +337,7 @@ void Light::decode(Data data)
 mat4 Light::getLightMat()
 {
     //return the light space matrix
-    return mat4(this->lightSpaceMat);
+    return mat4(this->lightDat.lightSpaceMat);
 }
 
 void Light::makeCurrentShadowCaster()
@@ -411,9 +417,9 @@ void Light::setupShadowMap()
     //set the size of the texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     //set simple text parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
     //create a new framebuffer
@@ -432,6 +438,10 @@ void Light::setupShadowMap()
         GLGE_THROW_ERROR("Failed to create framebuffer for shadow mapping")
     }
 
+    //get the handler of the texture
+    this->lightDat.shadowMap = glGetTextureHandleARB(this->shadowDepth);
+    //make the handler usefull
+    glMakeTextureHandleResidentARB(this->lightDat.shadowMap);
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
     //unbind the framebuffer
@@ -442,42 +452,35 @@ void Light::setupShadowMap()
 
 void Light::updateLightMat()
 {
-    //store a vector for the y axis
-    vec3 yaxis = vec3(0,1,0);
-    //start rotation things
-    //calculate the view vector
-    //setup the vector to face right
-    vec3 view = vec3(1,0,0);
-    //rotathe the vector around the y axis by the x rotation amount
-    view = glgeRotateVector(this->lightDat.dir.x,yaxis, view);
-    //normaise the vector
-    view.normalize();
-
-    //rotate the view vector and calculate U
-    //calculate the cross product of the yaxis and the view vector
-    vec3 U = view.cross(yaxis);
-    //normalise the U vector
-    U.normalize();
-    //rotate the view vector around U by the rotation on the y axis
-    view = glgeRotateVector(this->lightDat.dir.y, U, view);
-    
-    //setup the vectors
-    //N is equal to the view vector
-    vec3 N = view;
-    //noralise N
-    N.normalize();
-
-    //V is the cross product of U and N. Both are normalised, so no normalistion needed
-    vec3 V = U.cross(N);
-    V = glgeRotateVector(this->lightDat.dir.z, U, V);
-    V.normalize();
-
-    //setup the view matrix
-    //IMPORTANT: the vectors are in reversd order!
-    mat4 rotMat =  mat4(U.z,U.y,U.x,0,
-                        V.z,V.y,V.x,0,
-                        N.z,N.y,N.x,0,
-                        0,  0,  0,  1);
+    //create the rotation matrix
+    mat4 rotMat;
+    //check if the light faces directly down
+    if (this->lightDat.dir == vec3(0,-1,0))
+    {
+        //use a pre-build matrix, because the calculations will break
+        rotMat = mat4(
+            1,0,0,0,
+            0,0,1,0,
+            0,1,0,0,
+            0,0,0,1
+        );
+    }
+    //check if the light faces straigt up
+    else if(this->lightDat.dir == vec3(0,1,0))
+    {
+        //use a pre-build matrix, because the calculations will break
+        rotMat = mat4(
+            1,0,0,0,
+            0,0,1,0,
+            0,-1,0,0,
+            0,0,0,1
+        );
+    }
+    else
+    {
+        //calculate the roataion matrix
+        rotMat = glgeLookAt(vec3(0),this->lightDat.dir);
+    }
 
     mat4 transfMat = mat4(1,0,0,-this->lightDat.pos.x,
                           0,1,0,-this->lightDat.pos.y,
@@ -497,18 +500,20 @@ void Light::updateLightMat()
         //calculate the z-range
         float zRange = far - near;
         //use the full angle of the light as the field of view
-        float tHF = std::tan((this->lightDat.angle));
+        float tHF = std::tan(this->lightDat.angle);
         //build a perspective projection matrix
         projMat =  mat4(1.f/tHF, 0.f, 0.f, 0.f,
                         0.f, 1/tHF, 0.f, 0.f,
                         0.f, 0.f, (-near - far)/zRange, (2.f*far * near) / zRange,
                         0.f, 0.f, 1.f, 0.f);
-
-        glActiveTexture(GL_TEXTURE7);
     }
 
+    //get the old light space matrix
+    mat4 oldLMat = this->lightDat.lightSpaceMat;
     //store the light space matrix
-    this->lightSpaceMat = (projMat * rotMat * transfMat);
+    this->lightDat.lightSpaceMat = (projMat * rotMat * transfMat);
+    //say that the light sould update if the matrix changed
+    this->needsUpdate = oldLMat == this->lightDat.lightSpaceMat;
 }
 
 void glgeAddGlobalLighSource(Light* l)

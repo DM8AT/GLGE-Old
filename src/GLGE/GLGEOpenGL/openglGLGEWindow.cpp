@@ -475,7 +475,7 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     this->defaultImageShader.recalculateUniforms();
 
     //create the shadow shader
-    this->shadowShader = Shader("src/Shaders/shadowShader.vert", std::string("#version 330 core\n;void main(){}"));
+    this->shadowShader = Shader("src/Shaders/shadowShader.vert", std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
     //add a uniform for the light space matrix
     this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
     //add a uniform for the model matrix
@@ -609,8 +609,6 @@ void Window::draw()
     glDisable(GL_BLEND);
     //set the clear color
     glClearColor(0,0,0,0);
-    //bind the shadow mapping framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, this->shadowFBO);
     //loop over all light sources
     for (size_t i = 0; i < this->lights.size(); i++)
     {

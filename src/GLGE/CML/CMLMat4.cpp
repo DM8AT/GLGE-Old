@@ -155,3 +155,21 @@ void mat4::operator*=(float s)
     }
     *this = t;
 }
+
+bool mat4::operator==(mat4 mat)
+{
+    //first say that both are equal
+    bool equals = true;
+    //loop over all columns
+    for (int x = 0; x < 4; x++)
+    {
+        //loop over all rows
+        for (int y = 0; y < 4; y++)
+        {
+            //check if a difference is or was found
+            equals = equals && (this->m[x][y] == mat.m[x][y]);
+        }
+    }
+    //return if both are equal
+    return equals;
+}
