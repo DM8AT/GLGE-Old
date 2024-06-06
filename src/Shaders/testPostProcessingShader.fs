@@ -101,6 +101,7 @@ void posterization(inout vec3 col)
 //settings for the crt effect
 int crtLineAmount = 0;
 int crtLineSize = 0;
+float crtLineOpaquness = 1.f;
 //compute the crt effect
 float CRTscanlines()
 {
@@ -109,7 +110,7 @@ float CRTscanlines()
     //mod the y position by the line amount
     int modPY = py % crtLineAmount;
     //use the step function to determin wich lines are shown and wich not
-    return step(crtLineSize, modPY);
+    return 1.f - clamp((1.f - step(crtLineSize, modPY)) - (1.f - crtLineOpaquness), 0.f, 1.f);
 }
 
 void main()
