@@ -243,6 +243,7 @@ void loadIncludeDefaults()
 {
     //the default for a light structure
     glgeIncludeDefaults["<glgeLightStructure>"] = flattenString({
+"\n#ifndef glgeLight\n"
 "struct glgeLight",
 "{",
 "vec4 color;",
@@ -257,6 +258,7 @@ void loadIncludeDefaults()
 "uvec2 shadowMap;",
 "int type;",
 "};"
+"\n#endif\n"
     });
     //the default structure for a pixel
     glgeIncludeDefaults["<glgePixelStructure>"] = flattenString({
@@ -387,5 +389,58 @@ void loadIncludeDefaults()
 "    return col;",
 "}",
 "/*GLGE LIGHT EVALUATION FUNCTION END*/"
+    });
+    //the way to include the camera data
+    glgeIncludeDefaults["<glgeCamera>"] = flattenString({
+"layout (std140, binding = 1) uniform glgeCameraData",
+"{",
+"    mat4 glgeCamMat;",
+"    mat4 glgeProjMat;",
+"    mat4 glgeCamTransfMat;",
+"    mat4 glgeCamRotMat;",
+"    vec4 glgeCameraPosAndFov;",
+"    vec4 glgeCameraRotAndFar;",
+"    float glgeNear;",
+"};\n",
+"float glgeFar = glgeCameraRotAndFar.w;\n",
+"vec3 glgeCameraRot = glgeCameraRotAndFar.xyz;\n",
+"float glgeFov = glgeCameraPosAndFov.w;\n",
+"vec3 glgeCameraPos = glgeCameraPosAndFov.xyz;\n",
+    });
+    //the way to get the current object data
+    glgeIncludeDefaults["<glgeObject>"] = flattenString({
+"layout (std140, binding = 0) uniform glgeObjectData",
+"{",
+"    mat4 glgeModelMat;",
+"    mat4 glgeRotMat;",
+"    int glgeObjectUUID;",
+"};",
+    });
+    //the way to get the current material data
+    glgeIncludeDefaults["<glgeMaterial>"] = flattenString({
+"layout (std140, binding = 2) uniform glgeMaterialData",
+"{",
+"    vec4 glgeColor;",
+"    float glgeRoughness;",
+"    float glgeMetalic;",
+"    int glgeLit;",
+"    int glgeAmbientMapActive;",
+"    int glgeNormalMapActive;",
+"    int glgeRoughnessMapActive;",
+"    int glgeMetalicMapActive;",
+"    uvec2 glgeAmbientMap;",
+"    uvec2 glgeNormalMap;",
+"    uvec2 glgeRoughnessMap;",
+"    uvec2 glgeMetalicMap;",
+"};",
+    });
+    //the way to get the light data
+    glgeIncludeDefaults["<glgeLights>"] = flattenString({
+"#include <glgeLightStructure>\n"
+"layout (std140, binding=3) uniform glgeLightData",
+"{",
+"    int glgeActiveLights;",
+"    layout(offset = 16) glgeLight glgeLights[128];",
+"};",
     });
 }

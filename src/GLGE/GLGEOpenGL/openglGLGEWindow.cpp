@@ -161,13 +161,17 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glGenFramebuffers(1, &this->mainFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
 
-    //generate the Render Buffer
-    glGenRenderbuffers(1, &this->mainRenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, this->mainRenderbuffer);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->size.x, this->size.y);
-    //attach an depth stencil
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->mainRenderbuffer);
+    //generate the texture for the depth buffer
+    glGenTextures(1, &this->mainDepthTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainDepthTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, this->size.x, this->size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->mainDepthTex, 0);
 
     //generate the texture for the frame buffer
     glGenTextures(1, &this->mainAlbedoTex);
@@ -176,8 +180,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->mainAlbedoTex, 0);
     //unbind the texture
@@ -190,8 +194,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, this->mainNormalTex, 0);
     //unbind the texture
@@ -204,8 +208,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, this->mainPosTex, 0);
 
@@ -216,8 +220,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, this->mainRMLTex, 0);
 
@@ -228,8 +232,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, this->mainOutTex, 0);
 
@@ -240,8 +244,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, this->mainEIDATex, 0);
 
@@ -253,8 +257,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, this->mainSolidTex, 0);
 
@@ -265,8 +269,8 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     //bind the texture to the frame buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, GL_TEXTURE_2D, this->mainTransparentAccumTex, 0);
 
@@ -1691,13 +1695,11 @@ void Window::resizeWindow(int width, int height)
     
     //update all the renderbuffer sizes
 
-    //update the window size of the frame buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, this->mainRenderbuffer);
-    //setup the storage for the render buffer
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->size.x, this->size.y);
+    //update the render texture parameters
+    glBindTexture(GL_TEXTURE_2D, this->mainDepthTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, this->size.x, this->size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-    //unbind the renderbuffer
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
     //update the render texture parameters
     glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
     //set the texture parameters so it dosn't loop around the screen
@@ -1822,14 +1824,18 @@ void Window::getDefaultUniformsFromPostProcessingShader(Shader* shader)
         //else, get the main image variable from the shader to the post processing texture
         shader->setCustomTexture("glgeMainImage", this->postProcessingTex);
     }
-    //get the position map from the post processing shader
+    //get the albedo map from the post processing shader
     shader->setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
-    //get the position map from the post processing shader
+    //get the normal map from the post processing shader
     shader->setCustomTexture("glgeNormalMap", this->mainNormalTex);
     //get the position map from the post processing shader
     shader->setCustomTexture("glgePositionMap", this->mainPosTex);
-    //get the position map from the post processing shader
+    //get the roughness, metalic and lit map from the post processing shader
     shader->setCustomTexture("glgeRoughnessMap", this->mainRMLTex);
+    //get the object data map from the shader
+    shader->setCustomTexture("glgeObjectDataMap", this->mainEIDATex);
+    //get the depth map from the post processing shader
+    shader->setCustomTexture("glgeDepthMap", this->mainDepthTex);
     //pass the window size to the shader
     shader->setCustomVec2("glgeWindowSize", this->size);
 }

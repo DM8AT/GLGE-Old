@@ -5,25 +5,8 @@ layout (location = 1) in vec4 vColor;
 layout (location = 2) in vec2 vTexcoord;
 layout (location = 3) in vec3 vNormal;
 
-layout (std140, binding = 0) uniform glgeObjectData
-{
-    mat4 glgeModelMat;
-    mat4 glgeRotMat;
-    int glgeObjectUUID;
-};
-
-layout (std140, binding = 1) uniform glgeCameraData
-{
-    mat4 glgeCamMat;
-    mat4 glgeProjMat;
-    mat4 glgeCamTransfMat;
-    mat4 glgeCamRotMat;
-    vec3 glgeCameraPos;
-    vec3 glgeCameraRot;
-    float glgeNear;
-    float glgeFar;
-    float glgeFov;
-};
+#include <glgeObject>
+#include <glgeCamera>
 
 layout (std140, binding = 4) buffer glgeModelMatrices
 {

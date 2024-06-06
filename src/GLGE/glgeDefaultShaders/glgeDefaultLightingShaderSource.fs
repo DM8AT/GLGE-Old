@@ -13,26 +13,9 @@ uniform sampler2D glgeNormalMap;
 uniform sampler2D glgePositionMap;
 uniform sampler2D glgeRoughnessMap;
 
-layout (std140, binding = 1) uniform glgeCameraData
-{
-    mat4 glgeCamMat;
-    mat4 glgeProjMat;
-    mat4 glgeCamTransfMat;
-    mat4 glgeCamRotMat;
-    vec3 glgeCameraPos;
-    vec3 glgeCameraRot;
-    float glgeNear;
-    float glgeFar;
-    float glgeFov;
-};
-
+#include <glgeCamera>
 #include <glgeLightEvaluationFunction>
-
-layout (std140, binding=3) uniform glgeLightData
-{
-    int glgeActiveLights;
-    layout(offset = 16) glgeLight glgeLights[128];
-};
+#include <glgeLights>
 
 void main()
 {

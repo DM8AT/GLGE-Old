@@ -743,14 +743,14 @@ private:
         mat4 rotMat;
         //store the camera position
         vec3 pos;
-        //store the camera rotation
-        vec3 rot;
-        //store the near clipping plane
-        float near;
-        //store the far clipping plane
-        float far;
         //store the field of view
         float fov;
+        //store the camera rotation
+        vec3 rot;
+        //store the far clipping plane
+        float far;
+        //store the near clipping plane
+        float near;
     };
     //store the right direction of the camera
     vec4 right = vec4(1,0,0,0);

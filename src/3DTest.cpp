@@ -308,8 +308,6 @@ void floorSetup()
     grassFloor = new Object(m);
 
     //an shader can be asigned to the object, but it is no longer necesery. 
-        //then, an shader is asigned to the grass floor. A shader is nececery, because else the objects could not be 3D. 
-        //grassFloor.setShader(GLGE_DEFAULT_3D_SHADER);
     //then create a material for the grass floor
     Material* grassFloorMat = new Material("assets/grass.png", 0.2);
     //apply the material to the grass floor
@@ -505,7 +503,7 @@ void run3Dexample()
     /////////
     //BLOOM//
     /////////
-
+/*
     //bind a post processing funciton for bloom calculation
     glgeAddCustomPostProcessingFunc(calculateBloom);
     //setup the first render target for the blure
@@ -535,7 +533,7 @@ void run3Dexample()
     //set the uniform for the texture map multiplyer
     upSample->setCustomInt("sampleMult", 1);
     //recalculate the uniform variables
-    upSample->recalculateUniforms();
+    upSample->recalculateUniforms();*/
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

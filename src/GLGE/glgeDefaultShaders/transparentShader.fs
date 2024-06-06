@@ -15,41 +15,9 @@ in vec2 texCoord;
 in vec3 normal;
 in vec3 currentPos;
 
-layout (std140, binding = 0) uniform glgeObjectData
-{
-    mat4 glgeModelMat;
-    mat4 glgeRotMat;
-    int glgeObjectUUID;
-};
-
-layout (std140, binding = 1) uniform glgeCameraData
-{
-    mat4 glgeCamMat;
-    mat4 glgeProjMat;
-    mat4 glgeCamTransfMat;
-    mat4 glgeCamRotMat;
-    vec3 glgeCameraPos;
-    vec3 glgeCameraRot;
-    float glgeNear;
-    float glgeFar;
-    float glgeFov;
-};
-
-layout (std140, binding = 2) uniform glgeMaterialData
-{
-    vec4 glgeColor;
-    float glgeRoughness;
-    float glgeMetalic;
-    int glgeLit;
-    int glgeAmbientMapActive;
-    int glgeNormalMapActive;
-    int glgeRoughnessMapActive;
-    int glgeMetalicMapActive;
-    uvec2 glgeAmbientMap;
-    uvec2 glgeNormalMap;
-    uvec2 glgeRoughnessMap;
-    uvec2 glgeMetalicMap;
-};
+#include <glgeObject>
+#include <glgeCamera>
+#include <glgeMaterial>
 
 uniform bool glgePass;
 
@@ -68,12 +36,7 @@ vec3 pos;
 float metallic = 0.f;
 
 #include <glgeLightEvaluationFunction>
-
-layout (std140, binding=3) uniform glgeLightData
-{
-    int glgeActiveLights;
-    glgeLight glgeLights[128];
-};
+#include <glgeLights>
 
 void main()
 {

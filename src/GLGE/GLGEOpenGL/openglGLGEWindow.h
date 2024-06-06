@@ -1034,8 +1034,6 @@ private:
     */
     //store the framebuffer for shadow mapping
     unsigned int shadowFBO = 0;
-    //store the depth texture for shadow mapping
-    unsigned int shadowDepth = 0;
     //store the screen space textures
     unsigned int shadowTex = 0;
     //store the data for all the lights
@@ -1080,8 +1078,6 @@ private:
     */
     //store the main framebuffer
     unsigned int mainFramebuffer = 0;
-    //store the main renderbuffer
-    unsigned int mainRenderbuffer = 0;
     //store the albedo texture
     unsigned int mainAlbedoTex = 0;
     //store the normal texture
@@ -1098,6 +1094,8 @@ private:
     unsigned int mainSolidTex = 0;
     //store the transparent accumulation texture
     unsigned int mainTransparentAccumTex = 0;
+    //store the depth texture
+    unsigned int mainDepthTex = 0;
 
     /*
         Last Tick Framebuffer
