@@ -479,7 +479,7 @@ Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
     this->defaultImageShader.recalculateUniforms();
 
     //create the shadow shader
-    this->shadowShader = Shader("src/Shaders/shadowShader.vert", std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
+    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
     //add a uniform for the light space matrix
     this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
     //add a uniform for the model matrix
@@ -735,11 +735,17 @@ void Window::draw()
     //disable depth testing
     glDisable(GL_DEPTH_TEST);
 
+    //check if a pre lighting pass function is bound
+    if (this->preLightPass != NULL)
+    {
+        //call the function
+        (*this->preLightPass)();
+    }
+
     //check if lighting should be applied
     if ((int)lights.size() != 0)
     {
         //if it needs, apply the lighting shader
-
         //bind the screen rect
         this->bindScreenRect();
         //bind the lighting shader
@@ -927,6 +933,8 @@ void Window::draw()
     {
         //bind the light framebuffer for reading
         glBindFramebuffer(GL_READ_FRAMEBUFFER, this->mainFramebuffer);
+        //tell it to read from color attachment 4
+        glReadBuffer(GL_COLOR_ATTACHMENT4);
         //bind the default fbo for drawing
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         //copy the framebuffers
@@ -1293,6 +1301,42 @@ void Window::setExitFunc(void (*func)())
     this->hasExitFunc = true;
 }
 
+void Window::setPreLightingPassFunc(void (*func)())
+{
+    
+    //check if an error occured
+    bool error = false;
+    if(func == nullptr)
+    {
+        //print an error
+        if(glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_FUNC_IS_NULLPOINTER);
+        }
+        //say that an error occured
+        error = true;
+    }
+
+    //if an error occured, exit
+    if(error)
+    {
+        //print an exit message
+        if(glgeErrorOutput)
+        {
+            std::cerr << GLGE_ERROR_STR_BIND_MAIN_CALLBACK << "\n";
+        }
+        //stop the program
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
+    }
+
+    //set the func
+    this->preLightPass = func;
+}
+
 void (*Window::getDrawFunc())()
 {
     //return the function, if none is bound, return 0
@@ -1321,6 +1365,12 @@ void (*Window::getExitFunc())()
 {
     //return the function, if none is bound, return 0
     return this->hasExitFunc ? this->onExit : NULL;
+}
+
+void (*Window::getPreLightingFunv())()
+{
+    //return the function pointer
+    return this->preLightPass;
 }
 
 void Window::callDrawFunc()
@@ -1965,6 +2015,12 @@ unsigned int Window::getLastFrame()
 {
     //return the last frame texture
     return this->lastTickTex;
+}
+
+unsigned int Window::getDepthTex()
+{
+    //return the depth map
+    return this->mainDepthTex;
 }
 
 void Window::setFullscreenMode(bool isFullscreen)
@@ -2826,4 +2882,62 @@ LightData* Window::setLightData(LightData data)
     this->lightCount++;
     //return the pointer
     return ret;
+}
+
+int Window::getId()
+{
+    //return the id
+    return this->id;
+}
+
+
+Window* glgeBindMainWindow(Window* window, bool replace)
+{
+    //check if the window is NULL
+    if (!window)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Tried to set a nullpointer as main window")
+        //stop the function
+        return NULL;
+    }
+    //start the window
+    window->start();
+    //make this the current window
+    window->makeCurrent();
+    //check if a window is allready bound
+    if (glgeHasMainWindow)
+    {
+        //store the old main window index
+        int idx = glgeMainWindowIndex;
+        //check if the window should be replased
+        if (replace)
+        {
+            //store the new main window index
+            glgeMainWindowIndex = window->getId();
+        }
+        else
+        {
+            //check if warning output is enabled
+            if (glgeWarningOutput)
+            {
+                //print a warning
+                printf("[GLGE WARNING] Trying to replace the main window, but replace isn't enabled\n");
+            }
+        }
+        //stop the function
+        return glgeWindows[idx];
+    }
+    //set the window
+    glgeMainWindowIndex = window->getId() - glgeWindowIndexOffset;
+    //say that a main window is bound
+    glgeHasMainWindow = true;
+    //return NULL
+    return NULL;
+}
+
+Window* glgeGetMainWindow()
+{
+    //return the pointer belonging to the main window
+    return glgeWindows[glgeMainWindowIndex];
 }

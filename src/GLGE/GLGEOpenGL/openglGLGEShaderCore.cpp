@@ -46,17 +46,13 @@ Shader::Shader(const char* vertexShaderFile, const char* fragmentShaderFile)
     readFile(fragmentShaderFile, frag);
 
     //create the shader
-    *this = Shader(vert, frag);
+    this->super(vert, frag);
 }
 
 Shader::Shader(std::string vertexShaderData, std::string fragmentShaderData)
 {
-    //store the vertex shader source
-    this->src.vertex = vertexShaderData;
-    //store the fragment shader source
-    this->src.fragment = fragmentShaderData;
-    //set the shader store variable to the compiled shader from the strings
-    this->shader = glgeCompileShader(vertexShaderData, fragmentShaderData);
+    //cast to super constructor
+    this->super(vertexShaderData, fragmentShaderData);
 }
 
 Shader::Shader(const char* shaderFile, unsigned int type)
@@ -71,13 +67,13 @@ Shader::Shader(const char* shaderFile, unsigned int type)
     if (type == GLGE_FRAGMENT_SHADER)
     {
         //set the shader store variable to the compilation of an empty vertex shader and the inputed data
-        *this = Shader(GLGE_EMPTY_VERTEX_SHADER, data);
+        this->super(GLGE_EMPTY_VERTEX_SHADER, data);
     }
     //else, if the shader is an vertex shader
     else if (type == GLGE_VERTEX_SHADER)
     {
         //set the shader store variable to the copilation of the inputed file and an empty fragment shader
-        *this = Shader(data, GLGE_EMPTY_FRAGMENT_SHADER);
+        this->super(data, GLGE_EMPTY_FRAGMENT_SHADER);
     }
     //if the type is invalide
     else
@@ -132,7 +128,7 @@ Shader::Shader(std::string data, const char* f)
     std::string d;
     readFile(f, d);
 
-    *this = Shader(data, d);
+    this->super(data, d);
 }
 
 Shader::Shader(const char* f, std::string data)
@@ -140,13 +136,13 @@ Shader::Shader(const char* f, std::string data)
     std::string d;
     readFile(f, d);
 
-    *this = Shader(d, data);
+    this->super(d, data);
 }
 
 Shader::Shader(const char* vs, const char* gs, const char* fs)
 {
     //set this to a new shader with vertex and fragment shader
-    *this = Shader(vs, fs);
+    this->super(vs, fs);
     //add the geometry shader
     this->addGeometryShader(gs);
 }
@@ -1171,7 +1167,7 @@ void Shader::decode(Data data)
     //delete this shader
     this->deleteShader();
     //construct a new shader
-    *this = Shader(vert, frag);
+    this->super(vert, frag);
     //add a geometry shader
     this->addGeometryShader(data.readString());
 
@@ -1419,6 +1415,16 @@ void Shader::encodeHook(Data*)
 void Shader::decodeHook(Data*)
 {
     //override here
+}
+
+void Shader::super(std::string vs, std::string fs)
+{
+    //store the vertex shader source
+    this->src.vertex = vs;
+    //store the fragment shader source
+    this->src.fragment = fs;
+    //set the shader store variable to the compiled shader from the strings
+    this->shader = glgeCompileShader(vs, fs);
 }
 
 /////////////

@@ -166,9 +166,16 @@ public:
     /**
      * @brief set a function that is called once the window closes
      * 
-     * @param initFunc a function pointer to the windows exit function
+     * @param exitFunc a function pointer to the windows exit function
      */
     void setExitFunc(void (*exitFunc)());
+
+    /**
+     * @brief set a function that is called once the scene geometry is drawn, the lighting framebuffer is active but before the lighting pass is called
+     * 
+     * @param preLightingPassFunc the function to call
+     */
+    void setPreLightingPassFunc(void (*preLightingPassFunc)());
 
     /**
      * @brief Get the Draw Func object
@@ -204,6 +211,13 @@ public:
      * @return a function pointer to the function
      */
     void (*getExitFunc())();
+
+    /**
+     * @brief Get the functino that is called before the lighting pass
+     * 
+     * @return a function pointer to the function
+     */
+    void (*getPreLightingFunv())();
 
     /**
      * @brief execute the draw function, if one is bound
@@ -475,6 +489,13 @@ public:
      * @return unsigned int the last frame texture on the graphics card
      */
     unsigned int getLastFrame();
+
+    /**
+     * @brief Get the depth map
+     * 
+     * @return unsigned int the depth map
+     */
+    unsigned int getDepthTex();
 
     /**
      * @brief Set the Fullscreen Mode for the window
@@ -938,6 +959,13 @@ public:
      */
     LightData* setLightData(LightData data);
 
+    /**
+     * @brief Get the window id
+     * 
+     * @return int the window id
+     */
+    int getId();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -991,15 +1019,17 @@ private:
     //store if an exit function is bound
     bool hasExitFunc = false;
     //store the draw func
-    void (*drawFunc)();
+    void (*drawFunc)() = NULL;
     //store the tick func
-    void (*tickFunc)();
+    void (*tickFunc)() = NULL;
     //store the init func
-    void (*initFunc)();
+    void (*initFunc)() = NULL;
     //store the resize func
-    void (*resizeFunc)(int, int);
+    void (*resizeFunc)(int, int) = NULL;
     //store the on exit func
-    void (*onExit)();
+    void (*onExit)() = NULL;
+    //store the pre light pass function
+    void (*preLightPass)() = NULL;
     //store the main camera
     Camera* mainCamera = NULL;
     //get if the window is currently drawing
@@ -1163,5 +1193,22 @@ private:
     //store if a custom transparent combination shader is bound
     bool customTransparentCombineShader = false;
 };
+
+/**
+ * @brief bind a window as the main window
+ * @warning this will start the window, the main window must be running!
+ * 
+ * @param window a pointer to the new main window
+ * @param replace say if the current main window should be replaced
+ * @return Window* a pointer to the old main window or NULL, if none was bound
+ */
+Window* glgeBindMainWindow(Window* window, bool replace = false);
+
+/**
+ * @brief get the current main window
+ * 
+ * @return Window* a pointer to the main window
+ */
+Window* glgeGetMainWindow();
 
 #endif

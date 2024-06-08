@@ -531,6 +531,14 @@ protected:
     std::map<std::string, unsigned int> mat4Locs;
     //store the locations of the custom textures
     std::map<std::string, unsigned int> customTextureLocs;
+
+    /**
+     * @brief super constructor
+     * 
+     * @param vs the source code for the vertex shader
+     * @param fs the source code for the fragment shader
+     */
+    void super(std::string vs, std::string fs);
 };
 
 /////////////

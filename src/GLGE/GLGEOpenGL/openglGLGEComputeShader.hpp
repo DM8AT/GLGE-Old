@@ -74,6 +74,13 @@ public:
 private:
     //store the source code
     std::string src;
+
+    /**
+     * @brief super constructor for the object
+     * 
+     * @param src the shader source code
+     */
+    void super(std::string src);
 };
 
 #endif 
