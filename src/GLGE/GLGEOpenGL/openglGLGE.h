@@ -33,50 +33,90 @@
 //DEFINES//
 ///////////
 
-//the screen space in pixels, from -halfWidth to halfWidth on x and from -halfHeight to halfHeight on y
+/**
+ * @brief the screen space in pixels, from -halfWidth to halfWidth on x and from -halfHeight to halfHeight on y
+ */
 #define GLGE_SCREEN_SPACE 0
-//relative window coordinates, from 0 to 1 on both axis
+/**
+ * @brief relative window coordinates, from 0 to 1 on both axis
+ */
 #define GLGE_WINDOW_SPACE 1
 
-//Wrist watch
+/**
+ * @brief Wrist watch
+ */
 #define GLGE_CURSOR_STYLE_WAIT 0x0002
-//Simple cross-hair
+/**
+ * @brief Simple cross-hair
+ */
 #define GLGE_CURSOR_STYLE_CROSSHAIR 0x0003
-//a hand to grab
+/**
+ * @brief a hand to grab
+ */
 #define GLGE_CURSOR_STYLE_HAND 0x000B
-//an style like when editing text
+/**
+ * @brief an style like when editing text
+ */
 #define GLGE_CURSOR_STYLE_TEXT 0x0001
-//An cross
+/**
+ * @brief A cross
+ */
 #define GLGE_CURSOR_STYLE_NO 0x000A
-//the cursor is invisible
+/**
+ * @brief the cursor is invisible
+ */
 #define GLGE_CURSOR_STYLE_NONE 0x0BB
-//The default curser image
+/**
+ * @brief The default curser image
+ */
 #define GLGE_CURSOR_STYLE_DEFAULT 0x0000
-//Four pointed arrow pointing north, south, east, and west
+/**
+ * @brief Four pointed arrow pointing north, south, east, and west
+ */
 #define GLGE_CURSOR_STYLE_FOUR_ARROWS 0x0009
-//Double arrow pointing northeast and southwest
+/**
+ * @brief Double arrow pointing northeast and southwest
+ */
 #define GLGE_CURSOR_STYLE_NORTHEAST_SOUTHWEST 0x0006
-//Double arrow pointing north and south
+/**
+ * @brief Double arrow pointing north and south
+ */
 #define GLGE_CURSOR_STYLE_NORTH_SOUTH 0x0008
-//Double arrow pointing northwest and southeast
+/**
+ * @brief Double arrow pointing northwest and southeast
+ */
 #define GLGE_CURSOR_STYLE_NORTHWEST_SOUTHEAST 0x0005
-//Double arrow pointing west and east
+/**
+ * @brief Double arrow pointing west and east
+ */
 #define GLGE_CURSOR_STYLE_WEST_EAST 0x0007
 
-//define the integer limit as unlimited FPS
+/**
+ * @brief define the integer limit as unlimited FPS
+ */
 #define GLGE_FPS_UNLIMITED 2147483647
 
 //define the window flags
 
-//say that the window should be created in high-DPI mode if supported
+/**
+ * @brief say that the window should be created in high-DPI mode if supported
+ */
 #define GLGE_WINDOW_FLAG_ALLOW_HIGHDPI 8192
-//window should be treated as a popup menu
+/**
+ * @brief window should be treated as a popup menu
+ */
 #define GLGE_WINDOW_FLAG_POPUP_MENU 524288
-//window should not be added to the taskbar
+/**
+ * @brief window should not be added to the taskbar
+ */
 #define GLGE_WINDOW_FLAG_SKIP_TASKBAR 65536
-//window should be treated as a tooltip
+/**
+ * @brief window should be treated as a tooltip
+ */
 #define GLGE_WINDOW_FLAG_TOOLTIP 262144
-//window should be treated as a utility window
+/**
+ * @brief window should be treated as a utility window
+ */
 #define GLGE_WINDOW_FLAG_UTILITY 131072
 
 /////////////
@@ -478,7 +518,6 @@ Shader* glgeSetPostProsessingShader(unsigned int shader);
  * @brief set the post-processing shader to an allready existing shader
  * 
  * @param shader the shader object
- * @param int the index in the post processing stack
  */
 int glgeSetPostProsessingShader(Shader* shader);
 

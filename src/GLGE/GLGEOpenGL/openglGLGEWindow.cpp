@@ -11,7 +11,9 @@
 
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
-//say that glew is now included
+/**
+ * @brief say that glew is now included
+*/
 #define _GLGE_GLEW_
 //include glew
 #include <GL/glew.h>
@@ -27,10 +29,17 @@
 #include "openglGLGEDefines.hpp"
 #include "../GLGEIndependend/glgePrivDefines.hpp"
 
-//define the Frame buffer bit amount
+/**
+ * @brief define the Frame buffer bit amount
+*/
 #define GLGE_FRAMEBUFFER_BIT_DEPTH GL_RGB16F
-//define the Frame buffer bit depth for high resolution
+/**
+ * @brief define the Frame buffer bit depth for high resolution
+*/
 #define GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES GL_RGB32F
+/**
+ * @brief define the bit depth for the post processing framebuffer
+*/
 #define GLGE_FRAMEBUFFER_POST_PROCESSING_DEF GL_RGB32F
 
 //include default libs

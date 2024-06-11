@@ -32,31 +32,49 @@
 //include vector
 #include <vector>
 
-//store the active color buffers
+/**
+ * @brief store the active color buffers
+ */
 extern GLenum glgeUsedColorBuffers[];
 
-//store the length of the unsigned buffer array
+/**
+ * @brief store the length of the unsigned buffer array
+ */
 extern unsigned int glgeLenUsedColorBuffers;
 
-//store all the color buffers
+/**
+ * @brief store all the color buffers
+ */
 extern GLenum glgeAllUsedColorBuffers[];
 
-//store the length of all used color buffers
+/**
+ * @brief store the length of all used color buffers
+ */
 extern unsigned int glgeLenAllUsedColorBuffers;
 
-//store how to sample images
+/**
+ * @brief store how to sample images
+ */
 extern GLenum glgeInterpolationMode;
 
-//store the window vector
+/**
+ * @brief store the window vector
+ */
 extern std::vector<Window*> glgeWindows;
 
-//store the current texture unit
+/**
+ * @brief store the current texture unit
+ */
 extern unsigned int glgeTextureUnit;
 
-//store the current light source that is casting shadows
+/**
+ * @brief store the current light source that is casting shadows
+ */
 extern Light* glgeCurrentShadowCaster;
 
-//store the type of the current framebuffer
+/**
+ * @brief store the type of the current framebuffer
+ */
 extern unsigned int glgeCurrentFramebufferType;
 
 #endif

@@ -224,7 +224,12 @@ std::string precompileShaderSource(std::string source, std::vector<std::string> 
     return src;
 }
 
-//flatten a std::vector of strings into one string
+/**
+ * @brief flatten an std::vector down to a string
+ * 
+ * @param strings the strings in an std::vector
+ * @return std::string the final string without newlines
+ */
 std::string flattenString(std::vector<std::string> strings)
 {
     //store the final string

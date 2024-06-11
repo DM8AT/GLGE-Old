@@ -12,7 +12,22 @@
 class dvec4
 {
 public:
-    double x,y,z,w;
+    /**
+     * @brief the x component of the vector
+     */
+    double x,
+    /**
+     * @brief the y component of the vector
+     */
+    y,
+    /**
+     * @brief the z component of the vector
+     */
+    z,
+    /**
+     * @brief the w component of the vector
+     */
+    w;
 
     /**
      * @brief default constructor

@@ -20,19 +20,29 @@
 
 //declare the base lighting shaders
 
-//default Lighting, for not so strong devicesred
+/**
+ * @brief default Lighting, for not so strong devicesred
+ */
 #define GLGE_LIGHT_SHADER_LOW std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 color;in vec2 texCoord;in vec3 normal;in vec3 currentPosition;uniform sampler2D Texture;uniform vec3 cameraPos;vec3 lightColor = vec3(1,1,1);vec3 lightPos = vec3(2,5,0);float ambient = 0.1;float specLight = 0.5;void main(){vec4 col = texture(Texture, texCoord);vec3 Normal = normalize(normal);vec3 lightDir = normalize(lightPos - currentPosition);vec3 viewDir = normalize(cameraPos - currentPosition);float diffuse = max(dot(normal, lightDir), 0.f);vec3 viewDirection = normalize(cameraPos - currentPosition);vec3 reflectionDirection = reflect(-lightDir, Normal);float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16.f);float specular = specAmount * specLight;FragColor = col * vec4(lightColor,1.f) * (diffuse + ambient + specular);FragColor.w = col.w;}")
 
-//define the limit an light sources for the defalut shader
+/**
+ * @brief define the limit an light sources for the defalut shader
+ */
 #define GLGE_LIGHT_SOURCE_MAX 128
 
-//define a light as a single point of light
+/**
+ * @brief define a light as a single point of light
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_POINT 0
 
-//define a light as a single point of light in an direction
+/**
+ * @brief define a light as a single point of light in an direction
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_SPOT 1
 
-//define a light as a light that shines in an direction
+/**
+ * @brief define a light as a light that shines in an direction
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL 2
 
 /**
@@ -40,21 +50,37 @@
  */
 struct LightData
 {
-    //store the light color (w for intensity)
+    /**
+     * @brief store the light color (w for intensity)
+     */
     vec4 color = vec4(0);
-    //store the light direction
+    /**
+     * @brief store the light direction
+     */
     vec3 dir = vec3(0);
-    //store the intense angle
+    /**
+     * @brief store the intense angle
+     */
     float intAngle = 0;
-    //store the light position
+    /**
+     * @brief store the light position
+     */
     vec3 pos = vec3(0);
-    //store the angle
+    /**
+     * @brief store the angle
+     */
     float angle = 0;
-    //store the light position matrix
+    /**
+     * @brief store the light position matrix
+     */
     mat4 lightSpaceMat;
-    //store the handel of the shadow map
+    /**
+     * @brief store the handel of the shadow map
+     */
     uint64_t shadowMap = 0;
-    //store the light source type
+    /**
+     * @brief store the light source type
+     */
     int type = 0;
 };
 
@@ -285,8 +311,6 @@ public:
 
     /**
      * @brief encode the data of this object into some data
-     * 
-     * @param data the encoded data
      */
     Data* encode();
     /**

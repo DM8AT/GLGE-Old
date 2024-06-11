@@ -397,31 +397,63 @@ public:
     virtual void decodeHookEarly(Data* data);
 
 protected:
-    //store the anchor position for the 2D Object
+    /**
+     * @brief store the anchor position for the 2D Object
+     */
     vec2 anchor = vec2(0);
-    //store the mesh for the object
+    /**
+     * @brief store the mesh for the object
+     */
     Mesh2D mesh;
-    //store the transform of the object
+    /**
+     * @brief store the transform of the object
+     */
     Transform2D transf;
-    //store the vertex and index buffer
-    unsigned int VBO=0, IBO=0;
-    //save the shader
+    /**
+     * @brief store the vertex buffer
+     */
+    unsigned int VBO=0, 
+    /**
+     * @brief store the index buffer
+     */
+    IBO=0;
+    /**
+     * @brief save the shader
+     */
     int shader = 0;
-    //store the move matrix location
+    /**
+     * @brief store the move matrix location
+     */
     unsigned int moveMatLoc = 0;
-    //the local matrix to make the object correct
+    /**
+     * @brief the local matrix to make the object correct
+     */
     mat3 moveMat = mat3(1,0,0,
                         0,1,0,
                         0,0,0);
-    //store a texture
+    /**
+     * @brief store a texture
+     */
     unsigned int texture = 0;
-    //say if the object is static
+    /**
+     * @brief say if the object is static
+     */
     bool isStatic = false;
-    //save the length of the vertex and index buffer
-    unsigned int VBOLen=0, IBOLen=0;
-    //store the object UUID
+    /**
+     * @brief save the length of the vertex buffer
+     */
+    unsigned int VBOLen=0, 
+    /**
+     * @brief save the length of the index buffer
+     */
+    IBOLen=0;
+    /**
+     * @brief store the object UUID
+     */
     unsigned int id = 0;
-    //store the window the buffers where created in
+    /**
+     * @brief store the window the buffers where created in
+     */
     int windowID = -1;
 
     /**

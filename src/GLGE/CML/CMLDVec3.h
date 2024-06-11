@@ -13,7 +13,18 @@
 class dvec3
 {
 public:
-    double x,y,z;
+    /**
+     * @brief the x component of the vector of doulbes
+     */
+    double x,
+    /**
+     * @brief the y component of the vector of doubles
+     */
+    y,
+    /**
+     * @brief the z component of the vector of doubles
+     */
+    z;
 
     /**
      * @brief default constructor

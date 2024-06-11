@@ -36,9 +36,13 @@
 // LOCAL VARIABLES //
 /////////////////////
 
-//store the main 2D camera
+/**
+ * @brief store the main 2D camera
+ */
 Camera2D* mainCam;
-//store the default location of the move matrix
+/**
+ * @brief store the default location of the move matrix
+ */
 int glgeDefaultMoveMatLoc;
 
 //OBJECT 2D

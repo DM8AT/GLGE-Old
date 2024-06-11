@@ -130,16 +130,6 @@ int getUniformVar(unsigned int program, const char* name)
     return ret;
 }
 
-
-/**
- * @brief Create a Window
- * 
- * this function is only called internaly in GLGE
- * 
- * @param n the name of the window
- * @param s the size of the window
- * @param p the position of the window
- */
 Window* createWindow(const char* n, vec2 s, vec2 p)
 {
     //check if an window is allready created
@@ -160,7 +150,6 @@ Window* createWindow(const char* n, vec2 s, vec2 p)
     return wptr;
 }
 
-//convert an error code into an string
 char* getGLErrorString(unsigned int error)
 {
     //check for all errors OpenGL has and return theyre name

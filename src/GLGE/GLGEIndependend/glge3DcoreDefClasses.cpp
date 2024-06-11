@@ -30,6 +30,13 @@
 //PRIVATE FUNCTIONS//
 /////////////////////
 
+/**
+ * @brief check if a string contains a double shalsh. This function is used when creating an object from an .obj file
+ * 
+ * @param str the string to check
+ * @return true : the string contains a double slash somewhere | 
+ * @return false : the sting dosn't contain a double slash
+ */
 bool has_double_slash(std::string &str)
 {
     //get the length of the stringt and decreese it by 2
@@ -45,6 +52,14 @@ bool has_double_slash(std::string &str)
     return false;
 }
 
+/**
+ * @brief add a vertex that lies on the unit sphere
+ * 
+ * @param p the un-normalised vertex position
+ * @param color the color of the vertex
+ * @param vertices the allready existing vertices to add to
+ * @return unsigned int the index if the vertex allready exists
+ */
 unsigned int addVertexOnUintSphere(Vertex p, vec4 color, std::vector<Vertex>* vertices)
 {
     //calculate the distance from the middle of the sphere
@@ -88,6 +103,20 @@ unsigned int addVertexOnUintSphere(Vertex p, vec4 color, std::vector<Vertex>* ve
     return (unsigned int) vertices->size()-1;
 }
 
+/**
+ * @brief add a polygon / circle to an allready existing mesh
+ * 
+ * @param vertices the vertices of the allready existing mesh
+ * @param indices the indices of the allready existing mesh
+ * @param numbers the number of points for the polygon / the resolution of the circle
+ * @param col the color for the polygon / circle. Use vec4(-1) for texture coordinates
+ * @param pos a position offset for all vertices
+ * @param flip say if the circle / polygon should be flipped in some way
+ * @param fill say if the circle / polygon should be filled using triangulation
+ * @param sidewaysNormals say if the normals should point sideways rather than upwards
+ * @param texOffset a texture coordinate offset
+ * @param textureMode the mode of the texture coordinates
+ */
 inline void addCircle(std::vector<Vertex>* vertices, std::vector<unsigned int>* indices, unsigned int numbers, vec4 col, vec3 pos = vec3(0), bool flip = false,
                       bool fill = true, bool sidewaysNormals = false, vec2 texOffset = vec2(0,0), unsigned int textureMode = 0)
 {

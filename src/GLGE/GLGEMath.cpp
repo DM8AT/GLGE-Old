@@ -13,7 +13,9 @@
 #include <math.h>
 #include "GLGEIndependend/glgePrivDefines.hpp"
 
-//store the seed for the noise functions
+/**
+ * @brief store the seed for the noise functions
+ */
 unsigned long glgeSeed = 0;
 
 mat4 glgeLookAt(vec3 eye, vec3 center, vec3 up)
@@ -57,20 +59,35 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
 
 //thanks for https://stackoverflow.com/questions/29711668/perlin-noise-generation for help with the noise
 
-  //store the numbers on X and on Y
+  /**
+   * @brief store the numbers on X
+   */
   int numX = 512,
+      /**
+       * @brief store the numbers on Y
+       */
       numY = 512,
-      //store the number of octaves
+      /**
+       * @brief store the number of octaves
+       */
       numOctaves = 7;
-  //store the persistance for heigher-level noise
+  /**
+   * @brief store the persistance for heigher-level noise
+   */
   float persistence = 0.5;
 
-  //define how much prime number trippels are in the list
+  /**
+   * @brief define how much prime number trippels are in the list
+   */
   #define maxPrimeIndex 10
-  //store the current prime index
+  /**
+   * @brief store the current prime index
+   */
   int primeIndex = 0;
 
-  //store a lot of heigh prime numbers
+  /**
+   * @brief store a lot of heigh prime numbers
+   */
   int primes[maxPrimeIndex][3] = {
     { 995615039, 600173719, 701464987 },
     { 831731269, 162318869, 136250887 },
@@ -84,7 +101,14 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
     { 997169939, 842027887, 423882827 }
   };
 
-  //calculate simple noise
+  /**
+   * @brief calculate simplex noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the noise value at the specified position
+   */
   float Noise(int i, int x, int y) {
     //do some magic
     int n = x + y * 57;
@@ -94,7 +118,14 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
     //output a semi-random number
     return 1.0 - (float)(t)/1073741824.0;
   }
-
+  /**
+   * @brief calculate smoothed simplex noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the smoothed noise value
+   */
   float SmoothedNoise(int i, int x, int y) {
     //calculate a lot of noise
     float corners = (Noise(i, x-1, y-1) + Noise(i, x+1, y-1) +
@@ -106,6 +137,14 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
     return corners + sides + center;
   }
 
+  /**
+   * @brief interpolate between two numbers
+   * 
+   * @param a the first number
+   * @param b the second number
+   * @param x the interpolation slider
+   * @return float the interpolated value
+   */
   float Interpolate(float a, float b, float x) {  // cosine interpolation
     //multiply x by pi and calculate the half of 1 minus cosine of ft(x * PI)
     float ft = x * GLGE_PI,
@@ -114,6 +153,14 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
     return  a*(1-f) + b*f;
   }
 
+  /**
+   * @brief even smoother noise than smooth noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the interpolated and smoothed noise
+   */
   float InterpolatedNoise(int i, float x, float y) {
     //store the inputed x as an integer
     int integer_X = x;
@@ -134,6 +181,13 @@ vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
     return Interpolate(i1, i2, fractional_Y);
   }
 
+  /**
+   * @brief value noise
+   * 
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the noise at the sample position
+   */
   float ValueNoise_2D(float x, float y) {
     //set the total to 0
     float total = 0,

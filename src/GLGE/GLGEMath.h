@@ -240,7 +240,7 @@ float glgeMax(float value, float min);
  * @param min the value to compare with
  * @return float the bigger value
  */
-float glgeMin(float value, float max);
+float glgeMin(float value, float min);
 
 /**
  * @brief clamp a float

@@ -11,7 +11,13 @@
 #include "GLGEData.h"
 #include "glgePrivDefines.hpp"
 
+/**
+ * @brief amount of bits in a segment
+ */
 #define SEGMENT_BITS 0x7F
+/**
+ * @brief the first bit of the next segment
+ */
 #define CONTINUE_BITS 0x80
 
 Data::Data()

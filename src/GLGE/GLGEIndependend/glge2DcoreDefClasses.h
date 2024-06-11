@@ -18,32 +18,52 @@
 
 //check if the input for texture coordinates was allready defined
 #ifndef GLGE_PRESET_USE_TEXTURE_COORDINATES
-//define the input for texture coordinates
+/**
+ * @brief define the input for texture coordinates
+ */
 #define GLGE_PRESET_USE_TEXTURE_COORDINATES vec4(-1)
 #endif //GLGE_PRESET_USE_TEXTURE_COORDINATES generation
 //check if the input for a special function was allready defined
 #ifndef GLGE_PRESET_USE_SPECIAL
-//define the input for presets used for special things (like color gradients)
+/**
+ * @brief define the input for presets used for special things (like color gradients)
+ */
 #define GLGE_PRESET_USE_SPECIAL vec4(-2)
 #endif //GLGE_PRESET_USE_SPECIAL define
 
-//check if a define for an empty object allreday exists
+/**
+ * @brief check if a define for an empty object allreday exists
+ */
 #ifndef GLGE_PRESET_EMPTY
-//generate an empty object without any mesh
+/**
+ * @brief generate an empty object without any mesh
+ */
 #define GLGE_PRESET_EMPTY 0
 #endif //GLGE_PRESET_EMPTY creation
-//generate a square
+/**
+ * @brief generate a square
+ */
 #define GLGE_PRESET_SQUARE 1
-//generate a triangle in the unit square
+/**
+ * @brief generate a triangle in the unit square
+ */
 #define GLGE_PRESET_TRIANGLE 2
-//check if the circle allready exists
+/**
+ * @brief check if the circle allready exists
+ */
 #ifndef GLGE_PRESET_CIRCLE
-//genearte an object with an circle as the mesh
+/**
+ * @brief genearte an object with an circle as the mesh
+ */
 #define GLGE_PRESET_CIRCLE 3
 #endif // GLGE_PRESET_CIRCLE generation
-//generate any filled uniform polygon
+/**
+ * @brief generate any filled uniform polygon
+*/
 #define GLGE_PRESET_POLYGON 4
-//generate an arrow
+/**
+ * @brief generate an arrow
+*/
 #define GLGE_PRESET_ARROW 5
 
 //needed librarys
@@ -245,9 +265,13 @@ public:
      */
     Mesh2D(unsigned int preset, unsigned int resolution, vec4 color = vec4(1));
 
-    //store the indices of the mesh
+    /**
+     * @brief store the indices of the mesh
+     */
     std::vector<unsigned int> indices;
-    //store the vertices of the mehs
+    /**
+     * @brief store the vertices of the mehs
+     */
     std::vector<Vertex2D> vertices; 
 };
 

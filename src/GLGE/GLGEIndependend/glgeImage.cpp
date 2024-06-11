@@ -58,6 +58,13 @@ uint8_t* glgeTextureDataToImageData(ivec2 texSize, vec4* texData)
     return data;
 }
 
+/**
+ * @brief store the image data in the file format "ppm"
+ * 
+ * @param file the file to store in
+ * @param imgSize the size of the image
+ * @param imgData the images data
+ */
 void storePPM(const char* file, ivec2 imgSize, uint8_t* imgData)
 {
     //create the file
@@ -111,6 +118,12 @@ void storePPM(const char* file, ivec2 imgSize, uint8_t* imgData)
     f.close();
 }
 
+/**
+ * @brief automaticaly get the file format using the file extension
+ * 
+ * @param file the file to get the format from
+ * @return unsigned int the encoded file format
+ */
 unsigned int getAutoFormat(const char* file)
 {
     //creata a string from the file name

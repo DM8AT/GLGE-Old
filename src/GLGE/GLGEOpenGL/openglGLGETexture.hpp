@@ -17,7 +17,9 @@
 //include the image wraper
 #include "../GLGEIndependend/glgeImage.h"
 
-//define the value for auto-binding
+/**
+ * @brief define the value for auto-binding
+ */
 #define GLGE_TEXTURE_BINDING_AUTO -1
 
 //defines to specify the types

@@ -24,7 +24,14 @@
 // PRIVATE FUNCTIONS //
 ///////////////////////
 
-//create a polygon
+/**
+ * @brief add a polygon / circle to an exisiting mesh
+ * 
+ * @param vertices the allready existing 2D vertices
+ * @param indices the allready existing indices
+ * @param numbers the number of points for the polygon / the resolution of the circle
+ * @param col the color for the polygon / cirlce
+ */
 inline void addCircle(std::vector<Vertex2D>* vertices, std::vector<unsigned int>* indices, unsigned int numbers, vec4 col)
 {
     //store the amount of points
