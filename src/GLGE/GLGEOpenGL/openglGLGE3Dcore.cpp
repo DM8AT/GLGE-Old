@@ -327,7 +327,7 @@ void Object::draw()
         return;
     }
     //check if the current object belongs to the current pass
-    if (!this->isTransparent && glgeWindows[this->windowIndex]->isTranparentPass())
+    if ((!this->isTransparent) && glgeWindows[this->windowIndex]->isTranparentPass())
     {
         //abbort the draw, if not
         return;
@@ -968,16 +968,6 @@ void Object::getUniforms()
         //add the depth and alpha buffer
         this->shader.setCustomTexture("glgeDepthAlbedoBuffer", glgeWindows[this->windowIndex]->getEIDATex());
     }
-    //only add the shadow stuff to solid objects
-    else
-    {
-        //loop over all lights
-        for (int i = 0; i < GLGE_LIGHT_SOURCE_MAX; i++)
-        {
-            //add the uniform for the light space matrix
-            this->shader.setCustomMat4("glgeLightSpaceMat[" + std::to_string(i) + "]", mat4());
-        }
-    }
 
     //get all uniform positions
     this->shader.recalculateUniforms();
@@ -1070,8 +1060,6 @@ void Object::shadowDraw()
     Shader* sShader = glgeWindows[glgeCurrentWindowIndex]->getShadowShader();
     //pass the light matrix
     sShader->setCustomMat4("glgeLightSpaceMat", glgeCurrentShadowCaster->getLightMat());
-    //also store the shadow matrix
-    this->shader.setCustomMat4("glgeLightSpaceMat[" + std::to_string(glgeShadowCasterIndex) + "]", glgeCurrentShadowCaster->getLightMat());
     //activate the shadow shader
     sShader->applyShader();
 

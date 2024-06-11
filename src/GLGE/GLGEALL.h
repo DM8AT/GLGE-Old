@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-03-27
  * 
- * This header-only file includes all GLGE-cores(yes, the math file is ment to be a core)
+ * This header-only file includes all GLGE-cores(yes, the math file is a core)
  * 
  * Current cores:
  * - GLGE.h:

@@ -487,7 +487,7 @@ void glgeRunMainLoop()
                                 break;
                             }
                             //close the window
-                            wptr->close();
+                            delete wptr;
                             //check if the window is the main window
                             if (event.window.windowID-glgeWindowIndexOffset == glgeMainWindowIndex)
                             {
@@ -534,7 +534,7 @@ void glgeRunMainLoop()
             if (close)
             {
                 //close the window
-                glgeWindows[i]->close();
+                delete glgeWindows[i];
                 //check if the window is the main window
                 if (((unsigned int)i == glgeMainWindowIndex))
                 {
@@ -549,7 +549,7 @@ void glgeRunMainLoop()
                             //skip if the window is a nullpointer
                             if (!win) { continue; }
                             //close the window
-                            win->close();
+                            delete win;
                         }
                     }
                 }
@@ -584,8 +584,6 @@ void glgeRunMainLoop()
             wptr->tick();
             //call the draw function
             wptr->draw();
-            //update the window surface
-            SDL_GL_SwapWindow((SDL_Window*)wptr->getSDLWindow());
         }
         //set the mouse wheel to 0
         glgeMouse.mouseWheel = 0;
@@ -1502,25 +1500,6 @@ Shader* glgeGetPostProcessingShader(int index)
     return glgeWindows[glgeMainWindowIndex]->getPostProcessingShader(index);
 }
 
-int glgeGetIndexOfPostProcessingShader(Shader* shader)
-{
-    //check if a window is bound
-    if (!glgeHasMainWindow)
-    {
-        //if not, check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            //if it should, print a warning
-            printf("[GLGE WARNING] can't add get a post processing shader from an main window, if no main window exists\n");
-        }
-        //stop the function
-        return -1;
-    }
-
-    //pass the call to the main window
-    return glgeWindows[glgeMainWindowIndex]->getPostProcessingShaderIndex(shader);
-}
-
 void glgeDeletePostProcessingShader(int index, bool del)
 {
     //check if a window is bound
@@ -1538,30 +1517,6 @@ void glgeDeletePostProcessingShader(int index, bool del)
 
     //pass the call to the main window
     glgeWindows[glgeMainWindowIndex]->removePostProcessingShader(index, del);
-}
-
-void glgeDeletePostProcessingShader(Shader* shader, bool del)
-{
-    //find the index of the shader
-    int index = glgeGetIndexOfPostProcessingShader(shader);
-    //check if the index is -1
-    if (index == -1)
-    {
-        //check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            std::cerr << "[GLGE WARNING] tryed to remove shader that wasn't part of post-processing pipeline" << "\n";
-        }
-        //quit the function
-        return;
-    }
-    else
-    {
-        //call the function to remove by index
-        glgeDeletePostProcessingShader(index, del);
-    }
-    //set the inputed shader to the Nullpointer
-    shader = NULL;
 }
 
 void glgeSetInterpolationMode(unsigned int mode)
@@ -2563,4 +2518,10 @@ bool glgeUsesVulkan()
 {
     //say that OpenGL is used
     return false;
+}
+
+unsigned int glgeGetCurrentFramebufferType()
+{
+    //return the currently bound framebuffer
+    return glgeCurrentFramebufferType;
 }

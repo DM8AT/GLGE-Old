@@ -503,7 +503,6 @@ void run3Dexample()
     /////////
     //BLOOM//
     /////////
-/*
     //bind a post processing funciton for bloom calculation
     glgeAddCustomPostProcessingFunc(calculateBloom);
     //setup the first render target for the blure
@@ -533,7 +532,7 @@ void run3Dexample()
     //set the uniform for the texture map multiplyer
     upSample->setCustomInt("sampleMult", 1);
     //recalculate the uniform variables
-    upSample->recalculateUniforms();*/
+    upSample->recalculateUniforms();
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

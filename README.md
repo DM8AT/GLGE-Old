@@ -105,6 +105,12 @@ Upcoming features that may be added to GLGE in the future include:
 - updated the way the shaders access uniforms, now using uniform buffers instead of passing everything all the time, hoping this improves performance
 - added simple shadow mapping for spotlights
 - updated the way scenes safe, it should be faster now. WARNING: old scenes won't work with the new version
+- added custom render pipelines
+   - class "RenderPipeline" is used to wrap the order of execution for each element in the render pipeline
+      - there can be less or more than one elements of each type
+   - class "PostProcessingStack" is used to wrap the information on wich shaders or functions to use for each post processing pass in a render stage
+- custom render pipelines can be bound to a window
+- each window has its own default render pipeline with the same stages and order as before
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

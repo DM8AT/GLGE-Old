@@ -586,20 +586,4 @@ int glgeAddCustomPostProcessingFunc(Shader (*func)(unsigned int));
  */
 void glgeDeleteCusotmPostProcessingFunc(int index);
 
-/**
- * @brief delete a custom post processing function
- * 
- * @param func the function that should be removed
- */
-void glgeDeleteCusotmPostProcessingFunc(Shader (*func)(unsigned int));
-
-/**
- * @brief get the index of execution of an custom post-processing function
- * 
- * @param func the function pointer
- * @return int the index of execution
- */
-int glgeGetIndexOfCustomPostProcessingFunc(Shader (*func)(unsigned int));
-
-
 #endif

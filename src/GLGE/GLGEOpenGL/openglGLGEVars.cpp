@@ -38,3 +38,6 @@ unsigned int glgeTextureUnit = 0;
 
 //store the current light source that is casting shadows
 Light* glgeCurrentShadowCaster = NULL;
+
+//store the type of the current framebuffer
+unsigned int glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;

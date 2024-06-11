@@ -31,6 +31,7 @@
 #define GLGE_FRAMEBUFFER_BIT_DEPTH GL_RGB16F
 //define the Frame buffer bit depth for high resolution
 #define GLGE_FRAMEBUFFER_BIT_DEPTH_HIGH_RES GL_RGB32F
+#define GLGE_FRAMEBUFFER_POST_PROCESSING_DEF GL_RGB32F
 
 //include default libs
 #include <iostream>
@@ -43,491 +44,31 @@ Window::Window()
 
 Window::Window(const char* name, vec2 size, vec2 pos, unsigned int flags)
 {
-    //add default flags
-    flags |= (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    //store the window name
-    this->name = std::string(name);
-    //store the size
-    this->size = size;
-    //store the position
-    this->pos = pos;
-
-    //create the window
-    SDL_Window* window = SDL_CreateWindow(name, pos.x, pos.y, size.x, size.y, flags);
-    //check if the window could be created
-    if (!window)
-    {
-        //check if an error should be outputed
-        if (glgeErrorOutput)
-        {
-            //if the window couldn't be created, throw an error
-            std::cerr << "[ERROR] GLGE couldn't create the window. SDL error: " << SDL_GetError() << "\n";
-        }
-        //check if the program should stop on an error
-        if (glgeExitOnError)
-        {
-            //exit with an error
-            exit(1);
-        }
-        //if it shouldn't stop, stop the function
-        return;
-    }
-    //store the window
-    this->window = (void*)window;
-    //store the window ID
-    this->id = SDL_GetWindowID(window);
-    //create a renderer
-    this->renderer = SDL_CreateRenderer((SDL_Window*)this->window, -1, 0);
-    //add a dummy value to the window
-    glgeWindows.push_back(NULL);
-
-    //get the gl context
-    SDL_GLContext con = SDL_GL_CreateContext(window);
-    //check if the context is valide
-    if (con == NULL)
-    {
-        //check if error output is enabled
-        if (glgeErrorOutput)
-        {
-            //if the context is not valide, print an fatal error
-            std::cerr << "[ERROR] GLGE could not create a OpenGL Context to the SDL Window. SDL Error: " << SDL_GetError() << "\n";
-        }
-        //check if the program should stop on an error
-        if (glgeExitOnError)
-        {
-            //exit with an error
-            exit(1);
-        }
-        //stop the function
-        return;
-    }
-    //store the context
-    this->glContext = con;
-
-    //initalise glew
-    if (glewInit() != GLEW_OK)
-    {
-        if(glgeErrorOutput)
-        {
-            printf(GLGE_ERROR_GLEW_INIT_FAILED, glewGetErrorString(glewInit()));
-            std::cerr << GLGE_ERROR_STR_GLEW_INIT << "\n";
-        }
-        //close the window
-        SDL_DestroyWindow((SDL_Window*)this->window);
-        //close the OpenGL context
-        SDL_GL_DeleteContext(this->glContext);
-        
-        //stop the program
-        if (glgeExitOnError)
-        {
-            //only exit the program if glge is tolled to exit on an error
-            exit(1);
-        };
-        //stop the function
-        return;
-    }
-
-    //bind the context
-    SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
-    //disable VSync
-    SDL_GL_SetSwapInterval(0);
-
-    //clear the framebuffer of the window
-    glClear(GL_COLOR_BUFFER_BIT);
-    //update the window
-    SDL_GL_SwapWindow((SDL_Window*)this->window);
-
-    //check if the window index offset is uninitalised (-1)
-    if (glgeWindowIndexOffset == -1)
-    {
-        //set the current index as offset (the first window should be 0)
-        glgeWindowIndexOffset = this->id;
-    }
-
-    //say to cull backfasing triangles
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
-    this->backfaceCulling = true;
-
-    //setup the depth buffer
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
-
-    //disable multisampeling
-    glDisable(GL_MULTISAMPLE);
-
-    //create and bind the custom frame buffer
-    glGenFramebuffers(1, &this->mainFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
-
-    //generate the texture for the depth buffer
-    glGenTextures(1, &this->mainDepthTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainDepthTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, this->size.x, this->size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->mainDepthTex, 0);
-
-    //generate the texture for the frame buffer
-    glGenTextures(1, &this->mainAlbedoTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->mainAlbedoTex, 0);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //generate a texture to store the normals
-    glGenTextures(1, &this->mainNormalTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, this->mainNormalTex, 0);
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //generate a texture to store the fragment position
-    glGenTextures(1, &this->mainPosTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, this->mainPosTex, 0);
-
-    //generate a texture to store the fragment roughness
-    glGenTextures(1, &this->mainRMLTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, this->mainRMLTex, 0);
-
-    //generate a texture to store the lighting pass output
-    glGenTextures(1, &this->mainOutTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainOutTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, this->mainOutTex, 0);
-
-    //generate a texture to store the depth information
-    glGenTextures(1, &this->mainEIDATex);
-    glBindTexture(GL_TEXTURE_2D, this->mainEIDATex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, this->mainEIDATex, 0);
-
-    //generate a texture to store the depth information
-    glGenTextures(1, &this->mainSolidTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
-
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, this->mainSolidTex, 0);
-
-    //generate a texture to store the last tick image
-    glGenTextures(1, &this->mainTransparentAccumTex);
-    glBindTexture(GL_TEXTURE_2D, this->mainTransparentAccumTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, GL_TEXTURE_2D, this->mainTransparentAccumTex, 0);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //unbind the render buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    //specify the number of used color buffers
-    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
-
-    //check if the framebuffer compiled correctly
-    unsigned int fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-    {
-        //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
-        //stop the program
-        exit(1);
-    }
-
-    //create and bind the second custom frame buffer
-    glGenFramebuffers(1, &this->lastTickFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, this->lastTickFramebuffer);
-
-    //generate a texture to store the last tick image
-    glGenTextures(1, &this->lastTickTex);
-    glBindTexture(GL_TEXTURE_2D, this->lastTickTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->lastTickTex, 0);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //check if the framebuffer compiled correctly
-    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-    {
-        //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
-        //stop the program
-        exit(1);
-    }
-
-    //create and bind the fourth custom frame buffer
-    glGenFramebuffers(1, &this->postProcessingFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, this->postProcessingFramebuffer);
-
-    //generate a texture to store the lighting pass output
-    glGenTextures(1, &this->postProcessingTex);
-    glBindTexture(GL_TEXTURE_2D, this->postProcessingTex);
-    //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //bind the texture to the frame buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->postProcessingTex, 0);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //check if the framebuffer compiled correctly
-    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    //if the frame buffer compiled not correctly
-    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
-    {
-        //print an error
-        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
-        //stop the program
-        exit(1);
-    }
-
-    //create an rectangle that covers the whole screen
-    float rectangleVertices[] = 
-    {
-        //Coords   //texCoords
-       -1.f, -1.f, 0.f, 0.f,
-        1.f, -1.f, 1.f, 0.f,
-       -1.f,  1.f, 0.f, 1.f,
-
-        1.f, -1.f, 1.f, 0.f,
-        1.f,  1.f, 1.f, 1.f,
-       -1.f,  1.f, 0.f, 1.f
-    };
-    
-    //create two buffers, one vertex array and one array buffer
-    glGenVertexArrays(1, &this->screenRectVAO);
-    //create two buffers, one vertex array and one array buffer
-    glGenBuffers(1, &this->screenRectVBO);
-    //bind the array buffer
-    glBindBuffer(GL_ARRAY_BUFFER, this->screenRectVBO);
-    //load the data into the array buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
-    //unbind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //generate the shaders for the default lighting shader
-    this->lightShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER);
-
-    //get the uniforms form the shader
-    this->getLightingUniforms();
-
-    //create an cube of size 1
-    float skyboxVerts[] = 
-    {
-        // positions          
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f, -1.0f,
-        1.0f,  1.0f,  1.0f,
-        1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f, -1.0f,
-        1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-        1.0f, -1.0f,  1.0f
-    };
-
-    //create two buffers, one vertex array and one array buffer
-    glGenVertexArrays(1, &this->skyboxVAO);
-    //create two buffers, one vertex array and one array buffer
-    glGenBuffers(1, &this->skyboxVBO);
-    //bind the array buffer
-    glBindBuffer(GL_ARRAY_BUFFER, this->skyboxVBO);
-    //load the data into the array buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVerts), &skyboxVerts, GL_STATIC_DRAW);
-    //unbind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //generate the shaders for the default lighting shader
-    this->skyboxShader = glgeCompileShader(GLGE_DEFAULT_VERTEX_SKYBOX, GLGE_DEFAULT_FRAGMENT_SKYBOX);
-
-    //get the uniforms
-    //get the rotation uniform
-    this->skyboxRot = getUniformVar(this->skyboxShader, "glgeRot");
-    //get the projection uniform
-    this->skyboxProj = getUniformVar(this->skyboxShader, "glgeProject");
-    //get the sampler
-    this->skyboxTexSampler = getUniformVar(this->skyboxShader, "glgeSkybox");
-
-    //setup the basic transparent combine shader
-    this->transparentCombineShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_TRANSPARENT_COMBINE_SHADER);
-    //load the uniforms
-    //load the uniform for the accumulation texture
-    this->transparentCombineShader->setCustomTexture("glgeTranspAccumTexture", this->mainTransparentAccumTex);
-    //load the uniform for the count texture
-    this->transparentCombineShader->setCustomTexture("glgeTranspCountTexture", this->mainEIDATex);
-    //update the uniform binding
-    this->transparentCombineShader->recalculateUniforms();
-    //say that no custom shader is bound
-    this->customTransparentCombineShader = false;
-
-    //compile the default 3D shader
-    this->default3DShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
-    //compile the default 3D transparent shader
-    this->default3DTransShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
-    //compile the default 2D shader
-    this->default2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
-    //compile the default pps shader
-    this->defaultImageShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_IMAGE_FRAGMENT_SHADER);
-    //add the uniform
-    this->defaultImageShader.setCustomTexture("image", (unsigned int)0);
-    //get the uniform
-    this->defaultImageShader.recalculateUniforms();
-
-    //create the shadow shader
-    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
-    //add a uniform for the light space matrix
-    this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
-    //add a uniform for the model matrix
-    this->shadowShader.setCustomMat4("glgeModelMat", mat4());
-    //update the uniforms
-    this->shadowShader.recalculateUniforms();
-
-    //create a new uniform buffer
-    glCreateBuffers(1, &this->lightUBO);
-    //bind it as a uniform buffer
-    glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
-    //allocate enough space for an integer and 128 light sources
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(LightData)*129, 0, GL_STATIC_DRAW);
-    //unbind the buffer
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    //bind the buffer to location 3
-    glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
-    //create a new buffer
-    glCreateBuffers(1, &this->modelMatSSBO);
-    //bind the UBO
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
-    //unbind the buffer
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    //bind the buffer to location 4
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
-    //clear the buffer for the light data
-    bzero(this->lightDatas, sizeof(LightData)*129);
-
-    //initalise the textures correctly by calling the resize function
-    this->resizeWindow(this->size.x, this->size.y);
+    this->super(name, size, pos, flags);
 }
 
 Window::Window(const char* name, unsigned int width, unsigned int height, vec2 pos, unsigned int flags)
 {
     //just pass to another constructor
-    *this = Window(name, vec2(width, height), pos, flags);
+    this->super(name, vec2(width, height), pos, flags);
 }
 
 Window::Window(const char* name, vec2 size, float x, float y, unsigned int flags)
 {
     //just pass to another constructor
-    *this = Window(name, size, vec2(x,y), flags);
+    this->super(name, size, vec2(x,y), flags);
 }
 
 Window::Window(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags)
 {
     //just pass to another constructor
-    *this = Window(name, vec2(width, height), vec2(x,y), flags);
+    this->super(name, vec2(width, height), vec2(x,y), flags);
+}
+
+Window::~Window()
+{
+    //close the window
+    this->close();
 }
 
 void Window::close()
@@ -537,8 +78,10 @@ void Window::close()
     {
         return;
     }
-    //activate the window
-    this->makeCurrent();
+    //store the window ID as currently active by OpenGL
+    glgeCurrentWindowIndex = this->id-glgeWindowIndexOffset;
+    //bind the OpenGL context to the window
+    SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
     //call the on exit function
     if (this->hasExitFunc)
     {
@@ -574,372 +117,17 @@ void Window::draw()
         this->mainCamera->readyForDraw();
     }
 
-    //store if the light data should update
-    bool updateLight = false;
-    //loop over all windows
-    for (int i = 0; i < (int)this->lights.size(); i++)
-    {
-        //get if a update is needed
-        if (this->lights[i]->shouldUpdate())
-        {
-            //store that an update should execute
-            updateLight = true;
-            //store the new light data
-            ((LightData*)(this->lightDatas + 16))[i] = this->lights[i]->getLightData();
-            //say that the update is now done
-            this->lights[i]->updateDone();
-        }
-    }
-    //check if an update is needed
-    if (updateLight)
-    {
-        //update the light count
-        *(int*)this->lightDatas = (int)this->lights.size();
-        //bind the ubo
-        glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
-        //store the data
-        glBufferData(GL_UNIFORM_BUFFER, 129*sizeof(LightData), this->lightDatas, GL_STATIC_DRAW);
-        //unbind the buffer
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        //bind the buffer to the correct slot
-        glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
-    }
+    //execute the render pipeline bound to this window
+    this->renderPipeline->execute();
 
-    //mark the beginning of the shadow pass
-    glgeShadowPass = true;
-    //enable depth testing
-    glEnable(GL_DEPTH_TEST);
-    //disable blending
-    glDisable(GL_BLEND);
-    //set the clear color
-    glClearColor(0,0,0,0);
-    //loop over all light sources
-    for (size_t i = 0; i < this->lights.size(); i++)
-    {
-        //check if the light source type is supported
-        if (this->lights[i]->getType() != GLGE_LIGHT_SOURCE_TYPE_SPOT) { continue; }
-        //bind the current shadow caster
-        this->lights[i]->makeCurrentShadowCaster();
-        //say that the active light is the current
-        glgeCurrentShadowCaster = this->lights[i];
-        //draw the scene geometry
-        this->callDrawFunc();
-    }
-    //end the shadow pass
-    glgeShadowPass = false;
-    //correct the OpenGL viewport
-    glViewport(0,0, this->size.x,this->size.y);
-
-    //bind the custom framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
-
-    //only clear the first color buffer
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-    //set the specified clear color
-    glClearColor(this->clear.x, this->clear.y, this->clear.z, 1);
-
-    //clear the screen
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //specify the color buffers
-    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
-
-    //set the clear color to black
-    glClearColor(0,0,0,0);
-
-    //clear the other buffers
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    //specify the color buffers to draw into
-    glDrawBuffers(glgeLenAllUsedColorBuffers, glgeAllUsedColorBuffers);
-
-    //enable depth testing
-    glEnable(GL_DEPTH_TEST);
-
-    //check if backface culling is enabled
-    if (this->backfaceCulling)
-    {
-        //if it is enabled, enable backface culling
-        glEnable(GL_CULL_FACE);
-        //setup the correct order
-        glCullFace(GL_BACK);
-    }
-    else
-    {
-        //else, disable it
-        glDisable(GL_CULL_FACE);
-    }
-
-    for (int i = 0; i < (int)this->lights.size(); i++)
-    {
-        this->lights[i]->bind();
-    }
-
-    //call the custom drawing function
-    this->callDrawFunc();
-
-    for (int i = 0; i < (int)this->lights.size(); i++)
-    {
-        this->lights[i]->unbind();
-    }
-
-    //check if a skybox is active
-    if (this->useSkybox)
-    {
-        //switch the depth function to greater equal
-        glDepthFunc(GL_GEQUAL);
-        //switch the order of the backface culling
-        glCullFace(GL_FRONT);
-
-        //draw the skybox
-        //switch to the skybox shader
-        glUseProgram(this->skyboxShader);
-        //bind the skybox vertices
-        glBindVertexArray(this->skyboxVAO);
-        //bind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, this->skyboxVBO);
-        //activate the vertex attribute for the position
-        glEnableVertexAttribArray(0);
-        //load the position into the shader
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        //push the projection matrix to the shader
-        glUniformMatrix4fv(this->skyboxProj, 1, GL_FALSE, this->mainCamera->getProjectionMatrixPointer());
-        //push the rotation to the shader
-        glUniformMatrix4fv(this->skyboxRot, 1, GL_FALSE, this->mainCamera->getRotMatPointer());
-        //activate the first texture unit
-        glActiveTexture(GL_TEXTURE0);
-        //bind the skybox
-        glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyboxTex);
-
-        //draw the skybox
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //unbind the skybox texture
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        //unbind the vertex attribute
-        glDisableVertexAttribArray(0);
-        //unbind the shader
-        glUseProgram(0);
-        //unbind the buffers
-        //unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //reset the depth func
-        glDepthFunc(GL_GREATER);
-    }
-
-    //enable back face culling
-    glEnable(GL_CULL_FACE);
-    //switch the order of the backface culling to the correct order
-    glCullFace(GL_BACK);
-    //disable depth testing
-    glDisable(GL_DEPTH_TEST);
-
-    //check if a pre lighting pass function is bound
-    if (this->preLightPass != NULL)
-    {
-        //call the function
-        (*this->preLightPass)();
-    }
-
-    //check if lighting should be applied
-    if ((int)lights.size() != 0)
-    {
-        //if it needs, apply the lighting shader
-        //bind the screen rect
-        this->bindScreenRect();
-        //bind the lighting shader
-        this->lightShader.applyShader();
-        
-        //draw the screen
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        //unbind the lighting shader
-        this->lightShader.removeShader();
-        //unbind the screen rect
-        this->unbindScreenRect();
-    }
-
-    //call the custom drawing function for transparent objects
-    if(this->hasDrawFunc)
-    {
-        //say that the second pass is the transparent pass
-        this->transparentPass = true;
-        //enable alpha blending
-        glEnable(GL_BLEND);
-        //enable depth testing
-        glEnable(GL_DEPTH_TEST);
-        //disable writes to the depth buffer
-        glDepthMask(GL_FALSE);
-        //default the blend func for all buffers
-        glBlendFunc(GL_ONE, GL_ZERO);
-        //switch to addaptive blending for color attachment 5 and 7
-        glBlendFunci(5,GL_ONE, GL_ONE);
-        glBlendFunci(7,GL_ONE, GL_ONE);
-        
-        //check if backface culling is enabled
-        if (this->backfaceCulling)
-        {
-            //if it is enabled, enable backface culling
-            glEnable(GL_CULL_FACE);
-            //setup the correct culling
-            glCullFace(GL_BACK);
-        }
-        else
-        {
-            //else, disable it
-            glDisable(GL_CULL_FACE);
-        }
-
-        //call the draw function
-        this->callDrawFunc();
-        //switch to inverted normal blend func
-        glBlendFunci(4,GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-
-        //bind the shader
-        this->transparentCombineShader->applyShader();
-        //bind the screen rect
-        this->bindScreenRect();
-
-        //draw the screen
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        //make sure to enable texture unit 0
-        glActiveTexture(GL_TEXTURE0);
-        //unbind the screen rect
-        this->unbindScreenRect();
-        //remove the shader
-        this->transparentCombineShader->removeShader();
-
-        //reenable depth mask
-        glDepthMask(GL_TRUE);
-        //disable depth testing
-        glDisable(GL_DEPTH_TEST);
-        //diable alpha blending
-        glDisable(GL_BLEND);
-        //reset the transparent pass to false
-        this->transparentPass = false;
-        //re-enable backface culling
-        glEnable(GL_CULL_FACE);
-        //setup the culling order
-        glCullFace(GL_BACK);
-    }
-
-    //bind the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //say that the momentan pass is the first
-    this->firstPPSPass = true;
-
-    //loop over all post-processing shader
-    for (Shader* shader : this->ppsShaderStack)
-    {
-        //bind the correct framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //take care of the uniforms
-        getDefaultUniformsFromPostProcessingShader(shader);
-        //update all uniforms
-        shader->recalculateUniforms();
-        //activate the shader
-        shader->applyShader();
-        //bind the screen rect
-        this->bindScreenRect();
-
-        //draw the screen
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        //deactivate the shader
-        shader->removeShader();
-        //make sure to enable texture unit 0
-        glActiveTexture(GL_TEXTURE0);
-        //unbind the screen rect
-        this->unbindScreenRect();
-
-        //bind the default FBO for reading
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        //bind the light framebuffer as writing
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->postProcessingFramebuffer);
-        //copy the framebuffers
-        glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        //bind the default framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //say that an pass finished
-        this->firstPPSPass = false;
-    }
-
-
-    //loop over all post-processing shader
-    for (Shader (*shaderFunc)(unsigned int) : this->ppsFunctionStack)
-    {
-        //bind the correct FBO
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //create a shader to store the shader from the function
-        Shader shader;
-        //check if this is the first post-processing pass
-        if (this->firstPPSPass)
-        {
-            //get the shader using the custom function and the lit image
-            shader = shaderFunc(this->mainOutTex);
-        }
-        else
-        {
-            //get the shader using the custom function and the image from the last PPS
-            shader = shaderFunc(this->postProcessingTex);
-        }
-        //get the default uniforms
-        getDefaultUniformsFromPostProcessingShader(&shader);
-        //get all uniforms (this is done automaticaly, because it is needed)
-        shader.recalculateUniforms();
-        //activate the shader
-        shader.applyShader();
-        //bind the array buffer
-        glBindBuffer(GL_ARRAY_BUFFER, this->screenRectVBO);
-        //activate the vertex attribute for the position
-        glEnableVertexAttribArray(0);
-        //load the position into the shader
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-        //activate the vertex attrivute for the texture coordinate
-        glEnableVertexAttribArray(1);
-        //load the texture coordinate into the shader
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-        //draw the screen
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        //deactivate the shader
-        shader.removeShader();
-        //make sure to enable texture unit 0
-        glActiveTexture(GL_TEXTURE0);
-        //unbind the buffer
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //deactivate the vertex attrib array pointers
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-
-        //bind the default FBO for reading
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        //bind the light framebuffer as writing
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->postProcessingFramebuffer);
-        //copy the framebuffers
-        glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        //bind the default framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //say that an pass finished
-        this->firstPPSPass = false;
-    }
-
-    //check if any post-processing shader was drawn
-    if (this->firstPPSPass)
-    {
-        //bind the light framebuffer for reading
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, this->mainFramebuffer);
-        //tell it to read from color attachment 4
-        glReadBuffer(GL_COLOR_ATTACHMENT4);
-        //bind the default fbo for drawing
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        //copy the framebuffers
-        glBlitFramebuffer(0,0, this->size.x, this->size.y, 0,0, this->size.x, this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    }
+    //get the final image (must be in the post processing framebuffer)
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, this->postProcessingFramebuffer);
+    //specify to read from color attachment 0
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    //copy to the screen
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    //copy the data
+    glBlitFramebuffer(0,0, this->size.x,this->size.y, 0,0, this->size.x,this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     //copy the last frame to another fragment shader
     //bind the default framebuffer as read only
@@ -951,6 +139,11 @@ void Window::draw()
 
     //bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //say that the window surface is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
+
+    //update the window surface
+    SDL_GL_SwapWindow((SDL_Window*)this->window);
 
     //say that the window is no longer drawing
     this->drawing = false;
@@ -958,6 +151,8 @@ void Window::draw()
 
 void Window::tick()
 {
+    //make this the current window
+    this->makeCurrent();
     //store the actual window width
     int w;
     //store the actual window height
@@ -996,6 +191,37 @@ void Window::tick()
 
     //call the tick function
     this->callTickFunc();
+
+    //store if the light data should update
+    bool updateLight = false;
+    //loop over all windows
+    for (int i = 0; i < (int)this->lights.size(); i++)
+    {
+        //get if a update is needed
+        if (this->lights[i]->shouldUpdate())
+        {
+            //store that an update should execute
+            updateLight = true;
+            //store the new light data
+            ((LightData*)(this->lightDatas + 16))[i] = this->lights[i]->getLightData();
+            //say that the update is now done
+            this->lights[i]->updateDone();
+        }
+    }
+    //check if an update is needed
+    if (updateLight)
+    {
+        //update the light count
+        *(int*)this->lightDatas = (int)this->lights.size();
+        //bind the ubo
+        glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
+        //store the data
+        glBufferData(GL_UNIFORM_BUFFER, 129*sizeof(LightData), this->lightDatas, GL_STATIC_DRAW);
+        //unbind the buffer
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        //bind the buffer to the correct slot
+        glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
+    }
     
     //set the prefix for the light position
     std::string prefixLightPos = std::string("glgeLightPos[");
@@ -1799,7 +1025,7 @@ void Window::resizeWindow(int width, int height)
     //update the post processing texture
     glBindTexture(GL_TEXTURE_2D, this->postProcessingTex);
     //set the texture parameters so it dosn't loop around the screen
-    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_POST_PROCESSING_DEF, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
 
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1863,17 +1089,8 @@ void Window::getLightingUniforms()
 
 void Window::getDefaultUniformsFromPostProcessingShader(Shader* shader)
 {
-    //check if the current pass is the first
-    if (this->firstPPSPass)
-    {
-        //if it is, get the main image variable from the shader to the lighting texture
-        shader->setCustomTexture("glgeMainImage", this->mainOutTex);
-    }
-    else
-    {
-        //else, get the main image variable from the shader to the post processing texture
-        shader->setCustomTexture("glgeMainImage", this->postProcessingTex);
-    }
+    //else, get the main image variable from the shader to the post processing texture
+    shader->setCustomTexture("glgeMainImage", this->postProcessingTex);
     //get the albedo map from the post processing shader
     shader->setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
     //get the normal map from the post processing shader
@@ -1888,6 +1105,70 @@ void Window::getDefaultUniformsFromPostProcessingShader(Shader* shader)
     shader->setCustomTexture("glgeDepthMap", this->mainDepthTex);
     //pass the window size to the shader
     shader->setCustomVec2("glgeWindowSize", this->size);
+
+    bool err = glgeErrorOutput;
+    glgeErrorOutput = false;
+    shader->recalculateUniforms();
+    glgeErrorOutput = err;
+}
+
+
+void Window::bindGBuff()
+{
+    //check if the framebuffer is allready bound
+    if (glgeCurrentFramebufferType == GLGE_FRAMEBUFFER_GEOMETRY) { return; }
+    //bind the custom framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
+
+    //specify the color buffers to draw into
+    glDrawBuffers(glgeLenAllUsedColorBuffers, glgeAllUsedColorBuffers);
+
+    //say that now the geometry buffer is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_GEOMETRY;
+}
+
+void Window::bindPPBuff()
+{
+    //check if the framebuffer is allready bound
+    if (glgeCurrentFramebufferType == GLGE_FRAMEBUFFER_POST_PROCESSING) { return; }
+    //bind the custom framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->postProcessingFramebuffer);
+    //specify to use texture unit 0
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    //say that the post processing framebuffer is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_POST_PROCESSING;
+}
+
+unsigned int Window::getPostProcessingTexture()
+{
+    //return the post processing texture
+    return this->postProcessingTex;
+}
+
+RenderPipeline* Window::getRenderPipeline()
+{
+    //return the render pipeline pointer
+    return this->renderPipeline;
+}
+
+void Window::setRenderPipeline(RenderPipeline* renderPipeline, bool del)
+{
+    //check if the render pipeline is null
+    if (!renderPipeline)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Can't use NULL as a render pipeline")
+        //stop the function
+        return;
+    }
+    //check if the old render pipeline should be deleted
+    if (del)
+    {
+        //delete the render pipeline
+        delete this->renderPipeline;
+    }
+    //store the new render pipeline
+    this->renderPipeline = renderPipeline;
 }
 
 float Window::getWindowAspect()
@@ -2105,8 +1386,8 @@ unsigned int Window::getScreenVBO()
 
 int Window::addPostProcessingShader(Shader* shader)
 {
-    //store the shader
-    this->ppsShaderStack.push_back(shader);
+    //add the post processing stage to the post processing stack
+    this->pps->addStage(shader);
     //check if the shader contains the main image
     if (glgeGetUniformVar(shader->getShader(), "glgeMainImage") == -1)
     {
@@ -2136,7 +1417,7 @@ int Window::addPostProcessingShader(Shader* shader)
     //reset error output
     glgeSetErrorOutput(err);
     //return the index
-    return (int)this->ppsShaderStack.size() - 1;
+    return this->pps->getStageCount() - 1;
 }
 
 Shader* Window::addPostProcessingShader(const char* file)
@@ -2155,7 +1436,7 @@ Shader* Window::addPostProcessingShader(const char* file)
         }
     }
     //store a new shader in the post-processing stack
-    this->ppsShaderStack.push_back(shader);
+    this->pps->addStage(shader);
     //setup all default uniforms
     getDefaultUniformsFromPostProcessingShader(shader);
     //store the current error output state
@@ -2194,7 +1475,7 @@ Shader* Window::addPostProcessingShader(std::string sc)
         return NULL;
     }
     //store a new shader in the post-processing stack
-    this->ppsShaderStack.push_back(shader);
+    this->pps->addStage(shader);
     //setup all default uniforms
     getDefaultUniformsFromPostProcessingShader(shader);
     //store the current error output state
@@ -2232,7 +1513,7 @@ Shader* Window::addPostProcessingShader(unsigned int s)
         return NULL;
     }
     //store a new shader in the post-processing stack
-    this->ppsShaderStack.push_back(shader);
+    this->pps->addStage(shader);
     //setup all default uniforms
     getDefaultUniformsFromPostProcessingShader(shader);
     //store the current error output state
@@ -2268,21 +1549,21 @@ int Window::addPostProcessingFunction(Shader (*func)(unsigned int))
         return -1;
     }
     //store the new post processing function
-    this->ppsFunctionStack.push_back(func);
+    this->pps->addStage(func);
     //return the index
-    return (int)this->ppsFunctionStack.size() - 1;
+    return (int)this->pps->getStageCount() - 1;
 }
 
 void Window::removePostProcessingShader(unsigned int index, bool del)
 {
     //check if the index is in range
-    if (index > (unsigned int)this->ppsShaderStack.size())
+    if (index > (unsigned int)this->pps->getStageCount())
     {
         //check if error should print
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing shader list with length" << (int)this->ppsShaderStack.size() <<"\n";
+            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing shader list with length" << this->pps->getStageCount() <<"\n";
         }
         //check if GLGE should exit on an error
         if (glgeExitOnError)
@@ -2296,37 +1577,29 @@ void Window::removePostProcessingShader(unsigned int index, bool del)
     if (del)
     {
         //store the pointer
-        Shader* s = this->ppsShaderStack[index];
+        Shader* s = this->pps->getShaderOfStage((*this->pps)[index]);
         //remove the shader from the stack
-        this->ppsShaderStack.erase(this->ppsShaderStack.begin() + index);
+        this->pps->deleteStage(index);
         //delete the pointer
         delete s;
     }
     else
     {
         //remove the shader from the stack
-        this->ppsShaderStack.erase(this->ppsShaderStack.begin() + index);
+        this->pps->deleteStage(index);
     }
-}
-
-void Window::removePostProcessingShader(Shader* shader, bool del)
-{
-    //first, get the index
-    int i = this->getPostProcessingShaderIndex(shader);
-    //delete the shader
-    this->removePostProcessingShader(i, del);
 }
 
 void Window::removePostProcessingFunction(unsigned int index)
 {
     //check if the index is in range
-    if (index > (unsigned int)this->ppsFunctionStack.size())
+    if (index > (unsigned int)this->pps->getStageCount())
     {
         //check if error should print
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing function list with length" << (int)this->ppsFunctionStack.size() <<"\n";
+            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing function list with length" << this->pps->getStageCount() <<"\n";
         }
         //check if GLGE should exit on an error
         if (glgeExitOnError)
@@ -2338,27 +1611,19 @@ void Window::removePostProcessingFunction(unsigned int index)
         return;
     }
     //delete the shader
-    this->ppsFunctionStack.erase(this->ppsFunctionStack.begin() + index);
-}
-
-void Window::removePostProcessingFunction(Shader (*func)(unsigned int))
-{
-    //get the index of the function
-    int i = this->getPostProcessingFuncIndex(func);
-    //delete the functoin
-    this->removePostProcessingFunction(i);
+    this->pps->deleteStage(index);
 }
 
 Shader* Window::getPostProcessingShader(unsigned int index)
 {
     //check if the index is in range
-    if (index > (unsigned int)this->ppsShaderStack.size())
+    if (index > (unsigned int)this->pps->getStageCount())
     {
         //check if error should print
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing shader list with length" << (int)this->ppsShaderStack.size() <<"\n";
+            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing shader list with length" << this->pps->getStageCount() <<"\n";
         }
         //check if GLGE should exit on an error
         if (glgeExitOnError)
@@ -2370,36 +1635,19 @@ Shader* Window::getPostProcessingShader(unsigned int index)
         return NULL;
     }
     //return the shader at the index
-    return this->ppsShaderStack[index];
-}
-
-int Window::getPostProcessingShaderIndex(Shader* shader)
-{
-    //find the index of the shader
-    std::vector<Shader*>::iterator iter = std::find(this->ppsShaderStack.begin(), this->ppsShaderStack.end(), shader);
-    //check if the element wasn't found
-    if (iter == this->ppsShaderStack.cend())
-    {
-        //quit the function with -1
-        return -1;
-    }
-    else
-    {
-        //return the index
-        return std::distance(this->ppsShaderStack.begin(), iter);
-    }
+    return this->pps->getShaderOfStage((*this->pps)[index]);
 }
 
 Shader (*Window::getPostProcessingFunc(unsigned int index))(unsigned int)
 {
     //check if the index is in range
-    if (index > (unsigned int)this->ppsFunctionStack.size())
+    if (index > (unsigned int)this->pps->getStageCount())
     {
         //check if error should print
         if (glgeErrorOutput)
         {
             //print an error
-            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing function list with length" << (int)this->ppsFunctionStack.size() <<"\n";
+            std::cerr << "[GLGE ERROR] index " << index << " is out of range of post processing function list with length" << this->pps->getStageCount() <<"\n";
         }
         //check if GLGE should exit on an error
         if (glgeExitOnError)
@@ -2411,24 +1659,7 @@ Shader (*Window::getPostProcessingFunc(unsigned int index))(unsigned int)
         return NULL;
     }
     //return the function
-    return this->ppsFunctionStack[index];
-}
-
-int Window::getPostProcessingFuncIndex(Shader (*func)(unsigned int))
-{
-    //find the index of the shader
-    std::vector<Shader (*)(unsigned int)>::iterator iter = std::find(this->ppsFunctionStack.begin(), this->ppsFunctionStack.end(), func);
-    //check if the element wasn't found
-    if (iter == this->ppsFunctionStack.cend())
-    {
-        //quit the function with -1
-        return -1;
-    }
-    else
-    {
-        //return the index
-        return std::distance(this->ppsFunctionStack.begin(), iter);
-    }
+    return this->pps->getFunctionOfStage((*this->pps)[index]);
 }
 
 bool Window::isFullscreen()
@@ -2890,6 +2121,812 @@ int Window::getId()
     return this->id;
 }
 
+void Window::drawPPShader(Shader* shader, bool getVars)
+{
+    if (glgeCurrentFramebufferType == GLGE_FRAMEBUFFER_WINDOW_SURFACE)
+    {
+        //bind the default framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //say that the framebuffer type is the window surface
+        glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
+    }
+
+    //check if this is the currently active window
+    if (glgeCurrentWindowIndex != (this->id-glgeWindowIndexOffset)) { return; }
+    //check if the default variables should be grabbed
+    if (getVars)
+    {
+        //get the default vars
+        this->getDefaultUniformsFromPostProcessingShader(shader);
+    }
+    //bind a rectangle over the whole window
+    this->bindScreenRect();
+    //apply the shader
+    shader->applyShader();
+    //draw the recangle
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //remove the shader
+    shader->removeShader();
+    //unbind the screen rect
+    this->unbindScreenRect();
+    //copy the image to the post processing framebuffer
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    //bind the post processing buffer as target
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->postProcessingFramebuffer);
+    //copy the data
+    glBlitFramebuffer(0,0, this->size.x,this->size.y, 0,0, this->size.x,this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    //unbind all framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //say that the framebuffer type is the window surface
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
+}
+
+void Window::clearGBuff()
+{
+    //bind the custom framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
+    //say that the g-buffer is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_GEOMETRY;
+
+    //only clear the first color buffer
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    //set the specified clear color
+    glClearColor(this->clear.x, this->clear.y, this->clear.z, 1);
+
+    //clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //specify the color buffers
+    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
+
+    //set the clear color to black
+    glClearColor(0,0,0,0);
+
+    //clear the other buffers
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //specify the color buffers to draw into
+    glDrawBuffers(glgeLenAllUsedColorBuffers, glgeAllUsedColorBuffers);
+}
+
+void Window::drawSolid()
+{
+    //bind the geometry buffer
+    this->bindGBuff();
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
+    //check if backface culling is enabled
+    if (this->backfaceCulling)
+    {
+        //if it is enabled, enable backface culling
+        glEnable(GL_CULL_FACE);
+        //setup the correct order
+        glCullFace(GL_BACK);
+    }
+    else
+    {
+        //else, disable it
+        glDisable(GL_CULL_FACE);
+    }
+
+    //call the custom drawing function
+    this->callDrawFunc();
+
+    //enable back face culling
+    glEnable(GL_CULL_FACE);
+    //switch the order of the backface culling to the correct order
+    glCullFace(GL_BACK);
+    //disable depth testing
+    glDisable(GL_DEPTH_TEST);
+}
+
+void Window::drawTransparent()
+{
+    //bind the geometry buffer
+    this->bindGBuff();
+    //call the custom drawing function for transparent objects
+    if(this->hasDrawFunc)
+    {
+        //say that the second pass is the transparent pass
+        this->transparentPass = true;
+        //enable alpha blending
+        glEnable(GL_BLEND);
+        //enable depth testing
+        glEnable(GL_DEPTH_TEST);
+        //disable writes to the depth buffer
+        glDepthMask(GL_FALSE);
+        //default the blend func for all buffers
+        glBlendFunc(GL_ONE, GL_ZERO);
+        //switch to addaptive blending for color attachment 5 and 7
+        glBlendFunci(5,GL_ONE, GL_ONE);
+        glBlendFunci(7,GL_ONE, GL_ONE);
+        
+        //check if backface culling is enabled
+        if (this->backfaceCulling)
+        {
+            //if it is enabled, enable backface culling
+            glEnable(GL_CULL_FACE);
+            //setup the correct culling
+            glCullFace(GL_BACK);
+        }
+        else
+        {
+            //else, disable it
+            glDisable(GL_CULL_FACE);
+        }
+
+        //call the draw function
+        this->callDrawFunc();
+        //switch to inverted normal blend func
+        glBlendFunci(4,GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+
+        //bind the shader
+        this->transparentCombineShader->applyShader();
+        //bind the screen rect
+        this->bindScreenRect();
+
+        //draw the screen
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //make sure to enable texture unit 0
+        glActiveTexture(GL_TEXTURE0);
+        //unbind the screen rect
+        this->unbindScreenRect();
+        //remove the shader
+        this->transparentCombineShader->removeShader();
+
+        //reenable depth mask
+        glDepthMask(GL_TRUE);
+        //disable depth testing
+        glDisable(GL_DEPTH_TEST);
+        //diable alpha blending
+        glDisable(GL_BLEND);
+        //reset the transparent pass to false
+        this->transparentPass = false;
+        //re-enable backface culling
+        glEnable(GL_CULL_FACE);
+        //setup the culling order
+        glCullFace(GL_BACK);
+    }
+}
+
+void Window::drawLighting()
+{
+    //bind the geometry buffer
+    this->bindGBuff();
+    //check if a pre lighting pass function is bound
+    if (this->preLightPass != NULL)
+    {
+        //call the function
+        (*this->preLightPass)();
+    }
+
+    //check if lighting should be applied
+    if ((int)lights.size() != 0)
+    {
+        //disable depth testing
+        glDisable(GL_DEPTH_TEST);
+        //if it needs, apply the lighting shader
+        //bind the screen rect
+        this->bindScreenRect();
+        //bind the lighting shader
+        this->lightShader.applyShader();
+        
+        //draw the screen
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //unbind the lighting shader
+        this->lightShader.removeShader();
+        //unbind the screen rect
+        this->unbindScreenRect();
+    }
+    else
+    {
+        //copy the image from the color attachment 0 to color attachment 4
+        //bind the main framebuffer as read source
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, this->mainFramebuffer);
+        //bind the read color attachment as 0
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        //bind the draw framebuffer as the main one
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->mainFramebuffer);
+        //specify the target as the color attachment 4
+        glDrawBuffer(GL_COLOR_ATTACHMENT4);
+        //copy the buffer
+        glBlitFramebuffer(0,0,this->size.x,this->size.y,0,0,this->size.x,this->size.y,GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    }
+}
+
+void Window::drawSkybox()
+{
+    //bind the geometry buffer
+    this->bindGBuff();
+    //check if a skybox is active
+    if (this->useSkybox)
+    {
+        //switch the depth function to greater equal
+        glDepthFunc(GL_GEQUAL);
+        //switch the order of the backface culling
+        glCullFace(GL_FRONT);
+        //turn on depth test
+        glEnable(GL_DEPTH_TEST);
+
+        //draw the skybox
+        //switch to the skybox shader
+        glUseProgram(this->skyboxShader);
+        //bind the skybox vertices
+        glBindVertexArray(this->skyboxVAO);
+        //bind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, this->skyboxVBO);
+        //activate the vertex attribute for the position
+        glEnableVertexAttribArray(0);
+        //load the position into the shader
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        //push the projection matrix to the shader
+        glUniformMatrix4fv(this->skyboxProj, 1, GL_FALSE, this->mainCamera->getProjectionMatrixPointer());
+        //push the rotation to the shader
+        glUniformMatrix4fv(this->skyboxRot, 1, GL_FALSE, this->mainCamera->getRotMatPointer());
+        //activate the first texture unit
+        glActiveTexture(GL_TEXTURE0);
+        //bind the skybox
+        glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyboxTex);
+
+        //draw the skybox
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //unbind the skybox texture
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        //unbind the vertex attribute
+        glDisableVertexAttribArray(0);
+        //unbind the shader
+        glUseProgram(0);
+        //unbind the buffers
+        //unbind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //reset the depth func
+        glDepthFunc(GL_GREATER);
+        //turn on depth test
+        glDisable(GL_DEPTH_TEST);
+        //switch to normal cull order
+        glCullFace(GL_BACK);
+    }
+}
+
+void Window::shadowPass()
+{
+    //mark the beginning of the shadow pass
+    glgeShadowPass = true;
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    //disable blending
+    glDisable(GL_BLEND);
+    //set the clear color
+    glClearColor(0,0,0,0);
+    //loop over all light sources
+    for (size_t i = 0; i < this->lights.size(); i++)
+    {
+        //check if the light source type is supported
+        if (this->lights[i]->getType() != GLGE_LIGHT_SOURCE_TYPE_SPOT) { continue; }
+        //bind the current shadow caster
+        this->lights[i]->makeCurrentShadowCaster();
+        //say that the active light is the current
+        glgeCurrentShadowCaster = this->lights[i];
+        //draw the scene geometry
+        this->callDrawFunc();
+    }
+    //end the shadow pass
+    glgeShadowPass = false;
+    //correct the OpenGL viewport
+    glViewport(0,0, this->size.x,this->size.y);
+}
+
+void Window::copyGToPPFramebuffer(int source)
+{
+    //check if the source is in range
+    if (!((source >= 0) && (source < 8))) { return; }
+    //bind the geoemtry framebuffer as source
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, this->mainFramebuffer);
+    //bind the spexified source buffer
+    glReadBuffer(GL_COLOR_ATTACHMENT0+source);
+    //bind the post processing buffer as target
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->postProcessingFramebuffer);
+    //copy the data
+    glBlitFramebuffer(0,0, this->size.x,this->size.y, 0,0, this->size.x,this->size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    //unbind all framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //say that the framebuffer type is the window surface
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
+}
+
+void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
+{
+
+    //add default flags
+    flags |= (SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    //store the window name
+    this->name = std::string(name);
+    //store the size
+    this->size = size;
+    //store the position
+    this->pos = pos;
+
+    //create the window
+    SDL_Window* window = SDL_CreateWindow(name.c_str(), pos.x, pos.y, size.x, size.y, flags);
+    //check if the window could be created
+    if (!window)
+    {
+        //check if an error should be outputed
+        if (glgeErrorOutput)
+        {
+            //if the window couldn't be created, throw an error
+            std::cerr << "[ERROR] GLGE couldn't create the window. SDL error: " << SDL_GetError() << "\n";
+        }
+        //check if the program should stop on an error
+        if (glgeExitOnError)
+        {
+            //exit with an error
+            exit(1);
+        }
+        //if it shouldn't stop, stop the function
+        return;
+    }
+    //store the window
+    this->window = (void*)window;
+    //store the window ID
+    this->id = SDL_GetWindowID(window);
+    //create a renderer
+    this->renderer = SDL_CreateRenderer((SDL_Window*)this->window, -1, 0);
+    //add a dummy value to the window
+    glgeWindows.push_back(NULL);
+
+    //get the gl context
+    SDL_GLContext con = SDL_GL_CreateContext(window);
+    //check if the context is valide
+    if (con == NULL)
+    {
+        //check if error output is enabled
+        if (glgeErrorOutput)
+        {
+            //if the context is not valide, print an fatal error
+            std::cerr << "[ERROR] GLGE could not create a OpenGL Context to the SDL Window. SDL Error: " << SDL_GetError() << "\n";
+        }
+        //check if the program should stop on an error
+        if (glgeExitOnError)
+        {
+            //exit with an error
+            exit(1);
+        }
+        //stop the function
+        return;
+    }
+    //store the context
+    this->glContext = con;
+
+    //initalise glew
+    if (glewInit() != GLEW_OK)
+    {
+        if(glgeErrorOutput)
+        {
+            printf(GLGE_ERROR_GLEW_INIT_FAILED, glewGetErrorString(glewInit()));
+            std::cerr << GLGE_ERROR_STR_GLEW_INIT << "\n";
+        }
+        //close the window
+        SDL_DestroyWindow((SDL_Window*)this->window);
+        //close the OpenGL context
+        SDL_GL_DeleteContext(this->glContext);
+        
+        //stop the program
+        if (glgeExitOnError)
+        {
+            //only exit the program if glge is tolled to exit on an error
+            exit(1);
+        };
+        //stop the function
+        return;
+    }
+
+    //bind the context
+    SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
+    //disable VSync
+    SDL_GL_SetSwapInterval(0);
+
+    //clear the framebuffer of the window
+    glClear(GL_COLOR_BUFFER_BIT);
+    //update the window
+    SDL_GL_SwapWindow((SDL_Window*)this->window);
+
+    //check if the window index offset is uninitalised (-1)
+    if (glgeWindowIndexOffset == -1)
+    {
+        //set the current index as offset (the first window should be 0)
+        glgeWindowIndexOffset = this->id;
+    }
+
+    //create the render pipeline
+    this->renderPipeline = new RenderPipeline(std::vector<Stage>{
+        Stage{name : "glgeDefaultRenderPipeline_ShadowPass",            pass : GLGE_PASS_SHADOWS},
+        Stage{name : "glgeDefaultRenderPipeline_ClearPass",             pass : GLGE_PASS_CLEAR_G_BUFFER},
+        Stage{name : "glgeDefaultRenderPipeline_SkyboxPass",            pass : GLGE_PASS_DRAW_SKYBOX},
+        Stage{name : "glgeDefaultRenderPipeline_SolidPass",             pass : GLGE_PASS_DRAW_SOLID},
+        Stage{name : "glgeDefaultRenderPipeline_LightingPass",          pass : GLGE_PASS_LIGHING},
+        Stage{name : "glgeDefaultRenderPipeline_TransparentPass",       pass : GLGE_PASS_DRAW_TRANSPARENT},
+        Stage{name : "glgeDefaultRenderPipeline_ReadyPostProcessing",   pass : GLGE_PASS_COPY_G_TO_PP+GLGE_G_BUFF_COLOR_ATTACHMENT_LIT},
+        Stage{name : "glgeDefaultRenderPipeline_PostProcessing",        pass : GLGE_PASS_POST_PROCESSING, 0, 0, "default"}
+    }
+    );
+    //create a new post processing stack
+    this->pps = new PostProcessingStack();
+    //bind the post processing stack as "default"
+    this->renderPipeline->setPPStagePPS(0, this->pps, "default");
+
+    //say to cull backfasing triangles
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
+    this->backfaceCulling = true;
+
+    //setup the depth buffer
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
+
+    //disable multisampeling
+    glDisable(GL_MULTISAMPLE);
+
+    //create and bind the custom frame buffer
+    glGenFramebuffers(1, &this->mainFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->mainFramebuffer);
+
+    //generate the texture for the depth buffer
+    glGenTextures(1, &this->mainDepthTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainDepthTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, this->size.x, this->size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->mainDepthTex, 0);
+
+    //generate the texture for the frame buffer
+    glGenTextures(1, &this->mainAlbedoTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainAlbedoTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->mainAlbedoTex, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //generate a texture to store the normals
+    glGenTextures(1, &this->mainNormalTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainNormalTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, this->mainNormalTex, 0);
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //generate a texture to store the fragment position
+    glGenTextures(1, &this->mainPosTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainPosTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, this->mainPosTex, 0);
+
+    //generate a texture to store the fragment roughness
+    glGenTextures(1, &this->mainRMLTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainRMLTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, this->mainRMLTex, 0);
+
+    //generate a texture to store the lighting pass output
+    glGenTextures(1, &this->mainOutTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainOutTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, this->mainOutTex, 0);
+
+    //generate a texture to store the depth information
+    glGenTextures(1, &this->mainEIDATex);
+    glBindTexture(GL_TEXTURE_2D, this->mainEIDATex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, this->mainEIDATex, 0);
+
+    //generate a texture to store the depth information
+    glGenTextures(1, &this->mainSolidTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainSolidTex);
+
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, this->mainSolidTex, 0);
+
+    //generate a texture to store the last tick image
+    glGenTextures(1, &this->mainTransparentAccumTex);
+    glBindTexture(GL_TEXTURE_2D, this->mainTransparentAccumTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, this->size.x, this->size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, GL_TEXTURE_2D, this->mainTransparentAccumTex, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //unbind the render buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    //specify the number of used color buffers
+    glDrawBuffers(glgeLenUsedColorBuffers, glgeUsedColorBuffers);
+
+    //check if the framebuffer compiled correctly
+    unsigned int fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
+        //stop the program
+        exit(1);
+    }
+
+    //create and bind the second custom frame buffer
+    glGenFramebuffers(1, &this->lastTickFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->lastTickFramebuffer);
+
+    //generate a texture to store the last tick image
+    glGenTextures(1, &this->lastTickTex);
+    glBindTexture(GL_TEXTURE_2D, this->lastTickTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_BIT_DEPTH, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->lastTickTex, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //check if the framebuffer compiled correctly
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
+        //stop the program
+        exit(1);
+    }
+
+    //create and bind the fourth custom frame buffer
+    glGenFramebuffers(1, &this->postProcessingFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->postProcessingFramebuffer);
+
+    //generate a texture to store the lighting pass output
+    glGenTextures(1, &this->postProcessingTex);
+    glBindTexture(GL_TEXTURE_2D, this->postProcessingTex);
+    //set the texture parameters so it dosn't loop around the screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GLGE_FRAMEBUFFER_POST_PROCESSING_DEF, this->size.x, this->size.y, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //bind the texture to the frame buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->postProcessingTex, 0);
+
+    //unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //check if the framebuffer compiled correctly
+    fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    //if the frame buffer compiled not correctly
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //print an error
+        std::cerr << GLGE_FATAL_ERROR_FRAMEBUFFER_NOT_COMPILED << fboStatus << "\n";
+        //stop the program
+        exit(1);
+    }
+
+    //create an rectangle that covers the whole screen
+    float rectangleVertices[] = 
+    {
+        //Coords   //texCoords
+       -1.f, -1.f, 0.f, 0.f,
+        1.f, -1.f, 1.f, 0.f,
+       -1.f,  1.f, 0.f, 1.f,
+
+        1.f, -1.f, 1.f, 0.f,
+        1.f,  1.f, 1.f, 1.f,
+       -1.f,  1.f, 0.f, 1.f
+    };
+    
+    //create two buffers, one vertex array and one array buffer
+    glGenVertexArrays(1, &this->screenRectVAO);
+    //create two buffers, one vertex array and one array buffer
+    glGenBuffers(1, &this->screenRectVBO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, this->screenRectVBO);
+    //load the data into the array buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate the shaders for the default lighting shader
+    this->lightShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER);
+
+    //get the uniforms form the shader
+    this->getLightingUniforms();
+
+    //create an cube of size 1
+    float skyboxVerts[] = 
+    {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f
+    };
+
+    //create two buffers, one vertex array and one array buffer
+    glGenVertexArrays(1, &this->skyboxVAO);
+    //create two buffers, one vertex array and one array buffer
+    glGenBuffers(1, &this->skyboxVBO);
+    //bind the array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, this->skyboxVBO);
+    //load the data into the array buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVerts), &skyboxVerts, GL_STATIC_DRAW);
+    //unbind the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate the shaders for the default lighting shader
+    this->skyboxShader = glgeCompileShader(GLGE_DEFAULT_VERTEX_SKYBOX, GLGE_DEFAULT_FRAGMENT_SKYBOX);
+
+    //get the uniforms
+    //get the rotation uniform
+    this->skyboxRot = getUniformVar(this->skyboxShader, "glgeRot");
+    //get the projection uniform
+    this->skyboxProj = getUniformVar(this->skyboxShader, "glgeProject");
+    //get the sampler
+    this->skyboxTexSampler = getUniformVar(this->skyboxShader, "glgeSkybox");
+
+    //setup the basic transparent combine shader
+    this->transparentCombineShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_TRANSPARENT_COMBINE_SHADER);
+    //load the uniforms
+    //load the uniform for the accumulation texture
+    this->transparentCombineShader->setCustomTexture("glgeTranspAccumTexture", this->mainTransparentAccumTex);
+    //load the uniform for the count texture
+    this->transparentCombineShader->setCustomTexture("glgeTranspCountTexture", this->mainEIDATex);
+    //update the uniform binding
+    this->transparentCombineShader->recalculateUniforms();
+    //say that no custom shader is bound
+    this->customTransparentCombineShader = false;
+
+    //compile the default 3D shader
+    this->default3DShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_3D_FRAGMENT);
+    //compile the default 3D transparent shader
+    this->default3DTransShader = glgeCompileShader(GLGE_DEFAULT_3D_VERTEX, GLGE_DEFAULT_TRANSPARENT_SHADER);
+    //compile the default 2D shader
+    this->default2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
+    //compile the default pps shader
+    this->defaultImageShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_IMAGE_FRAGMENT_SHADER);
+    //add the uniform
+    this->defaultImageShader.setCustomTexture("image", (unsigned int)0);
+    //get the uniform
+    this->defaultImageShader.recalculateUniforms();
+
+    //create the shadow shader
+    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
+    //add a uniform for the light space matrix
+    this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
+    //add a uniform for the model matrix
+    this->shadowShader.setCustomMat4("glgeModelMat", mat4());
+    //update the uniforms
+    this->shadowShader.recalculateUniforms();
+
+    //create a new uniform buffer
+    glCreateBuffers(1, &this->lightUBO);
+    //bind it as a uniform buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, this->lightUBO);
+    //allocate enough space for an integer and 128 light sources
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(LightData)*129, 0, GL_STATIC_DRAW);
+    //unbind the buffer
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    //bind the buffer to location 3
+    glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
+    //create a new buffer
+    glCreateBuffers(1, &this->modelMatSSBO);
+    //bind the UBO
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
+    //unbind the buffer
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    //bind the buffer to location 4
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
+    //clear the buffer for the light data
+    bzero(this->lightDatas, sizeof(LightData)*129);
+
+    //initalise the textures correctly by calling the resize function
+    this->resizeWindow(this->size.x, this->size.y);
+}
 
 Window* glgeBindMainWindow(Window* window, bool replace)
 {

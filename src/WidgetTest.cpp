@@ -30,9 +30,9 @@ Button* button;
 //store the Camera
 Camera* camSecWin;
 //store a second window
-Window win;
+Window* win;
 //store a window for a compute shader example
-Window compute;
+Window* compute;
 //store a texture for the compute shader
 Texture* compOutTexture;
 //store the compute shader
@@ -140,7 +140,7 @@ void secWindowInit()
     //create the camera
     camSecWin = new Camera(90);
     //bind the camera
-    win.setCamera(camSecWin);
+    win->setCamera(camSecWin);
 
     //set the triangle to an 2D object created out of the vertices scaled down by 0.5
     tri = new Object2D(GLGE_PRESET_TRIANGLE, 0, GLGE_PRESET_USE_SPECIAL, Transform2D(0.75,0.75,0,vec2(0.25,0.25)));
@@ -158,11 +158,11 @@ void secWindowInit()
     button = new Button("assets/GLGEImage.png", Transform2D(-0.75,-0.75,0,vec2(0.25,0.25)));
 
     //bind a draw function to the window
-    win.setDrawFunc(secondDraw);
+    win->setDrawFunc(secondDraw);
     //bind a tick function to the window
-    win.setTickFunc(secondTick);
+    win->setTickFunc(secondTick);
     //set the window icon
-    win.setWindowIcon("assets/GLGEImage.png");
+    win->setWindowIcon("assets/GLGEImage.png");
 }
 
 void computeDraw()
@@ -174,7 +174,7 @@ void computeDraw()
     //update the time, divide it by 1000 so it dosn't go too fast
     compShader->setCustomFloat("t", glgeGetDeltaTime() / 1000.f, GLGE_MODE_ADD);
     //run the compute shader
-    compShader->dispatch(vec3(compute.getSize().x, compute.getSize().y, 1));
+    compShader->dispatch(vec3(compute->getSize().x, compute->getSize().y, 1));
     //draw the texture
     compOutTexture->draw();
 }
@@ -190,13 +190,13 @@ void computeClose()
 void computeSetup()
 {
     //create a new window for the compute shader example
-    compute = Window("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
+    compute = new Window("Compute Example", 512,512, glgeGetScreenSize()-vec2(512));
     //start the window so the window will be able to be drawn
-    compute.start();
+    compute->start();
     //disable resizing so the amount of pixels needed to compute dosn't change
-    compute.setResizable(false);
+    compute->setResizable(false);
     //create a new texture to render into
-    compOutTexture = new Texture(compute.getSize(), GLGE_TEX_RGBA32, 0);
+    compOutTexture = new Texture(compute->getSize(), GLGE_TEX_RGBA32, 0);
     //create the compute shader from an source file
     compShader = new ComputeShader("src/Shaders/computeExample.comp");
     //add a variable for the time
@@ -204,9 +204,9 @@ void computeSetup()
     //update the uniform bindings
     compShader->recalculateUniforms();
     //bind a draw function for the window
-    compute.setDrawFunc(computeDraw);
+    compute->setDrawFunc(computeDraw);
     //bind an exit function
-    compute.setExitFunc(computeClose);
+    compute->setExitFunc(computeClose);
     //a tick function is not needed for the window, so don't bind one
 }
 
@@ -259,15 +259,15 @@ void runWidgetExample()
     glgeBindDisplayFunc(widgetDraw);
 
     //create the second window
-    win = Window("Hello World!", 250,250);
+    win = new Window("Hello World!", 250,250);
     //set the clear color of the window to white
-    win.setClearColor(1,1,1);
+    win->setClearColor(1,1,1);
     //bind an initalisation function
-    win.setInitFunc(secWindowInit);
+    win->setInitFunc(secWindowInit);
     //bind an exit function
-    win.setExitFunc(closeWin);
+    win->setExitFunc(closeWin);
     //mark the window as ready for updates
-    win.start();
+    win->start();
     
     //generate a window for the compute shader example
     computeSetup();
@@ -279,6 +279,4 @@ void runWidgetExample()
 
     //run the program
     glgeRunMainLoop();
-    //close the custom window
-    win.close();
 }

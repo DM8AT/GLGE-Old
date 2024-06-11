@@ -17,12 +17,43 @@
 #include "openglGLGELightingCore.h"
 #include "openglGLGE3Dcore.h"
 #include "openglGLGE2Dcore.h"
+#include "openglGLGERenderPipeline.hpp"
 //include CML
 #include "../CML/CMLVec2.h"
 #include "../CML/CMLVec3.h"
 
 //include dependencys from the default lib
 #include <string>
+
+/**
+ * @brief identify the framebuffer that draws directly to the window surface
+ */
+#define GLGE_FRAMEBUFFER_WINDOW_SURFACE 0
+/**
+ * @brief identify the geometry framebuffer (G-Buffer). 
+ * @par The geometry buffer is used for the default geometry drawing. It stores: 
+ *  - The albdeo information for the pixel (the color)
+ *  - The normal vector for the pixel
+ *  - The world-space position of the pixel
+ *  - The roughness, metallic and lit information
+ *  - The lit image without post processing
+ *  - The Object IDs, Depth and transparent image max accumulation
+ *  - The accumulated transparent albedo
+ *  - The objects depth map
+ */
+#define GLGE_FRAMEBUFFER_GEOMETRY 1
+/**
+ * @brief identify the framebuffer used for post processing
+ */
+#define GLGE_FRAMEBUFFER_POST_PROCESSING 2
+/**
+ * @brief identify the framebuffers used for shadow mapping
+ */
+#define GLGE_FRAMEBUFFER_SHADOW_MAPPING 3
+/**
+ * @brief identify a framebuffer used for a custom render target
+ */
+#define GLGE_FRAMEBUFFER_CUSTOM_RENDER_TEXTURE 4
 
 /**
  * @brief a simple window to handle multiple windows
@@ -78,6 +109,11 @@ public:
      * @param flags the window creation flags
      */
     Window(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags = 0);
+
+    /**
+     * @brief Destroy the Window
+     */
+    ~Window();
 
     /**
      * @brief Destroy the Window
@@ -588,27 +624,12 @@ public:
     void removePostProcessingShader(unsigned int index, bool del = false);
 
     /**
-     * @brief remove a shader from the post processing shader stack
-     * 
-     * @param shader the shader that should be removed from the post processing shader stack
-     * @param del true : the shader pointer will be deleted | false : the shader pointer will continue to exist
-     */
-    void removePostProcessingShader(Shader* shader, bool del = false);
-
-    /**
      * @brief remove a function from the post processing function stack
      * 
      * @param index the index of the function in the post processing function stack
      */
     void removePostProcessingFunction(unsigned int index);
 
-    /**
-     * @brief remove a function from the post processing function stack
-     * 
-     * @param func a pointer to the function that should be removed
-     */
-    void removePostProcessingFunction(Shader (*func)(unsigned int));
-    
     /**
      * @brief Get the Post Processing Shader from the post processing shader stack
      * 
@@ -618,28 +639,12 @@ public:
     Shader* getPostProcessingShader(unsigned int index);
 
     /**
-     * @brief Get the Index of an post processing shader in the post processing shader stack
-     * 
-     * @param shader a pointer to the shader
-     * @return unsigned int the index of the shader in the post processing stack
-     */
-    int getPostProcessingShaderIndex(Shader* shader);
-
-    /**
      * @brief Get a Post Processing Func from the post processing function stack
      * 
      * @param index the index of the post processing function
      * @return Shader*(funx*)(unsigned int) a pointer to the function 
      */
     Shader (*getPostProcessingFunc(unsigned int index))(unsigned int);
-
-    /**
-     * @brief Get the index of an post processing function in the post processing function stack
-     * 
-     * @param func the post processing function
-     * @return unsigned int the index of the function in the post processing function stack
-     */
-    int getPostProcessingFuncIndex(Shader (*func)(unsigned int));
 
     /**
      * @brief get if the window is fullscreen
@@ -966,6 +971,66 @@ public:
      */
     int getId();
 
+    /**
+     * @brief draw a post processing shader over the whole window
+     * 
+     * @param shader a pointer to the shader
+     */
+    void drawPPShader(Shader* shader, bool getVars = true);
+
+    /**
+     * @brief clear the geometry buffer and prepare normal drawing
+     */
+    void clearGBuff();
+    /**
+     * @brief draw all solid geometry
+     */
+    void drawSolid();
+    /**
+     * @brief draw all transparent geometry
+     */
+    void drawTransparent();
+    /**
+     * @brief draw the lighting
+     */
+    void drawLighting();
+    /**
+     * @brief draw the skybox
+     */
+    void drawSkybox();
+    /**
+     * @brief do shadow-precalculation
+     */
+    void shadowPass();
+    /**
+     * @brief copy the image from the geometry buffer to the post processing buffer
+     * 
+     * @param source the source to copy from
+     */
+    void copyGToPPFramebuffer(int source);
+
+    /**
+     * @brief Get the Post Processing Texture
+     * 
+     * @return unsigned int the OpenGL post processing texture identifier
+     */
+    unsigned int getPostProcessingTexture();
+
+    /**
+     * @brief Get the Render Pipeline bound to this window
+     * 
+     * @return RenderPipeline* the render pipeline
+     */
+    RenderPipeline* getRenderPipeline();
+
+    /**
+     * @brief Set the Render Pipeline for this window
+     * 
+     * @param renderPipeline the render pipeline
+     * @param del if the old pipeline should be deleted
+     */
+    void setRenderPipeline(RenderPipeline* renderPipeline, bool del = true);
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -981,6 +1046,26 @@ private:
      * @param shader the post processing shader to get the 
      */
     void getDefaultUniformsFromPostProcessingShader(Shader* shader);
+
+    /**
+     * @brief bind the geometry framebuffer
+     */
+    void bindGBuff();
+
+    /**
+     * @brief bind the post processing framebuffer
+     */
+    void bindPPBuff();
+
+    /**
+     * @brief super constructor for the window
+     * 
+     * @param name the name of the window
+     * @param size the size of the window
+     * @param pos the position of the window
+     * @param flags the flags for the window creation
+     */
+    void super(std::string name, vec2 size, vec2 pos, unsigned int flags = 0);
 
     /////////////////
     //  Variables  //
@@ -1058,6 +1143,14 @@ private:
     bool screenRectBound = false;
     //store if the window was started
     bool started = false;
+
+    /*
+        Rendering
+    */
+    //store a pointer to the render pipeline the window is using
+    RenderPipeline* renderPipeline = NULL;
+    //store the post processing stack of the window
+    PostProcessingStack* pps = NULL;
 
     /*
         Shadow pass stuff
@@ -1142,12 +1235,6 @@ private:
     unsigned int postProcessingFramebuffer;
     //store the image for post processing
     unsigned int postProcessingTex;
-    //store the post processing function stack
-    std::vector<Shader (*)(unsigned int)> ppsFunctionStack = {};
-    //store the post processing shader stack
-    std::vector<Shader*> ppsShaderStack = {};
-    //store if this is the first post processing pass
-    bool firstPPSPass;
 
     /*
         Store default Vertex and Index buffers

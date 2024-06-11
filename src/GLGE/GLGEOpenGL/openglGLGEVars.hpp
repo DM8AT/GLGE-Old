@@ -56,4 +56,7 @@ extern unsigned int glgeTextureUnit;
 //store the current light source that is casting shadows
 extern Light* glgeCurrentShadowCaster;
 
+//store the type of the current framebuffer
+extern unsigned int glgeCurrentFramebufferType;
+
 #endif

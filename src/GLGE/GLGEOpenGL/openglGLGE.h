@@ -491,28 +491,12 @@ int glgeSetPostProsessingShader(Shader* shader);
 Shader* glgeGetPostProcessingShader(int index);
 
 /**
- * @brief get the index of an post-processing shader, -1 if it dosn't exist
- * 
- * @param shader the shader to find the index for
- * @return int the index in the pipeline
- */
-int glgeGetIndexOfPostProcessingShader(Shader* shader);
-
-/**
  * @brief delete an post processing shader
  * 
  * @param index the index of the shader to remove
  * @param del say if the shader sould be deletet from memory, default = false
  */
 void glgeDeletePostProcessingShader(int index, bool del = false);
-
-/**
- * @brief delete an post processing shader
- * 
- * @param shader a pointer to the shader, that sould be removed
- * @param del say if the shader sould be deletet from memory, default = false
- */
-void glgeDeletePostProcessingShader(Shader* shader, bool del = false);
 
 /**
  * @brief Set the Interpolation Mode for textures
@@ -986,6 +970,17 @@ bool glgeUsesOpenGL();
  * @return false : GLGE ueses OpenGL
  */
 bool glgeUsesVulkan();
+
+/**
+ * @brief get the type of the currently bound framebuffer. This can be one of the following: \n 
+ *  - GLGE_FRAMEBUFFER_WINDOW_SURFACE
+ *  - GLGE_FRAMEBUFFER_GEOMETRY
+ *  - GLGE_FRAMEBUFFER_POST_PROCESSING
+ *  - GLGE_FRAMEBUFFER_SHADOW_MAPPING
+ *  - GLGE_FRAMEBUFFER_CUSTOM_RENDER_TEXTURE
+ * @return unsigned int one of the framebuffer types
+ */
+unsigned int glgeGetCurrentFramebufferType();
 
 /**
  * @brief get the typename like it would be stored in a file
