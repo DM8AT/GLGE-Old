@@ -2182,6 +2182,8 @@ void Window::clearGBuff()
 
     //set the specified clear color
     glClearColor(this->clear.x, this->clear.y, this->clear.z, 1);
+    //set the clear depth
+    glClearDepth(0.f);
 
     //clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

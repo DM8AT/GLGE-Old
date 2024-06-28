@@ -428,15 +428,21 @@ void loadIncludeDefaults()
 "    vec4 glgeColor;",
 "    float glgeRoughness;",
 "    float glgeMetalic;",
+"    float dispStrength;",
+"    int minLayers;",
+"    int maxLayers;",
+"    int binarySteps;",
 "    int glgeLit;",
 "    int glgeAmbientMapActive;",
 "    int glgeNormalMapActive;",
 "    int glgeRoughnessMapActive;",
 "    int glgeMetalicMapActive;",
+"    int glgeDisplacementMapActive;",
 "    uvec2 glgeAmbientMap;",
 "    uvec2 glgeNormalMap;",
 "    uvec2 glgeRoughnessMap;",
 "    uvec2 glgeMetalicMap;",
+"    uvec2 glgeDisplacementMap;"
 "};",
     });
     //the way to get the light data

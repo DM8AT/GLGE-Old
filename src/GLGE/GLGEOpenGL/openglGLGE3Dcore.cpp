@@ -341,6 +341,8 @@ void Object::draw()
 
     //enable depth testing
     glEnable(GL_DEPTH_TEST);
+    //set the depth function correct
+    glDepthFunc(GL_GREATER);
 
     if (!glgeWindows[this->windowIndex]->isTranparentPass())
     {
@@ -409,6 +411,8 @@ void Object::draw()
     glDisableVertexAttribArray(1);
     //deactivate the texCoord argument
     glDisableVertexAttribArray(2);
+    //deactivate the normal argument
+    glDisableVertexAttribArray(3);
 
     //unbind the shader
     this->shader.removeShader();

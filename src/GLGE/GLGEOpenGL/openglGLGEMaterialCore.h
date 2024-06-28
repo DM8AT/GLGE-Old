@@ -232,6 +232,83 @@ public:
     Texture* getMetalicMap();
 
     /**
+     * @brief Set the Displacement Map for the material
+     * 
+     * @param displacementMap a pointer to an instance of the texture class with the displacment map
+     */
+    void setDisplacementMap(Texture* displacementMap);
+
+    /**
+     * @brief Set the Displacement Map for the material
+     * 
+     * @param texture the path to the texture file with the displacement map
+     */
+    void setDisplacementMap(const char* texture);
+
+    /**
+     * @brief Get the Displacement Map from the material
+     * 
+     * @return Texture* a pointer to an instance of the texture class with the displacement map
+     */
+    Texture* getDisplacementMap();
+
+    /**
+     * @brief Set the Displacement Strength
+     * 
+     * @param strength the new displacement strength
+     */
+    void setDisplacementStrength(float strength);
+
+    /**
+     * @brief Get the Displacement Strength
+     * 
+     * @return float the displacment strength
+     */
+    float getDisplacementStrength();
+
+    /**
+     * @brief Set the minimal amount of depth layers to search
+     * 
+     * @param layers the minimum amount of depth layers
+     */
+    void setDisplacementMinLayers(int layers);
+
+    /**
+     * @brief Get the minimum amount of searchd depth layers
+     * 
+     * @return int the minimum amount of depth layers
+     */
+    int getDisplacementMinLayers();
+
+    /**
+     * @brief Set the maximum amount of depth layers to search
+     * 
+     * @param layers the maximum amount of depth layers
+     */
+    void setDisplacementMaxLayers(int layers);
+
+    /**
+     * @brief Get the maximum amount of depth layers to search
+     * 
+     * @return int the maximum amount of depth layers to search
+     */
+    int getDisplacementMaxLayers();
+
+    /**
+     * @brief Set the amount of binary steps to use to refine the parallax mapping
+     * 
+     * @param steps the amount of steps to take
+     */
+    void setDisplacementBinaryRefinementSteps(int steps);
+
+    /**
+     * @brief Get the amount of binary steps to use
+     * 
+     * @return int the amount of binary steps
+     */
+    int getDisplacementBinaryRefinementSteps();
+
+    /**
      * @brief makes this the currently active material
      */
     void apply();
@@ -263,7 +340,15 @@ private:
         //the material base roughness
         float roughness = 0.3;
         //the material base metalicnes
-        float metalic;
+        float metalic = 0.f;
+        //the strength of the displacement map
+        float dispStrength = -0.05;
+        //store the minimum amount of allowed depth layers
+        int minLayers = 4;
+        //store the maximum amount of depth layers
+        int maxLayers = 16;
+        //store the amount of binary hit refinement steps
+        int binarySteps = 4;
         //say if the material is lit
         int lit = 1;
         //store if the ambient texture is active
@@ -274,6 +359,8 @@ private:
         int roughnessMapActive;
         //store if the metalic map is active
         int metalicMapActive;
+        //store if the displacement map is active
+        int displacementMapActive;
         //store the ambient texture
         uint64_t ambientTex;
         //store the normal map texture 
@@ -282,6 +369,8 @@ private:
         uint64_t roughnessMap;
         //store the metalic map texture 
         uint64_t metalicMap;
+        //store the displacement map texture
+        uint64_t displacementMap;
     };
 
     //store a ambient map
@@ -292,6 +381,8 @@ private:
     Texture* roughnessMap = 0;
     //store a metalic map
     Texture* metalicMap = 0;
+    //store the displacement map
+    Texture* displacementMap = 0;
     //store the window id
     int windowId = -1;
     //store the material data

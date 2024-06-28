@@ -162,6 +162,21 @@ void Material::update()
         //say that no metalic map exists
         this->matData.metalicMapActive = 0;
     }
+    //check if the displacement texture exists
+    if (this->displacementMap != NULL)
+    {
+        //update the displacement map
+        this->matData.displacementMap = this->displacementMap->getHandler();
+        //say that the displacement map exists
+        this->matData.displacementMapActive = 1;
+    }
+    else
+    {
+        //update the displacement map
+        this->matData.displacementMap = 0;
+        //say that no displacement map exists
+        this->matData.displacementMapActive = 0;
+    }
 
     //bind the uniform buffer
     glBindBuffer(GL_UNIFORM_BUFFER, this->ubo);
@@ -331,6 +346,74 @@ Texture* Material::getMetalicMap()
 {
     //return the metalic map
     return this->metalicMap;
+}
+
+void Material::setDisplacementMap(Texture* displacementMap)
+{
+    //store the displacement map
+    this->displacementMap = displacementMap;
+    //say that an update is qued
+    this->quedUpdate = true;
+}
+
+void Material::setDisplacementMap(const char* texture)
+{
+    //create a new texture and cast to another function
+    this->setDisplacementMap(new Texture(texture));
+}
+
+Texture* Material::getDisplacementMap()
+{
+    //return the displacment map
+    return this->displacementMap;
+}
+
+void Material::setDisplacementStrength(float strength)
+{
+    //store the new displacement strength
+    this->matData.dispStrength = strength;
+}
+
+float Material::getDisplacementStrength()
+{
+    //return the displacement strength
+    return this->matData.dispStrength;
+}
+
+void Material::setDisplacementMinLayers(int layers)
+{
+    //store the new minimum layer amount
+    this->matData.minLayers = layers;
+}
+
+int Material::getDisplacementMinLayers()
+{
+    //return the minimum layer amount
+    return this->matData.minLayers;
+}
+
+void Material::setDisplacementMaxLayers(int layers)
+{
+    //set the maximum layer amount
+    this->matData.maxLayers = layers;
+}
+
+int Material::getDisplacementMaxLayers()
+{
+    //return the maximum amount of depth layers
+    return this->matData.maxLayers;
+}
+
+void Material::setDisplacementBinaryRefinementSteps(int steps)
+{
+    //store the new step amount
+    this->matData.binarySteps = steps;
+}
+
+int Material::getDisplacementBinaryRefinementSteps()
+{
+    //return the amount of steps
+    return this->matData.binarySteps;
 }
 
 void Material::apply()

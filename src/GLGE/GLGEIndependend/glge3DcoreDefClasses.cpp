@@ -1167,14 +1167,16 @@ void Mesh::recalculateNormals()
 {
     for (int i = 0; i < (int)this->indices.size()/3; i++)
     {
-        vec3 normal = this->vertices[indices[i+1]].pos.cross(this->vertices[indices[i]].pos);
+        vec3 edge1 = this->vertices[indices[i+1]].pos - this->vertices[indices[i]].pos;
+        vec3 edge2 = this->vertices[indices[i+1]].pos - this->vertices[indices[i+2]].pos;
+        
+        vec3 normal = edge1.cross(edge2);
         normal.normalize();
 
         if (normal == vec3(1/0.f,1/0.f,1/0.f))
         {
             normal = vec3(0,0,0);
         }
-        
         for (int j = 0; j < 3; j++)
         {
             bool is0 = this->vertices[indices[i+j]].normal == vec3(0,0,0);            

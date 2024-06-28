@@ -64,10 +64,10 @@ c: clean all
 
 ##################################### APP BEGIN
 
-$(BIN)/$(EXECUTABLE): $(OBJ_D)/main.o $(OBJ_D)/2DTest.o $(OBJ_D)/3DTest.o $(OBJ_D)/WidgetTest.o $(OBJ_D)/SceneExample.o $(BIN)/libGLGE.a $(BIN)/libCML.a
+$(BIN)/$(EXECUTABLE): $(OBJ_D)/main.o $(OBJ_D)/2DTest.o $(OBJ_D)/3DTest.o $(OBJ_D)/WidgetTest.o $(BIN)/libGLGE.a $(BIN)/libCML.a
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $(BIN)/$(EXECUTABLE) $(LIBRARIES)
 
-$(OBJ_D)/main.o: $(SRC)/main.cpp $(GLGE_ALL_FILES) $(CML_ALL_FILES) $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp $(SRC)/SceneExample.cpp $(SRC)/SceneExample.hpp 
+$(OBJ_D)/main.o: $(SRC)/main.cpp $(GLGE_ALL_FILES) $(CML_ALL_FILES) $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(OBJ_D)/2DTest.o: $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
@@ -77,9 +77,6 @@ $(OBJ_D)/3DTest.o: $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(GLGE_ALL_FILES) $(CML_A
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(OBJ_D)/WidgetTest.o: $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
-	$(CXX) -c $< -o $@ $(CXX_FLAGS)
-
-$(OBJ_D)/SceneExample.o: $(SRC)/SceneExample.cpp $(SRC)/SceneExample.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 ##################################### APP END

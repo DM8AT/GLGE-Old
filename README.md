@@ -111,6 +111,10 @@ Upcoming features that may be added to GLGE in the future include:
    - class "PostProcessingStack" is used to wrap the information on wich shaders or functions to use for each post processing pass in a render stage
 - custom render pipelines can be bound to a window
 - each window has its own default render pipeline with the same stages and order as before
+- fixed some wierd behavieor of normals when an object was rotated
+- added built in support for parallax occlusion mapping to materials
+   - depth peeling
+   - binary refinement
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

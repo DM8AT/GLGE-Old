@@ -4,6 +4,7 @@ layout (location = 0) in vec3 pos;
 layout (location = 1) in vec4 vColor;
 layout (location = 2) in vec2 vTexcoord;
 layout (location = 3) in vec3 vNormal;
+layout (location = 4) in vec3 vTangent;
 
 #include <glgeObject>
 #include <glgeCamera>
@@ -19,7 +20,7 @@ uniform int glgeActiveShadowCasters;
 out vec4 color;
 out vec2 texCoord;
 out vec3 normal;
-out vec3 currentPos;
+out vec3 fragPos;
 out vec3 vPos;
 flat out int activeShadowCasters;
 
@@ -29,9 +30,9 @@ void main()
 {
     color = vColor;
     texCoord = vTexcoord;
-    normal = vNormal;
-    currentPos = vec3(vec4(pos, 1)*glgeModelMat);
-    gl_Position = vec4(pos, 1)*glgeModelMat*glgeCamMat;
+    fragPos = (vec4(pos, 1) * glgeModelMat).xyz;
+    normal = normalize(vec4(vNormal, 1) * glgeRotMat).xyz;
+    gl_Position = vec4(fragPos,1)*glgeCamMat;
     vPos = pos;
     glgeModelMatrix[glgeObjectUUID] = glgeModelMat;
 }
