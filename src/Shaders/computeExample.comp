@@ -2,7 +2,7 @@
  * For documentation, please read: https://learnopengl.com/Guest-Articles/2022/Compute-Shaders/Introduction
  * That page is also the source of the shader
  */
-#version 430 core
+#version 450 core
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 	
