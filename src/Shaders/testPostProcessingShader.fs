@@ -26,8 +26,8 @@ float aspect;
 vec3 normal;
 vec3 pos;
 vec3 viewPos;
-const mat4 viewMat = glgeCamTransfMat * glgeCamRotMat;
-const mat4 invView = inverse(viewMat);
+mat4 viewMat = glgeCamTransfMat * glgeCamRotMat;
+mat4 invView = inverse(viewMat);
 
 //settings for lens distortion
 float lenseDistStrength = 0.f;

@@ -201,6 +201,17 @@ void main()
 //define the default transparent combine shader
 #define GLGE_DEFAULT_TRANSPARENT_COMBINE_SHADER std::string("#version 450 core\nprecision mediump float;layout(location = 4) out vec4 FragColor;uniform sampler2D glgeTranspAccumTexture;uniform sampler2D glgeTranspCountTexture;void main(){vec4 accum = texelFetch(glgeTranspAccumTexture, ivec2(gl_FragCoord.xy), 0);float n = max(1.0, texelFetch(glgeTranspCountTexture, ivec2(gl_FragCoord.xy), 0).b);FragColor = vec4(accum.rgb / max(accum.a, 0.0001), pow(max(0.0, 1.0 - accum.a / n), n));}")
 
+/**
+ * a fragment shader that basicaly dose nothing
+ */
+#define GLGE_EMPTY_FRAGMENT_SHADER std::string("#version 450 core\nprecision mediump float;out vec4 FragColor;in vec4 color;void main(){FragColor = color;}")
+
+/**
+ * a vertex shader that doese nothing
+ */
+#define GLGE_EMPTY_VERTEX_SHADER std::string("#version 450 core\nlayout (location = 0) in vec2 inPos;layout (location = 1) in vec2 inTexCoord;out vec2 texCoords;void main(){gl_Position = vec4(inPos.x, inPos.y, 0, 1);texCoords = inTexCoord;}")
+
+
 //define the wrap modes for the textures
 
 //sample the closest pixels

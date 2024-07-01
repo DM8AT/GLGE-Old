@@ -2906,7 +2906,7 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     this->defaultImageShader.recalculateUniforms();
 
     //create the shadow shader
-    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 330 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
+    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 450 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
     //add a uniform for the light space matrix
     this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
     //add a uniform for the model matrix
