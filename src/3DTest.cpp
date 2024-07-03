@@ -301,9 +301,9 @@ void floorSetup()
                       0,2,3};
 
     //then, the arrays are inputed to the Mesh constructor to create an new mesh, that can be used to create an Object. 
-    Mesh m = Mesh(vertices, indices, sizeof(vertices), sizeof(indices));
+    Mesh* m = new Mesh(vertices, indices, sizeof(vertices), sizeof(indices));
     //the normal vectors of the mesh are recalculated, so it can be lit. 
-    m.recalculateNormals();
+    m->recalculateNormals();
     //the grass floor is constructed from the previously created mesh by overwriting the data previously stored in it with the new mesh
     grassFloor = new Object(m);
 
@@ -319,9 +319,11 @@ void cubeSetup()
 {
     Mesh sphereMesh = Mesh(GLGE_PRESET_SPHERE, vec4(-1));
     sphereMesh.applyTransform(Transform(vec3(0,2,0), vec3(0), vec3(0.5)));
-    Mesh cubeMesh = Mesh(GLGE_PRESET_CUBE, vec4(-1));
+    Mesh* cubeMesh = new Mesh(GLGE_PRESET_CUBE, vec4(-1));
+    //join the two meshes together
+    cubeMesh->joinThis(sphereMesh);
     //the cube object is constructed using a cube preset using an alpha of -1 for the color to use textures
-    cube = new Object(cubeMesh + sphereMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
+    cube = new Object(cubeMesh, Transform(vec3(0,1,2),vec3(0,0,0), 1));
     //create a material for the cube
     Material* cubeMaterial = new Material("assets/GLGEImage.png", 0);
     //set it to unlit
@@ -335,7 +337,7 @@ void cubeSetup()
 void thingSetup()
 {
     //load a mesh from an file        specify the file format to be .obj
-    Mesh m = Mesh("assets/Vertices.obj", GLGE_OBJ);
+    Mesh* m = new Mesh("assets/Vertices.obj", GLGE_OBJ);
 
     //load the mesh to an object and change the position of it
     thing = new Object(m, Transform(vec3(0,0,-5), vec3(0,0,0), 1));
@@ -491,15 +493,6 @@ void run3Dexample()
     //a lighting shader is bound by default, so binding one is not needed (source: GLGE/glgeDefaultLightingShaderSource.fs)
     glgeSetLightingShader("src/GLGE/glgeDefaultShaders/glgeDefaultLightingShaderSource.fs");
 
-    // create post processing shader
-    glgeSetPostProsessingShader("src/Shaders/testPostProcessingShader.fs");
-    //bind another post processing shader
-    invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
-    //set a uniform float in the shader to controll the strength for the invertion
-    invColPPS->setCustomFloat("strength", 1);
-    //recalculate the positions of the uniforms
-    invColPPS->recalculateUniforms();
-
     /////////
     //BLOOM//
     /////////
@@ -533,6 +526,17 @@ void run3Dexample()
     upSample->setCustomInt("sampleMult", 1);
     //recalculate the uniform variables
     upSample->recalculateUniforms();
+
+    //bind another post processing shader
+    invColPPS = glgeSetPostProsessingShader("src/Shaders/invertColors.fs");
+    //set a uniform float in the shader to controll the strength for the invertion
+    invColPPS->setCustomFloat("strength", 1);
+    //recalculate the positions of the uniforms
+    invColPPS->recalculateUniforms();
+    //create post processing shader
+    glgeSetPostProsessingShader("src/Shaders/glgeFinalise.fs");
+    //add the anit-alisaing shader
+    glgeSetPostProsessingShader("src/Shaders/FxAA.fs");
 
     //the clear color is set here. The default clear color is the default clear color used in OpenGL. 
     glgeSetClearColor(0.5,0.5,0.5);

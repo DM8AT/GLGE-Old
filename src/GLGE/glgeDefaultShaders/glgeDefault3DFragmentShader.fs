@@ -1,5 +1,4 @@
 #version 450 core
-#extension GL_ARB_bindless_texture : require
 
 precision highp float;
 
@@ -54,7 +53,7 @@ FragmentData parallaxMapping(mat3 TBN)
     //store the current texture coordinates
     vec2 currentTexCoords = f.uv;
     //store the current depth read from the displacement map
-    float currentDepthMapValue = texture(sampler2D(glgeDisplacementMap), currentTexCoords).r;
+    float currentDepthMapValue = texture(glgeDisplacementMap, currentTexCoords).r;
     
     //loop while the depth is less than the displacement map
     while(currentLayerDepth < currentDepthMapValue)
@@ -62,7 +61,7 @@ FragmentData parallaxMapping(mat3 TBN)
         //displace the texture coordinates
         currentTexCoords -= deltaTexCoords;
         //get the new depth value
-        currentDepthMapValue = texture(sampler2D(glgeDisplacementMap), currentTexCoords).r;  
+        currentDepthMapValue = texture(glgeDisplacementMap, currentTexCoords).r;  
         //increment the depth
         currentLayerDepth += layerDepth;
     }
@@ -77,7 +76,7 @@ FragmentData parallaxMapping(mat3 TBN)
         //go the step in depth
         currentLayerDepth += depthStep;
         //read the depth from the texture
-        currentDepthMapValue = texture(sampler2D(glgeDisplacementMap), currentTexCoords).r;
+        currentDepthMapValue = texture(glgeDisplacementMap, currentTexCoords).r;
         //divide the depth step by two and switch the sign if needed
         depthStep /= 2.f * sign(currentLayerDepth - currentDepthMapValue);
     }
@@ -113,28 +112,16 @@ void main()
     //read the color for the object
     vec4 col = glgeColor + frag.color;
     col.rgb *= (1-int(glgeAmbientMapActive));
-    col.rgb += texture(sampler2D(glgeAmbientMap), frag.uv).rgb * int(glgeAmbientMapActive);
+    col.rgb += texture(glgeAmbientMap, frag.uv).rgb * int(glgeAmbientMapActive);
     //no luck getting arround this if statement. Alpha clipping is enabled by default
     if(col.w < 0.5){discard;}
 
-    //re-compute tangent and bitangent
-	Q1 = dFdx(frag.pos);
-	Q2 = dFdy(frag.pos);
-	st1 = dFdx(frag.uv);
-	st2 = dFdy(frag.uv);
-	
-    //calculate tangent and bitangent again
-	tangent = normalize(Q1*st2.t - Q2*st1.t);
-	bitangent = normalize(-Q1*st2.s + Q2*st1.s);
-
-    //TBN = mat3(tangent, bitangent, normal);
-
     //if a normal map is active, get the normal of the normal map and use it, else use vec3(0,0,1)
-    vec3 n = mix(vec3(0,0,1),normalize(texture(sampler2D(glgeNormalMap),frag.uv).rgb * 2.f - 1.f),float(glgeNormalMapActive));
+    vec3 n = mix(vec3(0,0,1),normalize(texture(glgeNormalMap,frag.uv).rgb * 2.f - 1.f),float(glgeNormalMapActive));
     n = normalize(TBN * n);
 
     //read the roughness and again use multiplikation like for the albedo texture
-    float rough = texture(sampler2D(glgeRoughnessMap), frag.uv).r * float(int(glgeRoughnessMapActive));
+    float rough = texture(glgeRoughnessMap, frag.uv).r * float(int(glgeRoughnessMapActive));
     //add the default roughness, multiplied with the inverted scalar (like an else, but faster)
     rough += glgeRoughness * (1.f - float(int(glgeRoughnessMapActive)));
     

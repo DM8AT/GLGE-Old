@@ -88,10 +88,10 @@ Material::~Material()
     delete this->metalicMap;
 }
 
-void Material::update()
+void Material::update(unsigned int shader, bool force)
 {
     //check if a update is qued
-    if (!this->quedUpdate)
+    if (!(this->quedUpdate && force))
     {
         //if not, stop the function
         return;
@@ -106,14 +106,14 @@ void Material::update()
     if (this->ambientMap != NULL)
     {
         //update the albdeo map
-        this->matData.ambientTex = this->ambientMap->getHandler();
+        this->ambientMapLoc = glGetUniformLocation(shader, "glgeAmbientMap");
         //say that the ambient map exists
         this->matData.ambientTexActive = 1;
     }
     else
     {
         //update the albdeo map
-        this->matData.ambientTex = 0;
+        this->ambientMapLoc = -1;
         //say that no ambient map exists
         this->matData.ambientTexActive = 0;
     }
@@ -121,14 +121,14 @@ void Material::update()
     if (this->normalMap != NULL)
     {
         //update the normal map
-        this->matData.normalMapTex = this->normalMap->getHandler();
+        this->normalMapLoc = glGetUniformLocation(shader, "glgeNormalMap");
         //say that the normal map exists
         this->matData.normalMapActive = 1;
     }
     else
     {
         //update the normal map
-        this->matData.normalMapTex = 0;
+        this->normalMapLoc = -1;
         //say that no normal map exists
         this->matData.normalMapActive = 0;
     }
@@ -136,14 +136,14 @@ void Material::update()
     if (this->roughnessMap != NULL)
     {
         //update the roughness map
-        this->matData.roughnessMap = this->roughnessMap->getHandler();
+        this->roughnessMapLoc = glGetUniformLocation(shader, "");
         //say that the roughness map exists
         this->matData.roughnessMapActive = 1;
     }
     else
     {
         //update the roughness map
-        this->matData.roughnessMap = 0;
+        this->roughnessMapLoc = -1;
         //say that no roughness map exists
         this->matData.roughnessMapActive = 0;
     }
@@ -151,14 +151,14 @@ void Material::update()
     if (this->metalicMap != NULL)
     {
         //update the metalic map
-        this->matData.metalicMap = this->metalicMap->getHandler();
+        this->metalicMapLoc = glGetUniformLocation(shader, "");
         //say that the metalic map exists
         this->matData.metalicMapActive = 1;
     }
     else
     {
         //update the metalic map
-        this->matData.metalicMap = 0;
+        this->metalicMapLoc = -1;
         //say that no metalic map exists
         this->matData.metalicMapActive = 0;
     }
@@ -166,14 +166,14 @@ void Material::update()
     if (this->displacementMap != NULL)
     {
         //update the displacement map
-        this->matData.displacementMap = this->displacementMap->getHandler();
+        this->displacementMapLoc = glGetUniformLocation(shader, "");
         //say that the displacement map exists
         this->matData.displacementMapActive = 1;
     }
     else
     {
         //update the displacement map
-        this->matData.displacementMap = 0;
+        this->displacementMapLoc = -1;
         //say that no displacement map exists
         this->matData.displacementMapActive = 0;
     }
@@ -194,8 +194,6 @@ void Material::bindToWindow(unsigned int windowId)
     glCreateBuffers(1, &this->ubo);
     //say that an update should be done
     this->quedUpdate = true;
-    //update the object
-    this->update();
 }
 
 void Material::setColor(vec4 color)
@@ -420,6 +418,108 @@ void Material::apply()
 {
     //bind the ubo
     glBindBufferBase(GL_UNIFORM_BUFFER, 2, this->ubo);
+
+    //store the amount of texture units used
+    unsigned int texUnits = 0;
+    //check if an ambient texture exists
+    if (this->ambientMap)
+    {
+        //bind the ambient map to texture unit
+        this->ambientMap->unbind();
+        this->ambientMap->bind(GLGE_TEXTURE_BIND_TEXTURE_UNIT, texUnits, true);
+        //pass the binding to the shader
+        glUniform1i(this->ambientMapLoc, texUnits);
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a normal texture exists
+    if (this->normalMap)
+    {
+        //bind the ambient map to texture unit
+        this->normalMap->unbind();
+        this->normalMap->bind(GLGE_TEXTURE_BIND_TEXTURE_UNIT, texUnits, true);
+        //pass the binding to the shader
+        glUniform1i(this->normalMapLoc, texUnits);
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if an ambient texture exists
+    if (this->roughnessMap)
+    {
+        //bind the roughess map to texture unit
+        this->roughnessMap->unbind();
+        this->roughnessMap->bind(GLGE_TEXTURE_BIND_TEXTURE_UNIT, texUnits, true);
+        //pass the binding to the shader
+        glUniform1i(this->roughnessMapLoc, texUnits);
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a metalic texture exists
+    if (this->metalicMap)
+    {
+        //bind the metalic map to texture unit
+        this->metalicMap->unbind();
+        this->metalicMap->bind(GLGE_TEXTURE_BIND_TEXTURE_UNIT, texUnits, true);
+        //pass the binding to the shader
+        glUniform1i(this->metalicMapLoc, texUnits);
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a displacement texture exists
+    if (this->displacementMap)
+    {
+        //bind the displacement map to texture unit
+        this->displacementMap->unbind();
+        this->displacementMap->bind(GLGE_TEXTURE_BIND_TEXTURE_UNIT, texUnits, true);
+        //pass the binding to the shader
+        glUniform1i(this->displacementMapLoc, texUnits);
+    }
+}
+
+void Material::remove()
+{
+    //store the amount of texture units used
+    unsigned int texUnits = 0;
+    //check if an ambient texture exists
+    if (this->ambientMap)
+    {
+        //unbind the ambient map to texture unit
+        this->ambientMap->unbind();
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a normal texture exists
+    if (this->normalMap)
+    {
+        //unbind the ambient map to texture unit
+        this->normalMap->unbind();
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if an ambient texture exists
+    if (this->roughnessMap)
+    {
+        //unbind the roughess map to texture unit
+        this->roughnessMap->unbind();
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a metalic texture exists
+    if (this->metalicMap)
+    {
+        //unbind the metalic map to texture unit
+        this->metalicMap->unbind();
+        //pass the unbinding to the shader
+        glUniform1i(this->metalicMapLoc, texUnits);
+        //increment the amount of used texture units
+        texUnits++;
+    }
+    //check if a displacement texture exists
+    if (this->displacementMap)
+    {
+        //unbind the displacement map to texture unit
+        this->displacementMap->unbind();
+    }
 }
 
 void Material::encode(Data* data)

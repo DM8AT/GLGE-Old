@@ -43,3 +43,5 @@
 #include "GLGETexture.h"
 //includet compute shaders
 #include "GLGEComputeShader.h"
+//include partickles
+#include "GLGEParticles.h"

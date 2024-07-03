@@ -438,10 +438,6 @@ void Light::setupShadowMap()
         GLGE_THROW_ERROR("Failed to create framebuffer for shadow mapping")
     }
 
-    //get the handler of the texture
-    this->lightDat.shadowMap = glGetTextureHandleARB(this->shadowDepth);
-    //make the handler usefull
-    glMakeTextureHandleResidentARB(this->lightDat.shadowMap);
     //unbind the texture
     glBindTexture(GL_TEXTURE_2D, 0);
     //unbind the framebuffer

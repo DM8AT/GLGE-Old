@@ -25,6 +25,187 @@
 #include "../GLGEIndependend/GLGEData.h"
 
 /**
+ * @brief the same as the buffer for the object data on the GPU
+ */
+struct ObjectData
+{
+    //the model matrix of the object
+    mat4 modelMat;
+    //the rotation matrix of the object
+    mat4 rotMat;
+    //the objects uuid
+    unsigned int uuid;
+};
+
+/**
+ * @brief store the mesh for a 3D object
+ */
+class Mesh
+{
+public:
+    /**
+     * @brief defalut constructor
+     */
+    Mesh();
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param preset the preset to use
+     * @param color the color for the mesh (alpha = -1 for texture coordinates)
+     * @param resolution the amount of subdivision for subdivided meshes (0 for defaults)
+     */
+    Mesh(unsigned int preset, vec4 color, unsigned int resolution = 0);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param vertices a pointer array to store the vertices
+     * @param indices a pointer array to store the indices
+     * @param sizeVertices the size of the vertices pointer
+     * @param sizeIndices the size of the indices pointer
+     */
+    Mesh(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param vertices the vertices in an std::vector
+     * @param indices the indices in an std::vector
+     */
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats:
+     * .obj
+     * 
+     * @param data the data from an for the mesh
+     * @param type the type of the data (what file format was used)
+     */
+    Mesh(std::string data, int type);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats: 
+     * .obj
+     * 
+     * @param file the file to read the data from
+     * @param type the type of the file
+     */
+    Mesh(const char* file, int type);
+
+    /**
+     * @brief Destroy the Mesh
+     */
+    ~Mesh();
+
+    /**
+     * @brief recalculate the normal vectors from the mesh in clockwise order
+     */
+    void recalculateNormals();
+
+    /**
+     * @brief apply the transform to the mesh data
+     * 
+     * @param transform the transform to apply
+     */
+    void applyTransform(Transform transform);
+
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
+    Mesh join(Mesh mesh);
+
+    /**
+     * @brief join an mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
+    void joinThis(Mesh mesh);
+
+    /**
+     * @brief join another mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
+    void operator+=(Mesh mesh);
+
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
+    Mesh operator+(Mesh mesh);
+
+    /**
+     * @brief update the OpenGL mesh
+     * 
+     * @warning this transfers a lot of data between the CPU and GPU. This might lead to poor performance. 
+     */
+    void update();
+
+    /**
+     * @brief this initalises the OpenGL buffers and dose nothing if it was allready initalised
+     */
+    void init();
+
+    /**
+     * @brief bind the mesh to be read from
+     */
+    void bind();
+
+    /**
+     * @brief unbind the mesh
+     */
+    void unbind();
+
+    //store the vertices for the object
+    std::vector<Vertex> vertices;
+    //store the indices for the object
+    std::vector<unsigned int> indices;
+
+public:
+    /**
+     * @brief construct a mesh using vertices
+     * 
+     * @param vertices the vertices to use
+     * @param indices the indices to use
+     */
+    void superVec(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief construct a mesh using a preset
+     * 
+     * @param preset the preset id to use
+     * @param color the color for the preset
+     * @param resolution the resolution of the preset
+     */
+    void superPres(unsigned int preset, vec4 color, unsigned int resolution);
+
+    /**
+     * @brief construct a mesh from a file
+     * 
+     * @param data the data of the file to use
+     * @param type the type of the file
+     */
+    void superFile(std::string data, int type);
+private:
+    //store the vertex buffer object
+    unsigned int VBO = 0;
+    //store the index buffer object
+    unsigned int IBO = 0;
+    //store the index of the own window
+    unsigned int windowID = -1;
+};
+
+/**
  * @brief store an 3D object
  */
 class Object
@@ -81,7 +262,7 @@ public:
      * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(Mesh mesh, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
+    Object(Mesh* mesh, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief Construct a new Object
@@ -337,26 +518,21 @@ public:
      * 
      * @param mesh the new mesh
      */
-    void setOnlyMesh(Mesh mesh);
-
-    /**
-     * @brief recalculate the vertex and index buffer
-     */
-    void recalculateBuffers();
+    void setOnlyMesh(Mesh* mesh);
 
     /**
      * @brief Set the Mesh for the Object
      * 
      * @param mesh the new mesh for the Object
      */
-    void setMesh(Mesh mesh);
+    void setMesh(Mesh* mesh);
 
     /**
      * @brief Get the Mesh from the object
      * 
      * @return Mesh the mesh of the object
      */
-    Mesh getMesh();
+    Mesh* getMesh();
 
     /**
      * @brief Set the Material for the object
@@ -423,24 +599,10 @@ public:
     void decode(Data data);
 
 private:
-    /**
-     * @brief the same as the buffer for the object data on the GPU
-     */
-    struct ObjectData
-    {
-        //the model matrix of the object
-        mat4 modelMat;
-        //the rotation matrix of the object
-        mat4 rotMat;
-        //the objects uuid
-        unsigned int uuid;
-    };
     //store the transform for the object
     Transform transf;
     //store a mesh
-    Mesh mesh;
-    //store the vertex and index buffer
-    unsigned int VBO ,IBO;
+    Mesh* mesh;
     //store if the object is transparent or opaque
     bool isTransparent = false;
     //save the shader
@@ -452,8 +614,6 @@ private:
                         0,0,0,1);
     //store if the object is static
     bool isStatic;
-    //store the length of the index and vertex vuffer
-    unsigned int VBOLen, IBOLen;
     //store the material of the object
     Material* mat = 0;
     //store the position of the light positions
@@ -478,9 +638,6 @@ private:
     bool fullyTransparent = false;
     //store the index of the window the object is used in
     int windowIndex = -1;
-
-    //compile the draw list
-    void compileBuffers();
 
     //recalculate the move matrix
     void recalculateMatrices();
@@ -802,6 +959,5 @@ void glgeBindCamera(Camera* camera);
  * this function initalises all values to draw 3D things
  */
 void glgeInit3DCore();
-
 
 #endif

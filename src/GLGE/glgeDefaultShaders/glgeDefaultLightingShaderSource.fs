@@ -1,5 +1,4 @@
 #version 450 core
-#extension GL_ARB_bindless_texture : require
 #define PI 3.14159265
 
 precision highp float;

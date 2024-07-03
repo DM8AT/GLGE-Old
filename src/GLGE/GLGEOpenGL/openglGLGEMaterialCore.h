@@ -70,8 +70,11 @@ public:
 
     /**
      * @brief update the material data on the GPU
+     * 
+     * @brief shader the OpenGL shader identifyer to use for updating
+     * @brief force say if the update should execute regardless if one was scedueld
      */
-    void update();
+    void update(unsigned int shader, bool force = false);
 
     /**
      * @brief bind the material data to a specific window's OpenGL context
@@ -314,6 +317,11 @@ public:
     void apply();
 
     /**
+     * @brief removes the material making ready for another material to be bound
+     */
+    void remove();
+
+    /**
      * @brief encode the object into some data
      * 
      * @param data the data to encode into
@@ -361,16 +369,6 @@ private:
         int metalicMapActive;
         //store if the displacement map is active
         int displacementMapActive;
-        //store the ambient texture
-        uint64_t ambientTex;
-        //store the normal map texture 
-        uint64_t normalMapTex;
-        //store the roughness map texture 
-        uint64_t roughnessMap;
-        //store the metalic map texture 
-        uint64_t metalicMap;
-        //store the displacement map texture
-        uint64_t displacementMap;
     };
 
     //store a ambient map
@@ -383,6 +381,16 @@ private:
     Texture* metalicMap = 0;
     //store the displacement map
     Texture* displacementMap = 0;
+    //store the position of the ambient map
+    int ambientMapLoc = -1;
+    //store the position of the normal map
+    int normalMapLoc = -1;
+    //store the position of the roughness map
+    int roughnessMapLoc = -1;
+    //store the position of the metalic map
+    int metalicMapLoc = -1;
+    //store the position of the displacement map
+    int displacementMapLoc = -1;
     //store the window id
     int windowId = -1;
     //store the material data

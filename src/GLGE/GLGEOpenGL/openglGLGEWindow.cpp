@@ -2092,16 +2092,6 @@ Shader* Window::getShadowShader()
     return &this->shadowShader;
 }
 
-void Window::resizeModelSSBO()
-{
-    //bind the buffer
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
-    //make space for the data
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(mat4)*glgeObjectUUID, 0, GL_STATIC_DRAW);
-    //bind the data to the chanal
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
-}
-
 LightData* Window::getLightData()
 {
     //get a pointer to the data
@@ -2542,6 +2532,33 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     //disable VSync
     SDL_GL_SetSwapInterval(0);
 
+    //store the amount of extensions
+    int numExts = 0;
+    //get the amount of extensions 
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExts);
+    //check if the needed extensions where found
+    int extensions = 0;
+    //loop over all extensions
+    for (int i = 0; i < numExts; i++)
+    {
+        //get the current extensions
+        const GLubyte* extName = glGetStringi(GL_EXTENSIONS, i);
+        //check if this is the bindless texture extension
+        if (!strcmp((const char*)extName, "GL_ARB_bindless_texture"))
+        {
+            //increase the number of found extensions
+            extensions++;
+        }
+    }
+    //check if all extensions where found
+    if (extensions != 1)
+    {
+        //print a fatal error
+        std::cerr << "[GLGE FATAL ERROR] The device your're using dosn't support all required OpenGL extensions.\n";
+        //stop the program
+        exit(-1);
+    }
+
     //clear the framebuffer of the window
     glClear(GL_COLOR_BUFFER_BIT);
     //update the window
@@ -2924,14 +2941,6 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //bind the buffer to location 3
     glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
-    //create a new buffer
-    glCreateBuffers(1, &this->modelMatSSBO);
-    //bind the UBO
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->modelMatSSBO);
-    //unbind the buffer
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    //bind the buffer to location 4
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this->modelMatSSBO);
     //clear the buffer for the light data
     bzero(this->lightDatas, sizeof(LightData)*129);
 

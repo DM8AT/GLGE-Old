@@ -1433,7 +1433,7 @@ void Shader::super(std::string vs, std::string fs)
 
 Shader glgeCreateKernalShader(float* kernal, int size)
 {
-    std::string header("#version 300 es\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;");
+    std::string header("#version 450 core\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;");
     std::string width = std::to_string(glgeWindows[glgeCurrentWindowIndex]->getSize().x);
     std::string height = std::to_string(glgeWindows[glgeCurrentWindowIndex]->getSize().y);
 
@@ -1521,7 +1521,7 @@ Shader glgeCreateKernalShader(float* kernal, unsigned long size)
 {
     size = std::sqrt((float)size / (float)sizeof(float));
 
-    std::string header("#version 300 es\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;uniform vec2 glgeWindowSize;void main(){");
+    std::string header("#version 450 core\nprecision highp float;out vec4 FragColor;in vec2 texCoords;uniform sampler2D glgeMainImage;uniform vec2 glgeWindowSize;void main(){");
 
     std::string body1 = std::string("float offset_x = 1.f / glgeWindowSize.x;float offset_y = 1.f / glgeWindowSize.y;"); 
 

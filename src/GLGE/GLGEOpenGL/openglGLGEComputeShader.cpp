@@ -39,14 +39,17 @@ ComputeShader::ComputeShader(std::string shaderCode)
     this->super(shaderCode);
 }
 
-void ComputeShader::dispatch(vec3 workgroups)
+void ComputeShader::dispatch(vec3 workgroups, unsigned int barrier)
 {
     //bind the shader program
     this->applyShader();
     //dispatch the compute shader
     glDispatchCompute((unsigned int)workgroups.x, (unsigned int)workgroups.y, (unsigned int)workgroups.z);
-    // make sure execution has finished before continuing
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    if (barrier != GLGE_COMPUTE_MEMORY_BARRIER_NONE)
+    {
+        // make sure execution has finished before continuing
+        glMemoryBarrier(this->decodeBarrier(barrier));
+    }
     //unbind the shader
     this->removeShader();
 }
@@ -221,4 +224,25 @@ void ComputeShader::super(std::string src)
 
     //store the shader program
     this->shader = shaderProgram;
+}
+
+unsigned int ComputeShader::decodeBarrier(unsigned int barrier)
+{
+    switch (barrier)
+    {
+    //if all memory barrier bits should be used, use all bits
+    case GLGE_COMPUTE_MEMORY_BARRIER_ALL:
+        return GL_ALL_BARRIER_BITS;
+        break;
+    
+    //if the shader storage memory barrier should be used, return the specific identifyer
+    case GLGE_COMPUTE_MEMORY_BARRIER_STORAGE_BUFFER:
+        return GL_SHADER_STORAGE_BARRIER_BIT;
+
+    //the default is an error and GL_ALL_ARRIER_BITS
+    default:
+        GLGE_THROW_ERROR("Identifyer " + std::to_string(barrier) + " dosn't name a valid memory barrier identifyer, defaulting to GLGE_COMPUTE_MEMORY_BARRIER_ALL")
+        return GL_ALL_BARRIER_BITS;
+        break;
+    }
 }

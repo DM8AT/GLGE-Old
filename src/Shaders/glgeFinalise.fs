@@ -32,7 +32,7 @@ mat4 invView = inverse(viewMat);
 //settings for lens distortion
 float lenseDistStrength = 0.f;
 vec2 lenseDistCenter = vec2(0.5);
-vec2 lenseDistZoom = vec2(1);
+vec2 lenseDistZoom = vec2(0.95);
 //compute the lense distortion
 void lesneDistortion()
 {
@@ -42,7 +42,7 @@ void lesneDistortion()
     float uvd = length(fUV);
     uvd = uvd*(1.0 + lenseDistStrength*uvd*uvd);
     uv = lenseDistCenter + vec2(sin(uva), cos(uva))*uvd;
-    uv *= lenseDistZoom;
+    uv = ((uv * 2.f - 1.f) * lenseDistZoom) * 0.5 + 0.5;
 }
 
 //Settings for the vingette effect
@@ -116,7 +116,15 @@ float CRTscanlines()
 void main()
 {
     //compute the lense distortion
-    if (lenseDistStrength != 0.f) {lesneDistortion();}
+    if (lenseDistStrength != 0.f)
+    {
+        lesneDistortion();
+        if (((uv.x < 0.f) || (uv.y < 0.f)) || ((uv.x > 1.f) || (uv.y > 1.f)))
+        {
+            FragColor = vec4(0,0,0,1);
+            return;
+        }
+    }
     else {uv = texCoords;}
     //compute helper variables
     aspect = glgeWindowSize.x / glgeWindowSize.y;

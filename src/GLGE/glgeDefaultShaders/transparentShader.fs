@@ -1,5 +1,4 @@
 #version 450 core
-#extension GL_ARB_bindless_texture : require
 #define PI 3.14159265
 
 precision highp float;
@@ -43,13 +42,13 @@ void main()
     //read the color for the object
     vec4 col = glgeColor + color;
     col.rgb *= (1-int(glgeAmbientMapActive));
-    col.rgb += texture(sampler2D(glgeAmbientMap), texCoord).rgb * int(glgeAmbientMapActive);
+    col.rgb += texture(glgeAmbientMap, texCoord).rgb * int(glgeAmbientMapActive);
     //no luck getting arround this if statement. Alpha clipping is enabled by default
     if(col.w == 0.f){discard;}
     if (!glgePass && col.w!=1.f){discard;}
     if (glgePass && col.w==1.f){discard;}
     //read the roughness and again use multiplikation like for the albedo texture
-    float rough = texture(sampler2D(glgeRoughnessMap), texCoord).r * float(int(glgeRoughnessMapActive));
+    float rough = texture(glgeRoughnessMap, texCoord).r * float(int(glgeRoughnessMapActive));
     //add the default roughness, multiplied with the inverted scalar (like an else, but faster)
     rough += glgeRoughness * (1.f - float(int(glgeRoughnessMapActive)));
     //store the normal

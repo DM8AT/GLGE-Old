@@ -39,13 +39,13 @@ EXECUTABLE	:= main
 CML_OBJ  = $(OBJ_D)/CMLDVec2.o $(OBJ_D)/CMLDVec3.o $(OBJ_D)/CMLDVec4.o $(OBJ_D)/CMLIVec2.o $(OBJ_D)/CMLIVec3.o $(OBJ_D)/CMLIVec4.o $(OBJ_D)/CMLMat2.o $(OBJ_D)/CMLMat3.o $(OBJ_D)/CMLMat4.o $(OBJ_D)/CMLQuaternion.o $(OBJ_D)/CMLVec2.o $(OBJ_D)/CMLVec3.o $(OBJ_D)/CMLVec4.o $(OBJ_D)/CMLVector.o
 
 # file list of all .o files for GLGE
-GLGE_OBJ = $(OBJ_D)/glge2DcoreDefClasses.o $(OBJ_D)/glge3DcoreDefClasses.o $(OBJ_D)/GLGEData.o $(OBJ_D)/glgeImage.o $(OBJ_D)/glgeInternalFuncs.o $(OBJ_D)/GLGEKlasses.o $(OBJ_D)/GLGEScene.o $(OBJ_D)/glgeVars.o $(OBJ_D)/openglGLGE.o $(OBJ_D)/openglGLGE2Dcore.o $(OBJ_D)/openglGLGE3Dcore.o $(OBJ_D)/openglGLGEComputeShader.o $(OBJ_D)/openglGLGEDefaultFuncs.o $(OBJ_D)/openglGLGEFuncs.o $(OBJ_D)/openglGLGELightingCore.o $(OBJ_D)/openglGLGEMaterialCore.o $(OBJ_D)/openglGLGERenderTarget.o $(OBJ_D)/openglGLGEShaderCore.o $(OBJ_D)/openglGLGETexture.o $(OBJ_D)/openglGLGEVars.o $(OBJ_D)/openglGLGEWindow.o $(OBJ_D)/GLGEMath.o $(OBJ_D)/glgeAtlasFile.o $(OBJ_D)/GLGEtextureAtlas.o $(OBJ_D)/openglGLGERenderPipeline.o
+GLGE_OBJ = $(OBJ_D)/glge2DcoreDefClasses.o $(OBJ_D)/glge3DcoreDefClasses.o $(OBJ_D)/GLGEData.o $(OBJ_D)/glgeImage.o $(OBJ_D)/glgeInternalFuncs.o $(OBJ_D)/GLGEKlasses.o $(OBJ_D)/GLGEScene.o $(OBJ_D)/glgeVars.o $(OBJ_D)/openglGLGE.o $(OBJ_D)/openglGLGE2Dcore.o $(OBJ_D)/openglGLGE3Dcore.o $(OBJ_D)/openglGLGEComputeShader.o $(OBJ_D)/openglGLGEDefaultFuncs.o $(OBJ_D)/openglGLGEFuncs.o $(OBJ_D)/openglGLGELightingCore.o $(OBJ_D)/openglGLGEMaterialCore.o $(OBJ_D)/openglGLGERenderTarget.o $(OBJ_D)/openglGLGEShaderCore.o $(OBJ_D)/openglGLGETexture.o $(OBJ_D)/openglGLGEVars.o $(OBJ_D)/openglGLGEWindow.o $(OBJ_D)/GLGEMath.o $(OBJ_D)/glgeAtlasFile.o $(OBJ_D)/GLGEtextureAtlas.o $(OBJ_D)/openglGLGERenderPipeline.o $(OBJ_D)/openglGLGEParticles.o
 # file list of all file of CML
 CML_ALL_FILES = $(CML)/CMLDVec2.cpp $(CML)/CMLDVec2.h $(CML)/CMLDVec3.cpp $(CML)/CMLDVec3.h $(CML)/CMLDVec4.cpp $(CML)/CMLDVec4.h $(CML)/CMLIVec2.cpp $(CML)/CMLIVec2.h $(CML)/CMLIVec3.cpp $(CML)/CMLIVec3.h $(CML)/CMLIVec4.cpp $(CML)/CMLIVec4.h $(CML)/CMLMat2.cpp $(CML)/CMLMat2.h $(CML)/CMLMat3.cpp $(CML)/CMLMat3.h $(CML)/CMLMat4.cpp $(CML)/CMLMat4.h $(CML)/CMLQuaternion.cpp $(CML)/CMLQuaternion.h $(CML)/CMLVec2.cpp $(CML)/CMLVec2.h $(CML)/CMLVec3.cpp $(CML)/CMLVec3.h $(CML)/CMLVec4.cpp $(CML)/CMLVec4.h $(CML)/CMLVector.cpp $(CML)/CMLVector.h
 # file list of all graphic lib independend files from GLGE
 GLGE_ALL_IND = $(GLGE_IND)/glge2DcoreDefClasses.cpp $(GLGE_IND)/glge2DcoreDefClasses.h $(GLGE_IND)/glge3DcoreDefClasses.cpp $(GLGE_IND)/glge3DcoreDefClasses.h $(GLGE_IND)/GLGEData.cpp $(GLGE_IND)/GLGEData.h $(GLGE_IND)/glgeErrors.hpp $(GLGE_IND)/glgeImage.cpp $(GLGE_IND)/glgeImage.h $(GLGE_IND)/glgeInternalFuncs.cpp $(GLGE_IND)/glgeInternalFuncs.h $(GLGE_IND)/GLGEKlasses.cpp $(GLGE_IND)/GLGEKlasses.hpp $(GLGE_IND)/glgePrivDefines.hpp $(GLGE_IND)/GLGEScene.cpp $(GLGE_IND)/GLGEScene.hpp $(GLGE_IND)/glgeVars.cpp $(GLGE_IND)/glgeVars.hpp
 # file list of all OpenGL dependend files from GLGE
-GLGE_ALL_OGL = $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_OGL)/openglGLGE2Dcore.cpp $(GLGE_OGL)/openglGLGE2Dcore.h $(GLGE_OGL)/openglGLGE3Dcore.cpp $(GLGE_OGL)/openglGLGE3Dcore.h $(GLGE_OGL)/openglGLGEComputeShader.cpp $(GLGE_OGL)/openglGLGEComputeShader.hpp $(GLGE_OGL)/openglGLGEDefaultFuncs.cpp $(GLGE_OGL)/openglGLGEDefaultFuncs.hpp $(GLGE_OGL)/openglGLGEDefines.hpp $(GLGE_OGL)/openglGLGEFuncs.cpp $(GLGE_OGL)/openglGLGEFuncs.hpp $(GLGE_OGL)/openglGLGELightingCore.cpp $(GLGE_OGL)/openglGLGELightingCore.h $(GLGE_OGL)/openglGLGEMaterialCore.cpp $(GLGE_OGL)/openglGLGEMaterialCore.h $(GLGE_OGL)/openglGLGERenderTarget.cpp $(GLGE_OGL)/openglGLGERenderTarget.h $(GLGE_OGL)/openglGLGEShaderCore.cpp $(GLGE_OGL)/openglGLGEShaderCore.h $(GLGE_OGL)/openglGLGETexture.cpp $(GLGE_OGL)/openglGLGETexture.hpp $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_OGL)/openglGLGEWindow.cpp $(GLGE_OGL)/openglGLGEWindow.h $(GLGE_OGL)/openglGLGERenderPipeline.hpp $(GLGE_OGL)/openglGLGERenderPipeline.cpp
+GLGE_ALL_OGL = $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_OGL)/openglGLGE2Dcore.cpp $(GLGE_OGL)/openglGLGE2Dcore.h $(GLGE_OGL)/openglGLGE3Dcore.cpp $(GLGE_OGL)/openglGLGE3Dcore.h $(GLGE_OGL)/openglGLGEComputeShader.cpp $(GLGE_OGL)/openglGLGEComputeShader.hpp $(GLGE_OGL)/openglGLGEDefaultFuncs.cpp $(GLGE_OGL)/openglGLGEDefaultFuncs.hpp $(GLGE_OGL)/openglGLGEDefines.hpp $(GLGE_OGL)/openglGLGEFuncs.cpp $(GLGE_OGL)/openglGLGEFuncs.hpp $(GLGE_OGL)/openglGLGELightingCore.cpp $(GLGE_OGL)/openglGLGELightingCore.h $(GLGE_OGL)/openglGLGEMaterialCore.cpp $(GLGE_OGL)/openglGLGEMaterialCore.h $(GLGE_OGL)/openglGLGERenderTarget.cpp $(GLGE_OGL)/openglGLGERenderTarget.h $(GLGE_OGL)/openglGLGEShaderCore.cpp $(GLGE_OGL)/openglGLGEShaderCore.h $(GLGE_OGL)/openglGLGETexture.cpp $(GLGE_OGL)/openglGLGETexture.hpp $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_OGL)/openglGLGEWindow.cpp $(GLGE_OGL)/openglGLGEWindow.h $(GLGE_OGL)/openglGLGERenderPipeline.hpp $(GLGE_OGL)/openglGLGERenderPipeline.cpp $(GLGE_OGL)/openglGLGEParticles.cpp $(GLGE_OGL)/openglGLGEParticles.h 
 # file list of all remaining GLGE files
 GLGE_ALL_REM = $(GLGE)/glgeAtlasFile.cpp $(GLGE)/glgeAtlasFile.hpp $(GLGE)/GLGEMath.cpp $(GLGE)/GLGEMath.h $(GLGE)/GLGEtextureAtlas.cpp $(GLGE)/GLGEtextureAtlas.h
 
@@ -64,10 +64,10 @@ c: clean all
 
 ##################################### APP BEGIN
 
-$(BIN)/$(EXECUTABLE): $(OBJ_D)/main.o $(OBJ_D)/2DTest.o $(OBJ_D)/3DTest.o $(OBJ_D)/WidgetTest.o $(BIN)/libGLGE.a $(BIN)/libCML.a
+$(BIN)/$(EXECUTABLE): $(OBJ_D)/main.o $(OBJ_D)/2DTest.o $(OBJ_D)/3DTest.o $(OBJ_D)/WidgetTest.o $(OBJ_D)/ParticleTest.o $(BIN)/libGLGE.a $(BIN)/libCML.a 
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $(BIN)/$(EXECUTABLE) $(LIBRARIES)
 
-$(OBJ_D)/main.o: $(SRC)/main.cpp $(GLGE_ALL_FILES) $(CML_ALL_FILES) $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp
+$(OBJ_D)/main.o: $(SRC)/main.cpp $(GLGE_ALL_FILES) $(CML_ALL_FILES) $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp $(SRC)/ParticleTest.cpp $(SRC)/ParticleTest.hpp
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(OBJ_D)/2DTest.o: $(SRC)/2DTest.cpp $(SRC)/2DTest.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
@@ -77,6 +77,9 @@ $(OBJ_D)/3DTest.o: $(SRC)/3DTest.cpp $(SRC)/3DTest.hpp $(GLGE_ALL_FILES) $(CML_A
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 $(OBJ_D)/WidgetTest.o: $(SRC)/WidgetTest.cpp $(SRC)/WidgetTest.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
+	$(CXX) -c $< -o $@ $(CXX_FLAGS)
+
+$(OBJ_D)/ParticleTest.o: $(SRC)/ParticleTest.cpp $(SRC)/ParticleTest.hpp $(GLGE_ALL_FILES) $(CML_ALL_FILES)
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 ##################################### APP END
@@ -156,6 +159,9 @@ $(OBJ_D)/openglGLGEWindow.o: $(GLGE_OGL)/openglGLGEWindow.cpp $(GLGE_OGL)/opengl
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 # Dep. on openglGLGE
 $(OBJ_D)/openglGLGERenderPipeline.o: $(GLGE_OGL)/openglGLGERenderPipeline.cpp $(GLGE_OGL)/openglGLGERenderPipeline.hpp $(GLGE_OGL)/openglGLGE.h $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_IND)/glgeVars.cpp $(GLGE_IND)/glgeVars.hpp $(GLGE_OGL)/openglGLGEWindow.cpp $(GLGE_OGL)/openglGLGEWindow.h $(GLGE_OGL)/openglGLGE2Dcore.cpp $(GLGE_OGL)/openglGLGE2Dcore.h $(GLGE_OGL)/openglGLGE3Dcore.cpp $(GLGE_OGL)/openglGLGE3Dcore.h $(GLGE_OGL)/openglGLGELightingCore.cpp $(GLGE_OGL)/openglGLGELightingCore.h
+	$(CXX) -c $< -o $@ $(CXX_FLAGS)
+# Dep. on openglGLGE3DCore, openglGLGEVars
+$(OBJ_D)/openglGLGEParticles.o: $(GLGE_OGL)/openglGLGEParticles.cpp $(GLGE_OGL)/openglGLGEParticles.h $(GLGE_OGL)/openglGLGE3Dcore.cpp $(GLGE_OGL)/openglGLGE3Dcore.h $(GLGE_IND)/glgeVars.cpp $(GLGE_IND)/glgeVars.hpp $(GLGE_OGL)/openglGLGEFuncs.cpp $(GLGE_OGL)/openglGLGEFuncs.hpp $(GLGE_OGL)/openglGLGEVars.cpp $(GLGE_OGL)/openglGLGEVars.hpp $(GLGE_OGL)/openglGLGEDefines.hpp $(CML)/CMLQuaternion.cpp $(CML)/CMLQuaternion.h $(GLGE_OGL)/openglGLGEMaterialCore.cpp $(GLGE_OGL)/openglGLGEMaterialCore.h $(GLGE_OGL)/openglGLGEShaderCore.cpp $(GLGE_OGL)/openglGLGEShaderCore.h $(GLGE_OGL)/openglGLGE.cpp $(GLGE_OGL)/openglGLGE.h $(GLGE_IND)/glge3DcoreDefClasses.cpp $(GLGE_IND)/glge3DcoreDefClasses.h $(GLGE_IND)/GLGEData.cpp $(GLGE_IND)/GLGEData.h
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 
 # Dep. on --

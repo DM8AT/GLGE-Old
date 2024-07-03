@@ -945,11 +945,6 @@ public:
     Shader* getShadowShader();
 
     /**
-     * @brief add an object to the model mat ubo
-     */
-    void resizeModelSSBO();
-
-    /**
      * @brief Get the data for a new light source
      * 
      * @return LightData* the place to store that data in
@@ -1161,8 +1156,6 @@ private:
     unsigned int shadowTex = 0;
     //store the data for all the lights
     unsigned int lightUBO = 0;
-    //store the model matrixes for the shadow calculation
-    unsigned int modelMatSSBO = 0;
     //store the data for all the lights
     uint8_t lightDatas[sizeof(LightData)*129];
     //store the light count

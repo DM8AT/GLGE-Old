@@ -279,8 +279,9 @@ public:
      * 
      * @param port the port the texture should bind to. Default is 0. 
      * @param bindTo the sort of unit to use for binding. Default is GLGE_TEXTURE_BIND_TEXTURE_UNIT
+     * @param force say if the binding call should always execute. !!Warning!!: This might result in OpenGL errors. 
      */
-    void bind(int port = 0, int bindTo = GLGE_TEXTURE_BIND_TEXTURE_UNIT);
+    void bind(int port = 0, int bindTo = GLGE_TEXTURE_BIND_TEXTURE_UNIT, bool force = false);
 
     /**
      * @brief unbind the texture

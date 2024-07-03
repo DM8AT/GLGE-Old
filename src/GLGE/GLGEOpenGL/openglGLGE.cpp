@@ -71,7 +71,7 @@ void glgeInit()
     #endif
 
     //initalise SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         //if sdl throws an value different than 0, print an error
         std::cerr << "[FATAL GLGE ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
@@ -89,7 +89,7 @@ void glgeInit()
 
     //initalise to OpenGL 3.0
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     //say that doublebuffering should be used
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -971,15 +971,13 @@ void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned 
     }
 
     //set a GLchar to the inputed text
-    const GLchar* p[1];
-    p[0] = shadertext;
+    const GLchar* p = shadertext;
 
     //store the length of the text
-    int lengths[1];
-    lengths[0] = strlen(shadertext);
+    int lengths = strlen(shadertext);
 
     //set the shader source code
-    glShaderSource(shaderObj, 1, p, lengths);
+    glShaderSource(shaderObj, 1, &p, &lengths);
 
     //compile to the new shader object
     glCompileShader(shaderObj);

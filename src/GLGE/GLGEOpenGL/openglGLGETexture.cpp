@@ -222,10 +222,10 @@ void Texture::resize(unsigned int width, unsigned int height)
     this->resize(vec2(width, height));
 }
 
-void Texture::bind(int port, int bindTo)
+void Texture::bind(int port, int bindTo, bool force)
 {
     //if this texture is bound, stop the function
-    if (this->binding != -1)
+    if (!((this->binding == -1) || force))
     { return; }
     //store the binding location
     this->binding = port;

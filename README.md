@@ -115,6 +115,14 @@ Upcoming features that may be added to GLGE in the future include:
 - added built in support for parallax occlusion mapping to materials
    - depth peeling
    - binary refinement
+- added a compute shader based particle system
+   - using instancing to be able to draw a lot of objects at a real-time performance
+   - particles can be fully lit objects
+      - temporeraly only supporting solid particles, THIS IS SUBJECT TO CHANGE
+   - create a compute shader to controll the behaviour of every single particle
+- changed the behaviour of meshes, meshes are now pointer-based components of objects
+   - meshes now store they're own vertex and index buffers
+   - when a mesh is created and given to a object, the object now has the ownership of the mesh exept something else is specifyed
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component
