@@ -509,10 +509,12 @@ void Object::draw()
 
     if (!glgeWindows[this->windowIndex]->isTranparentPass())
     {
-        //enable color blending
+        //disable color blending
         glDisable(GL_BLEND);
     }
 
+    //initalise the mesh (this will only run once)
+    this->mesh->init();
     //bind the mesh
     this->mesh->bind();
 
@@ -1178,6 +1180,8 @@ void Object::shadowDraw()
     //activate the shadow shader
     sShader->applyShader();
 
+    //initalise the mesh (this will only run once)
+    this->mesh->init();
     //bind the mesh
     this->mesh->bind();
     //bind the buffers

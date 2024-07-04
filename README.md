@@ -118,7 +118,7 @@ Upcoming features that may be added to GLGE in the future include:
 - added a compute shader based particle system
    - using instancing to be able to draw a lot of objects at a real-time performance
    - particles can be fully lit objects
-      - temporeraly only supporting solid particles, THIS IS SUBJECT TO CHANGE
+   - particles have the same transparency behaviour like normal objects
    - create a compute shader to controll the behaviour of every single particle
 - changed the behaviour of meshes, meshes are now pointer-based components of objects
    - meshes now store they're own vertex and index buffers

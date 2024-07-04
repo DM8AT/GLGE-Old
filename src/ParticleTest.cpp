@@ -19,6 +19,14 @@ Object* planet;
 
 void partDraw()
 {
+    if (glgeTransparentOpaquePass)
+    {
+        glgeDisableBackfaceCulling();
+    }
+    else
+    {
+        glgeEnableBackfaceCulling();
+    }
     //draw all the particles
     particles->draw();
     //draw the planet
@@ -82,11 +90,9 @@ void runParticleExample()
     //create a new particle system with the basemesh
     particles = new ParticleSystem(mesh, 500000);
     //create a new material for the particle system
-    particles->setMaterial(new Material("assets/cubeTexture.png"), 0.3);
+    particles->setMaterial(new Material("assets/cubeTexture.png", 0.3));
     //create a compute shader as the controll shader
     particles->setControllShader(new ComputeShader("src/ParticleControllShader.cs"));
-    //create a shader for the particles to use
-    particles->setShader(new Shader(GLGE_DEFAULT_3D_PARTICLE_VERTEX_SHADER, GLGE_DEFAULT_3D_FRAGMENT));
 
     //switch back to linear sampeling
     glgeSetInterpolationMode(GLGE_LINEAR);

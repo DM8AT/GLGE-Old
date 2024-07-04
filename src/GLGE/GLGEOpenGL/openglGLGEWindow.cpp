@@ -150,7 +150,7 @@ void Window::draw()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //say that the window surface is bound
     glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
-
+    
     //update the window surface
     SDL_GL_SwapWindow((SDL_Window*)this->window);
 
@@ -232,42 +232,13 @@ void Window::tick()
         glBindBufferBase(GL_UNIFORM_BUFFER, 3, this->lightUBO);
     }
     
-    //set the prefix for the light position
-    std::string prefixLightPos = std::string("glgeLightPos[");
-    //set the prefix for the light color
-    std::string prefixLightCol = std::string("glgeLightColor[");
-    //set the prefix for the light data
-    std::string prefixLightDat = std::string("glgeLightData[");
-    //set the prefix for the light direction
-    std::string prefixLightDir = std::string("glgeLightDir[");
-
-    //update all light data
-    for (int i = 0; i < (int)this->lights.size(); i++)
-    {
-        //get the uniform for the light color
-        this->lightShader.setCustomVec3((prefixLightCol + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getColor());
-        //get the uniform for the light data
-        this->lightShader.setCustomVec4((prefixLightDat + std::to_string(i) + std::string("]")).c_str(), vec4(
-            this->lights[i]->getType(), 
-            std::cos(this->lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
-            std::cos(this->lights[i]->getAngle() * GLGE_TO_RADIANS), 
-            this->lights[i]->getInsensity()));
-        //get the uniform for the light position
-        this->lightShader.setCustomVec3((prefixLightPos + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getPos());
-        //get the uniform for the light direction
-        this->lightShader.setCustomVec3((prefixLightDir + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getDir());
-    }
-    
-    //get the uniform for the amount of active lights
-    this->lightShader.setCustomInt("glgeActiveLights", (int)this->lights.size());
-    
     //update the camera data
     if (this->mainCamera != NULL)
     {
         //get the uniform for the camera position
-        this->lightShader.setCustomVec3("glgeCameraPos", this->mainCamera->getPos());
+        this->lightShader->setCustomVec3("glgeCameraPos", this->mainCamera->getPos());
         //get the camera rotation matrix in the lighting shader
-        this->lightShader.setCustomVec3("glgeCameraRot", this->mainCamera->getRotation());
+        this->lightShader->setCustomVec3("glgeCameraRot", this->mainCamera->getRotation());
     }
 }
 
@@ -1046,52 +1017,21 @@ void Window::resizeWindow(int width, int height)
 void Window::getLightingUniforms()
 {
     //let the error messages set for the albedo map, you want the albedo map in most cases
-    this->lightShader.setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
+    this->lightShader->setCustomTexture("glgeAlbedoMap", this->mainAlbedoTex);
     //next, turn the errors temporarely off
     //get if the errors are turned on
     bool error = glgeGetErrorOutput();
     //turn the errors of
     glgeSetErrorOutput(false);
     //get the unform for the normal map
-    this->lightShader.setCustomTexture("glgeNormalMap", this->mainNormalTex);
+    this->lightShader->setCustomTexture("glgeNormalMap", this->mainNormalTex);
     //get the uniform for the position map
-    this->lightShader.setCustomTexture("glgePositionMap", this->mainPosTex);
+    this->lightShader->setCustomTexture("glgePositionMap", this->mainPosTex);
     //get the uniform for the roughness map
-    this->lightShader.setCustomTexture("glgeRoughnessMap", this->mainRMLTex);
+    this->lightShader->setCustomTexture("glgeRoughnessMap", this->mainRMLTex);
     
-    //set the prefix for the light position
-    std::string prefixLightPos = std::string("glgeLightPos[");
-    //set the prefix for the light color
-    std::string prefixLightCol = std::string("glgeLightColor[");
-    //set the prefix for the light intensity
-    std::string prefixLightDat = std::string("glgeLightData[");
-    //set the prefix for the light direction
-    std::string prefixLightDir = std::string("glgeLightDir[");
-
-    for (int i = 0; i < (int)this->lights.size(); i++)
-    {
-        //get the uniform for the light color
-        this->lightShader.setCustomVec3((prefixLightCol + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getColor());
-        //get the uniform for the light intensity
-        this->lightShader.setCustomVec4((prefixLightDat + std::to_string(i) + std::string("]")).c_str(), vec4(
-            this->lights[i]->getType(), 
-            std::cos(this->lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
-            std::cos(this->lights[i]->getAngle() * GLGE_TO_RADIANS), 
-            this->lights[i]->getInsensity()));
-        //get the uniform for the light position
-        this->lightShader.setCustomVec3((prefixLightPos + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getPos());
-        //get the uniform for the light direction
-        this->lightShader.setCustomVec3((prefixLightDir + std::to_string(i) + std::string("]")).c_str(), this->lights[i]->getDir());
-    }
-
-    //get the uniform for the amount of active lights
-    this->lightShader.setCustomInt("glgeActiveLights", (int)this->lights.size());
-    //get the uniform for the camera position
-    this->lightShader.setCustomVec3("glgeCameraPos", vec3(0));
-    //get the camera rotation matrix in the lighting shader
-    this->lightShader.setCustomVec3("glgeCameraRot", vec3(0));
     //recalculate all uniforms
-    this->lightShader.recalculateUniforms();
+    this->lightShader->recalculateUniforms();
     //reset the error output
     glgeSetErrorOutput(error);
 }
@@ -1240,8 +1180,10 @@ void Window::setLightingShader(const char* shader)
         };
     }
 
+    //delete the old lighting shader
+    delete this->lightShader;
     //compile the shader and save it
-    this->lightShader = Shader(GLGE_EMPTY_VERTEX_SHADER, data);
+    this->lightShader = new Shader(GLGE_EMPTY_VERTEX_SHADER, data);
 
     //get the post processing uniforms
     this->getLightingUniforms();
@@ -1249,8 +1191,10 @@ void Window::setLightingShader(const char* shader)
 
 void Window::setLightingShader(std::string shader)
 {
+    //delete the old lighting shader
+    delete this->lightShader;
     //compile the shader and save it
-    this->lightShader = Shader(GLGE_EMPTY_VERTEX_SHADER, shader);
+    this->lightShader = new Shader(GLGE_EMPTY_VERTEX_SHADER, shader);
 
     //get the post processing uniforms
     this->getLightingUniforms();
@@ -1258,8 +1202,10 @@ void Window::setLightingShader(std::string shader)
 
 void Window::setLightingShader(unsigned int shader)
 {
+    //delete the old lighting shader
+    delete this->lightShader;
     //store the inputed shader
-    this->lightShader = Shader(shader);
+    this->lightShader = new Shader(shader);
 
     //get the post processing uniforms
     this->getLightingUniforms();
@@ -2077,19 +2023,19 @@ int Window::getDefault2DShader()
 Shader* Window::getLightingShader()
 {
     //return a pointer to the current light shader
-    return &this->lightShader;
+    return this->lightShader;
 }
 
 Shader* Window::getDefaultImageShader()
 {
     //return the default image shader
-    return &this->defaultImageShader;
+    return this->defaultImageShader;
 }
 
 Shader* Window::getShadowShader()
 {
     //return a pointer to the shadow shader
-    return &this->shadowShader;
+    return this->shadowShader;
 }
 
 LightData* Window::getLightData()
@@ -2118,6 +2064,18 @@ int Window::getId()
 {
     //return the id
     return this->id;
+}
+
+Shader* Window::getDefaultParticleShader()
+{
+    //return a pointer to the particle shader
+    return this->defaultParticleShader;
+}
+
+Shader* Window::getDefaultTransparentParticleShader()
+{
+    //return a pointer to the default transparent particle shader
+    return this->defaultTransparentParticleShader;
 }
 
 void Window::drawPPShader(Shader* shader, bool getVars)
@@ -2313,13 +2271,13 @@ void Window::drawLighting()
         //bind the screen rect
         this->bindScreenRect();
         //bind the lighting shader
-        this->lightShader.applyShader();
+        this->lightShader->applyShader();
         
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         //unbind the lighting shader
-        this->lightShader.removeShader();
+        this->lightShader->removeShader();
         //unbind the screen rect
         this->unbindScreenRect();
     }
@@ -2573,7 +2531,8 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
 
     //create the render pipeline
     this->renderPipeline = new RenderPipeline(std::vector<Stage>{
-        Stage{name : "glgeDefaultRenderPipeline_ShadowPass",            pass : GLGE_PASS_SHADOWS},
+        //Shadow pass is temporarily disabled, the shadow code is being redone to base on 3D layerd textures, this may take some time
+        //Stage{name : "glgeDefaultRenderPipeline_ShadowPass",            pass : GLGE_PASS_SHADOWS},
         Stage{name : "glgeDefaultRenderPipeline_ClearPass",             pass : GLGE_PASS_CLEAR_G_BUFFER},
         Stage{name : "glgeDefaultRenderPipeline_SkyboxPass",            pass : GLGE_PASS_DRAW_SKYBOX},
         Stage{name : "glgeDefaultRenderPipeline_SolidPass",             pass : GLGE_PASS_DRAW_SOLID},
@@ -2823,7 +2782,7 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //generate the shaders for the default lighting shader
-    this->lightShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER);
+    this->lightShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_LIGHTING_SHADER);
 
     //get the uniforms form the shader
     this->getLightingUniforms();
@@ -2916,20 +2875,25 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     //compile the default 2D shader
     this->default2DShader = glgeCompileShader(GLGE_DEFAULT_2D_VERTEX, GLGE_DEFAULT_2D_FRAGMENT);
     //compile the default pps shader
-    this->defaultImageShader = Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_IMAGE_FRAGMENT_SHADER);
+    this->defaultImageShader = new Shader(GLGE_DEFAULT_POST_PROCESSING_VERTEX_SHADER, GLGE_DEFAULT_IMAGE_FRAGMENT_SHADER);
     //add the uniform
-    this->defaultImageShader.setCustomTexture("image", (unsigned int)0);
+    this->defaultImageShader->setCustomTexture("image", (unsigned int)0);
     //get the uniform
-    this->defaultImageShader.recalculateUniforms();
+    this->defaultImageShader->recalculateUniforms();
 
     //create the shadow shader
-    this->shadowShader = Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 450 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
+    this->shadowShader = new Shader(std::string("#version 450 core\nlayout (location = 0) in vec3 pos;uniform mat4 glgeLightSpaceMat;layout (std140, binding = 0) uniform glgeObjectData{mat4 glgeModelMat;mat4 glgeRotMat;int glgeObjectUUID;};void main(){gl_Position = vec4(pos, 1.0) * glgeModelMat * glgeLightSpaceMat;}"), std::string("#version 450 core\nout vec4 FragCol;void main(){FragCol=vec4(0);}"));
     //add a uniform for the light space matrix
-    this->shadowShader.setCustomMat4("glgeLightSpaceMat", mat4());
+    this->shadowShader->setCustomMat4("glgeLightSpaceMat", mat4());
     //add a uniform for the model matrix
-    this->shadowShader.setCustomMat4("glgeModelMat", mat4());
+    this->shadowShader->setCustomMat4("glgeModelMat", mat4());
     //update the uniforms
-    this->shadowShader.recalculateUniforms();
+    this->shadowShader->recalculateUniforms();
+
+    //create the particle shader
+    this->defaultParticleShader = new Shader(GLGE_DEFAULT_3D_PARTICLE_VERTEX_SHADER, GLGE_DEFAULT_3D_FRAGMENT);
+    //create the default shader for transparent particles
+    this->defaultTransparentParticleShader = new Shader(GLGE_DEFAULT_3D_PARTICLE_VERTEX_SHADER, GLGE_DEFAULT_TRANSPARENT_SHADER);
 
     //create a new uniform buffer
     glCreateBuffers(1, &this->lightUBO);

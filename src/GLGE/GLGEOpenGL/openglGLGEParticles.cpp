@@ -37,13 +37,27 @@ void ParticleSystem::draw()
 {
     PARTICLESYS_WINDOW_CHECK
 
-    //check if this is the transparent pass
-    if (glgeWindows[this->windowID]->isTranparentPass()) {return;}
+    //check if the current object belongs to the current pass
+    if ((!this->transparent) && glgeWindows[this->windowID]->isTranparentPass())
+    {
+        //abbort the draw, if not
+        return;
+    }
+    //check for fully transparent objects
+    if (this->fullyTransparent && !glgeWindows[this->windowID]->isTranparentPass())
+    {
+        //abbort the draw, if it is the opaque pass
+        return;
+    }
 
-    //disable blending
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    //set the depth function correct
+    glDepthFunc(GL_GREATER);
+
     if (!glgeWindows[this->windowID]->isTranparentPass())
     {
-        //enable color blending
+        //disable color blending
         glDisable(GL_BLEND);
     }
 
@@ -51,6 +65,13 @@ void ParticleSystem::draw()
     glEnable(GL_DEPTH_TEST);
     //set the depth function correct
     glDepthFunc(GL_GREATER);
+
+    //bind the transparent extra data
+    if (this->transparent)
+    {
+        //pass the current pass
+        this->shader->setCustomInt("glgePass", glgeWindows[this->windowID]->isTranparentPass());
+    }
 
     //bind the buffers
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->ubo);
@@ -324,7 +345,7 @@ void ParticleSystem::setMaterial(Material* material, bool rep)
     //say that a custom material is bound
     this->customMaterial = true;
     //update the material
-    this->material->update(this->shader->getShader());
+    this->material->update(this->shader->getShader(), true);
 }
 
 Material* ParticleSystem::getMaterial()
@@ -362,6 +383,8 @@ void ParticleSystem::setShader(Shader* shader, bool rep)
         //update the material with the shader
         this->material->update(this->shader->getShader(), true);
     }
+    //recalculate the uniform locations
+    this->getUniforms();
 }
 
 Shader* ParticleSystem::getShader()
@@ -369,6 +392,45 @@ Shader* ParticleSystem::getShader()
     PARTICLESYS_WINDOW_CHECK
     //return a pointer to the shader
     return this->shader;
+}
+
+void ParticleSystem::setTransparent(bool transparent)
+{
+    //store the new transparent state
+    this->transparent = transparent;
+}
+
+bool ParticleSystem::isTransparent()
+{
+    //return the transparent state
+    return this->transparent;
+}
+
+void ParticleSystem::setFullyTransparent(bool fullyTransparent)
+{
+    //store the fully transparent state
+    this->fullyTransparent = fullyTransparent;
+    //set the transparent state
+    this->transparent = fullyTransparent;
+    //check if transparency is enabled
+    if (fullyTransparent)
+    {
+        //get the fully transparent shader
+        this->setShader(glgeWindows[this->windowID]->getDefaultTransparentParticleShader());
+    }
+    else
+    {
+        //get the default opaque shader
+        this->setShader(glgeWindows[this->windowID]->getDefaultParticleShader());
+    }
+    //say that no custom shader is bound
+    this->customShader = false;
+}
+
+bool ParticleSystem::isFullyTransparent()
+{
+    //return the fully transparent state
+    return this->fullyTransparent;
 }
 
 void ParticleSystem::super(Mesh* mesh, unsigned int particleCount, Transform transform, unsigned int shape)
@@ -409,12 +471,14 @@ void ParticleSystem::super(Mesh* mesh, unsigned int particleCount, Transform tra
     this->data.uuid = glgeObjectUUID;
     //increase the amount of created objects
     glgeObjectUUID++;
-    //get the default shader from the current window
-    this->shader = new Shader(glgeWindows[this->windowID]->getDefault3DShader());
-    this->customShader = true;
 
     //update the object
     this->update();
+
+    //get the default shader
+    this->setShader(glgeWindows[this->windowID]->getDefaultParticleShader());
+    //say that no custom shader is bound
+    this->customShader = false;
 }
 
 bool ParticleSystem::isValidShape(unsigned int shapeID)
@@ -460,4 +524,13 @@ void ParticleSystem::updateUBO()
     glBufferData(GL_UNIFORM_BUFFER, sizeof(this->data), &this->data, GL_STREAM_COPY);
     //unbind the buffer
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void ParticleSystem::getUniforms()
+{
+    //add the pass uniform
+    this->shader->setCustomInt("glgePass", 0);
+
+    //recalculate the uniform locations
+    this->shader->recalculateUniforms();
 }

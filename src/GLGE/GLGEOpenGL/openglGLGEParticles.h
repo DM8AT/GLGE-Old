@@ -280,6 +280,36 @@ public:
      */
     Shader* getShader();
 
+    /**
+     * @brief Set the transparency state of the particle system
+     * 
+     * @param transparent true : the particles will behave like transparent objects | false : the particles will behave like solid objects
+     */
+    void setTransparent(bool transparent);
+
+    /**
+     * @brief check if the particles are transparent
+     * 
+     * @return true : the particles behave like transparent objects | 
+     * @return false : the particles behave like solid objects
+     */
+    bool isTransparent();
+
+    /**
+     * @brief Set if the particles are fully transparent
+     * 
+     * @param fullyTransparent true : the particles will behave like fully transparent objects | false : the particles will behave like objects according to the transparent flag
+     */
+    void setFullyTransparent(bool fullyTransparent);
+
+    /**
+     * @brief check if the particles are fully transparent
+     * 
+     * @return true : the particles will behave like fully transparent objects | 
+     * @return false the particles will behave like objects according to the transparent flag
+     */
+    bool isFullyTransparent();
+
 protected:
     /**
      * @brief create the new particle system
@@ -358,9 +388,30 @@ private:
      */
     bool customShader = false;
     /**
+     * @brief store if the particles are transparent
+     */
+    bool transparent = false;
+    /**
+     * @brief store if the particles are fully transparent
+     */
+    bool fullyTransparent = false;
+    /**
      * @brief store the index of the window the element is bound to
      */
     int windowID = -1;
+
+    //////////////
+    // UNIFORMS //
+    //////////////
+    /**
+     * @brief store the location of the pass uniform for transparent particle systems
+     */
+    int u_passLoc = -1;
+
+    /**
+     * @brief Get the uniform locations from the shader
+     */
+    void getUniforms();
 };
 
 #endif

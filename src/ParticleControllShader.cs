@@ -74,8 +74,8 @@ BuffParticle spawn()
     particle.pz = pos.z;
     //set the y position in a random range from -30 to 30
     particle.py = (hash() * 60.f) - 30.f;
-    //set the scale to a range between 0.1 and 1
-    float scale = 0.1 + hash() * 0.9;
+    //set the scale to a range between 0.5 and 1.5
+    float scale = 0.5 + hash();
     particle.sx = scale; particle.sy = scale; particle.sz = scale;
     //set the remaining lifetime to 1000
     particle.lifetime = 1000.f;

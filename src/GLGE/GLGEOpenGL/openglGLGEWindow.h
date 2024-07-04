@@ -1026,6 +1026,20 @@ public:
      */
     void setRenderPipeline(RenderPipeline* renderPipeline, bool del = true);
 
+    /**
+     * @brief Get the default particle shader of this window
+     * 
+     * @return Shader* a pointer to the default particle shader
+     */
+    Shader* getDefaultParticleShader();
+
+    /**
+     * @brief Get the default shader for transparent particles
+     * 
+     * @return Shader* a pointer to the default shader for transparent particles
+     */
+    Shader* getDefaultTransparentParticleShader();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -1171,9 +1185,13 @@ private:
     //store the default 2D shader
     unsigned int default2DShader = 0;
     //store the default image shader
-    Shader defaultImageShader;
+    Shader* defaultImageShader;
     //store the shadow shader
-    Shader shadowShader;
+    Shader* shadowShader;
+    //store the particle shader
+    Shader* defaultParticleShader;
+    //store the transparent particle shader
+    Shader* defaultTransparentParticleShader;
     
     /*
         Window constrains
@@ -1245,7 +1263,7 @@ private:
         information about the lighting shader
     */
     //store the lighting shader
-    Shader lightShader;
+    Shader* lightShader;
     //store the lights
     std::vector<Light*> lights;
 
