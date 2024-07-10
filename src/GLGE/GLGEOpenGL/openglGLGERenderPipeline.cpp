@@ -10,6 +10,7 @@
  */
 #include <algorithm>
 #include "openglGLGERenderPipeline.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEVars.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

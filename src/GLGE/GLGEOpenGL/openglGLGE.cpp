@@ -335,6 +335,24 @@ void glgeRunMainLoop()
     //run the main loop while the program is not stopped
     while (running)
     {
+        //check if debug gathering is enabled
+        if (glgeGatherDebugInfo)
+        {
+            //store all the debug data from the last tick
+            glgeDrawCallCount = glgeDrawCallCountT;
+            glgeTriangleCount = glgeTriangleCountT;
+            glgeDrawPassCount = glgeDrawPassCountT;
+            glgeUniformsPassed = glgeUniformsPassedT;
+            glgeBytesPassedToGPU = glgeBytesPassedToGPUT;
+            glgeBytesReadFromGPU = glgeBytesReadFromGPUT;
+            //reset the data for this tick
+            glgeDrawCallCountT = 0;
+            glgeTriangleCountT = 0;
+            glgeDrawPassCountT = 0;
+            glgeUniformsPassedT = 0;
+            glgeBytesPassedToGPUT = 0;
+            glgeBytesReadFromGPUT = 0;
+        }
         //clear whatever was written last tick
         glgeTypedThisTick = "";
         //store the current SDL event
@@ -602,7 +620,6 @@ void glgeRunMainLoop()
             //if it is, set it to 0
             waitTime = 0;
         }
-
         //limit the framerate
         SDL_Delay(waitTime);
     }
@@ -2522,4 +2539,28 @@ unsigned int glgeGetCurrentFramebufferType()
 {
     //return the currently bound framebuffer
     return glgeCurrentFramebufferType;
+}
+
+void glgeSetDebugGathering(bool state)
+{
+    //store the new state
+    glgeGatherDebugInfo = state;
+}
+
+bool glgeIsDebugGatheringEnabled()
+{
+    //return the current state
+    return glgeGatherDebugInfo;
+}
+
+int glgeDebugGetDrawCallCount()
+{
+    //return the draw call count
+    return glgeDrawCallCount;
+}
+
+int glgeDebugGetDrawnTriangleCount()
+{
+    //retuen the triangle count
+    return glgeTriangleCount;
 }

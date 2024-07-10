@@ -2102,6 +2102,14 @@ void Window::drawPPShader(Shader* shader, bool getVars)
     shader->applyShader();
     //draw the recangle
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles by 2 (the amount of triangles in a rectangle)
+        glgeTriangleCountT += 2;
+    }
     //remove the shader
     shader->removeShader();
     //unbind the screen rect
@@ -2228,6 +2236,14 @@ void Window::drawTransparent()
 
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        //check if debug data gathering is enabled
+        if (glgeGatherDebugInfo)
+        {
+            //increment the amount of draw passes
+            glgeDrawCallCountT++;
+            //increment the amount of triangles by 2 (the amount of triangles in a rectangle)
+            glgeTriangleCountT += 2;
+        }
 
         //make sure to enable texture unit 0
         glActiveTexture(GL_TEXTURE0);
@@ -2275,6 +2291,14 @@ void Window::drawLighting()
         
         //draw the screen
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        //check if debug data gathering is enabled
+        if (glgeGatherDebugInfo)
+        {
+            //increment the amount of draw passes
+            glgeDrawCallCountT++;
+            //increment the amount of triangles by 2 (the amount of triangles in a rectangle)
+            glgeTriangleCountT += 2;
+        }
 
         //unbind the lighting shader
         this->lightShader->removeShader();
@@ -2333,6 +2357,14 @@ void Window::drawSkybox()
 
         //draw the skybox
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        //check if debug data gathering is enabled
+        if (glgeGatherDebugInfo)
+        {
+            //increment the amount of draw passes
+            glgeDrawCallCountT++;
+            //increment the amount of triangles by 12 (the amount of triangles in a cube)
+            glgeTriangleCountT += 12;
+        }
 
         //unbind the skybox texture
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -2489,33 +2521,6 @@ void Window::super(std::string name, vec2 size, vec2 pos, unsigned int flags)
     SDL_GL_MakeCurrent((SDL_Window*)this->window, this->glContext);
     //disable VSync
     SDL_GL_SetSwapInterval(0);
-
-    //store the amount of extensions
-    int numExts = 0;
-    //get the amount of extensions 
-    glGetIntegerv(GL_NUM_EXTENSIONS, &numExts);
-    //check if the needed extensions where found
-    int extensions = 0;
-    //loop over all extensions
-    for (int i = 0; i < numExts; i++)
-    {
-        //get the current extensions
-        const GLubyte* extName = glGetStringi(GL_EXTENSIONS, i);
-        //check if this is the bindless texture extension
-        if (!strcmp((const char*)extName, "GL_ARB_bindless_texture"))
-        {
-            //increase the number of found extensions
-            extensions++;
-        }
-    }
-    //check if all extensions where found
-    if (extensions != 1)
-    {
-        //print a fatal error
-        std::cerr << "[GLGE FATAL ERROR] The device your're using dosn't support all required OpenGL extensions.\n";
-        //stop the program
-        exit(-1);
-    }
 
     //clear the framebuffer of the window
     glClear(GL_COLOR_BUFFER_BIT);

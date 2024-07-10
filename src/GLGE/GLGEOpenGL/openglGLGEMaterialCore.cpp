@@ -25,6 +25,8 @@
 #include "openglGLGEVars.hpp"
 //include the defines
 #include "openglGLGEDefines.hpp"
+//include the private defines
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 Material::Material()
 {
@@ -163,7 +165,7 @@ void Material::update(unsigned int shader, bool force)
         this->matData.metalicMapActive = 0;
     }
     //check if the displacement texture exists
-    if (this->displacementMap != NULL)
+    if (this->displacementMap)
     {
         //update the displacement map
         this->displacementMapLoc = glGetUniformLocation(shader, "");

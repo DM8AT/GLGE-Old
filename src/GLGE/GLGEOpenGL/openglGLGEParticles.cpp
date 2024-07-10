@@ -10,7 +10,9 @@
  */
 
 #include "openglGLGEParticles.h"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEVars.hpp"
+#include <math.h>
 
 /**
  * @brief check if the particle system is bound to a window
@@ -90,6 +92,14 @@ void ParticleSystem::draw()
     
     //draw the elements instanced
     glDrawElementsInstanced(GL_TRIANGLES, this->mesh->indices.size(), GL_UNSIGNED_INT, 0, this->numParticles);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles draw by the own triangle count multiplied by the amount of instances
+        glgeTriangleCountT += (this->mesh->indices.size() / 3) * this->numParticles;
+    }
 
     //unbind the shader
     this->shader->removeShader();
@@ -210,7 +220,7 @@ void ParticleSystem::setRot(vec3 rot)
 {
     PARTICLESYS_WINDOW_CHECK
     //store the new rotation
-    this->transf.rot = rot;
+    this->transf.rot = vec3(std::fmod(rot.x, 2*M_PI),std::fmod(rot.y, 2*M_PI),std::fmod(rot.z, 2*M_PI));
 }
 
 void ParticleSystem::setRot(float x, float y, float z)

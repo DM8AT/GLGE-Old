@@ -26,6 +26,8 @@
 #include "../GLGEIndependend/glgeErrors.hpp"
 //get access to the glge functions
 #include "openglGLGEFuncs.hpp"
+//include the private defines
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 //include the 4D matrices
 #include "../CML/CMLMat4.h"

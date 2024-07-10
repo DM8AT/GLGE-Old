@@ -1026,4 +1026,33 @@ unsigned int glgeGetCurrentFramebufferType();
  */
 #define glgeGetTypeName(T) std::string(typeid(T).name())
 
+/**
+ * @brief Enable / Disable the gathering of debug data
+ * 
+ * @param state the stat for debug gathering \n true : debug gathering is enabled | false : debug gathering is disabled (default)
+ */
+void glgeSetDebugGathering(bool state);
+
+/**
+ * @brief get if debug data gathering is enabled
+ * 
+ * @return true : debug data gathering is enabled | 
+ * @return false : debug data gathering is disabled
+ */
+bool glgeIsDebugGatheringEnabled();
+
+/**
+ * @brief get the amount of draw calles made last tick
+ * 
+ * @return int the amount of draw calls made last tick
+ */
+int glgeDebugGetDrawCallCount();
+
+/**
+ * @brief get the amount of triangles drawn last tick 
+ * 
+ * @return int the amount of triangles drawn last tick
+ */
+int glgeDebugGetDrawnTriangleCount();
+
 #endif

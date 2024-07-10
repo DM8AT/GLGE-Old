@@ -220,6 +220,14 @@ void Object2D::draw()
 
     //draw the object
     glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles draw by the own triangle count
+        glgeTriangleCountT += this->mesh.indices.size() / 3;
+    }
 
     //unbind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -392,13 +400,13 @@ void Object2D::move(float deltaX, float deltaY)
 void Object2D::move(float speedX, float speedY, float dir)
 {
     //change the position
-    this->transf.pos += vec2(speedX*std::sin(dir*GLGE_TO_RADIANS), speedY*std::cos(dir*GLGE_TO_RADIANS));
+    this->transf.pos += vec2(speedX*std::sin(dir), speedY*std::cos(dir));
 }
 
 void Object2D::move(float speed)
 {
     //change the position
-    this->transf.pos += vec2(speed*std::sin(this->transf.rot*GLGE_TO_RADIANS), speed*std::cos(this->transf.rot*GLGE_TO_RADIANS));
+    this->transf.pos += vec2(speed*std::sin(this->transf.rot), speed*std::cos(this->transf.rot));
 }
 
 void Object2D::setPos(vec2 pos)
@@ -422,19 +430,19 @@ vec2 Object2D::getPos()
 void Object2D::rotate(float angle)
 {
     //change the rotation of the object
-    this->transf.rot += (angle*GLGE_TO_RADIANS);
+    this->setRotation(this->transf.rot + (angle));
 }
 
 void Object2D::setRotation(float dir)
 {
     //set the rotation of the object
-    this->transf.rot = dir*GLGE_TO_RADIANS;
+    this->transf.rot = std::fmod(dir,2*M_PI);
 }
 
 float Object2D::getRotation()
 {
     //return the rotation in degrees
-    return this->transf.rot * GLGE_TO_DEGREES;
+    return this->transf.rot;
 }
 
 void Object2D::scale(vec2 scale)
@@ -894,13 +902,13 @@ void Camera2D::move(float deltaX, float deltaY)
 void Camera2D::move(float speedX, float speedY, float dir)
 {
     //change the position
-    this->transf.pos += vec2(speedX*std::sin(dir*GLGE_TO_RADIANS), speedY*std::cos(dir*GLGE_TO_RADIANS));
+    this->transf.pos += vec2(speedX*std::sin(dir), speedY*std::cos(dir));
 }
 
 void Camera2D::move(float speed)
 {
     //change the position
-    this->transf.pos += vec2(speed*std::sin(this->transf.rot*GLGE_TO_RADIANS), speed*std::cos(this->transf.rot*GLGE_TO_RADIANS));
+    this->transf.pos += vec2(speed*std::sin(this->transf.rot), speed*std::cos(this->transf.rot));
 }
 
 void Camera2D::setPos(vec2 pos)
@@ -924,19 +932,19 @@ vec2 Camera2D::getPos()
 void Camera2D::rotate(float angle)
 {
     //change the rotation of the object
-    this->transf.rot += (angle*GLGE_TO_RADIANS);
+    this->setRotation(this->transf.rot + angle);
 }
 
 void Camera2D::setRotation(float dir)
 {
     //set the rotation of the object
-    this->transf.rot = dir*GLGE_TO_RADIANS;
+    this->transf.rot = std::fmod(dir,2*M_PI);
 }
 
 float Camera2D::getRotation()
 {
     //return the rotation in degrees
-    return this->transf.rot * GLGE_TO_DEGREES;
+    return this->transf.rot;
 }
 
 void Camera2D::scale(vec2 scale)
@@ -1516,12 +1524,12 @@ void Text::updateTexture()
     SDL_Color c = SDL_Color{(uint8_t)(this->color.x * 255), (uint8_t)(this->color.y * 255), (uint8_t)(this->color.z * 255), (uint8_t)(this->color.w * 255)};
     //create the text surface
     SDL_Surface* surf = TTF_RenderText_Blended(f, this->text.c_str(), c);
-    this->texSize = vec2(surf->w, surf->h);
-    //check if the surface was created
+    //check if the surface was created successfully
     if (!surf)
     {
         GLGE_THROW_ERROR((std::string("Failed to render text message to surface") + std::string(" SDL Error : " + std::string(SDL_GetError()))).c_str())
     }
+    this->texSize = vec2(surf->w, surf->h);
     //delete the old texture
     glDeleteTextures(1, &this->texture);
     //convert SDL Texture to OpenGL texture

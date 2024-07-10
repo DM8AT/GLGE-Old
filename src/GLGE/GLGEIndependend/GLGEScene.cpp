@@ -10,6 +10,7 @@
  */
 
 #include "GLGEScene.hpp"
+#include "glgePrivDefines.hpp"
 #include <fstream>
 
 NamedObject::NamedObject()

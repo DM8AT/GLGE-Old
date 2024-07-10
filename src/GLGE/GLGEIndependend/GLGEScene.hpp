@@ -19,7 +19,6 @@
 #include <typeinfo>
 
 //includes from GLGE
-#include "glgePrivDefines.hpp"
 #include "GLGEData.h"
 
 ///////////

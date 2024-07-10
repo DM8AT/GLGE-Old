@@ -177,3 +177,56 @@ bool glgeShadowPass = false;
  * @brief store the index of the current shadow caster
  */
 int glgeShadowCasterIndex = 0;
+
+/**
+ * @brief say if GLGE should keep track of generel debug data
+ */
+bool glgeGatherDebugInfo = false;
+/**
+ * @brief store the amount of draw calls per tick
+ */
+int glgeDrawCallCount = 0;
+/**
+ * @brief store the amount of drawn triangles per frame
+ */
+int glgeTriangleCount = 0;
+/**
+ * @brief store the amount of draw passes taken last tick
+ */
+int glgeDrawPassCount = 0;
+/**
+ * @brief store the amount of uniform variables passed to the GPU last tick
+ */
+int glgeUniformsPassed = 0;
+/**
+ * @brief store the amount of bytes send to the gpu last tick
+ */
+int glgeBytesPassedToGPU = 0;
+/**
+ * @brief store the amount of bytes read back from the GPU last tick
+ */
+int glgeBytesReadFromGPU = 0;
+/**
+ * @brief store the amount of draw calls taken this tick
+ */
+int glgeDrawCallCountT = 0;
+/**
+ * @brief store the amount of drawn triangles taken this tick
+ */
+int glgeTriangleCountT = 0;
+/**
+ * @brief store the amount of draw passes taken taken this tick
+ */
+int glgeDrawPassCountT = 0;
+/**
+ * @brief store the amount of uniform variables passed to the GPU taken this tick
+ */
+int glgeUniformsPassedT = 0;
+/**
+ * @brief store the amount of bytes send to the gpu taken this tick
+ */
+int glgeBytesPassedToGPUT = 0;
+/**
+ * @brief store the amount of bytes read back from the GPU taken this tick
+ */
+int glgeBytesReadFromGPUT = 0;

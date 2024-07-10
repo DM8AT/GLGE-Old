@@ -123,6 +123,9 @@ Upcoming features that may be added to GLGE in the future include:
 - changed the behaviour of meshes, meshes are now pointer-based components of objects
    - meshes now store they're own vertex and index buffers
    - when a mesh is created and given to a object, the object now has the ownership of the mesh exept something else is specifyed
+- converted all examples into one, see main.cpp
+- GLGE now only uses the radians system, use "glgeToRadians" if you wish to use degrees
+- all rotate and set rotation functions now use the modulo opperator to enable infinite rotation
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

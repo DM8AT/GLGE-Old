@@ -45,3 +45,5 @@
 #include "GLGEComputeShader.h"
 //include partickles
 #include "GLGEParticles.h"
+//include Meta-Objects
+#include "GLGEMetaObject.h"

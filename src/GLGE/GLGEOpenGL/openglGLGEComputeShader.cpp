@@ -16,6 +16,8 @@
 #include "openglGLGEVars.hpp"
 //include the errors
 #include "../GLGEIndependend/glgeErrors.hpp"
+//private defines
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 //default includes
 #include <iostream>

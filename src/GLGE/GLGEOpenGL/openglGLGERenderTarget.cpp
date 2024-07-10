@@ -124,6 +124,14 @@ void RenderTarget::draw()
 
     //draw the screen
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles by 2 (the amount of triangles in a rectangle)
+        glgeTriangleCountT += 2;
+    }
 
     //unbind the screen rect
     glgeWindows[this->windowIndex]->unbindScreenRect();

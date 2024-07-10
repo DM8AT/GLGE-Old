@@ -552,7 +552,16 @@ void Object::draw()
     //Bind the material
     this->mat->apply();
 
+    //draw the object
     glDrawElements(GL_TRIANGLES, this->mesh->indices.size(), GL_UNSIGNED_INT, 0);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles draw by the own triangle count
+        glgeTriangleCountT += this->mesh->indices.size() / 3;
+    }
 
     //unbind the material
     this->mat->remove();
@@ -712,28 +721,28 @@ vec3 Object::getPos()
 void Object::setRotation(vec3 r)
 {
     //apply the new rotation
-    this->transf.rot = r;
+    this->transf.rot = vec3(std::fmod(r.x, 2*M_PI),std::fmod(r.y, 2*M_PI),std::fmod(r.z, 2*M_PI));
 }
 
 //set the rotation of the object
 void Object::setRotation(float x, float y, float z)
 {
-    //apply the new rotation
-    this->transf.rot = vec3(x,y,z);
+    //pass to another function
+    this->setRotation(vec3(x,y,z));
 }
 
 //rotate the object
 void Object::rotate(vec3 r)
 {
     //rotate the object
-    this->transf.rot += r;
+    this->setRotation(this->transf.rot + r);
 }
 
 //rotate the object
 void Object::rotate(float x, float y, float z)
 {
-    //rotate the object
-    this->transf.rot += vec3(x,y,z);
+    //pass to another function
+    this->rotate(vec3(x,y,z));
 }
 
 vec3 Object::getRotation()
@@ -1160,8 +1169,8 @@ void Object::loadLights()
         //pass the light data
         glUniform4f(this->lightDatLocs[i], 
             lights[i]->getType(), 
-            std::cos(lights[i]->getIntenseAngle() * GLGE_TO_RADIANS), 
-            std::cos(lights[i]->getAngle() * GLGE_TO_RADIANS),
+            std::cos(lights[i]->getIntenseAngle()), 
+            std::cos(lights[i]->getAngle()),
             lights[i]->getInsensity());
         //pass the light direction
         glUniform3f(this->lightDirLocs[i], lights[i]->getDir().x, lights[i]->getDir().y, lights[i]->getDir().z);
@@ -1188,6 +1197,14 @@ void Object::shadowDraw()
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->ubo);
 
     glDrawElements(GL_TRIANGLES, this->mesh->indices.size(), GL_UNSIGNED_INT, 0);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles draw by the own triangle count
+        glgeTriangleCountT += this->mesh->indices.size() / 3;
+    }
 
     //unbind the texture for the shadow map
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -1287,7 +1304,7 @@ Camera::Camera(float FOV, float near, double far, Transform transform)
     }
 
     //if no error occured, store the variables
-    this->camData.fov = FOV*GLGE_TO_RADIANS;
+    this->camData.fov = FOV;
     this->camData.near = near;
     this->camData.far = far;
     this->transf = transform;
@@ -1395,28 +1412,30 @@ vec3 Camera::getPos()
 void Camera::setRotation(vec2 r)
 {
     //apply the new rotation
-    this->transf.rot = vec3(r.x,r.y,0);
+    this->transf.rot = vec3(std::fmod(r.x, 2*M_PI),std::fmod(r.y, 2*M_PI),0);
 }
 
 //set the rotation of the camera
 void Camera::setRotation(float x, float y)
 {
-    //apply the new rotation
-    this->transf.rot = vec3(x,y,0);
+    //pass to another function
+    this->setRotation(vec2(x,y));
 }
 
 //rotate the camera
 void Camera::rotate(vec2 r)
 {
+    //calculate the rotated vector
+    vec3 rot = this->transf.rot + vec3(r.x,r.y,0);
     //rotate the camera
-    this->transf.rot += vec3(r.x,r.y,0);
+    this->setRotation(rot.x,rot.y);
 }
 
 //rotate the camera
-void Camera::rotate(float x, float y, float z)
+void Camera::rotate(float x, float y, float)
 {
-    //rotate the camera
-    this->transf.rot += vec3(x,y,z);
+    //pass to another function
+    this->rotate(vec2(x,y));
 }
 
 vec3 Camera::getRotation()
@@ -1429,14 +1448,14 @@ vec3 Camera::getRotation()
 void Camera::setFOV(float f)
 {
     //apply the new fov
-    this->camData.fov = f*GLGE_TO_RADIANS;
+    this->camData.fov = f;
 }
 
 //change the field of view
 void Camera::sizeFOV(float df)
 {
     //change the fov
-    this->camData.fov += (df*GLGE_TO_RADIANS);
+    this->camData.fov += df;
 }
 
 float Camera::getFOV()
@@ -1467,6 +1486,11 @@ float* Camera::getTransformMatPointer()
 {
     //return a pointer to the transformation matrix
     return &this->camData.transMat.m[0][0];
+}
+
+mat4 Camera::getViewMatrix()
+{
+    return this->camData.transMat * this->camData.rotMat;
 }
 
 void Camera::setWindowIndex(unsigned int windowIndex)
@@ -2511,10 +2535,20 @@ void Mesh::init()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(this->indices[0]), this->indices.data(), GL_STATIC_DRAW);
     //unbind the IBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //store the window id
+    this->windowID = glgeCurrentWindowIndex;
 }
 
 void Mesh::bind()
 {
+    //check if the window id is the window the mesh was created in
+    if (this->windowID != glgeCurrentWindowIndex)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Can't bind a mesh in a window it was not created in")
+        return;
+    }
     //bind the VBO
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     //bind the IBO
@@ -2540,6 +2574,13 @@ void Mesh::bind()
 
 void Mesh::unbind()
 {
+    //check if the window id is the window the mesh was created in
+    if (this->windowID != glgeCurrentWindowIndex)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Can't bind a mesh in a window it was not created in")
+        return;
+    }
     //deactivate the sub elements
     //deactivate the position argument
     glDisableVertexAttribArray(0);

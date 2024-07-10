@@ -202,7 +202,7 @@ private:
     //store the index buffer object
     unsigned int IBO = 0;
     //store the index of the own window
-    unsigned int windowID = -1;
+    int windowID = -1;
 };
 
 /**
@@ -850,13 +850,6 @@ public:
      * @return float* a pointer to the transformation matrix
      */
     float* getTransformMatPointer();
-    
-    /**
-     * @brief Get a pointer to the view matrix
-     * 
-     * @return float* a pointer to the view matrix
-     */
-    float* getViewMatrixPointer();
 
     /**
      * @brief Get the view matrix
