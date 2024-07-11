@@ -1,1 +1,0 @@
-Skybox from: https://learnopengl.com/Advanced-OpenGL/Cubemaps, all rights belong to them
