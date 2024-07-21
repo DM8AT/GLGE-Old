@@ -16,6 +16,119 @@
 #include "../GLGEIndependend/glge2DcoreDefClasses.h"
 //include the base
 #include "openglGLGE.h"
+//include textures
+#include "openglGLGETexture.hpp"
+
+///////////
+//CLASSES//
+///////////
+
+/**
+ * @brief store a 2D mesh
+ */
+class Mesh2D
+{
+public:
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * default constructor
+     */
+    Mesh2D();
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices as an pointer array
+     * @param indices the indices as an pointer array
+     * @param sizeOfVertices the size of the vertex pointer array
+     * @param sizeOfIndices the size of the indices pointer array
+     */
+    Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices);
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices in an std vector
+     * @param indices the indices in an std vector
+     */
+    Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief Construct a new Mesh 2D from an preset
+     * 
+     * @param preset the preset to choose (Starting with GLGE_PRESET_)
+     * @param resolution the resolution or scale for the preset
+     * @param color the color for the vertices (w = -1 for texture coordinates)
+     */
+    Mesh2D(unsigned int preset, unsigned int resolution, vec4 color = vec4(1));
+
+    /**
+     * @brief Delete the 2D mesh
+     */
+    ~Mesh2D();
+
+    /**
+     * @brief bind the 2D mesh to OpenGL
+     */
+    void bind();
+
+    /**
+     * @brief unbind the 2D mesh
+     */
+    void unbind();
+
+    /**
+     * @brief recalculate the vertex buffer
+     */
+    void updateVertexBuffer();
+
+    /**
+     * @brief recalculate the index buffer
+     */
+    void updateIndexBuffer();
+
+    /**
+     * @brief recalculate the vertex and index buffer
+     */
+    void recalculateBuffers();
+
+    /**
+     * @brief Set the Data for the mesh
+     * 
+     * @param vertices the new vertices
+     * @param indices the new indices
+     */
+    void setData(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief store the indices of the mesh
+     */
+    std::vector<unsigned int> indices;
+    /**
+     * @brief store the vertices of the mehs
+     */
+    std::vector<Vertex2D> vertices; 
+
+private:
+    /**
+     * @brief Create the OpenGL buffers
+     */
+    void createBuffers();
+
+    /**
+     * @brief store the vertex buffer object
+     */
+    unsigned int VBO = 0;
+    /**
+     * @brief store the index buffer object
+     */
+    unsigned int IBO = 0;
+    /**
+     * @brief store the window index
+     */
+    int windowID = -1;
+};
 
 /**
  * @brief an 2D object
@@ -59,7 +172,7 @@ public:
      * @param transform the transform of the object
      * @param isStatic say if the object should stay on the same screen position relative to the world
      */
-    Object2D(Mesh2D mesh, Transform2D transform = Transform2D(), bool isStatic = false);
+    Object2D(Mesh2D* mesh, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief Construct a new 2D object
@@ -70,7 +183,7 @@ public:
      * @param transform the transform of the object
      * @param isStatic say if the object should stay on the same screen position relative to the world
      */
-    Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform = Transform2D(), bool isStatic = false);
+    Object2D(unsigned int preset, vec4 color, unsigned int resolution, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief Destroy the 2D Object
@@ -88,46 +201,18 @@ public:
     void update();
 
     /**
-     * @brief update the vertex buffer
-     * 
-     * @param mesh an optional argument to also asign a new mesh
-     */
-    void recalculateVertexBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
-     * @brief update the index buffer
-     * 
-     * @param mesh an optinal argument to also asign a new mesh
-     */
-    void recalculateIndexBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
-     * @brief update the complete mesh buffers
-     * 
-     * @param mesh an optional new mesh
-     */
-    void recalculateMeshBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
      * @brief assign a new mesh to the object
      * 
      * @param mesh the new mesh data
      */
-    void setMesh(Mesh2D mesh);
+    void setMesh(Mesh2D* mesh);
 
     /**
      * @brief Get the Mesh from the object
      * 
      * @return Mesh2D the mesh from the object
      */
-    Mesh2D getMesh();
-
-    /**
-     * @brief Set the Shader
-     * 
-     * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
-     */
-    void setShader(const char* path);
+    Mesh2D* getMesh();
 
     /**
      * @brief Set the Shader
@@ -145,11 +230,18 @@ public:
     void setShader(std::string vertexShader, std::string fragmentShader);
 
     /**
+     * @brief Set the shader for the object
+     * 
+     * @param shader a pointer to the new shader
+     */
+    void setShader(Shader* shader);
+
+    /**
      * @brief Get the Shader
      * 
-     * @return unsigned int the compiled shader
+     * @return Shader* the GLGE shader
      */
-    unsigned int getShader();
+    Shader* getShader();
 
     /**
      * @brief Set the Texture for the object
@@ -159,23 +251,18 @@ public:
     void setTexture(const char* file);
 
     /**
-     * @brief Set the Texture for the object
+     * @brief Set the own texture
      * 
-     * @param texture the allready compiled OpenGL texture
+     * @param texture a pointer to the new texture
      */
-    void setTexture(unsigned int texture);
+    void setTexture(Texture* texture);
 
     /**
-     * @brief deletes the own texture and sets it to 0
-     */
-    void deleteTexture();
-
-    /**
-     * @brief Get the Texture from the file
+     * @brief Get the own texture
      * 
-     * @return unsigned int the allready compiled OpenGL texture
+     * @return Texture* a pointer to the own texture
      */
-    unsigned int getTexture();
+    Texture* getTexture();
 
     /**
      * @brief Set the Transform for the object
@@ -256,14 +343,14 @@ public:
      * 
      * @param dir the direction for the object in degrees
      */
-    void setRotation(float dir);
+    void setRot(float dir);
 
     /**
      * @brief Get the Rotation from the object
      * 
      * @return float the rotation in degrees
      */
-    float getRotation();
+    float getRot();
 
     /**
      * @brief change the scale of the object
@@ -402,29 +489,17 @@ protected:
      */
     vec2 anchor = vec2(0);
     /**
-     * @brief store the mesh for the object
-     */
-    Mesh2D mesh;
-    /**
      * @brief store the transform of the object
      */
     Transform2D transf;
     /**
-     * @brief store the vertex buffer
+     * @brief store a pointer to the own mesh
      */
-    unsigned int VBO=0, 
-    /**
-     * @brief store the index buffer
-     */
-    IBO=0;
+    Mesh2D* mesh = 0;
     /**
      * @brief save the shader
      */
-    int shader = 0;
-    /**
-     * @brief store the move matrix location
-     */
-    unsigned int moveMatLoc = 0;
+    Shader* shader = 0;
     /**
      * @brief the local matrix to make the object correct
      */
@@ -434,19 +509,11 @@ protected:
     /**
      * @brief store a texture
      */
-    unsigned int texture = 0;
+    Texture* texture = 0;
     /**
      * @brief say if the object is static
      */
     bool isStatic = false;
-    /**
-     * @brief save the length of the vertex buffer
-     */
-    unsigned int VBOLen=0, 
-    /**
-     * @brief save the length of the index buffer
-     */
-    IBOLen=0;
     /**
      * @brief store the object UUID
      */
@@ -460,33 +527,6 @@ protected:
      * @brief perform any setup scripts for the object that are not mesh-related
      */
     void superConstructor();
-
-    /**
-     * @brief Create the buffers
-     */
-    void createBuffers();
-
-    /**
-     * @brief create the vertex buffer or update it
-     * 
-     * @param mesh the new mesh
-     */
-    void updateVertexBuffer();
-
-    /**
-     * @brief create the index buffer or update it
-     * 
-     * @param mesh the new mesh
-     */
-    void updateIndexBuffer();
-
-    /**
-     * @brief setup the shaders
-     * 
-     * @param vs the vertex shader
-     * @param fs the fragment shader
-     */
-    void shaderSetup(const char* vs, const char* fs);
 
     /**
      * @brief recalculate the local move matrix
@@ -959,9 +999,9 @@ public:
     /**
      * @brief Get the texture containing the text
      * 
-     * @return int an OpenGL texture pointer for the texture
+     * @return Texture* a pointer to the GLGE texture
      */
-    int getTextTexture();
+    Texture* getTextTexture();
 
     /**
      * @brief Get if dynamic meshing is activated

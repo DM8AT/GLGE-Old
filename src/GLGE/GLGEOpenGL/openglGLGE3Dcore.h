@@ -730,7 +730,7 @@ public:
      * 
      * @param position the new position for the camera
      */
-    void set(vec3 position);
+    void setPos(vec3 position);
 
     /**
      * @brief position the camera new
@@ -739,7 +739,7 @@ public:
      * @param y the new y position for the camera
      * @param z the new z position for the camera
      */
-    void set(float x, float y, float z);
+    void setPos(float x, float y, float z);
 
     /**
      * @brief move the camera
@@ -769,22 +769,23 @@ public:
      * 
      * @param rotation the new rotation for the camera
      */
-    void setRotation(vec2 rotation);
+    void setRot(vec3 rotation);
 
     /**
      * @brief Set the Rotation of the camera
      * 
      * @param x the x rotation for the camera
      * @param y the y rotation for the camera
+     * @param z the z rotation for the camera
      */
-    void setRotation(float x, float y);
+    void setRot(float x, float y, float z);
 
     /**
      * @brief rotate the camera
      * 
      * @param deltaRotation the difference for the rotation
      */
-    void rotate(vec2 deltaRotation);
+    void rotate(vec3 deltaRotation);
 
     /**
      * @brief rotate the camera

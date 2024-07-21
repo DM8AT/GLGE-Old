@@ -2209,21 +2209,9 @@ void Window::drawTransparent()
         //switch to addaptive blending for color attachment 5 and 7
         glBlendFunci(5,GL_ONE, GL_ONE);
         glBlendFunci(7,GL_ONE, GL_ONE);
+        //disable backface culling
+        glDisable(GL_CULL_FACE);
         
-        //check if backface culling is enabled
-        if (this->backfaceCulling)
-        {
-            //if it is enabled, enable backface culling
-            glEnable(GL_CULL_FACE);
-            //setup the correct culling
-            glCullFace(GL_BACK);
-        }
-        else
-        {
-            //else, disable it
-            glDisable(GL_CULL_FACE);
-        }
-
         //call the draw function
         this->callDrawFunc();
         //switch to inverted normal blend func

@@ -531,24 +531,6 @@ void Object::draw()
     //bind the shader
     this->shader.applyShader();
 
-    int shadowCasters = 0;
-    //loop over all the light sources
-    for (int i = 0; i < (int)glgeWindows[this->windowIndex]->getLights().size(); i++)
-    {
-        if (glgeWindows[this->windowIndex]->getLights()[i]->getType() != GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL) { continue; }
-        //pass the texture handler
-        glUniform1i(glGetUniformLocation(this->shader.getShader(), ("glgeShadowMap[" + std::to_string(shadowCasters) + "]").c_str()), glgeWindows[this->windowIndex]->getLights()[i]->getShadowMap()+1);
-        shadowCasters++;
-    }
-    glUniform1i(glGetUniformLocation(this->shader.getShader(), "glgeActiveShadowCasters"), shadowCasters);
-
-    //check if this is the transparent pass
-    if (this->isTransparent)
-    {
-        //pass the lights
-        this->loadLights();
-    }
-
     //Bind the material
     this->mat->apply();
 
@@ -1371,14 +1353,14 @@ Transform Camera::getTransform()
 }
 
 //set the position of the camera
-void Camera::set(vec3 p)
+void Camera::setPos(vec3 p)
 {
     //apply the new position
     this->transf.pos = p;
 }
 
 //set the position of the camera
-void Camera::set(float x, float y, float z)
+void Camera::setPos(float x, float y, float z)
 {
     //apply the new position
     this->transf.pos = vec3(x,y,z);
@@ -1397,9 +1379,9 @@ void Camera::move(float x, float y, float z)
     //just add the y component
     this->transf.pos.y += y;
     //add the difference of the x and z component scaled by the sine of the rotatin on the x-axis
-    this->transf.pos.x += (x - z) * std::sin(this->transf.rot.x);
+    this->transf.pos.x += (x - z) * std::sin(this->transf.rot.y);
     //do the same as for x, but change the order of x and z and use cosine
-    this->transf.pos.z += (z - x) * std::cos(this->transf.rot.x);
+    this->transf.pos.z += (z - x) * std::cos(this->transf.rot.y);
 }
 
 vec3 Camera::getPos()
@@ -1409,33 +1391,31 @@ vec3 Camera::getPos()
 }
 
 //set the rotation of the camera
-void Camera::setRotation(vec2 r)
+void Camera::setRot(vec3 r)
 {
     //apply the new rotation
-    this->transf.rot = vec3(std::fmod(r.x, 2*M_PI),std::fmod(r.y, 2*M_PI),0);
+    this->transf.rot = vec3(std::fmod(r.x, 2*M_PI),std::fmod(r.y, 2*M_PI),std::fmod(r.z, 2*M_PI));
 }
 
 //set the rotation of the camera
-void Camera::setRotation(float x, float y)
+void Camera::setRot(float x, float y, float z)
 {
     //pass to another function
-    this->setRotation(vec2(x,y));
+    this->setRot(vec3(x,y,z));
 }
 
 //rotate the camera
-void Camera::rotate(vec2 r)
+void Camera::rotate(vec3 r)
 {
-    //calculate the rotated vector
-    vec3 rot = this->transf.rot + vec3(r.x,r.y,0);
     //rotate the camera
-    this->setRotation(rot.x,rot.y);
+    this->setRot(this->transf.rot + r);
 }
 
 //rotate the camera
-void Camera::rotate(float x, float y, float)
+void Camera::rotate(float x, float y, float z)
 {
     //pass to another function
-    this->rotate(vec2(x,y));
+    this->rotate(vec3(x,y,z));
 }
 
 vec3 Camera::getRotation()
@@ -1529,7 +1509,7 @@ void Camera::calculateViewMatrix()
     //setup the vector to face right
     vec3 view = vec3(right.x,right.y,right.z);
     //rotathe the vector around the y axis by the x rotation amount
-    view = glgeRotateVector(transf.rot.x,yaxis, view);
+    view = glgeRotateVector(transf.rot.y,yaxis, view);
     //normaise the vector
     view.normalize();
 
@@ -1539,7 +1519,7 @@ void Camera::calculateViewMatrix()
     //normalise the U vector
     U.normalize();
     //rotate the view vector around U by the rotation on the y axis
-    view = glgeRotateVector(transf.rot.y, U, view);
+    view = glgeRotateVector(transf.rot.x, U, view);
     
     //setup the vectors
     //N is equal to the view vector

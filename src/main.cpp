@@ -14,6 +14,7 @@
  * @brief GLGEALL.h is a wraper file that includes all core featuers of GLGE. 
  */
 #include "GLGE/GLGEALL.h"
+#include "GLGE/GLGESound/glgeSoundCore.h"
 
 /**
  * @brief this stores a pointer to the main application window
@@ -28,6 +29,10 @@ Camera* cam;
  */
 Object* planet;
 /**
+ * @brief store the object that is the planet's core
+ */
+Object* core;
+/**
  * @brief store the particle system for the astroid belt
  */
 ParticleSystem* astroids;
@@ -35,6 +40,24 @@ ParticleSystem* astroids;
  * @brief store if the window is selected
  */
 bool active = true;
+/**
+ * @brief store the listener wich can listen to sounds
+ * @warning Cameras and Listeners are different, but in a sence the same. Trugh a camera you can see, 
+ * but not hear. Trugh a listener you can hear, but you can't see. For the whole you need a listener and a camera. 
+ */
+Listener* listener;
+/**
+ * @brief a speaker is a sound source wich can be used in 2D and 3D enviroments. 
+ */
+Speaker* speaker;
+/**
+ * @brief store the speed the player is flying with
+ */
+float flightSpeed = 0.4;
+/**
+ * @brief store a 2D object to indicate the flight speed
+ */
+Object2D* speedIndicator;
 
 ///////////////////
 // DATA FOR MAIN //
@@ -46,10 +69,21 @@ bool active = true;
 void mainDraw()
 {
     /**
+     * @brief draw the speed indicator
+     */
+    speedIndicator->draw();
+    /**
      * @brief draw the planet
      */
     planet->draw();
+    /**
+     * @brief draw the instaced astroid cubes
+     */
     astroids->draw();
+    /**
+     * @brief draw the planet's core
+     */
+    core->draw();
 }
 
 /**
@@ -70,11 +104,11 @@ void mainTick()
             /**
              * @brief calculate the difference the mouse has moved from the window center
              */
-            vec2 delta = (vec2(0.5) - glgeGetMouse().pos);
+            vec2 delta = (vec2(0.5) - glgeGetMouse().pos) * 0.5;
             /**
              * @brief rotate the camera by a fraction of that amount
              */
-            cam->rotate(delta * 0.5);
+            cam->rotate(delta.y,delta.x,0);
             /**
              * @brief position the mouse in the center of the window
              */
@@ -87,7 +121,7 @@ void mainTick()
             /**
              * @brief calculate the amount to move this tick
              */
-            float speed = 0.4 * glgeGetDeltaTime();
+            float speed = flightSpeed * glgeGetDeltaTime();
             /**
              * @brief if the w key was pressed, move the camera forward (towards -z)
              */
@@ -99,7 +133,7 @@ void mainTick()
             /**
              * @brief rotate the camera 90 degrees
              */
-            cam->rotate(glgeToRadians(90),0,0);
+            cam->rotate(0,glgeToRadians(90),0);
             /**
              * @brief if it d key was pressed, move the camera right (towards +x)
              */
@@ -111,7 +145,7 @@ void mainTick()
             /**
              * @brief rotate the camera back to normal orientation
              */
-            cam->rotate(-glgeToRadians(90),0,0);
+            cam->rotate(0,-glgeToRadians(90),0);
             /**
              * @brief if the space key was presed, move the camera up (towards +y)
              */
@@ -133,6 +167,22 @@ void mainTick()
                 * @brief position the mouse in the center of the window
                 */
                 glgeWarpPointer(vec2(0));
+            }
+            //check if the mouse wheel was scrolled
+            if (glgeGetMouse().mouseWheel != 0)
+            {
+                //increment the flight speed by a portion of the scrolled wheel amount
+                flightSpeed += glgeGetMouse().mouseWheel / 5.f;
+                //clamp the new flight speed value
+                flightSpeed = glgeClamp(flightSpeed,0.f,10.f);
+                //update the speed
+                speedIndicator->getShader()->setCustomFloat("speed", flightSpeed);
+                //check if a sound is playing
+                if (glgeGetCurrentSoundCount() == 0)
+                {
+                    //if not, start a sound with the pitch as the interpolated new speed
+                    glgePlaySound("assets/speedup.wav", flightSpeed / 10.f);
+                }
             }
         }
         else
@@ -159,6 +209,16 @@ void mainTick()
     }
 
     /**
+     * @brief repeatetly position the listener at the camera to keep both togeter
+     */
+    listener->setTransform(cam->getTransform());
+    /**
+     * @brief always play the sound so it is looping. 
+     * If the sound should reset, the parameter 'force' in the play function can be set to true, wich 
+     * will restart the sound. 
+     */
+    speaker->play();
+    /**
      * @brief update the camera
      */
     cam->update();
@@ -171,13 +231,25 @@ void mainTick()
      */
     planet->update();
     /**
+     * @brief update the planet's core
+     */
+    core->update();
+    /**
      * @brief rotate the astroid belt a bit
      */
     astroids->setRot(astroids->getRot() + vec3(0,glgeToRadians(0.0003) * glgeGetDeltaTime(),0));
     /**
-     * @brief update the astroids
+     * @brief update the astroids (this will run the controll shader if one is bound)
      */
     astroids->update();
+    /**
+     * @brief update the speed indicator
+     */
+    speedIndicator->update();
+    /**
+     * @brief tick the sound core (do this once per frame)
+     */
+    glgeTickSounds();
 }
 
 void initMain()
@@ -201,6 +273,19 @@ void initMain()
     glgeBindCamera(cam);
 
     /**
+     * @brief create a new listener with the same transformation as the camera
+     */
+    listener = new Listener(cam->getTransform());
+    /**
+     * @brief create a new sound source that plays an example sound
+     */
+    speaker = new Speaker("assets/firework.wav", vec3(0));
+    /**
+     * @brief increase the gain of the source so it is louder
+     */
+    speaker->setGain(100.f);
+
+    /**
      * @brief create a new object with a new mesh using the base mesh of a UV sphere
      */
     planet = new Object(new Mesh(GLGE_PRESET_SPHERE, vec4(-1)), Transform(vec3(0,-1,0),vec3(0),vec3(1000)));
@@ -208,6 +293,28 @@ void initMain()
      * @brief set the material of the plane to a new material with a texture
      */
     planet->setMaterial(new Material("assets/grass.png", 0.6));
+
+    /**
+     * @brief create the core
+     */
+    core = new Object(new Mesh(GLGE_PRESET_SPHERE, vec4(-1)), Transform(vec3(0),vec3(0),vec3(10)));
+    /**
+     * @brief create a new material for the core
+     */
+    core->setMaterial(new Material(vec4(0,0,1,0.6), 0.2));
+    /**
+     * @brief say that the core is transparent
+     */
+    core->setTransparency(true);
+    /**
+     * @brief say that the core is fully transparent
+     */
+    core->setFullyTransparent(true);
+    /**
+     * @brief bind the default transparent shader to the object
+     */
+    core->setShader(mainWin->getDefault3DTransparentShader());
+
     /**
      * @brief set a skybox using 6 planes that form a cube
      */
@@ -222,9 +329,37 @@ void initMain()
      */
     glgeAddGlobalLighSource(new Light(Light(vec3(0), vec3(0,-1,0.5), GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL, vec3(0.98, 0.98, 0.6), 0, 3)));
 
+    glgeSetPostProsessingShader("src/postProcessing.fs");
+
+    /**
+     * @brief create a new particle system
+     */
     astroids = new  ParticleSystem(new Mesh(GLGE_PRESET_CUBE, vec4(-1), 0), 500000);
+    /**
+     * @brief set the controll shader for the particle system (this is not really required, else the particles will just do nothing)
+     */
     astroids->setControllShader("src/Controll.cs");
+    /**
+     * @brief set the material for the particle system
+     */
     astroids->setMaterial(new Material("assets/cubeTexture.png"));
+
+    /**
+     * @brief create the speed indicator object
+     */
+    speedIndicator = new Object2D(GLGE_PRESET_SQUARE, vec4(-1), 0, Transform2D(vec2(-0.65f,-0.9),0,vec2(0.3,0.05)), true);
+    /**
+     * @brief create a custom shader for the speed indicator
+     */
+    speedIndicator->setShader(new Shader(GLGE_DEFAULT_2D_VERTEX, "src/speedIndicator.fs"));
+    /**
+     * @brief add a custom float to the shader
+     */
+    speedIndicator->getShader()->setCustomFloat("speed", flightSpeed);
+    /**
+     * @brief recalculate the uniforms of the speed indicator shader
+     */
+    speedIndicator->getShader()->recalculateUniforms();
 }
 
 ////////////////////
@@ -515,6 +650,11 @@ int main()
      * @warning this will start the window. Make sure that it is not started first!
      */
     glgeBindMainWindow(mainWin);
+    /**
+     * @brief Open a conection to the default audio device. This is like initalising the sound core. 
+     * It is required before constructing any sound-dependend structured, else there will be an error. 
+     */
+    glgeOpenDevice();
     /**
      * @brief This function initalises the 2D-functionality of GLGE
      * @warning This function will only work after a main window is bound

@@ -101,23 +101,30 @@ mat4 Transform::getMatrix()
 
 mat4 Transform::getRotationMatrix()
 {
+    //pre-compute sine and cosine values
+    float sx = std::sin(this->rot.x);
+    float cx = std::cos(this->rot.x);
+    float sy = std::sin(this->rot.y);
+    float cy = std::cos(this->rot.y);
+    float sz = std::sin(this->rot.z);
+    float cz = std::cos(this->rot.z);
     //rotation on x axis
-    mat4 rotXMat = mat4(1, 0,                     0,                     0,
-                        0, std::cos(this->rot.x),-std::sin(this->rot.x), 0,
-                        0, std::sin(this->rot.x), std::cos(this->rot.x), 0,
-                        0, 0,                     0,                     1);
+    mat4 rotXMat = mat4(1, 0, 0,   0,
+                        0, cx,-sx, 0,
+                        0, sx, cx, 0,
+                        0, 0, 0,   1);
 
     //rotation on y axis
-    mat4 rotYMat = mat4(std::cos(this->rot.y), 0, std::sin(this->rot.y), 0,
-                        0,                     1,                     0, 0,
-                       -std::sin(this->rot.y), 0, std::cos(this->rot.y), 0,
-                        0,                     0,                     0, 1);
+    mat4 rotYMat = mat4(cy, 0, sy, 0,
+                        0,  1, 0,  0,
+                       -sy, 0, cy, 0,
+                        0,  0, 0,  1);
 
     //rotation on z axis
-    mat4 rotZMat = mat4(std::cos(this->rot.z),-std::sin(this->rot.z), 0, 0,
-                        std::sin(this->rot.z), std::cos(this->rot.z), 0, 0,
-                        0,                     0,                     1, 0,
-                        0,                     0,                     0, 1);
+    mat4 rotZMat = mat4(cz,-sz, 0, 0,
+                        sz, cz, 0, 0,
+                        0,  0,  1, 0,
+                        0,  0,  0, 1);
 
     //return the product of the matrices
     return (rotXMat * rotYMat) * rotZMat;

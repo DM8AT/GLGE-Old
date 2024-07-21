@@ -21,9 +21,6 @@ Often causes for memory access errors:
 Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
-# Use GLGE
-TODO
-
 ## Installation
 To install GLGE, download the source code or clone the project. Make sure to install following librarys:
 - OpenGL
@@ -34,6 +31,13 @@ To install GLGE, download the source code or clone the project. Make sure to ins
    - Linux: `sudo apt install libsdl2-dev`
 - SDL2_TTF
    - Linux: `sudo apt install libsdl2-ttf-dev`
+- OpenAL
+   - Linux: `sudo apt install libopenal-dev`
+- ALUT
+   - Linux: `sudo apt install libalut-dev`
+To install all librarys on linux, just run `make install` in the project directory or manualy run `sudo apt install libgl-dev libglew-dev libsdl2-dev libsdl2-ttf-dev libopenal-dev libalut-dev` in a terminal. 
+
+**Superuser access is requred to install the librarys, but not to compile and run any GLGE applications**
    
 also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
 
@@ -126,6 +130,19 @@ Upcoming features that may be added to GLGE in the future include:
 - converted all examples into one, see main.cpp
 - GLGE now only uses the radians system, use "glgeToRadians" if you wish to use degrees
 - all rotate and set rotation functions now use the modulo opperator to enable infinite rotation
+- corrected the rotation for the camera, x and y axis where swapped and the camera now uses vec3 instead of vec2 for rotation
+- updated the 2D core to the new code structure (now using the reference dependend structure with destructors)
+- added a sound core using OpenAL and ALUT
+   - the sound core is initalised by opening a device conection
+   - added a simple function to play a sound without a position
+   - added the 'Listener' class to define the position of a sound listener
+      - multiple listeners can exists, but only one can be bound at any time. The bound listener is the currently opperating one and will be updated every time the sound core ist ticked
+      - a listener can be positiond in 3D and 2D space to support audio for both spaces
+         - using 2D will simply ignore positon along the y-axis and rotation around the x and z axis
+   - added the 'Speaker' class to act as a positional audio source
+      - a speaker can be positiond in 3D and 2D space like a listener
+      - sounds can be played, paused and stopped
+   - added functions to handle the functionality of the doppler effect
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

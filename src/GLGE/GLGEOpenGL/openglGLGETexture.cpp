@@ -175,10 +175,14 @@ Texture::Texture(unsigned int openGLTex, unsigned int encodeType)
 
 Texture::~Texture()
 {
-    //free the data buffer
-    delete[] this->texData;
-    //delete the open gl texture
-    glDeleteTextures(1, &this->texture);
+    //check if texture data exists
+    if (this->texData)
+    {
+        //free the data buffer
+        delete[] this->texData;
+        //delete the open gl texture
+        glDeleteTextures(1, &this->texture);
+    }
 }
 
 void Texture::resize(vec2 size)

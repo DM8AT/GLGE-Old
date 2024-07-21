@@ -373,7 +373,7 @@ public:
 
 private:
     //store the texture data
-    vec4* texData;
+    vec4* texData = 0;
     //store the texture
     unsigned int texture = 0;
     //store the texture binding

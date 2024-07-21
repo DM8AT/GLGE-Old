@@ -40,10 +40,422 @@
  * @brief store the main 2D camera
  */
 Camera2D* mainCam;
+
+
+///////////////////////
+// PRIVATE FUNCTIONS //
+///////////////////////
+
 /**
- * @brief store the default location of the move matrix
+ * @brief add a polygon / circle to an exisiting mesh
+ * 
+ * @param vertices the allready existing 2D vertices
+ * @param indices the allready existing indices
+ * @param numbers the number of points for the polygon / the resolution of the circle
+ * @param col the color for the polygon / cirlce
  */
-int glgeDefaultMoveMatLoc;
+inline void addCircle(std::vector<Vertex2D>* vertices, std::vector<unsigned int>* indices, unsigned int numbers, vec4 col)
+{
+    //store the amount of points
+    unsigned int points = (numbers == 0) ? 32 : numbers;
+
+    //calculate the angle
+    double angle = (2.0*M_PI) / (double)points;
+
+    //store the first index
+    unsigned int first_ind = (unsigned int)vertices->size();
+
+    //generate the vertices
+    for (int i = 0; i < (int)points; i++)
+    {
+        //calculate the current angle
+        double c_angle = angle * i;
+        //store the calculated position
+        vec2 p = vec2(std::sin(c_angle), std::cos(c_angle));
+        //create the vertex
+        Vertex2D vert = Vertex2D(p);
+        //check if color should be added
+        if (col.w != -1)
+        {
+            //add the color
+            vert.color = col;
+        }
+        else
+        {
+            //clear the color
+            vert.color = vec4(0);
+            //check the texture mode
+            //normal circle texturing
+            vert.texCoord = vec2(p.x * 0.5 + 0.5, 1.f - (p.y * 0.5 + 0.5));            
+        }
+        //add the vertex
+        vertices->push_back(vert);
+    }
+
+    //generate the indices
+    for (int i = 0; i < (int)points - 2; i++)
+    {
+        //create a triangle
+        indices->push_back(first_ind);
+        indices->push_back(i + 2 + first_ind);
+        indices->push_back(i + 1 + first_ind);
+    }
+}
+
+///////////
+//CLASSES//
+///////////
+
+//MESH2D
+
+//default constructor
+Mesh2D::Mesh2D()
+{
+    //init the object
+}
+
+//constructor with pointer array
+Mesh2D::Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices)
+{
+    //convert the pointer arrays to vectors and save them
+    this->vertices = std::vector<Vertex2D>(vertices, vertices + (sizeOfVertices/sizeof(vertices[0])));
+    this->indices = std::vector<unsigned int>(indices, indices + (sizeOfIndices/sizeof(indices[0])));
+    //create the buffers
+    this->createBuffers();
+}
+
+//constructor with vectors
+Mesh2D::Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices)
+{
+    //save the inputed vectors
+    this->vertices = vertices;
+    this->indices = indices;
+    //create the buffers
+    this->createBuffers();
+}
+
+//constructor with presets
+Mesh2D::Mesh2D(unsigned int preset, unsigned int resolution, vec4 color)
+{
+    switch (preset)
+    {
+    case GLGE_PRESET_EMPTY:
+        {
+            //clear the indices
+            this->indices.clear();
+            //clear the vertices
+            this->vertices.clear();
+        }
+        break;
+    
+    case GLGE_PRESET_SQUARE:
+        {
+            //load a preset of a square
+            //store the vertices
+            std::vector<Vertex2D> vertices;
+            //case for texture coordinates
+            if (color.w == -1)
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D( 1, 1, 1,  0),
+                            Vertex2D( 1,-1, 1,  1),
+                            Vertex2D(-1, 1, 0,  0),
+                            Vertex2D(-1,-1, 0,  1)};
+            }
+            //specal case
+            else if (color.w == -2)
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D( 1, 1, 1,0,0,1),
+                            Vertex2D( 1,-1, 0,1,0,1),
+                            Vertex2D(-1, 1, 0,1,0,1),
+                            Vertex2D(-1,-1, 0,0,1,1)};
+            }
+            else
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D( 1, 1, color),
+                            Vertex2D( 1,-1, color),
+                            Vertex2D(-1, 1, color),
+                            Vertex2D(-1,-1, color)};
+            }
+            //bind the vertices to an triangle1
+            std::vector<unsigned int> indices = {1,0,2, 1,2,3};
+
+            //store the indices
+            this->vertices = vertices;
+            this->indices = indices;
+        }
+        break;
+
+    case GLGE_PRESET_TRIANGLE:
+        {
+            //store the vertices
+            std::vector<Vertex2D> vertices;
+            //case for texture coordinates
+            if (color.w == -1)
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D(0,1,   0.5,0),
+                            Vertex2D(-1,-1, 0,  1),
+                            Vertex2D( 1,-1, 1,  1)};
+            }
+            //specal case
+            else if (color.w == -2)
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D(0,1,   1,0,0,1),
+                            Vertex2D(-1,-1, 0,1,0,1),
+                            Vertex2D( 1,-1, 0,0,1,1)};
+            }
+            else
+            {
+                //create the triangle
+                //set the vertices for the triangle
+                vertices = {Vertex2D(0,1,   color),
+                            Vertex2D(-1,-1, color),
+                            Vertex2D( 1,-1, color)};
+            }
+            //bind the vertices to an triangle1
+            std::vector<unsigned int> indices = {0,1,2};
+
+            //store the indices
+            this->vertices = vertices;
+            this->indices = indices;
+        }
+        break;
+
+    case GLGE_PRESET_POLYGON:
+        {
+            //default the resolution to 5
+            if (resolution == 0)
+            {
+                resolution = 5;
+            }
+            //generate a polygon
+            addCircle(&this->vertices, &this->indices, resolution, color);
+        }
+        break;
+
+    case GLGE_PRESET_CIRCLE:
+        {
+            //generate a circle
+            addCircle(&this->vertices, &this->indices, resolution, color);
+        }
+        break;
+
+    case GLGE_PRESET_ARROW:
+        {
+            //create the vertices
+            std::vector<Vertex2D> verts = {Vertex2D(-0.17, -1), Vertex2D(0.17, -1 ), Vertex2D(-0.17,0.5),
+                                           Vertex2D( 0.17,0.5), Vertex2D(-0.48,0.5), Vertex2D( 0.48,0.5),
+                                           Vertex2D(0,1)};
+
+
+            //loop over all vertices
+            for (int i = 0; i < (int)verts.size(); i++)
+            {
+                //check if color should be added
+                if (color.w == -1)
+                {
+                    //if not, add texcoords
+                    verts[i].texCoord = vec2(verts[i].pos.x * 0.5 + 0.5, 1.f - (verts[i].pos.y * 0.5 + 0.5));
+                    //remove the color
+                    verts[i].color = vec4(0);
+                }
+                else
+                {
+                    //add color
+                    verts[i].color = color;
+                }
+
+                //exclude the first two vertices
+                if (i < 2)
+                { continue; }
+
+                //move the position by the resolution
+                verts[i].pos += vec2(0, resolution);
+            }
+
+            //create the indices
+            std::vector<unsigned int> inds = {0,1,2, 2,1,3, 4,5,6};
+
+            //load the mesh
+            this->vertices = verts;
+            this->indices = inds;
+        }
+        break;
+
+    default:
+        {
+            //check if an error should print
+            if (glgeErrorOutput)
+            {
+                //print an error message
+                std::cerr << "[GLGE ERROR] Invalid preset used to construct a 2D object\n";
+            }
+            //check if error should stop the program
+            if (glgeExitOnError)
+            {
+                //close the program with an error
+                exit(1);
+            }
+            //stop the function
+            return;
+        }
+        break;
+    }
+    //create the buffers
+    this->createBuffers();
+}
+
+Mesh2D::~Mesh2D()
+{
+    //delete the mesh
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteBuffers(1, &this->IBO);
+}
+
+void Mesh2D::bind()
+{
+    //bind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
+
+    //activate sub elements
+    //say where the position vector is
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), 0);
+    //say where the color is
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, color));
+    //say where texture coordinates are
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, texCoord));
+}
+
+void Mesh2D::unbind()
+{
+    //unbind the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //deactivate the sub elements
+    //deactivate the position argument
+    glDisableVertexAttribArray(0);
+    //deactivate the color argument
+    glDisableVertexAttribArray(1);
+    //deactivate the texCoord argument
+    glDisableVertexAttribArray(2);
+}
+
+void Mesh2D::createBuffers()
+{
+    //check if the window ID is -1
+    if (this->windowID == -1)
+    {
+        //then store the current window ID in it
+        this->windowID = glgeCurrentWindowIndex;
+    }
+    else
+    {
+        //check if the IDs are not the same
+        if (! (this->windowID == glgeCurrentWindowIndex))
+        {
+            //if they are not the same, check if a warning should print
+            if (glgeWarningOutput)
+            {
+                //print an warning
+                printf("[GLGE WARNING] tried to setup an allready setup object in a different window\n");
+            }
+            //stop the function
+            return;
+        }
+    }
+    //generate the vertex buffer for the object
+    glGenBuffers(1, &this->VBO);
+    //bind the vertex buffer object to store data
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    //store the mesh data in the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(this->vertices[0])*((int)this->vertices.size()), &(this->vertices[0]), GL_STATIC_DRAW);
+    //unbind the vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate the index buffer
+    glGenBuffers(1, &this->IBO);
+    //bind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
+    //store the index information in the index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->indices[0])*((int)this->indices.size()), &(this->indices[0]), GL_STATIC_DRAW);
+    //unbind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Mesh2D::updateVertexBuffer()
+{
+    //check if the IDs are not the same
+    if (! (this->windowID == glgeCurrentWindowIndex))
+    {
+        //if they are not the same, check if a warning should print
+        if (glgeWarningOutput)
+        {
+            //print an warning
+            printf("[GLGE WARNING] tried to update an object in a different window\n");
+        }
+        //stop the function
+        return;
+    }
+    //bind the vertex buffer object to store data
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    //store the mesh data in the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(this->vertices[0])*((int)this->vertices.size()), &(this->vertices[0]), GL_STATIC_DRAW);
+    //unbind the vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void Mesh2D::updateIndexBuffer()
+{
+    //check if the IDs are not the same
+    if (! (this->windowID == glgeCurrentWindowIndex))
+    {
+        //if they are not the same, check if a warning should print
+        if (glgeWarningOutput)
+        {
+            //print an warning
+            printf("[GLGE WARNING] tried to update an object in a different window\n");
+        }
+        //stop the function
+        return;
+    }
+    //bind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
+    //store the index information in the index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->indices[0])*((int)this->indices.size()), &(this->indices[0]), GL_STATIC_DRAW);
+    //unbind the index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Mesh2D::recalculateBuffers()
+{
+    //recalculate the VBO
+    this->updateVertexBuffer();
+    //recalculate the IBO
+    this->updateIndexBuffer();
+}
+
+void Mesh2D::setData(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices)
+{
+    //store the new vercites
+    this->vertices = vertices;
+    //store the new indices
+    this->indices = indices;
+}
 
 //OBJECT 2D
 
@@ -57,7 +469,9 @@ Object2D::Object2D()
 Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfFaces, Transform2D transform, bool isStatic)
 {
     //create an mesh from the array pointers
-    this->mesh = Mesh2D(vertices, indices, sizeOfVertices, sizeOfFaces);
+    this->mesh = new Mesh2D(vertices, indices, sizeOfVertices, sizeOfFaces);
+    //save the current window
+    this->windowID = glgeCurrentWindowIndex;
 
     //save the transform
     this->transf = transform;
@@ -65,13 +479,12 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
     //save if the object is static
     this->isStatic = isStatic;
 
-    //create the buffers
-    this->createBuffers();
-
     //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    this->shader = new Shader(glgeWindows[this->windowID]->getDefault2DShader());
+    //store the default move matrix
+    this->shader->setCustomMat3("glgeCamMat", mat3());
+    //recalculate the uniforms
+    this->shader->recalculateUniforms();
     //get the UUID
     this->id = glgeObjectUUID;
 
@@ -83,7 +496,9 @@ Object2D::Object2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeO
 Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices, Transform2D transform, bool isStatic)
 {
     //save an mesh created from the two vectors
-    this->mesh = Mesh2D(vertices, indices);
+    this->mesh = new Mesh2D(vertices, indices);
+    //save the current window
+    this->windowID = glgeCurrentWindowIndex;
 
     //save the transform
     this->transf = transform;
@@ -91,13 +506,12 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
     //save if the object is static
     this->isStatic = isStatic;
 
-    //create the buffers
-    this->createBuffers();
-
     //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    this->shader = new Shader(glgeWindows[this->windowID]->getDefault2DShader());
+    //store the default move matrix
+    this->shader->setCustomMat3("glgeCamMat", mat3());
+    //recalculate the uniforms
+    this->shader->recalculateUniforms();
     //get the UUID
     this->id = glgeObjectUUID;
     //increase the object count
@@ -107,10 +521,12 @@ Object2D::Object2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> ind
     this->update();
 }
 
-Object2D::Object2D(Mesh2D mesh, Transform2D transform, bool isStatic)
+Object2D::Object2D(Mesh2D* mesh, Transform2D transform, bool isStatic)
 {
     //save an mesh
     this->mesh = mesh;
+    //save the current window
+    this->windowID = glgeCurrentWindowIndex;
 
     //save the transform
     this->transf = transform;
@@ -118,13 +534,12 @@ Object2D::Object2D(Mesh2D mesh, Transform2D transform, bool isStatic)
     //save if the object is static
     this->isStatic = isStatic;
 
-    //create the buffers
-    this->createBuffers();
-
     //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    this->shader = new Shader(glgeWindows[this->windowID]->getDefault2DShader());
+    //store the default move matrix
+    this->shader->setCustomMat3("glgeCamMat", mat3());
+    //recalculate the uniforms
+    this->shader->recalculateUniforms();
     //get the UUID
     this->id = glgeObjectUUID;
     //increase the object count
@@ -134,12 +549,12 @@ Object2D::Object2D(Mesh2D mesh, Transform2D transform, bool isStatic)
     this->update();
 }
 
-Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform, bool isStatic)
+Object2D::Object2D(unsigned int preset, vec4 color, unsigned int resolution, Transform2D transform, bool isStatic)
 {
-    //generate the mesh
-    Mesh2D mesh = Mesh2D(preset, resolution, color);
     //save an mesh
-    this->mesh = mesh;
+    this->mesh = new Mesh2D(preset, resolution, color);
+    //save the current window
+    this->windowID = glgeCurrentWindowIndex;
 
     //save the transform
     this->transf = transform;
@@ -147,13 +562,12 @@ Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Tra
     //save if the object is static
     this->isStatic = isStatic;
 
-    //create the buffers
-    this->createBuffers();
-
     //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    this->shader = new Shader(glgeWindows[this->windowID]->getDefault2DShader());
+    //store the default move matrix
+    this->shader->setCustomMat3("glgeCamMat", mat3());
+    //recalculate the uniforms
+    this->shader->recalculateUniforms();
     //get the UUID
     this->id = glgeObjectUUID;
     //increase the object count
@@ -165,12 +579,12 @@ Object2D::Object2D(unsigned int preset, unsigned int resolution, vec4 color, Tra
 
 Object2D::~Object2D()
 {
-    //destroy the VBO
-    glDeleteBuffers(1, &this->VBO);
-    //destroy the IBO
-    glDeleteBuffers(1, &this->IBO);
-    //delete the bound texture
-    glDeleteTextures(1, &this->texture);
+    //delete the mesh
+    delete this->mesh;
+    //delete the texture
+    delete this->texture;
+    //delete the shader
+    delete this->shader;
 }
 
 void Object2D::draw()
@@ -193,59 +607,41 @@ void Object2D::draw()
     glEnable(GL_BLEND);
     //setup the blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //bind the buffers
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
 
-    //activate sub elements
-    //say where the position vector is
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), 0);
-    //say where the color is
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, color));
-    //say where texture coordinates are
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(struct Vertex2D, texCoord));
+    //bind the mesh
+    this->mesh->bind();
 
-    //bind the shader
-    glUseProgram(this->shader);
-    //pass the move matrix to the shader
-    glUniformMatrix3fv(moveMatLoc, 1, GL_FALSE, &this->moveMat.m[0][0]);
+    //apply the shader
+    this->shader->applyShader();
 
-    //activate the first texture unit
-    glActiveTexture(GL_TEXTURE0);
-    //bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture);
+    //check if a texture exists
+    if (this->texture)
+    {
+        //bind the texture to unit 0
+        this->texture->bind(0, GLGE_TEXTURE_BIND_TEXTURE_UNIT, true);
+    }
 
     //draw the object
-    glDrawElements(GL_TRIANGLES, this->mesh.indices.size()*2.f, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, this->mesh->indices.size(), GL_UNSIGNED_INT, 0);
     //check if debug data gathering is enabled
     if (glgeGatherDebugInfo)
     {
         //increment the amount of draw passes
         glgeDrawCallCountT++;
         //increment the amount of triangles draw by the own triangle count
-        glgeTriangleCountT += this->mesh.indices.size() / 3;
+        glgeTriangleCountT += this->mesh->indices.size() / 3;
     }
 
-    //unbind the buffers
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    //unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //deactivate the sub elements
-    //deactivate the position argument
-    glDisableVertexAttribArray(0);
-    //deactivate the color argument
-    glDisableVertexAttribArray(1);
-    //deactivate the texCoord argument
-    glDisableVertexAttribArray(2);
-
+    //unbind the mesh
+    this->mesh->unbind();
     //unbind the shader
-    glUseProgram(0);
+    this->shader->removeShader();
+    //check if a texture exists
+    if (this->texture)
+    {
+        //unbind the texture
+        this->texture->unbind();
+    }
 }
 
 //update the object
@@ -253,95 +649,69 @@ void Object2D::update()
 {
     //update the move matrix
     this->recalculateMoveMatrix();
-}
-
-void Object2D::recalculateVertexBuffer(Mesh2D mesh)
-{
-    //check if a new mesh should be asigned
-    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    //store the matrix
+    mat3 gpuMat = this->moveMat;
+    //check if a camera is bound and if this is not static
+    if (mainCam && !this->isStatic)
     {
-        this->mesh = mesh;
+        //multiply the mat with the camera mat
+        gpuMat *= mainCam->getMatrix();
     }
-
-    //recalculate the vertex buffer
-    this->updateVertexBuffer();
+    //push the matrix to the gpu
+    this->shader->setCustomMat3("glgeCamMat", gpuMat);
 }
 
-void Object2D::recalculateIndexBuffer(Mesh2D mesh)
+void Object2D::setMesh(Mesh2D* mesh)
 {
-    //check if a new mesh should be asigned
-    if ((mesh.indices.size() != 0) || (mesh.vertices.size() != 0))
+    //check if the mesh is a nullpointer
+    if (!mesh)
     {
-        this->mesh = mesh;
-    }
-
-    //recalculate the vertex buffer
-    this->updateIndexBuffer();
-}
-
-void Object2D::recalculateMeshBuffer(Mesh2D mesh)
-{
-    //store the new mesh
-    this->mesh = mesh;
-
-    //check if the mesh was initalised
-    if ((this->VBO == 0) && (this->IBO == 0))
-    {
-        //create the buffers
-        this->createBuffers();
-        //stop this function
+        //throw an error
+        GLGE_THROW_ERROR("Nullpointer is not a valid mesh")
         return;
     }
-
-    //recalculate all buffers
-    this->updateVertexBuffer();
-    this->updateIndexBuffer();
-}
-
-void Object2D::setMesh(Mesh2D mesh)
-{
     //store the inputed mesh
     this->mesh = mesh;
 }
 
-Mesh2D Object2D::getMesh()
+Mesh2D* Object2D::getMesh()
 {
     //return the mesh
     return this->mesh;
 }
 
-void Object2D::setShader(const char* p)
+void Object2D::setShader(Shader* shader)
 {
-    //save the inputed path in an string
-    std::string path = p;
-
-    //add the suffixes
-    std::string vs = p+std::string(".vs");
-    std::string fs = p+std::string(".fs");
-
-    //do the shader setup
-    this->shaderSetup(vs.c_str(), fs.c_str());
+    //check if the shader exists
+    if (!shader)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Nullpointer is not a valid shader")
+        return;
+    }
+    //delete the old shader
+    delete this->shader;
+    //load the shader
+    this->shader = shader;
+    //set the move matrix uniform
+    this->shader->setCustomMat3("glgeCamMat", mat3());
+    //recalculate the uniforms
+    this->shader->recalculateUniforms();
 }
 
 void Object2D::setShader(unsigned int shader)
 {
-    //store the inputed shader
-    this->shader = shader;
-    
-    //get the new location for the move matrix
-    this->moveMatLoc = glgeGetUniformVar(shader, glgeCamMatrix);
+    //pass to another function
+    this->setShader(new Shader(shader));
 }
 
 void Object2D::setShader(std::string vs, std::string fs)
 {
-    //compile the shader source code and store the shader
-    this->shader = glgeCompileShader(vs, fs);
-    
-    //get the new location for the move matrix
-    this->moveMatLoc = glgeGetUniformVar(shader, glgeCamMatrix);
+    //pass to another function
+    this->setShader(new Shader(vs,fs));
 }
 
-unsigned int Object2D::getShader()
+Shader* Object2D::getShader()
 {
     //return the shader
     return this->shader;    
@@ -350,24 +720,23 @@ unsigned int Object2D::getShader()
 void Object2D::setTexture(const char* file)
 {
     //compile and store the texture
-    this->texture = glgeTextureFromFile(file);
+    this->texture = new Texture(file);
 }
 
-void Object2D::setTexture(unsigned int texture)
+void Object2D::setTexture(Texture* texture)
 {
-    //store the inputed texture
+    //check if the inputed texture exists
+    if (!texture)
+    {
+        //throw an error
+        GLGE_THROW_ERROR("Nullpointer is not a valid texture")
+        return;
+    }
+    //store the texture
     this->texture = texture;
 }
 
-void Object2D::deleteTexture()
-{
-    //delete the stored texture
-    glDeleteTextures(1, &this->texture);
-    //set the stored texture to 0
-    this->texture = 0;
-}
-
-unsigned int Object2D::getTexture()
+Texture* Object2D::getTexture()
 {
     //return the stored texture
     return this->texture;
@@ -430,16 +799,16 @@ vec2 Object2D::getPos()
 void Object2D::rotate(float angle)
 {
     //change the rotation of the object
-    this->setRotation(this->transf.rot + (angle));
+    this->setRot(this->transf.rot + (angle));
 }
 
-void Object2D::setRotation(float dir)
+void Object2D::setRot(float dir)
 {
     //set the rotation of the object
     this->transf.rot = std::fmod(dir,2*M_PI);
 }
 
-float Object2D::getRotation()
+float Object2D::getRot()
 {
     //return the rotation in degrees
     return this->transf.rot;
@@ -527,9 +896,9 @@ Data* Object2D::encode()
      * Store the vertices
      */
     //Store the amount of vertices
-    dat->writeLong(this->mesh.vertices.size());
+    dat->writeLong(this->mesh->vertices.size());
     //loop over all the vertices
-    for (Vertex2D vert : this->mesh.vertices)
+    for (Vertex2D vert : this->mesh->vertices)
     {
         //store the vertex position
         dat->writeVec2(vert.pos);
@@ -543,9 +912,9 @@ Data* Object2D::encode()
      * Store the indices
      */
     //store the amount of indices
-    dat->writeLong(this->mesh.indices.size());
+    dat->writeLong(this->mesh->indices.size());
     //loop over all the indices
-    for (unsigned int ind : this->mesh.indices)
+    for (unsigned int ind : this->mesh->indices)
     {
         //store the index
         dat->writeUInt(ind);
@@ -585,8 +954,10 @@ void Object2D::decode(Data dat)
     //call early decode hook
     this->decodeHookEarly(&dat);
 
-    //create a new mesh
-    Mesh2D m;
+    //store all vectices
+    std::vector<Vertex2D> vertices;
+    //store all indices
+    std::vector<unsigned int> indices;
     /*
      * get the vertices
      */
@@ -604,7 +975,7 @@ void Object2D::decode(Data dat)
         //get the vertex texture coordinate
         v.texCoord = dat.readVec2();
         //store the vertex
-        m.vertices.push_back(v);
+        vertices.push_back(v);
     }
     
     /*
@@ -616,8 +987,11 @@ void Object2D::decode(Data dat)
     for (long i = 0; i < is; i++)
     {
         //store the index
-        m.indices.push_back(dat.readUInt());
+        indices.push_back(dat.readUInt());
     }
+
+    //store the mesh
+    this->mesh = new Mesh2D(vertices, indices);
 
     /*
      * get the transform
@@ -628,9 +1002,6 @@ void Object2D::decode(Data dat)
     this->transf.rot = dat.readFloat();
     //store the scaling
     this->transf.size = dat.readVec2();
-
-    //re-init the object
-    *this = Object2D(m, this->transf);
 
     /*
      * Store object attributes
@@ -670,11 +1041,14 @@ void Object2D::decodeHookEarly(Data*)
 
 void Object2D::superConstructor()
 {
+    //save the current window
+    this->windowID = glgeCurrentWindowIndex;
     //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
+    this->shader = new Shader(glgeWindows[this->windowID]->getDefault2DShader());
+    //set the shader
+    this->shader->setCustomMat3("glgeCamMat", mat3());
     //recalculate the shader uniforms
+    this->shader->recalculateUniforms();
     
     //get the UUID
     this->id = glgeObjectUUID;
@@ -685,121 +1059,6 @@ void Object2D::superConstructor()
     this->transf = transf;
     //update the object
     this->update();
-}
-
-void Object2D::createBuffers()
-{
-    //check if the window ID is -1
-    if (this->windowID == -1)
-    {
-        //then store the current window ID in it
-        this->windowID = glgeCurrentWindowIndex;
-    }
-    else
-    {
-        //check if the IDs are not the same
-        if (! (this->windowID == glgeCurrentWindowIndex))
-        {
-            //if they are not the same, check if a warning should print
-            if (glgeWarningOutput)
-            {
-                //print an warning
-                printf("[GLGE WARNING] tried to setup an allready setup object in a different window\n");
-            }
-            //stop the function
-            return;
-        }
-    }
-    //generate the vertex buffer for the object
-    glGenBuffers(1, &this->VBO);
-    //bind the vertex buffer object to store data
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    //store the mesh data in the vertex buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
-    //unbind the vertex buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //save the length of the Vertex Buffer
-    this->IBOLen = mesh.vertices.size();
-
-    //generate the index buffer
-    glGenBuffers(1, &this->IBO);
-    //bind the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
-    //store the index information in the index buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
-    //unbind the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    //save the length of the Index Buffer
-    this->IBOLen = mesh.indices.size();
-}
-
-void Object2D::updateVertexBuffer()
-{
-    //check if the IDs are not the same
-    if (! (this->windowID == glgeCurrentWindowIndex))
-    {
-        //if they are not the same, check if a warning should print
-        if (glgeWarningOutput)
-        {
-            //print an warning
-            printf("[GLGE WARNING] tried to update an object in a different window\n");
-        }
-        //stop the function
-        return;
-    }
-    //delete the old buffer
-    glDeleteBuffers(1, &this->VBO);
-    //generate the vertex buffer for the object
-    glGenBuffers(1, &this->VBO);
-    //bind the vertex buffer object to store data
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    //store the mesh data in the vertex buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh.vertices[0])*((int)mesh.vertices.size()), &(mesh.vertices[0]), GL_STATIC_DRAW);
-    //unbind the vertex buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //save the length of the Vertex Buffer
-    this->IBOLen = mesh.vertices.size();
-}
-
-void Object2D::updateIndexBuffer()
-{
-    //check if the IDs are not the same
-    if (! (this->windowID == glgeCurrentWindowIndex))
-    {
-        //if they are not the same, check if a warning should print
-        if (glgeWarningOutput)
-        {
-            //print an warning
-            printf("[GLGE WARNING] tried to update an object in a different window\n");
-        }
-        //stop the function
-        return;
-    }
-    //delete the old buffer
-    glDeleteBuffers(1, &this->IBO);
-    //generate the index buffer
-    glGenBuffers(1, &this->IBO);
-    //bind the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IBO);
-    //store the index information in the index buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh.indices[0])*((int)mesh.indices.size()), &(mesh.indices[0]), GL_STATIC_DRAW);
-    //unbind the index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    //save the length of the Index Buffer
-    this->IBOLen = mesh.indices.size();
-}
-
-void Object2D::shaderSetup(const char* vs, const char* fs)
-{
-    //compile and save the shader
-    this->shader = glgeCompileShader(vs, fs);
-
-    //save the location of the move matrix
-    this->moveMatLoc = glgeGetUniformVar(this->shader, glgeCamMatrix);
 }
 
 //move matrix update
@@ -1047,19 +1306,12 @@ Button::Button(const char* texture, Transform2D transf)
     std::vector<unsigned int> inds = {1,0,2, 1,2,3};
 
     //calculate the mesh
-    this->mesh = Mesh2D(vert, inds);
+    this->mesh = new Mesh2D(vert, inds);
     //save the transform
     this->transf = transf;
     //say that the object is static
     this->isStatic = true;
 
-    //create the buffers
-    this->createBuffers();
-
-    //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
     //get the UUID
     this->id = glgeObjectUUID;
     //increase the object count
@@ -1091,30 +1343,13 @@ Button::Button(unsigned int width, unsigned int height, vec4 color, Transform2D 
     std::vector<unsigned int> inds = {1,0,2, 1,2,3};
 
     //calculate the mesh
-    this->mesh = Mesh2D(vert, inds);
+    this->mesh = new Mesh2D(vert, inds);
     //save the transform
     this->transf = transf;
     //say that the object is static
     this->isStatic = true;
-
-    //create the buffers
-    this->createBuffers();
-
-    //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
-    //get the UUID
-    this->id = glgeObjectUUID;
-    //increase the object count
-    glgeObjectUUID++;
-    //store that this is a circle
-    this->isCircle = false;
-    //store the width and height
-    this->size = vec2(width, height);
-
-    //update the object
-    this->update();
+    //call the super constructor
+    this->superConstructor();
 }
 
 Button::Button(vec2 size, vec4 color, Transform2D transf)
@@ -1133,41 +1368,24 @@ Button::Button(vec2 size, vec4 color, Transform2D transf)
     std::vector<unsigned int> inds = {1,0,2, 1,2,3};
 
     //calculate the mesh
-    this->mesh = Mesh2D(vert, inds);
+    this->mesh = new Mesh2D(vert, inds);
     //save the transform
     this->transf = transf;
     //say that the object is static
     this->isStatic = true;
-
-    //create the buffers
-    this->createBuffers();
-
-    //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
-    //get the UUID
-    this->id = glgeObjectUUID;
-    //increase the object count
-    glgeObjectUUID++;
-    //store that this is a circle
-    this->isCircle = false;
-    //store the width and height
-    this->size = size;
-
-    //update the object
-    this->update();
+    //call the super constructor
+    this->superConstructor();
 }
 
 Button::Button(float radius, unsigned int res, vec4 color, Transform2D transf)
 {
     //generate the mesh from an preset
-    Mesh2D mesh = Mesh2D(GLGE_PRESET_CIRCLE, res, color);
+    Mesh2D* mesh = new Mesh2D(GLGE_PRESET_CIRCLE, res, color);
     //scale according to the radius
-    for (int i = 0; i < (int)mesh.vertices.size(); i++)
+    for (int i = 0; i < (int)mesh->vertices.size(); i++)
     {
         //scale the position
-        mesh.vertices[i].pos.scale(radius);
+        mesh->vertices[i].pos.scale(radius);
     }
     
     //store the mesh
@@ -1176,25 +1394,8 @@ Button::Button(float radius, unsigned int res, vec4 color, Transform2D transf)
     this->transf = transf;
     //say that the object is static
     this->isStatic = true;
-
-    //create the buffers
-    this->createBuffers();
-
-    //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
-    //get the UUID
-    this->id = glgeObjectUUID;
-    //increase the object count
-    glgeObjectUUID++;
-    //store that this is a circle
-    this->isCircle = true;
-    //store the radius
-    this->size = vec2(radius);
-
-    //update the object
-    this->update();
+    //call the super constructor
+    this->superConstructor();
 }
 
 void Button::update()
@@ -1384,22 +1585,8 @@ Text::Text(const char* text, const char* font, vec4 color, int fontSize, Transfo
     this->transf = transf;
     //say that the object is static
     this->isStatic = true;
-
-    //set the base 2D shader
-    this->shader = glgeWindows[this->windowID]->getDefault2DShader();
-    //set the move matrix location
-    this->moveMatLoc = glgeDefaultMoveMatLoc;
-    //recalculate the shader uniforms
-    
-    //get the UUID
-    this->id = glgeObjectUUID;
-    //increase the object count
-    glgeObjectUUID++;
-
-    //store the transform
-    this->transf = transf;
-    //update the object
-    this->update();
+    //call the super constructor
+    this->superConstructor();
 }
 
 std::string Text::getText()
@@ -1458,7 +1645,7 @@ void Text::setTextColor(vec4 col)
     this->updateTexture();
 }
 
-int Text::getTextTexture()
+Texture* Text::getTextTexture()
 {
     //return the texture
     return this->texture;
@@ -1531,9 +1718,9 @@ void Text::updateTexture()
     }
     this->texSize = vec2(surf->w, surf->h);
     //delete the old texture
-    glDeleteTextures(1, &this->texture);
+    delete this->texture;
     //convert SDL Texture to OpenGL texture
-    this->texture = sdlSurfaceToOpenGLTexture(surf);
+    this->texture = new Texture(sdlSurfaceToOpenGLTexture(surf), GLGE_TEX_RGB32);
     //check if dynamic meshing is activated
     if (this->dynamicMesh)
     {
@@ -1549,9 +1736,19 @@ void Text::updateTexture()
         vert[3].texCoord = vec2(0,1);
         //generate the indices
         std::vector<unsigned int> inds = {1,0,2, 1,2,3};
-        //regenerate the mesh
-        this->mesh = Mesh2D(vert, inds);
-        this->recalculateMeshBuffer(Mesh2D(vert, inds));
+        //check if a mesh exists
+        if (!mesh)
+        {
+            //create a new mesh
+            this->mesh = new Mesh2D(vert, inds);
+        }
+        else
+        {
+            //update the mesh
+            this->mesh->setData(vert, inds);
+            //recalculate the buffers
+            this->mesh->recalculateBuffers();
+        }
     }
 }
 
@@ -1861,8 +2058,6 @@ void glgeInit2DCore()
         //else, stop the function
         return;
     }
-    //get the move matrix location from the default shader
-    glgeDefaultMoveMatLoc = glgeGetUniformVar(glgeWindows[glgeMainWindowIndex]->getDefault2DShader(), glgeCamMatrix);
 }
 
 void glgeBindMain2DCamera(Camera2D* camera)
