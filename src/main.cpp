@@ -448,30 +448,30 @@ void debugMain()
          * @brief reset the sample count and accumulation buffer
          */
         d_fpsSample = 0; d_fpsAccum = 0;
+
+        //Only update the rest if the FPS are updated, writing a lot of textures to the GPU every frame isn't good
+
+        /**
+         * @brief update the text to display the amount of draw calls
+         */
+        d_drawCalls->setText(std::string("Draw Calls : " + std::to_string(glgeDebugGetDrawCallCount())));
+        /**
+         * @brief update the text to display the amount of triangles drawn
+         */
+        d_triCount->setText(std::string("Tries drawn : " + std::to_string(glgeDebugGetDrawnTriangleCount())));
     }
     /**
      * @brief update the fps display
      */
     d_fps->update();
-
-    /**
-     * @brief update the text to display the amount of draw calls
-     */
-    d_drawCalls->setText(std::string("Draw Calls : " + std::to_string(glgeDebugGetDrawCallCount())));
     /**
      * @brief update the text
      */
     d_drawCalls->update();
-
-    /**
-     * @brief update the text to display the amount of triangles drawn
-     */
-    d_triCount->setText(std::string("Tries drawn : " + std::to_string(glgeDebugGetDrawnTriangleCount())));
     /**
      * @brief update the text
      */
     d_triCount->update();
-
     /**
      * @brief check if the window is focused
      */

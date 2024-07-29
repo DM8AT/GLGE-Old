@@ -12,7 +12,7 @@ STD_VERS := c++17
 
 # Compiler and compiler flags
 CXX		  := g++
-CXX_FLAGS := -Wall -Wextra -std=$(STD_VERS) -ggdb
+CXX_FLAGS := -Wall -Wextra -std=$(STD_VERS) -O3
 
 # Specify some directories
 # The directory for the executable
