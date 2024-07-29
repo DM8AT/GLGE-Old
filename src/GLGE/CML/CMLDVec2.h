@@ -8,7 +8,14 @@
 class dvec2
 {
 public:
-    double x,y;
+    /**
+     * @brief the x component of the vector of doubles
+     */
+    double x,
+    /**
+     * @brief the y component of the vector of doubles
+     */
+    y;
 
     /**
      * @brief default construcotr

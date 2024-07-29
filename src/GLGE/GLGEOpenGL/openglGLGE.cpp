@@ -20,14 +20,14 @@
 
 //include the GLGE dependencys
 #include "openglGLGE.h"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEFuncs.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
-#include "../GLGEInternal/glgePrivDefines.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 
 //include acess to images
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 
 //include the standart librarys
 #include <math.h>
@@ -71,17 +71,25 @@ void glgeInit()
     #endif
 
     //initalise SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         //if sdl throws an value different than 0, print an error
-        std::cerr << "[FATAL ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
+        std::cerr << "[FATAL GLGE ERROR] GLGE failed to initalise SDL, SDL error: " << SDL_GetError() << "\n";
+        //exit with an error
+        exit(1);
+    }
+    //initalise fonts
+    if (TTF_Init() != 0)
+    {
+        //printa a fatal error
+        std::cerr << "[FATAL GLGE ERROR] GLGE failed to initalise SDL fonts, SDL font error: " << TTF_GetError() << "\n";
         //exit with an error
         exit(1);
     }
 
     //initalise to OpenGL 3.0
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     //say that doublebuffering should be used
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -272,9 +280,9 @@ bool glgeGetWarningOutput()
  * @brief safely get a window from the glge window stack
  * 
  * @param windowID the ID of the window to acess
- * @return GLGEWindow* a pointer to the window, NULL if the window acess failed
+ * @return Window* a pointer to the window, NULL if the window acess failed
  */
-GLGEWindow* safeWindowAcess(unsigned int windowID)
+Window* safeWindowAcess(unsigned int windowID)
 {
     //check if the window pointer is 0
     if ((windowID-glgeWindowIndexOffset) > (unsigned int)glgeWindows.size())
@@ -289,7 +297,7 @@ GLGEWindow* safeWindowAcess(unsigned int windowID)
         return NULL;
     }
     //get the window pointer
-    GLGEWindow* wptr = glgeWindows[windowID-glgeWindowIndexOffset];
+    Window* wptr = glgeWindows[windowID-glgeWindowIndexOffset];
     //check if the window pointer is a nullpointer
     if (wptr == NULL)
     {
@@ -318,12 +326,35 @@ void glgeRunMainLoop()
         exit(1);
     }
 
+    //start SDL2 text input
+    SDL_StartTextInput();
+
     //store if the file should stop
     bool running = true;
 
     //run the main loop while the program is not stopped
     while (running)
     {
+        //check if debug gathering is enabled
+        if (glgeGatherDebugInfo)
+        {
+            //store all the debug data from the last tick
+            glgeDrawCallCount = glgeDrawCallCountT;
+            glgeTriangleCount = glgeTriangleCountT;
+            glgeDrawPassCount = glgeDrawPassCountT;
+            glgeUniformsPassed = glgeUniformsPassedT;
+            glgeBytesPassedToGPU = glgeBytesPassedToGPUT;
+            glgeBytesReadFromGPU = glgeBytesReadFromGPUT;
+            //reset the data for this tick
+            glgeDrawCallCountT = 0;
+            glgeTriangleCountT = 0;
+            glgeDrawPassCountT = 0;
+            glgeUniformsPassedT = 0;
+            glgeBytesPassedToGPUT = 0;
+            glgeBytesReadFromGPUT = 0;
+        }
+        //clear whatever was written last tick
+        glgeTypedThisTick = "";
         //store the current SDL event
         SDL_Event event;
         //check all SDL events
@@ -338,6 +369,9 @@ void glgeRunMainLoop()
             //check the event type
             switch (event.type)
             {
+                case SDL_TEXTINPUT:
+                    glgeTypedThisTick += event.text.text;
+                    break;
                 case SDL_KEYDOWN:
                 {
                     //handle the keydown
@@ -403,7 +437,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_MINIMIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -418,7 +452,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_RESTORED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -433,7 +467,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_MAXIMIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -448,7 +482,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_RESIZED:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -463,7 +497,7 @@ void glgeRunMainLoop()
                         case SDL_WINDOWEVENT_CLOSE:
                         {
                             //store the window pointer
-                            GLGEWindow* wptr = safeWindowAcess(event.window.windowID);
+                            Window* wptr = safeWindowAcess(event.window.windowID);
                             //check if the safe window acess was sucessfull
                             if (wptr == NULL)
                             {
@@ -471,7 +505,7 @@ void glgeRunMainLoop()
                                 break;
                             }
                             //close the window
-                            wptr->close();
+                            delete wptr;
                             //check if the window is the main window
                             if (event.window.windowID-glgeWindowIndexOffset == glgeMainWindowIndex)
                             {
@@ -518,7 +552,7 @@ void glgeRunMainLoop()
             if (close)
             {
                 //close the window
-                glgeWindows[i]->close();
+                delete glgeWindows[i];
                 //check if the window is the main window
                 if (((unsigned int)i == glgeMainWindowIndex))
                 {
@@ -527,6 +561,14 @@ void glgeRunMainLoop()
                     {
                         //stop the function
                         running = false;
+                        //loop over all windows
+                        for (Window* win : glgeWindows)
+                        {
+                            //skip if the window is a nullpointer
+                            if (!win) { continue; }
+                            //close the window
+                            delete win;
+                        }
                     }
                 }
             }
@@ -537,6 +579,8 @@ void glgeRunMainLoop()
                 running = false;
             }
         }
+        //run a tick
+        glgeDefaultTimer();
         //loop over all windows
         for (int i = 0; i < (int)glgeWindows.size(); i++)
         {
@@ -547,16 +591,40 @@ void glgeRunMainLoop()
                 continue;
             }
             //get the window pointer
-            GLGEWindow* wptr = glgeWindows[i];
+            Window* wptr = glgeWindows[i];
             //check if the window poitner is a nullpointer
             if (wptr == NULL) { continue; }
+            //store the currently active window
+            glgeCurrentWindowIndex = i;
+            //activate the window
+            wptr->makeCurrent();
+            //call the tick function
+            wptr->tick();
             //call the draw function
             wptr->draw();
         }
+        //set the mouse wheel to 0
+        glgeMouse.mouseWheel = 0;
 
-        //run a tick
-        glgeDefaultTimer();
+        //clear the key from the last tick
+        glgeKeysThisTick.clear();
+        //clear the releasd keys
+        glgeKeysRelesdThisTick.clear();
+
+        //calculate the time to wait
+        int waitTime = std::floor((1000.f/glgeMaxFPS) - (1000.f/glgeTickTime));
+
+        //check if the wait time is negative
+        if (waitTime < 0)
+        {
+            //if it is, set it to 0
+            waitTime = 0;
+        }
+        //limit the framerate
+        SDL_Delay(waitTime);
     }
+    //stop SDL text input
+    SDL_StopTextInput();
 }
 
 //first function to set the clear color
@@ -920,15 +988,13 @@ void glgeAddShader(unsigned int shaderProgram, const char* shadertext, unsigned 
     }
 
     //set a GLchar to the inputed text
-    const GLchar* p[1];
-    p[0] = shadertext;
+    const GLchar* p = shadertext;
 
     //store the length of the text
-    int lengths[1];
-    lengths[0] = strlen(shadertext);
+    int lengths = strlen(shadertext);
 
     //set the shader source code
-    glShaderSource(shaderObj, 1, p, lengths);
+    glShaderSource(shaderObj, 1, &p, &lengths);
 
     //compile to the new shader object
     glCompileShader(shaderObj);
@@ -1124,8 +1190,6 @@ unsigned int glgeCompileShader(std::string fileDataVertex, std::string fileDataF
         };
     }
 
-    //say open GL to use the shader program
-    glUseProgram(shaderProgram);
     //return the shader program in the GLGE Object
     return shaderProgram;
 }
@@ -1144,7 +1208,7 @@ unsigned int glgeTextureFromFile(const char* name, vec2* sP)
 
     // load and generate the texture
     int width, height, nrChannels;
-    unsigned char *data = glgeLoad(name, &width, &height, &nrChannels);
+    unsigned char *data = glgeLoadImage(name, &width, &height, &nrChannels);
     if(data)
     {
         if (nrChannels == 3)
@@ -1178,7 +1242,7 @@ unsigned int glgeTextureFromFile(const char* name, vec2* sP)
 vec2 glgeGetTextureSize(const char* name)
 {
     int w, h, c;
-    unsigned char* data = glgeLoad(name, &w, &h, &c, 0);
+    unsigned char* data = glgeLoadImage(name, &w, &h, &c, 0);
     if(!data)
     {
         std::cout << "Failed to load texture file: " << name << "\n";
@@ -1451,25 +1515,6 @@ Shader* glgeGetPostProcessingShader(int index)
     return glgeWindows[glgeMainWindowIndex]->getPostProcessingShader(index);
 }
 
-int glgeGetIndexOfPostProcessingShader(Shader* shader)
-{
-    //check if a window is bound
-    if (!glgeHasMainWindow)
-    {
-        //if not, check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            //if it should, print a warning
-            printf("[GLGE WARNING] can't add get a post processing shader from an main window, if no main window exists\n");
-        }
-        //stop the function
-        return -1;
-    }
-
-    //pass the call to the main window
-    return glgeWindows[glgeMainWindowIndex]->getPostProcessingShaderIndex(shader);
-}
-
 void glgeDeletePostProcessingShader(int index, bool del)
 {
     //check if a window is bound
@@ -1487,30 +1532,6 @@ void glgeDeletePostProcessingShader(int index, bool del)
 
     //pass the call to the main window
     glgeWindows[glgeMainWindowIndex]->removePostProcessingShader(index, del);
-}
-
-void glgeDeletePostProcessingShader(Shader* shader, bool del)
-{
-    //find the index of the shader
-    int index = glgeGetIndexOfPostProcessingShader(shader);
-    //check if the index is -1
-    if (index == -1)
-    {
-        //check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            std::cerr << "[GLGE WARNING] tryed to remove shader that wasn't part of post-processing pipeline" << "\n";
-        }
-        //quit the function
-        return;
-    }
-    else
-    {
-        //call the function to remove by index
-        glgeDeletePostProcessingShader(index, del);
-    }
-    //set the inputed shader to the Nullpointer
-    shader = NULL;
 }
 
 void glgeSetInterpolationMode(unsigned int mode)
@@ -2019,20 +2040,8 @@ unsigned int glgeGetLighningBuffer()
 
 bool glgeGetTransparencyPass()
 {
-    //check if a window is bound
-    if (!glgeHasMainWindow)
-    {
-        //if not, check if an warning should be printed
-        if (glgeWarningOutput)
-        {
-            //if it should, print a warning
-            printf("[GLGE WARNING] can't get transpraent pass from an main window, if no main window exists\n");
-        }
-        //stop the function
-        return false;
-    }
-    //get if the main window is using backface culling
-    return glgeWindows[glgeMainWindowIndex]->isTranparentPass();
+    //return if the current window is in the transparency pass
+    return glgeWindows[glgeCurrentWindowIndex]->isTranparentPass();
 }
 
 void glgeSetTransparencyCombineShader(Shader* shader)
@@ -2524,4 +2533,34 @@ bool glgeUsesVulkan()
 {
     //say that OpenGL is used
     return false;
+}
+
+unsigned int glgeGetCurrentFramebufferType()
+{
+    //return the currently bound framebuffer
+    return glgeCurrentFramebufferType;
+}
+
+void glgeSetDebugGathering(bool state)
+{
+    //store the new state
+    glgeGatherDebugInfo = state;
+}
+
+bool glgeIsDebugGatheringEnabled()
+{
+    //return the current state
+    return glgeGatherDebugInfo;
+}
+
+int glgeDebugGetDrawCallCount()
+{
+    //return the draw call count
+    return glgeDrawCallCount;
+}
+
+int glgeDebugGetDrawnTriangleCount()
+{
+    //retuen the triangle count
+    return glgeTriangleCount;
 }

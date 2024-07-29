@@ -10,9 +10,19 @@
  */
 
 #include "glgeAtlasFile.hpp"
-#include "GLGEInternal/glgeErrors.hpp"
+#include "GLGEIndependend/glgeErrors.hpp"
 
+/**
+ * @brief helper function to print the data in a beautifull way
+ * 
+ * @param data the data to print
+ */
 void printd(std::string data){for(ulong i=0;i<data.size();i++){if(data[i]!=0){std::cout<<data[i];}else{std::cout<<" ";}}std::cout<<"<-end\n";}
+/**
+ * @brief same as printd, but in another format
+ * 
+ * @param data the data to print
+ */
 void printdi(std::string data){for(ulong i=0;i<data.size();i++){std::cout<<(int)data[i];}std::cout<<"<-end\n";}
 
 GLGEAtlasImage::GLGEAtlasImage( std::string name, vec2 pos, vec2 size )

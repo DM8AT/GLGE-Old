@@ -19,8 +19,8 @@
 #endif
 
 //include the GLGE dependencys
-#include "../GLGEInternal/glgeErrors.hpp"
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "../GLGEIndependend/glgeErrors.hpp"
+#include "../GLGEIndependend/glgePrivDefines.hpp"
 #include "openglGLGEVars.hpp"
 #include "openglGLGEDefaultFuncs.hpp"
 #include "openglGLGEDefines.hpp"
@@ -35,7 +35,7 @@
 #include <cstring>
 
 //include acess to images
-#include "../GLGEInternal/glgeImage.h"
+#include "../GLGEIndependend/glgeImage.h"
 
 //an copy of the shader code to make the shader handeling here easier
 
@@ -130,17 +130,7 @@ int getUniformVar(unsigned int program, const char* name)
     return ret;
 }
 
-
-/**
- * @brief Create a Window
- * 
- * this function is only called internaly in GLGE
- * 
- * @param n the name of the window
- * @param s the size of the window
- * @param p the position of the window
- */
-GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
+Window* createWindow(const char* n, vec2 s, vec2 p)
 {
     //check if an window is allready created
     if (!glgeHasMainWindow)
@@ -151,7 +141,7 @@ GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
         glgeHasMainWindow = true;
     }
     //create the window pointer
-    GLGEWindow* wptr = new GLGEWindow(n, s, p, glgeWindowFlags);
+    Window* wptr = new Window(n, s, p, glgeWindowFlags);
     //start the window
     wptr->start();
     //make the window the current window
@@ -160,7 +150,6 @@ GLGEWindow* createWindow(const char* n, vec2 s, vec2 p)
     return wptr;
 }
 
-//convert an error code into an string
 char* getGLErrorString(unsigned int error)
 {
     //check for all errors OpenGL has and return theyre name
@@ -243,7 +232,7 @@ SDL_Surface* loadImage(const char* file)
     int bytesPerPixel;
 
     //load the inputed file
-    unsigned char* data = glgeLoad(file, &w, &h, &bytesPerPixel);
+    unsigned char* data = glgeLoadImage(file, &w, &h, &bytesPerPixel);
 
     //Store the pitch of the image
 	int pitch;
@@ -287,4 +276,31 @@ SDL_Surface* loadImage(const char* file)
     }
     //if the surface construction was sucessfull, return the surface
     return surface;
+}
+
+//convert SDL Texture to OpenGL
+unsigned int sdlSurfaceToOpenGLTexture(SDL_Surface* surf)
+{
+    SDL_Surface *newSurf = SDL_CreateRGBSurface(0, surf->w, surf->h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    if (!newSurf)
+    {
+        GLGE_THROW_ERROR("Failed to copy surface to new 32 bit surface")
+    }
+    SDL_BlitSurface(surf, 0, newSurf, 0);
+
+    unsigned int ret;
+    glGenTextures(1, &ret);
+    glBindTexture(GL_TEXTURE_2D, ret);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newSurf->w, newSurf->h, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, newSurf->pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return ret;
 }

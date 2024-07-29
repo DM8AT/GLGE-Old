@@ -13,7 +13,7 @@
 
 //include the OpenGL dependencys
 #include "openglGLGEVars.hpp"
-#include "../GLGEInternal/glgeErrors.hpp"
+#include "../GLGEIndependend/glgeErrors.hpp"
 
 #include <iostream>
 
@@ -97,6 +97,13 @@ void RenderTarget::draw()
         return;
     }
 
+    //disable depth testing
+    glDisable(GL_DEPTH_TEST);
+    //enable color blending
+    glEnable(GL_BLEND);
+    //setup the blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     //check if a callback function is bound
     if (this->callback != NULL)
     {
@@ -106,6 +113,8 @@ void RenderTarget::draw()
 
     //activate the FBO
     glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
+    //say that now a custom framebuffer is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_CUSTOM_RENDER_TEXTURE;
 
     //activate the shader
     this->shader->applyShader();
@@ -115,6 +124,14 @@ void RenderTarget::draw()
 
     //draw the screen
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    //check if debug data gathering is enabled
+    if (glgeGatherDebugInfo)
+    {
+        //increment the amount of draw passes
+        glgeDrawCallCountT++;
+        //increment the amount of triangles by 2 (the amount of triangles in a rectangle)
+        glgeTriangleCountT += 2;
+    }
 
     //unbind the screen rect
     glgeWindows[this->windowIndex]->unbindScreenRect();
@@ -126,6 +143,8 @@ void RenderTarget::draw()
 
     //unbind the FBO
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //say that now the default window surface is bound
+    glgeCurrentFramebufferType = GLGE_FRAMEBUFFER_WINDOW_SURFACE;
 }
 
 void RenderTarget::changeSize(vec2 s)
@@ -224,7 +243,7 @@ void RenderTarget::generateTexture(int w, int h, bool genTexture)
         glGenTextures(1, &this->texture);
         glBindTexture(GL_TEXTURE_2D, this->texture);
         //set the texture parameters so it dosn't loop around the screen
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glgeInterpolationMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glgeInterpolationMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

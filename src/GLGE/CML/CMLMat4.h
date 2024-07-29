@@ -10,7 +10,12 @@
 class mat4
 {
 public:
-    float m[4][4];
+    float m[4][4] = {
+        {1,0,0,0},
+        {0,1,0,0},
+        {0,0,1,0},
+        {0,0,0,1}
+    };
 
     /**
      * @brief default constructor
@@ -42,6 +47,13 @@ public:
          float m10, float m11, float m12, float m13,
          float m20, float m21, float m22, float m23,
          float m30, float m31, float m32, float m33);
+
+    /**
+     * @brief Construct a new mat4 from an float array
+     * 
+     * @param arr the float array to use
+     */
+    mat4(float arr[16]);
 
     /**
      * @brief add another matrix to this matrix
@@ -130,6 +142,15 @@ public:
      * @param s the scalr to scale with
      */
     void operator*=(float s);
+    /**
+     * @brief compare two matrices
+     * 
+     * @param mat the matrix to compare with
+     * 
+     * @return true : both matrices are equal | 
+     * @return false : the matrices are different
+     */
+    bool operator==(mat4 mat);
 };
 
 #endif

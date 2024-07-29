@@ -48,12 +48,24 @@
 
 //// Errors ////
 
+/**
+ * @brief this error is thrown if a mode is not a valid atlas mode
+ */
 #define GLGE_ERROR_ATLAS_FILE_INVALID_MODE "[GLGE ERROR] The specified mode '%s' is invalid.\n"
 
+/**
+ * @brief this error is thrown if a file can't be accessed
+ */
 #define GLGE_ERROR_FILE_COULDNT_OPEN "[GLGE ERROR] The specified file '%s' could not be opened.\n"
 
+/**
+ * @brief this error is thrown if a file is tried to be opend multiple times
+ */
 #define GLGE_ERROR_FILE_ALREADY_OPEN "[GLGE ERROR] The specified file '%s' is already open.\n"
 
+/**
+ * @brief this error is trown if an action can't be executed in the current mode for the atlas
+ */
 #define GLGE_ERROR_WRONG_MODE_FOR_ACTION "[GLGE ERROR] Attempted an action that is not supperted with the current mode.\n"
 
 #endif

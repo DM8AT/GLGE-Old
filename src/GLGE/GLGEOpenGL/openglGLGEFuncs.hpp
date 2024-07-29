@@ -42,7 +42,7 @@
 //include windows
 #include "openglGLGEWindow.h"
 //include the rest of the default funcs
-#include "../GLGEInternal/glgeInternalFuncs.h"
+#include "../GLGEIndependend/glgeInternalFuncs.h"
 
 /**
  * @brief Create a Window
@@ -53,7 +53,7 @@
  * @param s the size of the window
  * @param p the position of the window
  */
-GLGEWindow* createWindow(const char* n, vec2 s, vec2 p);
+Window* createWindow(const char* n, vec2 s, vec2 p);
 
 /**
  * @brief convert an error code from OpenGL into an error string
@@ -87,5 +87,13 @@ void addShader(unsigned int shaderProgram, const char* shadertext, GLenum shader
  * @return SDL_Surface* a pointer to an SDL_Surface
  */
 SDL_Surface* loadImage(const char* file);
+
+/**
+ * @brief convert an SDL Surface to an OpenGL texture
+ * 
+ * @param surf the surface to convert
+ * @return unsigned int the OpenGL texture
+ */
+unsigned int sdlSurfaceToOpenGLTexture(SDL_Surface* surf);
 
 #endif

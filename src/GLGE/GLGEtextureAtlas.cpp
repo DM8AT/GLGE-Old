@@ -12,8 +12,8 @@
 #include "fstream"
 #include <iostream>
 
-#include "GLGEInternal/glgeErrors.hpp"
-#include "GLGEInternal/glgeImage.h"
+#include "GLGEIndependend/glgeErrors.hpp"
+#include "GLGEIndependend/glgeImage.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"

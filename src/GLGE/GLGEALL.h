@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-03-27
  * 
- * This header-only file includes all GLGE-cores(yes, the math file is ment to be a core)
+ * This header-only file includes all GLGE-cores(yes, the math file is a core)
  * 
  * Current cores:
  * - GLGE.h:
@@ -39,3 +39,11 @@
 #include "GLGEMath.h"
 //include the window management system
 #include "GLGEWindow.h"
+//include textures
+#include "GLGETexture.h"
+//includet compute shaders
+#include "GLGEComputeShader.h"
+//include partickles
+#include "GLGEParticles.h"
+//include Meta-Objects
+#include "GLGEMetaObject.h"

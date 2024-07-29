@@ -12,84 +12,14 @@
 #ifndef _GLGE_MATERIAL_CORE_OGL_H_
 #define _GLGE_MATERIAL_CORE_OGL_H_
 
-
-//define things for identification
-
-//define the roughness uniform
-#define GLGE_ROUGHNESS_ID 0
-//define the color uniform
-#define GLGE_COLOR_ID 1
-//define the texture coordinate uniform
-#define GLGE_TEXTURE_COORDINATS_ID 2
-
-//define the image type for an normal image
-#define GLGE_IMAGE_ID 3
-//define the image type for an normal map
-#define GLGE_NORMAL_MAP_ID 4
-//define the image type for an specular map
-#define GLGE_SPECULAR_MAP_ID 5
-//define the image type for an height map
-#define GLGE_HEIGHT_MAP_ID 6
-//define the image type for an metalic map
-#define GLGE_METALIC_MAP_ID 7
-
-//define the names for the default unifroms
-
-//define the default name for a normal map
-#define GLGE_NORMAL_MAP "glgeNormalMap"
-//define the default name for a specular map
-#define GLGE_SPECULAR_MAP "glgeSpecularMap"
-//define the default name for a height map
-#define GLGE_HEIGHT_MAP "glgeHeightMap"
-//define the default name for a roughness map
-#define GLGE_ROUGHNESS_MAP "glgeRoughnessMap"
-//define the default name for a metalic map
-#define GLGE_METALIC_MAP "glgeMetalicMap"
-//define the default name for the color
-#define GLGE_COLOR "glgeColor"
-//define the name for the var to say the number of used textures
-#define GLGE_USED_TEXTURES "glgeUsedTextures"
-//define the name for the default texture
-#define GLGE_TEXTURE "glgeTexture"
-
-//define the suffix for activated materials
-#define GLGE_SUFFIX_IS_ACTIVE_TEXTURE "IsActive"
-
-//check if the shader core is allredy included
-#ifndef _GLGE_SHADER_CORE_H_
-//define the mode for setting custom values
-#define GLGE_MODE_SET 0
-//define the mode for adding custom values
-#define GLGE_MODE_ADD 1
-//define the mode for subtracting custom values
-#define GLGE_MODE_SUBTRACT 2
-//define the mode for multipliing custom values
-#define GLGE_MODE_MULTIPLY 3
-//define the mode for dividing custom values
-#define GLGE_MODE_DIVIDE 4
-//define the mode for a cross product
-#define GLGE_MODE_CROSS 5
-//define the mode for a logical and opperation
-#define GLGE_MODE_AND 6
-//define the mode for a logical or opperation
-#define GLGE_MODE_OR 7
-//define the mode for a logical not opperation
-#define GLGE_MODE_NOT 8
-//define the mode for a logical nand opperation
-#define GLGE_MODE_NAND 9
-//define the mode for a logical nor opperation
-#define GLGE_MODE_NOR 10
-//define the mode for a logical xor opperation
-#define GLGE_MODE_XOR 11
-//close the if-statement
-#endif //line 64
+//include the GLGE core
+#include "openglGLGETexture.hpp"
 
 //include the needed math librarys
 #include "../CML/CML.h"
 
 //include the needed things from the default library
 #include <vector>
-#include <map>
 #include <string>
 
 /**
@@ -99,382 +29,376 @@ class Material
 {
 public:
     /**
-     * @brief Construct a new Material
-     * 
-     * default constructor
+     * @brief Default constructor
      */
     Material();
 
     /**
      * @brief Construct a new Material
      * 
-     * @param image the image for the base texture
-     * @param uniform the name of the uniform variable in the corresponding shader
-     * @param roughness the roughness for the texture
-     * @param metalstore the metalicness of the object
+     * @param color the color of the material
+     * @param roughness define how much light scatters
+     * @param lit say if the material is effected by lighting
+     * @param metalic say how much the material is a metal
      */
-    Material(const char* image, const char* uniform, float roughness, float metal = 0);
+    Material(vec4 color, float roughness = 0.3, bool lit = true, float metalic = 0.0);
 
     /**
      * @brief Construct a new Material
      * 
-     * @param texture a OpenGL pointer to the texture on the GPU
-     * @param uniform the name of the uniform variable in the corresponding shader
-     * @param roughness the roughness for the texture
-     * @param metal store the metalicness of the object
+     * @param texture a pointer to an instance of the texture class to use as texture
+     * @param roughness define how much light scatters
+     * @param lit say if the material is effected by lighting
+     * @param metalic say how much the material is a metal
      */
-    Material(unsigned int texture, const char* uniform, float roughness, float metal = 0);
+    Material(Texture* texture, float roughness = 0.3, bool lit = true, float metalic = 0.0);
 
     /**
      * @brief Construct a new Material
      * 
-     * @param color the base color of the material
-     * @param roughness the roughness for the texture
-     * @param metal store the metalicness of the object
+     * @param texture a texture file to load the texture from
+     * @param roughness define how much light scatters
+     * @param lit say if the material is effected by lighting
+     * @param metalic say how much the material is a metal
      */
-    Material(vec4 color, float roughness, float metal = 0);
+    Material(const char* texture, float roughness = 0.3, bool lit = true, float metalic = 0.0);
 
     /**
-     * @brief Set the Default Name for an uniform variable 
+     * @brief Destroy the Material
+     */
+    ~Material();
+
+    /**
+     * @brief update the material data on the GPU
      * 
-     * @param newName the new name for one of the default uniforms
-     * @param type the type of the default uniform
+     * @brief shader the OpenGL shader identifyer to use for updating
+     * @brief force say if the update should execute regardless if one was scedueld
      */
-    void setDefaultUnifromName(const char* newName, unsigned int type);
+    void update(unsigned int shader, bool force = false);
 
     /**
-     * @brief Set the Normal Map for a material
-     * this function stores that the material has normal maps activated
-     * @param image the image for the normal map
-     * @param uniformName the uniform for the normal map in the shader
-     */
-    void setNormalMap(const char* image, const char* uniformName = GLGE_NORMAL_MAP);
-
-    /**
-     * @brief Set the Roughness Map for a material
-     * this function stores that the material has roughness maps activated
-     * @param image the image for the roughness maps
-     * @param uniformName the uniform name for the roughness map
-     */
-    void setRoughnessMap(const char* image, const char* uniformName = GLGE_ROUGHNESS_MAP);
-
-    /**
-     * @brief Set the Height Map for a material
-     * this function stores that the material has height maps activated
-     * @param image the image for the height map
-     * @param uniformName the uniform name for the height map
-     */
-    void setHeightMap(const char* image, const char* uniformName = GLGE_HEIGHT_MAP);
-
-    /**
-     * @brief Set the Metalic Map for a material
+     * @brief bind the material data to a specific window's OpenGL context
      * 
-     * @param image the image for the metalic map
-     * @param uniformName the uniform name for the metalic map
+     * @param windowId the window id to bind to
      */
-    void setMetalicMap(const char* image, const char* uniformName = GLGE_METALIC_MAP);
+    void bindToWindow(unsigned int windowId);
 
     /**
-     * @brief this function gets all needed data from the sader
-     */
-    void applyShader(unsigned int shader);
-
-    /**
-     * @brief apply the material for drawing
+     * @brief Set the Color of the material
      * 
-     * @return int the amount of bound textures
+     * @param color the new color
      */
-    void applyMaterial();
+    void setColor(vec4 color);
 
     /**
-     * @brief the material will no longer be used
-     */
-    void removeMaterial();
-
-    /**
-     * @brief Set if the object is effected by lighting
+     * @brief Set the color of the material
      * 
-     * @param lit true: lighting takes effect | false: lighting is ignored
+     * @param r the amount of red for the color
+     * @param g the amount of green for the color
+     * @param b the amount of blue for the color
+     * @param a the alpha value for the color
+     */
+    void setColor(float r, float g, float b, float a);
+
+    /**
+     * @brief Get the color of the material
+     * 
+     * @return vec4 the color packed into a vec4 (r,g,b,a)
+     */
+    vec4 getColor();
+
+    /**
+     * @brief Set the Roughness for the material
+     * 
+     * @param roughness the new rougness
+     */
+    void setRoughness(float roughness);
+
+    /**
+     * @brief Get the Roughness from the material
+     * 
+     * @return float the roughness of the material. Dictates how much light scatters
+     */
+    float getRoughness();
+
+    /**
+     * @brief Set the Metalicness of the material
+     * 
+     * @param metalic the new metalicness value
+     */
+    void setMetalic(float metalic);
+
+    /**
+     * @brief Get the Metalicness value from the material
+     * 
+     * @return float the metalicness value
+     */
+    float getMetalic();
+
+    /**
+     * @brief Set if the material is effected by lighting
+     * 
+     * @param lit the new value for the effect of light on the material
      */
     void setLit(bool lit);
 
     /**
-     * @brief Set the value for a custom float uniform in the shader
+     * @brief get if the material is effected by lighting
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the float
-     * @param mode say if the value should be set, added, subtracted, multiplied or divided | default: set
+     * @return true : the material is effected by lighting | 
+     * @return false : the material is not effected by lighting
      */
-    void setCustomFloat(std::string name, float value, unsigned int mode = GLGE_MODE_SET);
+    bool isLit();
 
     /**
-     * @brief Set the value for a custom int uniform in the shader
+     * @brief Set the Ambient Texture for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the integer
-     * @param mode say if the value should be set, added, subtracted, multiplied or divided | default: set
+     * @param texture a pointer to an instance of the texture class with the ambient texture
      */
-    void setCustomInt(std::string name, int value, unsigned int mode = GLGE_MODE_SET);
+    void setAmbientTexture(Texture* texture);
 
     /**
-     * @brief Set the value for a custom bool uniform in the shader
+     * @brief Set the Ambient Texture for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the bool
-     * @param mode say if the value should be set, or if an logical opperation should be performed | default: set
+     * @param texture the path to a texture file with the ambient texture
      */
-    void setCustomBool(std::string name, bool value, unsigned int mode = GLGE_MODE_SET);
+    void setAmbientTexture(const char* texture);
 
     /**
-     * @brief Set the value for a custom vec2 uniform in the shader
+     * @brief Get the Ambient Texture from the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the vec2
-     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     * @return Texture* a pointer to an instance of the texture class with the ambient texture
      */
-    void setCustomVec2(std::string name, vec2 value, unsigned int mode = GLGE_MODE_SET);
+    Texture* getAmbientTexture();
 
     /**
-     * @brief Set the value for a custom vec3 uniform in the shader
+     * @brief Set the Normal Map for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the vec3
-     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     * @param normalMap a pointer to an instance of the texture class with the normal map
      */
-    void setCustomVec3(std::string name, vec3 value, unsigned int mode = GLGE_MODE_SET);
+    void setNormalMap(Texture* normalMap);
 
     /**
-     * @brief Set the value for a custom vec4 uniform in the shader
+     * @brief Set the Normal Map for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the vec4
-     * @param mode say if the value should be set, added, subtracted, scaled, divided or crossed | default: set
+     * @param texture the path to a texture file with the normal map
      */
-    void setCustomVec4(std::string name, vec4 value, unsigned int mode = GLGE_MODE_SET);
+    void setNormalMap(const char* texture);
 
     /**
-     * @brief Set the value for a custom mat2 uniform in the shader
+     * @brief Get the Normal Map from the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the mat2
-     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     * @return Texture* a pointer to an instance of the texture class with the normal map
      */
-    void setCustomMat2(std::string name, mat2 value, unsigned int mode = GLGE_MODE_SET);
+    Texture* getNormalMap();
 
     /**
-     * @brief Set the value for a custom mat3 uniform in the shader
+     * @brief Set the Roughness Map for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the mat3
-     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     * @param roughnessMap a pointer to an instance of the texture class with the roughness map
      */
-    void setCustomMat3(std::string name, mat3 value, unsigned int mode = GLGE_MODE_SET);
+    void setRoughnessMap(Texture* roughnessMap);
 
     /**
-     * @brief Set the value for a custom mat4 uniform in the shader
+     * @brief Set the Roughness Map for the material
      * 
-     * @param name the name of the uniform in the shader
-     * @param value the value for the mat4
-     * @param mode say if the value should be set, added, subtracted or multiplied | default: set
+     * @param texture the path to a texture file with teh roughness map
      */
-    void setCustomMat4(std::string name, mat4 value, unsigned int mode = GLGE_MODE_SET);
+    void setRoughnessMap(const char* texture);
 
     /**
-     * @brief Load a custom texture from an file
+     * @brief Get the Roughness Map from the material
      * 
-     * @param name the name of the sampler in the shader
-     * @param file the texture file
+     * @return Texture* a pointer to an instance of the texture class with the roughness map
      */
-    void setCustomTexture(std::string name, char* file);
+    Texture* getRoughnessMap();
 
     /**
-     * @brief Load a custom texture from an file
+     * @brief Set the Metalic Map for the material
      * 
-     * @param name the name of the sampler in the shader
-     * @param file the texture file
+     * @param metalicMap a pointer to an instance of the texture class with the metalic map
      */
-    void setCustomTexture(std::string name, std::string file);
+    void setMetalicMap(Texture* metalicMap);
 
     /**
-     * @brief Load a custom texture from an texture pointer
+     * @brief Set the Metalic Map for the material
      * 
-     * @param name the name of the sampler in the shader
-     * @param texture the OpenGL texture pointer
+     * @param texture the path to the texture file with the metalic map
      */
-    void setCustomTexture(std::string name, unsigned int texture);
+    void setMetalicMap(const char* texture);
 
     /**
-     * @brief Get a float that is parsed to the shader
+     * @brief Get the Metalic Map from the material
      * 
-     * @param name the name of the uniform
-     * @return float the value that is going to be parsed
+     * @return Texture* a pointer to an instance of the texture class with the metalic map
      */
-    float getFloatByName(std::string name);
+    Texture* getMetalicMap();
 
     /**
-     * @brief Get an integer that is parsed to the shader
+     * @brief Set the Displacement Map for the material
      * 
-     * @param name the name of the uniform
-     * @return int the value that is going to be parsed
+     * @param displacementMap a pointer to an instance of the texture class with the displacment map
      */
-    int getIntByName(std::string name);
+    void setDisplacementMap(Texture* displacementMap);
 
     /**
-     * @brief Get an boolean that is parsed to the shader
+     * @brief Set the Displacement Map for the material
      * 
-     * @param name the name of the uniform
-     * @return bool the value that is going to be parsed
+     * @param texture the path to the texture file with the displacement map
      */
-    bool getBoolByName(std::string name);
+    void setDisplacementMap(const char* texture);
 
     /**
-     * @brief Get an vec2 that is parsed to the shader
+     * @brief Get the Displacement Map from the material
      * 
-     * @param name the name of the uniform
-     * @return vec2 the value that is going to be parsed
+     * @return Texture* a pointer to an instance of the texture class with the displacement map
      */
-    vec2 getVec2ByName(std::string name);
+    Texture* getDisplacementMap();
 
     /**
-     * @brief Get an vec3 that is parsed to the shader
+     * @brief Set the Displacement Strength
      * 
-     * @param name the name of the uniform
-     * @return vec3 the value that is going to be parsed
+     * @param strength the new displacement strength
      */
-    vec3 getVec3ByName(std::string name);
+    void setDisplacementStrength(float strength);
 
     /**
-     * @brief Get an vec4 that is parsed to the shader
+     * @brief Get the Displacement Strength
      * 
-     * @param name the name of the uniform
-     * @return vec4 the value that is going to be parsed
+     * @return float the displacment strength
      */
-    vec4 getVec4ByName(std::string name);
+    float getDisplacementStrength();
 
     /**
-     * @brief Get an mat2 that is parsed to the shader
+     * @brief Set the minimal amount of depth layers to search
      * 
-     * @param name the name of the uniform
-     * @return mat2 the value that is going to be parsed
+     * @param layers the minimum amount of depth layers
      */
-    mat2 getMat2ByName(std::string name);
+    void setDisplacementMinLayers(int layers);
 
     /**
-     * @brief Get an mat3 that is parsed to the shader
+     * @brief Get the minimum amount of searchd depth layers
      * 
-     * @param name the name of the uniform
-     * @return mat3 the value that is going to be parsed
+     * @return int the minimum amount of depth layers
      */
-    mat3 getMat3ByName(std::string name);
+    int getDisplacementMinLayers();
 
     /**
-     * @brief Get an mat4 that is parsed to the shader
+     * @brief Set the maximum amount of depth layers to search
      * 
-     * @param name the name of the uniform
-     * @return mat4 the value that is going to be parsed
+     * @param layers the maximum amount of depth layers
      */
-    mat4 getMat4ByName(std::string name);
+    void setDisplacementMaxLayers(int layers);
 
     /**
-     * @brief Get an OpenGL sampler that is parsed to the shader
+     * @brief Get the maximum amount of depth layers to search
      * 
-     * @param name the name of the uniform
-     * @return unsigned int the sampler that is going to be parsed
+     * @return int the maximum amount of depth layers to search
      */
-    unsigned int getTextureByName(std::string name);
+    int getDisplacementMaxLayers();
 
     /**
-     * @brief Get the string descriping the name of the inputed mode
+     * @brief Set the amount of binary steps to use to refine the parallax mapping
      * 
-     * @param mode the mode to get the name from
-     * @return std::string the string that describes the mode
+     * @param steps the amount of steps to take
      */
-    std::string getModeString(unsigned int mode);
+    void setDisplacementBinaryRefinementSteps(int steps);
+
+    /**
+     * @brief Get the amount of binary steps to use
+     * 
+     * @return int the amount of binary steps
+     */
+    int getDisplacementBinaryRefinementSteps();
+
+    /**
+     * @brief makes this the currently active material
+     */
+    void apply();
+
+    /**
+     * @brief removes the material making ready for another material to be bound
+     */
+    void remove();
+
+    /**
+     * @brief encode the object into some data
+     * 
+     * @param data the data to encode into
+     */
+    void encode(Data* data);
+    /**
+     * @brief decode the object from some data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
+
 private:
-    //store the positon of the roughness in the shader
-    int roughnessLoc = -1;
-    //store the position of the metalic in the shader
-    int metalicLoc = -1;
-    //store the positon of the color in the shader
-    int colorLoc = -1;
-    //store the position of the used textures uniform
-    int usedLoc = -1;
-    //store the position to say if the normal map is active
-    int normIsActivLoc = -1;
-    //store the position to say if the roughness map is active
-    int roughIsActivLoc = -1;
-    //store the position to say if the hight map is used
-    int highIsActiveLoc = -1;
-    //store the position of the lit parameter in the shader
-    int litLoc = -1;
-    //say if the material is effected by lighting
-    bool lit = true;
-    //store the color
-    vec4 color = vec4(0,0,0,1);
-    //store the roughness
-    float roughness;
-    //store the metal value
-    float metal;
-    //store the names for the normal map uniform
-    const char* normalUniform = GLGE_NORMAL_MAP;
-    //store the names for the roughness map uniform
-    const char* roughnessUniform = GLGE_ROUGHNESS_MAP;
-    //store the names for the specular map uniform
-    const char* specularUniform = GLGE_SPECULAR_MAP;
-    //store the names for the height map uniform
-    const char* heightUniform = GLGE_HEIGHT_MAP;
-    //store the names for the color uniform
-    const char* colorUniform = GLGE_COLOR;
-    //store the names for the color uniform
-    const char* metalicUniform = GLGE_METALIC_MAP;
-    //store the amount of bound textures
-    int boundTextures;
-    //store the position to pass if a texture is bound
-    int hasTextureLoc;
+    /**
+     * @brief the material data that should be send to the GPU
+     */
+    struct MaterialData
+    {
+        //the material color
+        float r = 0.8;
+        float g = 0.8;
+        float b = 0.8;
+        float a = 1.0;
+        //the material base roughness
+        float roughness = 0.3;
+        //the material base metalicnes
+        float metalic = 0.f;
+        //the strength of the displacement map
+        float dispStrength = -0.05;
+        //store the minimum amount of allowed depth layers
+        int minLayers = 4;
+        //store the maximum amount of depth layers
+        int maxLayers = 16;
+        //store the amount of binary hit refinement steps
+        int binarySteps = 4;
+        //say if the material is lit
+        int lit = 1;
+        //store if the ambient texture is active
+        int ambientTexActive;
+        //store if the normal map is active
+        int normalMapActive;
+        //store if the roughness map is active
+        int roughnessMapActive;
+        //store if the metalic map is active
+        int metalicMapActive;
+        //store if the displacement map is active
+        int displacementMapActive;
+    };
 
-    //custom values
-
-    //store the custom values (floats)
-    std::map<std::string, float> floats;
-    //store the custom values (integers)
-    std::map<std::string, int> integers;
-    //store the custom values (booleans)
-    std::map<std::string, bool> booleans;
-    //store the custom values (vec2)
-    std::map<std::string, vec2> vec2s;
-    //store the custom values (vec3)
-    std::map<std::string, vec3> vec3s;
-    //store the custom values (vec4)
-    std::map<std::string, vec4> vec4s;
-    //store the custom values (mat2)
-    std::map<std::string, mat2> mat2s;
-    //store the custom values (mat3)
-    std::map<std::string, mat3> mat3s;
-    //store the custom values (mat4)
-    std::map<std::string, mat4> mat4s;
-    //store a custom texture
-    std::map<std::string, unsigned int> customTextures;
-
-    //store the locations of the custom floats
-    std::map<std::string, unsigned int> floatLocs;
-    //store the locations of the custom integers
-    std::map<std::string, unsigned int> intLocs;
-    //store the locations of the custom booleans
-    std::map<std::string, unsigned int> boolLocs;
-    //store the locations of the custom vec2s
-    std::map<std::string, unsigned int> vec2Locs;
-    //store the locations of the custom vec3s
-    std::map<std::string, unsigned int> vec3Locs;
-    //store the locations of the custom vec4s
-    std::map<std::string, unsigned int> vec4Locs;
-    //store the locations of the custom mat2s
-    std::map<std::string, unsigned int> mat2Locs;
-    //store the locations of the custom mat3s
-    std::map<std::string, unsigned int> mat3Locs;
-    //store the locations of the custom mat4s
-    std::map<std::string, unsigned int> mat4Locs;
-    //store the locations of the custom textures
-    std::map<std::string, unsigned int> customTextureLocs;
+    //store a ambient map
+    Texture* ambientMap = 0;
+    //store a normal map
+    Texture* normalMap = 0;
+    //store a roughness map
+    Texture* roughnessMap = 0;
+    //store a metalic map
+    Texture* metalicMap = 0;
+    //store the displacement map
+    Texture* displacementMap = 0;
+    //store the position of the ambient map
+    int ambientMapLoc = -1;
+    //store the position of the normal map
+    int normalMapLoc = -1;
+    //store the position of the roughness map
+    int roughnessMapLoc = -1;
+    //store the position of the metalic map
+    int metalicMapLoc = -1;
+    //store the position of the displacement map
+    int displacementMapLoc = -1;
+    //store the window id
+    int windowId = -1;
+    //store the material data
+    MaterialData matData = {};
+    //store the ubo
+    unsigned int ubo;
+    //store if a update is qued
+    bool quedUpdate = true;
 };
 
 

@@ -1,5 +1,4 @@
-#version 300 es
-
+#version 450 core
 #define PI 3.14159265
 
 precision highp float;
@@ -13,41 +12,38 @@ uniform sampler2D glgeNormalMap;
 uniform sampler2D glgePositionMap;
 uniform sampler2D glgeRoughnessMap;
 
-//light data
-uniform vec3 glgeLightColor[128];
-uniform vec4 glgeLightData[128];
-uniform vec3 glgeLightPos[128];
-uniform vec3 glgeLightDir[128];
-uniform int glgeActiveLights;
-
-//camera data
-uniform vec3 glgeCameraPos;
-uniform float glgeFarPlane;
-uniform vec3 glgeCameraRot;
-
+#include <glgeCamera>
 #include <glgeLightEvaluationFunction>
+#include <glgeLights>
 
 void main()
 {
+    vec4 aMap = texture(glgeAlbedoMap,   texCoords);
+    vec4 nMap = texture(glgeNormalMap,   texCoords);
+    vec4 pMap = texture(glgePositionMap, texCoords);
+
+    vec3 vPos = vec3(aMap.w,nMap.w,pMap.w);
+
     vec3 tmp = texture(glgeRoughnessMap, texCoords).rgb;
-    glgePixel d = glgePixel(
-        texture(glgeAlbedoMap,   texCoords).rgb,
-        texture(glgePositionMap, texCoords).rgb,
-        normalize(texture(glgeNormalMap,   texCoords).rgb),
-        tmp.x, tmp.y
-    );
 
     if ((glgeActiveLights == 0) || (tmp.z == 0.f))
     {
-        FragColor = vec4(d.color, 1);
+        FragColor = vec4(aMap.rgb, 1);
         return;
     }
+
+    glgePixel d = glgePixel(
+        aMap.rgb,
+        pMap.rgb,
+        normalize(nMap.rgb),
+        tmp.x, tmp.y
+    );
 
     FragColor = vec4(0,0,0,1);
 
     for (int i = 0; i < glgeActiveLights; i++)
     {
-        glgeLight l = glgeLight(glgeLightPos[i], glgeLightColor[i], glgeLightDir[i], int(glgeLightData[i].x), glgeLightData[i].y, glgeLightData[i].z, glgeLightData[i].w);
-        FragColor.xyz += glgeEvaluateLight(l, d);
+        vec3 light = glgeEvaluateLight(glgeLights[i], d);
+        FragColor.xyz += light;
     }
 }

@@ -17,7 +17,7 @@
  * - GLEW: -lGLEW
  * - SDL: -lSDL2main -lSDL2
  * - OPENGL: -lGL
- * - CML: {PathToSurcecode}\CML\*.cpp
+ * - CML: "{PathToSurcecode}\CML\*.cpp"
  * 
  * @version 0.1
  * @date 2022-12-17

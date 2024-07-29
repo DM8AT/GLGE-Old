@@ -18,6 +18,15 @@ mat4::mat4(float m00, float m01, float m02, float m03,
     m[3][0] = m30; m[3][1] = m31; m[3][2] = m32; m[3][3] = m33;
 }
 
+mat4::mat4(float arr[16])
+{
+    //store the data
+    m[0][0] = arr[ 0]; m[0][1] = arr[ 1]; m[0][2] = arr[ 2]; m[0][3] = arr[ 3];
+    m[1][0] = arr[ 4]; m[1][1] = arr[ 5]; m[1][2] = arr[ 6]; m[1][3] = arr[ 7];
+    m[2][0] = arr[ 8]; m[2][1] = arr[ 9]; m[2][2] = arr[10]; m[2][3] = arr[11];
+    m[3][0] = arr[12]; m[3][1] = arr[13]; m[3][2] = arr[14]; m[3][3] = arr[15];
+}
+
 mat4 mat4::operator+(mat4 c)
 {
     return mat4(m[0][0] + c.m[0][0], m[0][1] + c.m[0][1], m[0][2] + c.m[0][2], m[0][3] + c.m[0][3],
@@ -145,4 +154,22 @@ void mat4::operator*=(float s)
         }
     }
     *this = t;
+}
+
+bool mat4::operator==(mat4 mat)
+{
+    //first say that both are equal
+    bool equals = true;
+    //loop over all columns
+    for (int x = 0; x < 4; x++)
+    {
+        //loop over all rows
+        for (int y = 0; y < 4; y++)
+        {
+            //check if a difference is or was found
+            equals = equals && (this->m[x][y] == mat.m[x][y]);
+        }
+    }
+    //return if both are equal
+    return equals;
 }

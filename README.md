@@ -21,19 +21,39 @@ Often causes for memory access errors:
 Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
-# Use GLGE
-To use GLGE, you need the OpenGL developer library, GLEW, SDL2, and all default C++ libraries. 
-
 ## Installation
-To install, download the source code and move the "GLGE" folder to your preferred location,
-updating the include path in the necessary files ("GLGE.h", "GLGE.cpp", "GLGE2DCore.h", "GLGE2DCore.cpp", "GLGE3DCore.h" and "GLGE3DCore.cpp"). 
-Else, there would be compilation errors. 
+To install GLGE, download the source code or clone the project. Make sure to install following librarys:
+- OpenGL
+   - Linux: `sudo apt install libgl-dev`
+- GLEW
+   - Linux: `sudo apt install libglew-dev`
+- SDL2
+   - Linux: `sudo apt install libsdl2-dev`
+- SDL2_TTF
+   - Linux: `sudo apt install libsdl2-ttf-dev`
+- OpenAL
+   - Linux: `sudo apt install libopenal-dev`
+- ALUT
+   - Linux: `sudo apt install libalut-dev`
+To install all librarys on linux, just run `make install` in the project directory or manualy run `sudo apt install libgl-dev libglew-dev libsdl2-dev libsdl2-ttf-dev libopenal-dev libalut-dev` in a terminal. 
 
-In the make file, there is one path that needs to be updated. It is called GLGE. It defines the path to the Core library. 
+**Superuser access is requred to install the librarys, but not to compile and run any GLGE applications**
+   
+also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
 
 ## Compiling
-Compiling can be done with the Makefile provided, or with your preferred method. 
-Make sure you include and compile with all the required librarys. 
+In the moment there is only a makefile set up for the GNU C/C++ Compiler. To set up your compiler of choise, see [this Section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#seting-up-an-own-compiler)
+### Using the makefile
+The makefile in the root directory of this project is set up for the GNU C/C++ under Linux. You can try compiling with the same compiler under another operating system, but I'm not sure if it will work. It defenetly dosn't work with another compiler. You must create **two new directorys** when using the makefile. The first is called **"bin"**. There, the output files like static librarys and executables will be stored. The other is **"build"**. There, all the intermediate object files will be stored. 
+#### Compiling the library
+To compile GLGE to an static library using the makefile, start a terminal and navigate to the folder GLGE was installed into. Then, run the command `make -j GLGE` to compile the library to an static compiled library. This will create two files called "libGLGE.a" and "libCML.a" in the folder called "bin". A system for shared objects dosn't currently exist. 
+#### Using the library
+Now, to compile your own project that uses GLGE, you need to add the files "libGLGE.a" and "libCML.a", that where created by the compiler in [the previouse section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#compiling-the-library), to the .o files in the linker. An example could be:
+`g++ main.cpp libGLGE.a libCML.a -o main.exe`
+#### Compiling the examples
+To compile the example scripts included in this repository, run `make -j`. This will create all the static librarys like shown in [this section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#compiling-the-library), so they can be used afterwards. It will also create a file called "main" in the "bin" directory. This is the final executable. To try the examples, run the executable using `./bin/main` from the root directory of the project. **Do not change into the "bin" directory to run the project.**
+### Seting up an own compiler
+To use your own compiler, compile all cpp files in the directory "src/GLGE/CML" into .o files. Then, link those .o files into a static library. Also, compile all files in "src/GLGE", "src/GLGE/GLGEIndependend" and "src/GLGE/GLGEOpenGL" into .o files and link them to a static library. When compiling your own files, make sure to link the two created static librarys to your project. 
 
 # Upcoming
 Upcoming features that may be added to GLGE in the future include:
@@ -48,9 +68,81 @@ Upcoming features that may be added to GLGE in the future include:
       - directional light
       - sun
       - light plates (some invisible shape that is emitting light)
-- Texture atleasing
+- Texture atlassing
 
 # Changelogs
+## Update 0.5
+- added the "Text" class to handle 2D text displays
+   - inherates from the "Object2D" class
+- added the "TextInput" class to handle simple text inputs
+   - inherates from the "Text" class, wich inherates from the "Object2D" class
+- added support for propper transparency for 2D objects
+- added a new 'Texture' class to better handle texture objects
+   - simple creation from files using stb_image
+   - create an empty texture with an specific size
+      - data can be passed to the texture as an array to initalise it
+- textures can be bound to be accessed in shaders
+   - binding to texture units allows acces to the texture using texture samplers
+      - use 'GLGE_TEXTURE_BIND_TEXTURE_UNIT' as second argument in the binding function to bind to an texture sampler
+   - binding to an image unit allows read and write access in compute shaders through an image2D
+      - use 'GLGE_TEXTURE_BIND_IMAGE_UNIT' as second argument in the binding function to bind to an image unit
+- made glgeImage usable in the user's scope (no sensetive functions, so it is ok)
+   - users can load images using glgeLoadImage
+   - users can store images using glgeStoreImage
+      - suppoerted formats: PNG, JPG / JPEG, BMP (Windows Bitmap), PPM
+   - added a function to convert texture data (format is one vec4 per pixel) to image data (4 uint8_t per pixel)
+- added a function to store textures
+   - suppoerted formats: PNG, JPG / JPEG, BMP (Windows Bitmap), PPM
+- added a new "ComputeShader" class. Compute shaders can now be used in GLGE
+- transforms can be applied to an mesh with the new function 'applyTransform'
+- meshes can be joind together
+   - use '+' or 'join' to get a new joined mesh from two meshes
+   - use '+=' or 'joinThis' to join the mesh on the right side to the mesh on the left side
+- remade the makefile
+   - compiling can now be threaded. Use `-j` when compiling to enable threading. 
+   - compiling CML and GLGE to static libraris is now easy. To compile both to static librarys, run `make -j GLGE`. 
+- rewrote a part of the README.md file
+- transparent objects now correctly opperate with the light shader
+- added destructors for 3D objects, 2D objects and Buttons
+   - destructors clean up the object
+- renamed "GLGEWindow" to "Window", so it better fits the naming scheme of GLGE
+- updated the way the shaders access uniforms, now using uniform buffers instead of passing everything all the time, hoping this improves performance
+- added simple shadow mapping for spotlights
+- updated the way scenes safe, it should be faster now. WARNING: old scenes won't work with the new version
+- added custom render pipelines
+   - class "RenderPipeline" is used to wrap the order of execution for each element in the render pipeline
+      - there can be less or more than one elements of each type
+   - class "PostProcessingStack" is used to wrap the information on wich shaders or functions to use for each post processing pass in a render stage
+- custom render pipelines can be bound to a window
+- each window has its own default render pipeline with the same stages and order as before
+- fixed some wierd behavieor of normals when an object was rotated
+- added built in support for parallax occlusion mapping to materials
+   - depth peeling
+   - binary refinement
+- added a compute shader based particle system
+   - using instancing to be able to draw a lot of objects at a real-time performance
+   - particles can be fully lit objects
+   - particles have the same transparency behaviour like normal objects
+   - create a compute shader to controll the behaviour of every single particle
+- changed the behaviour of meshes, meshes are now pointer-based components of objects
+   - meshes now store they're own vertex and index buffers
+   - when a mesh is created and given to a object, the object now has the ownership of the mesh exept something else is specifyed
+- converted all examples into one, see main.cpp
+- GLGE now only uses the radians system, use "glgeToRadians" if you wish to use degrees
+- all rotate and set rotation functions now use the modulo opperator to enable infinite rotation
+- corrected the rotation for the camera, x and y axis where swapped and the camera now uses vec3 instead of vec2 for rotation
+- updated the 2D core to the new code structure (now using the reference dependend structure with destructors)
+- added a sound core using OpenAL and ALUT
+   - the sound core is initalised by opening a device conection
+   - added a simple function to play a sound without a position
+   - added the 'Listener' class to define the position of a sound listener
+      - multiple listeners can exists, but only one can be bound at any time. The bound listener is the currently opperating one and will be updated every time the sound core ist ticked
+      - a listener can be positiond in 3D and 2D space to support audio for both spaces
+         - using 2D will simply ignore positon along the y-axis and rotation around the x and z axis
+   - added the 'Speaker' class to act as a positional audio source
+      - a speaker can be positiond in 3D and 2D space like a listener
+      - sounds can be played, paused and stopped
+   - added functions to handle the functionality of the doppler effect
 ## Update 0.5-1
 - added 2 new light source types:
    - spot light: a light with a direction and angle component

@@ -1,6 +1,7 @@
 # Compile output
 bin/*
 *.out
+build/*
 
 # IDE folders
 .vscode
@@ -13,3 +14,6 @@ assets/atlas.png.atlas
 # Doxygen files
 doxygen/html
 doxygen/latex
+
+# example png
+test.png

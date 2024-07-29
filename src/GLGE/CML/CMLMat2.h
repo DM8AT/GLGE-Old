@@ -10,7 +10,10 @@ class mat2
 {
 public:
     //define the storage array of the matrix
-    float m[2][2];
+    float m[2][2] = {
+        {1,0},
+        {0,1}
+    };
 
     /**
      * @brief Construct a new 2*2 matrix

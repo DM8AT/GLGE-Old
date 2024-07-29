@@ -1,5 +1,5 @@
 /**
- * @file openglGLGEWindow.h
+ * @file openglWindow.h
  * @author DM8AT
  * @brief declare the window class of GLGE
  * @version 0.1
@@ -16,6 +16,8 @@
 //include the GLGE Dependencys
 #include "openglGLGELightingCore.h"
 #include "openglGLGE3Dcore.h"
+#include "openglGLGE2Dcore.h"
+#include "openglGLGERenderPipeline.hpp"
 //include CML
 #include "../CML/CMLVec2.h"
 #include "../CML/CMLVec3.h"
@@ -24,15 +26,45 @@
 #include <string>
 
 /**
+ * @brief identify the framebuffer that draws directly to the window surface
+ */
+#define GLGE_FRAMEBUFFER_WINDOW_SURFACE 0
+/**
+ * @brief identify the geometry framebuffer (G-Buffer). 
+ * @par The geometry buffer is used for the default geometry drawing. It stores: 
+ *  - The albdeo information for the pixel (the color)
+ *  - The normal vector for the pixel
+ *  - The world-space position of the pixel
+ *  - The roughness, metallic and lit information
+ *  - The lit image without post processing
+ *  - The Object IDs, Depth and transparent image max accumulation
+ *  - The accumulated transparent albedo
+ *  - The objects depth map
+ */
+#define GLGE_FRAMEBUFFER_GEOMETRY 1
+/**
+ * @brief identify the framebuffer used for post processing
+ */
+#define GLGE_FRAMEBUFFER_POST_PROCESSING 2
+/**
+ * @brief identify the framebuffers used for shadow mapping
+ */
+#define GLGE_FRAMEBUFFER_SHADOW_MAPPING 3
+/**
+ * @brief identify a framebuffer used for a custom render target
+ */
+#define GLGE_FRAMEBUFFER_CUSTOM_RENDER_TEXTURE 4
+
+/**
  * @brief a simple window to handle multiple windows
  */
-class GLGEWindow
+class Window
 {
 public:
     /**
      * @brief Default constructor for a new window
      */
-    GLGEWindow();
+    Window();
 
     /**
      * @brief Construct a new GLGE window
@@ -42,7 +74,7 @@ public:
      * @param pos the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, vec2 size, vec2 pos = vec2(0), unsigned int flags = 0);
+    Window(const char* name, vec2 size, vec2 pos = vec2(0), unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -53,7 +85,7 @@ public:
      * @param pos the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, unsigned int width, unsigned int height, vec2 pos = vec2(0), unsigned int flags = 0);
+    Window(const char* name, unsigned int width, unsigned int height, vec2 pos = vec2(0), unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -64,7 +96,7 @@ public:
      * @param y the position of the window in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, vec2 size, float x, float y, unsigned int flags = 0);
+    Window(const char* name, vec2 size, float x, float y, unsigned int flags = 0);
 
     /**
      * @brief Construct a new GLGE window
@@ -76,10 +108,15 @@ public:
      * @param y the y position in pixels
      * @param flags the window creation flags
      */
-    GLGEWindow(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags = 0);
+    Window(const char* name, unsigned int width, unsigned int height, float x, float y, unsigned int flags = 0);
 
     /**
-     * @brief Destroy the GLGEWindow
+     * @brief Destroy the Window
+     */
+    ~Window();
+
+    /**
+     * @brief Destroy the Window
      */
     void close();
 
@@ -163,6 +200,20 @@ public:
     void setInitFunc(void (*initFunc)());
 
     /**
+     * @brief set a function that is called once the window closes
+     * 
+     * @param exitFunc a function pointer to the windows exit function
+     */
+    void setExitFunc(void (*exitFunc)());
+
+    /**
+     * @brief set a function that is called once the scene geometry is drawn, the lighting framebuffer is active but before the lighting pass is called
+     * 
+     * @param preLightingPassFunc the function to call
+     */
+    void setPreLightingPassFunc(void (*preLightingPassFunc)());
+
+    /**
      * @brief Get the Draw Func object
      * 
      * @return a function pointer to the function
@@ -189,6 +240,20 @@ public:
      * @return a function pointer to the function
      */
     void (*getInitFunc())();
+
+    /**
+     * @brief Get the on exit Func object
+     * 
+     * @return a function pointer to the function
+     */
+    void (*getExitFunc())();
+
+    /**
+     * @brief Get the functino that is called before the lighting pass
+     * 
+     * @return a function pointer to the function
+     */
+    void (*getPreLightingFunv())();
 
     /**
      * @brief execute the draw function, if one is bound
@@ -298,6 +363,13 @@ public:
      * @return void* a pointer of type SDL_Window* to the SDL window
      */
     void* getSDLWindow();
+
+    /**
+     * @brief get the SDL renderer for this window
+     * 
+     * @return void* a pointer to the renderer
+     */
+    void* getSDLRenderer();
 
     /**
      * @brief get the OpenGL context of the window
@@ -455,6 +527,13 @@ public:
     unsigned int getLastFrame();
 
     /**
+     * @brief Get the depth map
+     * 
+     * @return unsigned int the depth map
+     */
+    unsigned int getDepthTex();
+
+    /**
      * @brief Set the Fullscreen Mode for the window
      * 
      * @param isFullscreen true : the window will be fullscreen | false : the window will be normal
@@ -545,27 +624,12 @@ public:
     void removePostProcessingShader(unsigned int index, bool del = false);
 
     /**
-     * @brief remove a shader from the post processing shader stack
-     * 
-     * @param shader the shader that should be removed from the post processing shader stack
-     * @param del true : the shader pointer will be deleted | false : the shader pointer will continue to exist
-     */
-    void removePostProcessingShader(Shader* shader, bool del = false);
-
-    /**
      * @brief remove a function from the post processing function stack
      * 
      * @param index the index of the function in the post processing function stack
      */
     void removePostProcessingFunction(unsigned int index);
 
-    /**
-     * @brief remove a function from the post processing function stack
-     * 
-     * @param func a pointer to the function that should be removed
-     */
-    void removePostProcessingFunction(Shader (*func)(unsigned int));
-    
     /**
      * @brief Get the Post Processing Shader from the post processing shader stack
      * 
@@ -575,28 +639,12 @@ public:
     Shader* getPostProcessingShader(unsigned int index);
 
     /**
-     * @brief Get the Index of an post processing shader in the post processing shader stack
-     * 
-     * @param shader a pointer to the shader
-     * @return unsigned int the index of the shader in the post processing stack
-     */
-    int getPostProcessingShaderIndex(Shader* shader);
-
-    /**
      * @brief Get a Post Processing Func from the post processing function stack
      * 
      * @param index the index of the post processing function
      * @return Shader*(funx*)(unsigned int) a pointer to the function 
      */
     Shader (*getPostProcessingFunc(unsigned int index))(unsigned int);
-
-    /**
-     * @brief Get the index of an post processing function in the post processing function stack
-     * 
-     * @param func the post processing function
-     * @return unsigned int the index of the function in the post processing function stack
-     */
-    int getPostProcessingFuncIndex(Shader (*func)(unsigned int));
 
     /**
      * @brief get if the window is fullscreen
@@ -882,6 +930,116 @@ public:
      */
     Shader* getLightingShader();
 
+    /**
+     * @brief Get the default post processing shader
+     * 
+     * @return Shader* the default post processing shader
+     */
+    Shader* getDefaultImageShader();
+
+    /**
+     * @brief Get the shader used for the shadow map passes
+     * 
+     * @return Shader* a pointer to the shadow shader
+     */
+    Shader* getShadowShader();
+
+    /**
+     * @brief Get the data for a new light source
+     * 
+     * @return LightData* the place to store that data in
+     */
+    LightData* getLightData();
+
+    /**
+     * @brief Set the data from an loaded light source
+     * 
+     * @param data the data from the object
+     * @return LightData* the new pointer to the data
+     */
+    LightData* setLightData(LightData data);
+
+    /**
+     * @brief Get the window id
+     * 
+     * @return int the window id
+     */
+    int getId();
+
+    /**
+     * @brief draw a post processing shader over the whole window
+     * 
+     * @param shader a pointer to the shader
+     */
+    void drawPPShader(Shader* shader, bool getVars = true);
+
+    /**
+     * @brief clear the geometry buffer and prepare normal drawing
+     */
+    void clearGBuff();
+    /**
+     * @brief draw all solid geometry
+     */
+    void drawSolid();
+    /**
+     * @brief draw all transparent geometry
+     */
+    void drawTransparent();
+    /**
+     * @brief draw the lighting
+     */
+    void drawLighting();
+    /**
+     * @brief draw the skybox
+     */
+    void drawSkybox();
+    /**
+     * @brief do shadow-precalculation
+     */
+    void shadowPass();
+    /**
+     * @brief copy the image from the geometry buffer to the post processing buffer
+     * 
+     * @param source the source to copy from
+     */
+    void copyGToPPFramebuffer(int source);
+
+    /**
+     * @brief Get the Post Processing Texture
+     * 
+     * @return unsigned int the OpenGL post processing texture identifier
+     */
+    unsigned int getPostProcessingTexture();
+
+    /**
+     * @brief Get the Render Pipeline bound to this window
+     * 
+     * @return RenderPipeline* the render pipeline
+     */
+    RenderPipeline* getRenderPipeline();
+
+    /**
+     * @brief Set the Render Pipeline for this window
+     * 
+     * @param renderPipeline the render pipeline
+     * @param del if the old pipeline should be deleted
+     */
+    void setRenderPipeline(RenderPipeline* renderPipeline, bool del = true);
+
+    /**
+     * @brief Get the default particle shader of this window
+     * 
+     * @return Shader* a pointer to the default particle shader
+     */
+    Shader* getDefaultParticleShader();
+
+    /**
+     * @brief Get the default shader for transparent particles
+     * 
+     * @return Shader* a pointer to the default shader for transparent particles
+     */
+    Shader* getDefaultTransparentParticleShader();
+
 private:
     //////////////////////////////////
     //   Private handler functions  //
@@ -898,12 +1056,34 @@ private:
      */
     void getDefaultUniformsFromPostProcessingShader(Shader* shader);
 
+    /**
+     * @brief bind the geometry framebuffer
+     */
+    void bindGBuff();
+
+    /**
+     * @brief bind the post processing framebuffer
+     */
+    void bindPPBuff();
+
+    /**
+     * @brief super constructor for the window
+     * 
+     * @param name the name of the window
+     * @param size the size of the window
+     * @param pos the position of the window
+     * @param flags the flags for the window creation
+     */
+    void super(std::string name, vec2 size, vec2 pos, unsigned int flags = 0);
+
     /////////////////
     //  Variables  //
     /////////////////
 
     //store the window pointer (void* to not give acess to SDL2)
     void* window;
+    //store the SDL2 renderer
+    void* renderer;
     //store the OpenGL context (void* to not give acess to SDL2)
     void* glContext;
     //store the window ID
@@ -930,14 +1110,20 @@ private:
     bool hasResizeFunc = false;
     //store if an initalisation function is bound
     bool hasInitFunc = false;
+    //store if an exit function is bound
+    bool hasExitFunc = false;
     //store the draw func
-    void (*drawFunc)();
+    void (*drawFunc)() = NULL;
     //store the tick func
-    void (*tickFunc)();
+    void (*tickFunc)() = NULL;
     //store the init func
-    void (*initFunc)();
+    void (*initFunc)() = NULL;
     //store the resize func
-    void (*resizeFunc)(int, int);
+    void (*resizeFunc)(int, int) = NULL;
+    //store the on exit func
+    void (*onExit)() = NULL;
+    //store the pre light pass function
+    void (*preLightPass)() = NULL;
     //store the main camera
     Camera* mainCamera = NULL;
     //get if the window is currently drawing
@@ -964,6 +1150,30 @@ private:
     bool mouseGrabbed = false;
     //store if the rectangle that covers the whole screen is bound
     bool screenRectBound = false;
+    //store if the window was started
+    bool started = false;
+
+    /*
+        Rendering
+    */
+    //store a pointer to the render pipeline the window is using
+    RenderPipeline* renderPipeline = NULL;
+    //store the post processing stack of the window
+    PostProcessingStack* pps = NULL;
+
+    /*
+        Shadow pass stuff
+    */
+    //store the framebuffer for shadow mapping
+    unsigned int shadowFBO = 0;
+    //store the screen space textures
+    unsigned int shadowTex = 0;
+    //store the data for all the lights
+    unsigned int lightUBO = 0;
+    //store the data for all the lights
+    uint8_t lightDatas[sizeof(LightData)*129];
+    //store the light count
+    unsigned int lightCount = 0;
 
     /*
         Default shaders
@@ -974,6 +1184,14 @@ private:
     unsigned int default3DTransShader = 0;
     //store the default 2D shader
     unsigned int default2DShader = 0;
+    //store the default image shader
+    Shader* defaultImageShader;
+    //store the shadow shader
+    Shader* shadowShader;
+    //store the particle shader
+    Shader* defaultParticleShader;
+    //store the transparent particle shader
+    Shader* defaultTransparentParticleShader;
     
     /*
         Window constrains
@@ -994,8 +1212,6 @@ private:
     */
     //store the main framebuffer
     unsigned int mainFramebuffer = 0;
-    //store the main renderbuffer
-    unsigned int mainRenderbuffer = 0;
     //store the albedo texture
     unsigned int mainAlbedoTex = 0;
     //store the normal texture
@@ -1012,6 +1228,8 @@ private:
     unsigned int mainSolidTex = 0;
     //store the transparent accumulation texture
     unsigned int mainTransparentAccumTex = 0;
+    //store the depth texture
+    unsigned int mainDepthTex = 0;
 
     /*
         Last Tick Framebuffer
@@ -1028,12 +1246,6 @@ private:
     unsigned int postProcessingFramebuffer;
     //store the image for post processing
     unsigned int postProcessingTex;
-    //store the post processing function stack
-    std::vector<Shader (*)(unsigned int)> ppsFunctionStack = {};
-    //store the post processing shader stack
-    std::vector<Shader*> ppsShaderStack = {};
-    //store if this is the first post processing pass
-    bool firstPPSPass;
 
     /*
         Store default Vertex and Index buffers
@@ -1051,7 +1263,7 @@ private:
         information about the lighting shader
     */
     //store the lighting shader
-    Shader lightShader;
+    Shader* lightShader;
     //store the lights
     std::vector<Light*> lights;
 
@@ -1079,5 +1291,22 @@ private:
     //store if a custom transparent combination shader is bound
     bool customTransparentCombineShader = false;
 };
+
+/**
+ * @brief bind a window as the main window
+ * @warning this will start the window, the main window must be running!
+ * 
+ * @param window a pointer to the new main window
+ * @param replace say if the current main window should be replaced
+ * @return Window* a pointer to the old main window or NULL, if none was bound
+ */
+Window* glgeBindMainWindow(Window* window, bool replace = false);
+
+/**
+ * @brief get the current main window
+ * 
+ * @return Window* a pointer to the main window
+ */
+Window* glgeGetMainWindow();
 
 #endif

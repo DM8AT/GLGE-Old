@@ -12,9 +12,15 @@
 #ifndef _GLGE_VARS_OGL_H_
 #define _GLGE_VARS_OGL_H_
 //include the rest of the variables
-#include "../GLGEInternal/glgeVars.hpp"
+#include "../GLGEIndependend/glgeVars.hpp"
 //include the window core
 #include "openglGLGEWindow.h"
+//include the 2D core
+#include "openglGLGE2Dcore.h"
+//include the 3D core
+#include "openglGLGE3Dcore.h"
+//include light sources
+#include "openglGLGELightingCore.h"
 //check if glew is allready included
 #ifndef _GLGE_GLEW_
 //say that glew is now included
@@ -26,22 +32,49 @@
 //include vector
 #include <vector>
 
-//store the active color buffers
+/**
+ * @brief store the active color buffers
+ */
 extern GLenum glgeUsedColorBuffers[];
 
-//store the length of the unsigned buffer array
+/**
+ * @brief store the length of the unsigned buffer array
+ */
 extern unsigned int glgeLenUsedColorBuffers;
 
-//store all the color buffers
+/**
+ * @brief store all the color buffers
+ */
 extern GLenum glgeAllUsedColorBuffers[];
 
-//store the length of all used color buffers
+/**
+ * @brief store the length of all used color buffers
+ */
 extern unsigned int glgeLenAllUsedColorBuffers;
 
-//store how to sample images
+/**
+ * @brief store how to sample images
+ */
 extern GLenum glgeInterpolationMode;
 
-//store the window vector
-extern std::vector<GLGEWindow*> glgeWindows;
+/**
+ * @brief store the window vector
+ */
+extern std::vector<Window*> glgeWindows;
+
+/**
+ * @brief store the current texture unit
+ */
+extern unsigned int glgeTextureUnit;
+
+/**
+ * @brief store the current light source that is casting shadows
+ */
+extern Light* glgeCurrentShadowCaster;
+
+/**
+ * @brief store the type of the current framebuffer
+ */
+extern unsigned int glgeCurrentFramebufferType;
 
 #endif

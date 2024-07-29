@@ -11,67 +11,47 @@
 
 #include "GLGEMath.h"
 #include <math.h>
-#include "GLGEInternal/glgePrivDefines.hpp"
+#include "GLGEIndependend/glgePrivDefines.hpp"
 
-//store the seed for the noise functions
+/**
+ * @brief store the seed for the noise functions
+ */
 unsigned long glgeSeed = 0;
 
 mat4 glgeLookAt(vec3 eye, vec3 center, vec3 up)
 {
-    //create 3 vectors for the collums of the output matrix
-    vec3 a,b,c;
+    //create the u,v,n vectors
+    vec3 u,v,n;
+    //create the forward vector (n)
+    n = (eye - center);
+    //normalize the forward vector
+    n.normalize();
+    //create the right vector (u)
+    u = up.cross(n);
+    //normalize the vector
+    u.normalize();
+    //create the new up vector (v)
+    v = n.cross(u);
 
-    //get the difference from the eye to the center
-    c = eye-center;
-    //normalise that difference
-    c.normalize();
-
-    //store the up vector in b
-    b = up;
-    //a is a cross product from b and c
-    a = b.cross(c);
-    //recalculate the b vector
-    b = c.cross(a);
-
-    //normalise the length of a and b
-    a.normalize();
-    b.normalize();
-
-    //create the output matrix
-    mat4 out;
-
-    //store the elements in the matrix
-    out.m[0][0] = a.x;
-    out.m[1][0] = a.y;
-    out.m[2][0] = a.z;
-    out.m[3][0] = -(a*eye);
-    out.m[0][1] = b.x;
-    out.m[1][1] = b.y;
-    out.m[2][1] = b.z;
-    out.m[3][1] = -(b*eye);
-    out.m[0][2] = c.x;
-    out.m[1][2] = c.y;
-    out.m[2][2] = c.z;
-    out.m[3][2] = -(c*eye);
-    out.m[0][3] = 0;
-    out.m[1][3] = 0;
-    out.m[2][3] = 0;
-    out.m[3][3] = 1.0f;
-
-    //return the matrix
-    return out;
+    //return the final transformation matrix
+    return mat4(
+        u.x, u.y, u.z, -(eye * u),
+        v.x, v.y, v.z, -(eye * v),
+        n.x, n.y, n.z, -(eye * n),
+        0,0,0,1
+    );
 }
 
-vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
+vec3 glgeRotateVector(float angle, vec3 axis, vec3 v)
 {
     //create a rotation quaternion from the vector input and the angle
-    Quaternion RotationQ = Quaternion(angle, v);
+    Quaternion RotationQ = Quaternion(angle, axis);
 
     //conjugate the rotation quaternion
     Quaternion ConjugateQ = RotationQ.conjugate();
 
     //do some quaternion magic, I don't understand this part compleatly
-    Quaternion W = (RotationQ * target) * ConjugateQ;
+    Quaternion W = (RotationQ * v) * ConjugateQ;
 
     //return the vector component of the quaternions
     return vec3(W.x,W.y,W.z);
@@ -79,20 +59,35 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
 
 //thanks for https://stackoverflow.com/questions/29711668/perlin-noise-generation for help with the noise
 
-  //store the numbers on X and on Y
+  /**
+   * @brief store the numbers on X
+   */
   int numX = 512,
+      /**
+       * @brief store the numbers on Y
+       */
       numY = 512,
-      //store the number of octaves
+      /**
+       * @brief store the number of octaves
+       */
       numOctaves = 7;
-  //store the persistance for heigher-level noise
+  /**
+   * @brief store the persistance for heigher-level noise
+   */
   float persistence = 0.5;
 
-  //define how much prime number trippels are in the list
+  /**
+   * @brief define how much prime number trippels are in the list
+   */
   #define maxPrimeIndex 10
-  //store the current prime index
+  /**
+   * @brief store the current prime index
+   */
   int primeIndex = 0;
 
-  //store a lot of heigh prime numbers
+  /**
+   * @brief store a lot of heigh prime numbers
+   */
   int primes[maxPrimeIndex][3] = {
     { 995615039, 600173719, 701464987 },
     { 831731269, 162318869, 136250887 },
@@ -106,7 +101,14 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
     { 997169939, 842027887, 423882827 }
   };
 
-  //calculate simple noise
+  /**
+   * @brief calculate simplex noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the noise value at the specified position
+   */
   float Noise(int i, int x, int y) {
     //do some magic
     int n = x + y * 57;
@@ -116,7 +118,14 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
     //output a semi-random number
     return 1.0 - (float)(t)/1073741824.0;
   }
-
+  /**
+   * @brief calculate smoothed simplex noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the smoothed noise value
+   */
   float SmoothedNoise(int i, int x, int y) {
     //calculate a lot of noise
     float corners = (Noise(i, x-1, y-1) + Noise(i, x+1, y-1) +
@@ -128,6 +137,14 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
     return corners + sides + center;
   }
 
+  /**
+   * @brief interpolate between two numbers
+   * 
+   * @param a the first number
+   * @param b the second number
+   * @param x the interpolation slider
+   * @return float the interpolated value
+   */
   float Interpolate(float a, float b, float x) {  // cosine interpolation
     //multiply x by pi and calculate the half of 1 minus cosine of ft(x * PI)
     float ft = x * GLGE_PI,
@@ -136,6 +153,14 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
     return  a*(1-f) + b*f;
   }
 
+  /**
+   * @brief even smoother noise than smooth noise
+   * 
+   * @param i the iteration
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the interpolated and smoothed noise
+   */
   float InterpolatedNoise(int i, float x, float y) {
     //store the inputed x as an integer
     int integer_X = x;
@@ -156,6 +181,13 @@ vec3 glgeRotateVector(float angle, vec3 v, vec3 target)
     return Interpolate(i1, i2, fractional_Y);
   }
 
+  /**
+   * @brief value noise
+   * 
+   * @param x the x position to sample the noise
+   * @param y the y position to sample the noise
+   * @return float the noise at the sample position
+   */
   float ValueNoise_2D(float x, float y) {
     //set the total to 0
     float total = 0,
@@ -262,6 +294,42 @@ float glgeGetPersistance()
     return persistence;
 }
 
+unsigned int glgeClamp(unsigned int v, unsigned int min, unsigned int max)
+{
+    //check if the value is smaler than the minimal value
+    if (v < min)
+    {
+        //if it is, then the value is the minimum
+        v = min;
+    }
+    //else, if the value is greater than the maximum
+    else if (v > max)
+    {
+        //then the value is the maximum
+        v = max;
+    }
+    //return the value
+    return v;
+}
+
+int glgeClamp(int v, int min, int max)
+{
+    //check if the value is smaler than the minimal value
+    if (v < min)
+    {
+        //if it is, then the value is the minimum
+        v = min;
+    }
+    //else, if the value is greater than the maximum
+    else if (v > max)
+    {
+        //then the value is the maximum
+        v = max;
+    }
+    //return the value
+    return v;
+}
+
 float glgeClamp(float v, float min, float max)
 {
     //check if the value is smaler than the minimal value
@@ -298,6 +366,42 @@ vec4 glgeClamp(vec4 v, float min, float max)
     return vec4(glgeClamp(v.x, min, max), glgeClamp(v.y, min, max), glgeClamp(v.z, min, max), glgeClamp(v.w, min, max));
 }
 
+void glgeClamp(float* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec2* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec3* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(vec4* v, float min, float max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(int* v, int min, int max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
+void glgeClamp(unsigned int* v, unsigned int min, unsigned int max)
+{
+    //cast to the clamp function
+    *v = glgeClamp(*v, min, max);
+}
+
 //convert the angle a to radians
 float glgeToRadians(float a)
 {
@@ -322,4 +426,81 @@ float glgeMin(float value, float max)
 {
     //if the value is less than max, return the value, else max
     return (max >= value) ? max : value;
+}
+
+Quaternion glgeCreateRotationQuaternion(float angle, vec3 axis)
+{
+    //articel to check the math: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    //create the quaternion to return
+    Quaternion q;
+    //pre-calculate the sin of the half angle, so it is only calculate once
+    float sinh = std::sin(angle/2.f);
+    //set the angle
+    q.w = std::cos(angle / 2.f);
+    //calcualte the axis part of the quaternion
+    q.x = sinh * axis.x;
+    q.y = sinh * axis.y;
+    q.z = sinh * axis.z;
+    //return the finished quaternion
+    return q;
+}
+
+Quaternion glgeEulerToQuaternion(vec3 rot)
+{
+    //math: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    //pre-calculate all posibilitys for sin and cosin
+    float cr = std::cos(rot.x * 0.5);
+    float sr = std::sin(rot.x * 0.5);
+    float cp = std::cos(rot.y * 0.5);
+    float sp = std::sin(rot.y * 0.5);
+    float cy = std::cos(rot.z * 0.5);
+    float sy = std::sin(rot.z * 0.5);
+    //create the quaternion to return
+    Quaternion q;
+    //calculate the quaternion from the sin and cos precalculations
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+    //return the quaternion
+    return q;
+}
+
+Quaternion glgeEulerToQuaternion(float x, float y, float z)
+{
+    //cast to another function
+    return glgeEulerToQuaternion(vec3(x,y,z));
+}
+
+vec3 glgeQuaternionToEuler(Quaternion q)
+{
+    //math: https://danceswithcode.net/engineeringnotes/quaternions/quaternions.html
+    //pre-compute this, it gets used twice
+    float tmp = q.w*q.w - q.x*q.x - q.y*q.y - q.z*q.z;
+    //calculate the rotation around the x axis
+    float x = std::atan2(2*(q.w*q.x - q.y*q.z),tmp);
+    //calculate the rotation around the y axis
+    float y = std::asin(2*(q.w*q.y - q.x*q.z));
+    //calculate the rotation around the z axis
+    float z = std::atan2(2*(q.w*q.z - q.x*q.y),tmp);
+    //return the finished rotations as vector
+    return vec3(x,y,z);
+}
+
+vec3 glgeAngleToDir(vec3 rot)
+{
+    //convert the inputed rotation to a quaternion
+    Quaternion euler = glgeEulerToQuaternion(rot);
+    //rotate the z-axis as quaternion around the point
+    Quaternion q = euler * Quaternion(0,0,0,1) * euler.invert();
+    //extract the direction vector
+    vec3 dir = vec3(q.x,q.y,q.z);
+    //return the extracted direction
+    return dir;
+}
+
+vec3 glgeAngleToDir(float x, float y, float z)
+{
+    //cast to another function
+    return glgeAngleToDir(vec3(x,y,z));
 }

@@ -13,7 +13,122 @@
 #define _GLGE_2D_CORE_OGL_H_
 
 //include the base classes for the 2D core
-#include "../GLGEInternal/glge2DcoreDefClasses.h"
+#include "../GLGEIndependend/glge2DcoreDefClasses.h"
+//include the base
+#include "openglGLGE.h"
+//include textures
+#include "openglGLGETexture.hpp"
+
+///////////
+//CLASSES//
+///////////
+
+/**
+ * @brief store a 2D mesh
+ */
+class Mesh2D
+{
+public:
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * default constructor
+     */
+    Mesh2D();
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices as an pointer array
+     * @param indices the indices as an pointer array
+     * @param sizeOfVertices the size of the vertex pointer array
+     * @param sizeOfIndices the size of the indices pointer array
+     */
+    Mesh2D(Vertex2D* vertices, unsigned int* indices, unsigned int sizeOfVertices, unsigned int sizeOfIndices);
+
+    /**
+     * @brief Construct a new Mesh 2D
+     * 
+     * @param vertices the vertices in an std vector
+     * @param indices the indices in an std vector
+     */
+    Mesh2D(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief Construct a new Mesh 2D from an preset
+     * 
+     * @param preset the preset to choose (Starting with GLGE_PRESET_)
+     * @param resolution the resolution or scale for the preset
+     * @param color the color for the vertices (w = -1 for texture coordinates)
+     */
+    Mesh2D(unsigned int preset, unsigned int resolution, vec4 color = vec4(1));
+
+    /**
+     * @brief Delete the 2D mesh
+     */
+    ~Mesh2D();
+
+    /**
+     * @brief bind the 2D mesh to OpenGL
+     */
+    void bind();
+
+    /**
+     * @brief unbind the 2D mesh
+     */
+    void unbind();
+
+    /**
+     * @brief recalculate the vertex buffer
+     */
+    void updateVertexBuffer();
+
+    /**
+     * @brief recalculate the index buffer
+     */
+    void updateIndexBuffer();
+
+    /**
+     * @brief recalculate the vertex and index buffer
+     */
+    void recalculateBuffers();
+
+    /**
+     * @brief Set the Data for the mesh
+     * 
+     * @param vertices the new vertices
+     * @param indices the new indices
+     */
+    void setData(std::vector<Vertex2D> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief store the indices of the mesh
+     */
+    std::vector<unsigned int> indices;
+    /**
+     * @brief store the vertices of the mehs
+     */
+    std::vector<Vertex2D> vertices; 
+
+private:
+    /**
+     * @brief Create the OpenGL buffers
+     */
+    void createBuffers();
+
+    /**
+     * @brief store the vertex buffer object
+     */
+    unsigned int VBO = 0;
+    /**
+     * @brief store the index buffer object
+     */
+    unsigned int IBO = 0;
+    /**
+     * @brief store the window index
+     */
+    int windowID = -1;
+};
 
 /**
  * @brief an 2D object
@@ -57,7 +172,7 @@ public:
      * @param transform the transform of the object
      * @param isStatic say if the object should stay on the same screen position relative to the world
      */
-    Object2D(Mesh2D mesh, Transform2D transform = Transform2D(), bool isStatic = false);
+    Object2D(Mesh2D* mesh, Transform2D transform = Transform2D(), bool isStatic = false);
 
     /**
      * @brief Construct a new 2D object
@@ -68,7 +183,12 @@ public:
      * @param transform the transform of the object
      * @param isStatic say if the object should stay on the same screen position relative to the world
      */
-    Object2D(unsigned int preset, unsigned int resolution, vec4 color, Transform2D transform = Transform2D(), bool isStatic = false);
+    Object2D(unsigned int preset, vec4 color, unsigned int resolution, Transform2D transform = Transform2D(), bool isStatic = false);
+
+    /**
+     * @brief Destroy the 2D Object
+     */
+    ~Object2D();
 
     /**
      * @brief draw the object to the screen
@@ -81,46 +201,18 @@ public:
     void update();
 
     /**
-     * @brief update the vertex buffer
-     * 
-     * @param mesh an optional argument to also asign a new mesh
-     */
-    void recalculateVertexBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
-     * @brief update the index buffer
-     * 
-     * @param mesh an optinal argument to also asign a new mesh
-     */
-    void recalculateIndexBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
-     * @brief update the complete mesh buffers
-     * 
-     * @param mesh an optional new mesh
-     */
-    void recalculateMeshBuffer(Mesh2D mesh = Mesh2D());
-
-    /**
      * @brief assign a new mesh to the object
      * 
      * @param mesh the new mesh data
      */
-    void setMesh(Mesh2D mesh);
+    void setMesh(Mesh2D* mesh);
 
     /**
      * @brief Get the Mesh from the object
      * 
      * @return Mesh2D the mesh from the object
      */
-    Mesh2D getMesh();
-
-    /**
-     * @brief Set the Shader
-     * 
-     * @param path the path and prefix for the shader files. Suffixes are automaticaly .fs and .vs
-     */
-    void setShader(const char* path);
+    Mesh2D* getMesh();
 
     /**
      * @brief Set the Shader
@@ -138,11 +230,18 @@ public:
     void setShader(std::string vertexShader, std::string fragmentShader);
 
     /**
+     * @brief Set the shader for the object
+     * 
+     * @param shader a pointer to the new shader
+     */
+    void setShader(Shader* shader);
+
+    /**
      * @brief Get the Shader
      * 
-     * @return unsigned int the compiled shader
+     * @return Shader* the GLGE shader
      */
-    unsigned int getShader();
+    Shader* getShader();
 
     /**
      * @brief Set the Texture for the object
@@ -152,23 +251,18 @@ public:
     void setTexture(const char* file);
 
     /**
-     * @brief Set the Texture for the object
+     * @brief Set the own texture
      * 
-     * @param texture the allready compiled OpenGL texture
+     * @param texture a pointer to the new texture
      */
-    void setTexture(unsigned int texture);
+    void setTexture(Texture* texture);
 
     /**
-     * @brief deletes the own texture and sets it to 0
-     */
-    void deleteTexture();
-
-    /**
-     * @brief Get the Texture from the file
+     * @brief Get the own texture
      * 
-     * @return unsigned int the allready compiled OpenGL texture
+     * @return Texture* a pointer to the own texture
      */
-    unsigned int getTexture();
+    Texture* getTexture();
 
     /**
      * @brief Set the Transform for the object
@@ -249,14 +343,14 @@ public:
      * 
      * @param dir the direction for the object in degrees
      */
-    void setRotation(float dir);
+    void setRot(float dir);
 
     /**
      * @brief Get the Rotation from the object
      * 
      * @return float the rotation in degrees
      */
-    float getRotation();
+    float getRot();
 
     /**
      * @brief change the scale of the object
@@ -347,60 +441,92 @@ public:
      */
     bool getStatic();
 
+    /**
+     * @brief endoce the object to some object data
+     * 
+     * @return glgeObjectData the encoded object data
+     */
+    Data* encode();
+
+    /**
+     * @brief set the object to some object data
+     * 
+     * @param data the data to set the object to
+     */
+    void decode(Data data);
+
+    /**
+     * @brief a hook into the encoding process to use if you don't want to override the original function | TIMESTAMP: before return
+     * 
+     * @param data a pointer to the encoded data AFTER the encoding process
+     */
+    virtual void encodeHook(Data* data);
+
+    /**
+     * @brief a hook into the encoding process to use if you don't want to override the original function | TIMESTAMP: before start
+     * 
+     * @param data a pointer to the encoded data BEFORE the encoding process
+     */
+    virtual void encodeHookEarly(Data* data);
+
+    /**
+     * @brief a hook into the decoding process to use if you don't want to override the original function | TIMESTAMP: before return
+     * 
+     * @param data a pointer to the left data AFTER the decoding process
+     */
+    virtual void decodeHook(Data* data);
+
+    /**
+     * @brief a hook into the decoding process to use if you don't want to override the original function | TIMESTAMP: before start
+     * 
+     * @param data a pointer to the entire data BEFORE the decoding process
+     */
+    virtual void decodeHookEarly(Data* data);
+
 protected:
-    //store the anchor position for the 2D Object
+    /**
+     * @brief store the anchor position for the 2D Object
+     */
     vec2 anchor = vec2(0);
-    //store the mesh for the object
-    Mesh2D mesh;
-    //store the transform of the object
+    /**
+     * @brief store the transform of the object
+     */
     Transform2D transf;
-    //store the vertex and index buffer
-    unsigned int VBO, IBO;
-    //save the shader
-    int shader;
-    //store the move matrix location
-    unsigned int moveMatLoc;
-    //the local matrix to make the object correct
+    /**
+     * @brief store a pointer to the own mesh
+     */
+    Mesh2D* mesh = 0;
+    /**
+     * @brief save the shader
+     */
+    Shader* shader = 0;
+    /**
+     * @brief the local matrix to make the object correct
+     */
     mat3 moveMat = mat3(1,0,0,
                         0,1,0,
                         0,0,0);
-    //store a texture
-    unsigned int texture;
-    //say if the object is static
-    bool isStatic;
-    //save the length of the vertex and index buffer
-    unsigned int VBOLen, IBOLen;
-    //store the object UUID
+    /**
+     * @brief store a texture
+     */
+    Texture* texture = 0;
+    /**
+     * @brief say if the object is static
+     */
+    bool isStatic = false;
+    /**
+     * @brief store the object UUID
+     */
     unsigned int id = 0;
-    //store the window the buffers where created in
+    /**
+     * @brief store the window the buffers where created in
+     */
     int windowID = -1;
 
     /**
-     * @brief Create the buffers
+     * @brief perform any setup scripts for the object that are not mesh-related
      */
-    void createBuffers();
-
-    /**
-     * @brief create the vertex buffer or update it
-     * 
-     * @param mesh the new mesh
-     */
-    void updateVertexBuffer();
-
-    /**
-     * @brief create the index buffer or update it
-     * 
-     * @param mesh the new mesh
-     */
-    void updateIndexBuffer();
-
-    /**
-     * @brief setup the shaders
-     * 
-     * @param vs the vertex shader
-     * @param fs the fragment shader
-     */
-    void shaderSetup(const char* vs, const char* fs);
+    void superConstructor();
 
     /**
      * @brief recalculate the local move matrix
@@ -740,6 +866,20 @@ public:
      */
     bool hoverStopThisTick();
 
+    /**
+     * @brief a hook into the encoding process
+     * 
+     * @param data the encoded data
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief a hook into the decoding process
+     * 
+     * @param data the data to decode
+     */
+    void decodeHook(Data* data) override;
+
 protected:
     /**
      * @brief store if the button was clicked last tick
@@ -773,6 +913,251 @@ protected:
      * @brief store the width and height or radius
      */
     vec2 size = vec2(0);
+};
+
+/**
+ * @brief a simple class to render text with SDL2
+ */
+class Text : public Object2D
+{
+public:
+    /**
+     * @brief Construct a new Text
+     * 
+     * default constructor
+     */
+    Text();
+
+    /**
+     * @brief Construct a new Text
+     * 
+     * @param text the text to render
+     * @param font the font for the text
+     * @param color the color of the text
+     * @param fontSize the font size of the text
+     * @param transf the transform for the text
+     * @param dynamicMesh true : the mesh will be recalculated every time the words change | false : the mesh won't change
+     */
+    Text(const char* text, const char* font, vec4 color = vec4(0,0,0,1), int fontSize = 30, Transform2D transf = Transform2D(), bool dynamicMesh = true);
+
+    /**
+     * @brief Get the text from this text element
+     * 
+     * @return std::string the text
+     */
+    std::string getText();
+
+    /**
+     * @brief Get the path to the used font
+     * 
+     * @return std::string the path to the font
+     */
+    std::string getFont();
+
+    /**
+     * @brief Set the text for this text element
+     * 
+     * @param text the new text for the text object
+     */
+    void setText(std::string text);
+
+    /**
+     * @brief Set the font for this text element
+     * 
+     * @param fontPath the path to the font file
+     */
+    void setFont(std::string fontPath);
+
+    /**
+     * @brief Get the font scale
+     * 
+     * @return int the font scale
+     */
+    unsigned int getFontSize();
+
+    /**
+     * @brief Set the font scale factor
+     * 
+     * @param fontScale the new font scale
+     */
+    void setFontSize(unsigned int fontScale);
+
+    /**
+     * @brief get the color of the text
+     * 
+     * @return vec4 the text color
+     */
+    vec4 getTextColor();
+
+    /**
+     * @brief Set the color for the text
+     * 
+     * @param color the new text color
+     */
+    void setTextColor(vec4 color);
+
+    /**
+     * @brief Get the texture containing the text
+     * 
+     * @return Texture* a pointer to the GLGE texture
+     */
+    Texture* getTextTexture();
+
+    /**
+     * @brief Get if dynamic meshing is activated
+     * 
+     * @return true : the mesh will be recalculated every time the words change | 
+     * @return false : the mesh won't change
+     */
+    bool getDynamicMeshing();
+
+    /**
+     * @brief Set if dynamic meshing is activated or not
+     * 
+     * @param dynamicMesh true : the mesh will be recalculated every time the words change | false : the mesh won't change
+     */
+    void setDynamicMeshing(bool dynamicMesh);
+
+    /**
+     * @brief encode the needed data to store this object
+     * 
+     * @param data the data to store in
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief decode the data to generate this object
+     * 
+     * @param data the data to use
+     */
+    void decodeHook(Data* data) override;
+
+protected:
+    //the text the object is displaying
+    std::string text;
+    //store the size of the texture
+    vec2 texSize;
+    //store the font size
+    unsigned int fontSize = 30;
+    //store the color of the text
+    vec4 color;
+    //store the font
+    std::string font;
+    //store if dynamic meshing is activated
+    bool dynamicMesh = true;
+
+    //update the texture
+    void updateTexture();
+};
+
+/**
+ * @brief A class to handle simple text input
+ */
+class TextInput : public Text
+{
+public:
+
+    /**
+     * @brief default constructor
+     * 
+     */
+    TextInput();
+
+    /**
+     * @brief Construct a new Text Input box
+     * 
+     * @param text the default text
+     * @param font the font for the text
+     * @param color the color of the text
+     * @param fontSize the font size of the text
+     * @param transf the transform for the text
+     */
+    TextInput(const char* text, const char* font, vec4 color = vec4(0,0,0,1), int fontSize = 30, Transform2D transf = Transform2D());
+
+    /**
+     * @brief update the text input box
+     */
+    void update();
+
+    /**
+     * @brief get if the object is currently focused
+     * 
+     * @return true : the object accepts text input | 
+     * @return false : the object is just text
+     */
+    bool isFocused();
+
+    /**
+     * @brief get if the object will cleare once it is focused
+     * 
+     * @return true : the object will clear | 
+     * @return false : the object wont clear
+     */
+    bool isEmpty();
+
+    /**
+     * @brief Set a function that should be called every time something is typed
+     * 
+     * @param func the function to call
+     */
+    void setOnTypeFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called every time something is typed
+     */
+    void (*getOnTypeFunc())();
+
+    /**
+     * @brief Set a function that should be called if the text input is enterd
+     * 
+     * @param func the function to call
+     */
+    void setOnEnterFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called if the text input is enterd
+     */
+    void (*getOnEnterFunc())();
+
+    /**
+     * @brief Set a function that should be called if the text input is exited
+     * 
+     * @param func the function to call
+     */
+    void setOnExitFunction(void (*func)());
+
+    /**
+     * @brief Get the function that should be called if the text input is exited
+     */
+    void (*getOnExitFunc())();
+
+    /**
+     * @brief encode the needed data to store this object
+     * 
+     * @param data the data to store in
+     */
+    void encodeHook(Data* data) override;
+
+    /**
+     * @brief decode the data to generate this object
+     * 
+     * @param data the data to use
+     */
+    void decodeHook(Data* data) override;
+    
+protected:
+    //store the current courser position
+    int cursourPos = 0;
+    //store if the box is focused
+    bool focused = false;
+    //store if the text is empty
+    bool empty = false;
+    //store the on tick function
+    void (*onTypeFunc)() =  NULL;
+    //store the on enter function
+    void (*onEnterFunc)() =  NULL;
+    //store the on exit function
+    void (*onExitFunc)() =  NULL;
 };
 
 //FUNCTIONS

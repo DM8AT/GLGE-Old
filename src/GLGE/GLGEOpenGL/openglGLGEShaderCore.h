@@ -19,33 +19,59 @@
 #include <map>
 //CML
 #include "../CML/CML.h"
+//include the data class
+#include "../GLGEIndependend/GLGEData.h"
 
 //check if the material core is allready included
 #ifndef _GLGE_MATERIAL_CORE_H_
 
-//define the mode for setting custom values
+/**
+ * @brief define the mode for setting custom values
+ */
 #define GLGE_MODE_SET 0
-//define the mode for adding custom values
+/**
+ * @brief define the mode for adding custom values
+ */
 #define GLGE_MODE_ADD 1
-//define the mode for subtracting custom values
+/**
+ * @brief define the mode for subtracting custom values
+ */
 #define GLGE_MODE_SUBTRACT 2
-//define the mode for multipliing custom values
+/**
+ * @brief define the mode for multipliing custom values
+ */
 #define GLGE_MODE_MULTIPLY 3
-//define the mode for dividing custom values
+/**
+ * @brief define the mode for dividing custom values
+ */
 #define GLGE_MODE_DIVIDE 4
-//define the mode for a cross product
+/**
+ * @brief define the mode for a cross product
+ */
 #define GLGE_MODE_CROSS 5
-//define the mode for a logical and opperation
+/**
+ * @brief define the mode for a logical and opperation
+ */
 #define GLGE_MODE_AND 6
-//define the mode for a logical or opperation
+/**
+ * @brief define the mode for a logical or opperation
+ */
 #define GLGE_MODE_OR 7
-//define the mode for a logical not opperation
+/**
+ * @brief define the mode for a logical not opperation
+ */
 #define GLGE_MODE_NOT 8
-//define the mode for a logical nand opperation
+/**
+ * @brief define the mode for a logical nand opperation
+ */
 #define GLGE_MODE_NAND 9
-//define the mode for a logical nor opperation
+/**
+ * @brief define the mode for a logical nor opperation
+ */
 #define GLGE_MODE_NOR 10
-//define the mode for a logical xor opperation
+/**
+ * @brief define the mode for a logical xor opperation
+ */
 #define GLGE_MODE_XOR 11
 
 //close the if-statement
@@ -55,11 +81,38 @@
 //DEFINES//
 ///////////
 
-//define GLGE_VERTEX_SHADER to 1, it is needed in an constructor of the Shader class
+/**
+ * @brief define GLGE_VERTEX_SHADER to 1, it is needed in an constructor of the Shader class
+ */
 #define GLGE_VERTEX_SHADER 1
-//define GLGE_FRAGMENT_SHADER to 2, it is needed in an constructor of the Shader class
+/**
+ * @brief define GLGE_FRAGMENT_SHADER to 2, it is needed in an constructor of the Shader class
+ */
 #define GLGE_FRAGMENT_SHADER 2
-//define GLGE_GEOMETRY_SHADER to 3, it is needed in an additional function of the shader class
+/**
+ * @brief define GLGE_GEOMETRY_SHADER to 3, it is needed in an additional function of the shader class
+ */
+#define GLGE_GEOMETRY_SHADER 3
+
+///////////
+//STRUCTS//
+///////////
+
+struct ShaderSource
+{
+    /**
+     * @brief store the source code for the vertex shader
+     */
+    std::string vertex;
+    /**
+     * @brief store the source code for the fragment shader
+     */
+    std::string fragment;
+    /**
+     * @brief store the source code for the geometry shader
+     */
+    std::string geometry;
+};
 
 ///////////
 //CLASSES//
@@ -140,6 +193,11 @@ public:
      * @param shader the compiled shader
      */
     Shader(unsigned int shader);
+
+    /**
+     * @brief Destroy the Shader
+     */
+    virtual ~Shader();
 
     /**
      * @brief set the shader to the current active shader
@@ -407,55 +465,157 @@ public:
      */
     void recalculateUniforms();
     
-private:
-    //store the address of the OpenGL shader
+    /**
+     * @brief get the entire shader source code
+     * 
+     * @return ShaderSource the shader source code
+     */
+    ShaderSource getSRC();
+
+    /**
+     * @brief encode the object to some data
+     * 
+     * @param data the data to encode the object into
+     */
+    void encode(Data* data);
+    /**
+     * @brief decode the object from some data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
+
+    /**
+     * @brief encode all the uniforms for the shader
+     * 
+     * @param data the data to encode into
+     */
+    void encodeUniforms(Data* data);
+    /**
+     * @brief decode all the uniforms for the shader
+     * 
+     * @param data the data to decode from
+     */
+    void decodeUniforms(Data* data);
+
+    /**
+     * @brief a hook into the encoding process
+     * 
+     * @param data the data to encode into
+     */
+    virtual void encodeHook(Data* data);
+    /**
+     * @brief a hook into the decoding process
+     * 
+     * @param data the data to decode from
+     */
+    virtual void decodeHook(Data* data);
+
+protected:
+    /**
+     * @brief store the address of the OpenGL shader
+     */
     unsigned int shader = 0;
-    //store how many textures are bound
+    /**
+     * @brief store how many textures are bound
+     */
     int boundTextures = 0;
+    /**
+     * @brief store the shader source
+     */
+    ShaderSource src;
 
     //custom values
 
-    //store the custom values (floats)
+    /**
+     * @brief store the custom values (floats)
+     */
     std::map<std::string, float> floats;
-    //store the custom values (integers)
+    /**
+     * @brief store the custom values (integers)
+     */
     std::map<std::string, int> integers;
-    //store the custom values (booleans)
+    /**
+     * @brief store the custom values (booleans)
+     */
     std::map<std::string, bool> booleans;
-    //store the custom values (vec2)
+    /**
+     * @brief store the custom values (vec2)
+     */
     std::map<std::string, vec2> vec2s;
-    //store the custom values (vec3)
+    /**
+     * @brief store the custom values (vec3)
+     */
     std::map<std::string, vec3> vec3s;
-    //store the custom values (vec4)
+    /**
+     * @brief store the custom values (vec4)
+     */
     std::map<std::string, vec4> vec4s;
-    //store the custom values (mat2)
+    /**
+     * @brief store the custom values (mat2)
+     */
     std::map<std::string, mat2> mat2s;
-    //store the custom values (mat3)
+    /**
+     * @brief store the custom values (mat3)
+     */
     std::map<std::string, mat3> mat3s;
-    //store the custom values (mat4)
+    /**
+     * @brief store the custom values (mat4)
+     */
     std::map<std::string, mat4> mat4s;
-    //store a custom texture
+    /**
+     * @brief store a custom texture
+     */
     std::map<std::string, unsigned int> customTextures;
 
-    //store the locations of the custom floats
+    /**
+     * @brief store the locations of the custom floats
+     */
     std::map<std::string, unsigned int> floatLocs;
-    //store the locations of the custom integers
+    /**
+     * @brief store the locations of the custom integers
+     */
     std::map<std::string, unsigned int> intLocs;
-    //store the locations of the custom booleans
+    /**
+     * @brief store the locations of the custom booleans
+     */
     std::map<std::string, unsigned int> boolLocs;
-    //store the locations of the custom vec2s
+    /**
+     * @brief store the locations of the custom vec2s
+     */
     std::map<std::string, unsigned int> vec2Locs;
-    //store the locations of the custom vec3s
+    /**
+     * @brief store the locations of the custom vec3s
+     */
     std::map<std::string, unsigned int> vec3Locs;
-    //store the locations of the custom vec4s
+    /**
+     * @brief store the locations of the custom vec4s
+     */
     std::map<std::string, unsigned int> vec4Locs;
-    //store the locations of the custom mat2s
+    /**
+     * @brief store the locations of the custom mat2s
+     */
     std::map<std::string, unsigned int> mat2Locs;
-    //store the locations of the custom mat3s
+    /**
+     * @brief store the locations of the custom mat3s
+     */
     std::map<std::string, unsigned int> mat3Locs;
-    //store the locations of the custom mat4s
+    /**
+     * @brief store the locations of the custom mat4s
+     */
     std::map<std::string, unsigned int> mat4Locs;
-    //store the locations of the custom textures
+    /**
+     * @brief store the locations of the custom textures
+     */
     std::map<std::string, unsigned int> customTextureLocs;
+
+    /**
+     * @brief super constructor
+     * 
+     * @param vs the source code for the vertex shader
+     * @param fs the source code for the fragment shader
+     */
+    void super(std::string vs, std::string fs);
 };
 
 /////////////
@@ -502,21 +662,5 @@ int glgeAddCustomPostProcessingFunc(Shader (*func)(unsigned int));
  * @param index the index of execution of the function
  */
 void glgeDeleteCusotmPostProcessingFunc(int index);
-
-/**
- * @brief delete a custom post processing function
- * 
- * @param func the function that should be removed
- */
-void glgeDeleteCusotmPostProcessingFunc(Shader (*func)(unsigned int));
-
-/**
- * @brief get the index of execution of an custom post-processing function
- * 
- * @param func the function pointer
- * @return int the index of execution
- */
-int glgeGetIndexOfCustomPostProcessingFunc(Shader (*func)(unsigned int));
-
 
 #endif

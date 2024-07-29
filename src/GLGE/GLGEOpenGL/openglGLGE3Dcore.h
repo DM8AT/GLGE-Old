@@ -20,7 +20,190 @@
 #include "openglGLGE.h"
 
 //include the 3D core base
-#include "../GLGEInternal/glge3DcoreDefClasses.h"
+#include "../GLGEIndependend/glge3DcoreDefClasses.h"
+//include the data class
+#include "../GLGEIndependend/GLGEData.h"
+
+/**
+ * @brief the same as the buffer for the object data on the GPU
+ */
+struct ObjectData
+{
+    //the model matrix of the object
+    mat4 modelMat;
+    //the rotation matrix of the object
+    mat4 rotMat;
+    //the objects uuid
+    unsigned int uuid;
+};
+
+/**
+ * @brief store the mesh for a 3D object
+ */
+class Mesh
+{
+public:
+    /**
+     * @brief defalut constructor
+     */
+    Mesh();
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param preset the preset to use
+     * @param color the color for the mesh (alpha = -1 for texture coordinates)
+     * @param resolution the amount of subdivision for subdivided meshes (0 for defaults)
+     */
+    Mesh(unsigned int preset, vec4 color, unsigned int resolution = 0);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param vertices a pointer array to store the vertices
+     * @param indices a pointer array to store the indices
+     * @param sizeVertices the size of the vertices pointer
+     * @param sizeIndices the size of the indices pointer
+     */
+    Mesh(Vertex* vertices, unsigned int* indices, unsigned int sizeVertices, unsigned int sizeIndices);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * @param vertices the vertices in an std::vector
+     * @param indices the indices in an std::vector
+     */
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats:
+     * .obj
+     * 
+     * @param data the data from an for the mesh
+     * @param type the type of the data (what file format was used)
+     */
+    Mesh(std::string data, int type);
+
+    /**
+     * @brief Construct a new Mesh
+     * 
+     * Supported formats: 
+     * .obj
+     * 
+     * @param file the file to read the data from
+     * @param type the type of the file
+     */
+    Mesh(const char* file, int type);
+
+    /**
+     * @brief Destroy the Mesh
+     */
+    ~Mesh();
+
+    /**
+     * @brief recalculate the normal vectors from the mesh in clockwise order
+     */
+    void recalculateNormals();
+
+    /**
+     * @brief apply the transform to the mesh data
+     * 
+     * @param transform the transform to apply
+     */
+    void applyTransform(Transform transform);
+
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
+    Mesh join(Mesh mesh);
+
+    /**
+     * @brief join an mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
+    void joinThis(Mesh mesh);
+
+    /**
+     * @brief join another mesh to this mesh
+     * 
+     * @param mesh the other mesh
+     */
+    void operator+=(Mesh mesh);
+
+    /**
+     * @brief join two meshes
+     * 
+     * @param mesh the other mesh
+     * @return Mesh the joined mesh
+     */
+    Mesh operator+(Mesh mesh);
+
+    /**
+     * @brief update the OpenGL mesh
+     * 
+     * @warning this transfers a lot of data between the CPU and GPU. This might lead to poor performance. 
+     */
+    void update();
+
+    /**
+     * @brief this initalises the OpenGL buffers and dose nothing if it was allready initalised
+     */
+    void init();
+
+    /**
+     * @brief bind the mesh to be read from
+     */
+    void bind();
+
+    /**
+     * @brief unbind the mesh
+     */
+    void unbind();
+
+    //store the vertices for the object
+    std::vector<Vertex> vertices;
+    //store the indices for the object
+    std::vector<unsigned int> indices;
+
+public:
+    /**
+     * @brief construct a mesh using vertices
+     * 
+     * @param vertices the vertices to use
+     * @param indices the indices to use
+     */
+    void superVec(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+
+    /**
+     * @brief construct a mesh using a preset
+     * 
+     * @param preset the preset id to use
+     * @param color the color for the preset
+     * @param resolution the resolution of the preset
+     */
+    void superPres(unsigned int preset, vec4 color, unsigned int resolution);
+
+    /**
+     * @brief construct a mesh from a file
+     * 
+     * @param data the data of the file to use
+     * @param type the type of the file
+     */
+    void superFile(std::string data, int type);
+private:
+    //store the vertex buffer object
+    unsigned int VBO = 0;
+    //store the index buffer object
+    unsigned int IBO = 0;
+    //store the index of the own window
+    int windowID = -1;
+};
 
 /**
  * @brief store an 3D object
@@ -79,7 +262,7 @@ public:
      * @param isTransparent say if an object is renderd in the transparent or opaque pass
      * @param isStatic says if the object should move with the camera
      */
-    Object(Mesh mesh, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
+    Object(Mesh* mesh, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
 
     /**
      * @brief Construct a new Object
@@ -91,6 +274,16 @@ public:
      * @param isStatic says if the object should move with the camera
      */
     Object(const char* file, int type, Transform transform = Transform(), bool isTransparent = false, bool isStatic = false);
+
+    /**
+     * @brief Destroy the Object
+     */
+    ~Object();
+
+    /**
+     * @brief delete the object
+     */
+    void destroy();
 
     /**
      * @brief draw the object to the screen
@@ -205,15 +398,16 @@ public:
      * 
      * @param rotation the new rotation for the Objct
      */
-    void setRotation(vec2 rotation);
+    void setRotation(vec3 rotation);
 
     /**
      * @brief Set the Rotation of the Objct
      * 
      * @param x the x rotation for the Objct
      * @param y the y rotation for the Objct
+     * @param z the z rotation for the Object
      */
-    void setRotation(float x, float y);
+    void setRotation(float x, float y, float z);
 
     /**
      * @brief rotate the Objct
@@ -324,33 +518,28 @@ public:
      * 
      * @param mesh the new mesh
      */
-    void setOnlyMesh(Mesh mesh);
-
-    /**
-     * @brief recalculate the vertex and index buffer
-     */
-    void recalculateBuffers();
+    void setOnlyMesh(Mesh* mesh);
 
     /**
      * @brief Set the Mesh for the Object
      * 
      * @param mesh the new mesh for the Object
      */
-    void setMesh(Mesh mesh);
+    void setMesh(Mesh* mesh);
 
     /**
      * @brief Get the Mesh from the object
      * 
      * @return Mesh the mesh of the object
      */
-    Mesh getMesh();
+    Mesh* getMesh();
 
     /**
      * @brief Set the Material for the object
      * 
      * @param material the new material for the object
      */
-    void setMaterial(Material material);
+    void setMaterial(Material* material);
 
     /**
      * @brief Get the Material from the object
@@ -396,13 +585,24 @@ public:
      */
     bool getFullyTransparent();
 
+    /**
+     * @brief encode the data to a single data object
+     * 
+     * @return Data* a pointer to the encoded data
+     */
+    Data* encode();
+    /**
+     * @brief decode the object from a signle data object
+     * 
+     * @param data the encoded data
+     */
+    void decode(Data data);
+
 private:
     //store the transform for the object
     Transform transf;
     //store a mesh
-    Mesh mesh;
-    //store the vertex and index buffer
-    unsigned int VBO ,IBO;
+    Mesh* mesh;
     //store if the object is transparent or opaque
     bool isTransparent = false;
     //save the shader
@@ -412,22 +612,10 @@ private:
                         0,1,0,0,
                         0,0,1,0,
                         0,0,0,1);
-    //this matrix is needed to calculate the lighting
-    mat4 modelMat = mat4(1,0,0,0,
-                         0,1,0,0,
-                         0,0,1,0,
-                         0,0,0,1);
-    //store the rotation matrix
-    mat4 rotMat = mat4(1,0,0,0,
-                       0,1,0,0,
-                       0,0,1,0,
-                       0,0,0,1);
     //store if the object is static
     bool isStatic;
-    //store the length of the index and vertex vuffer
-    unsigned int VBOLen, IBOLen;
     //store the material of the object
-    Material mat;
+    Material* mat = 0;
     //store the position of the light positions
     std::vector<unsigned int> lightPosLocs;
     //store the position of the light colors
@@ -440,15 +628,16 @@ private:
     unsigned int usedLigtsPos;
     //store the position for the shadow maps
     unsigned int shadowMapSamplerLoc;
-    //store the object UUID
-    unsigned int uuid = 0;
+    //store the own ubo (uniform buffer object)
+    unsigned int ubo = 0;
+    //store the position of the uniform block index
+    int uboIndex = -1;
+    //store the own object data
+    ObjectData objData;
     //store if the object is fully transparent
     bool fullyTransparent = false;
     //store the index of the window the object is used in
     int windowIndex = -1;
-
-    //compile the draw list
-    void compileBuffers();
 
     //recalculate the move matrix
     void recalculateMatrices();
@@ -463,6 +652,11 @@ private:
     void getLightUniforms();
     //load the light uniforms to the shader
     void loadLights();
+
+    /**
+     * @brief the draw function if this is a shadow pass
+     */
+    void shadowDraw();
 };
 
 /**
@@ -536,7 +730,7 @@ public:
      * 
      * @param position the new position for the camera
      */
-    void set(vec3 position);
+    void setPos(vec3 position);
 
     /**
      * @brief position the camera new
@@ -545,7 +739,7 @@ public:
      * @param y the new y position for the camera
      * @param z the new z position for the camera
      */
-    void set(float x, float y, float z);
+    void setPos(float x, float y, float z);
 
     /**
      * @brief move the camera
@@ -575,22 +769,23 @@ public:
      * 
      * @param rotation the new rotation for the camera
      */
-    void setRotation(vec2 rotation);
+    void setRot(vec3 rotation);
 
     /**
      * @brief Set the Rotation of the camera
      * 
      * @param x the x rotation for the camera
      * @param y the y rotation for the camera
+     * @param z the z rotation for the camera
      */
-    void setRotation(float x, float y);
+    void setRot(float x, float y, float z);
 
     /**
      * @brief rotate the camera
      * 
      * @param deltaRotation the difference for the rotation
      */
-    void rotate(vec2 deltaRotation);
+    void rotate(vec3 deltaRotation);
 
     /**
      * @brief rotate the camera
@@ -656,13 +851,6 @@ public:
      * @return float* a pointer to the transformation matrix
      */
     float* getTransformMatPointer();
-    
-    /**
-     * @brief Get a pointer to the view matrix
-     * 
-     * @return float* a pointer to the view matrix
-     */
-    float* getViewMatrixPointer();
 
     /**
      * @brief Get the view matrix
@@ -685,7 +873,36 @@ public:
      */
     unsigned int getWindowIndex();
 
+    /**
+     * @brief make the camera ready to draw from this perspective
+     */
+    void readyForDraw();
+
 private:
+    /**
+     * @brief the data that should be send to the GPU
+     */
+    struct CameraData
+    {
+        //store the whole camera matrix
+        mat4 camMat;
+        //store the projection matrix
+        mat4 projMat;
+        //store the transformation matrix
+        mat4 transMat;
+        //store the rotation matrix
+        mat4 rotMat;
+        //store the camera position
+        vec3 pos;
+        //store the field of view
+        float fov;
+        //store the camera rotation
+        vec3 rot;
+        //store the far clipping plane
+        float far;
+        //store the near clipping plane
+        float near;
+    };
     //store the right direction of the camera
     vec4 right = vec4(1,0,0,0);
     //store the left direction of the camera
@@ -698,38 +915,19 @@ private:
     vec4 forward = vec4(0,0,1,0);
     //store the backwards direction of the camera
     vec4 backward = vec4(0,0,-1,0);
-    //store the position of the camera in camera space
-    vec4 position = vec4(0,0,0,1);
-    //store the field of view for the camera
-    float fov = 90.f;
-    //store the near cliping plane
-    float near = 0.1f;
-    //store the far cliping plane
-    double far = 10.0;
     //store the transform of the camera
     Transform transf;
-    //store the rotation matrix
-    mat4 rotMat = mat4(1,0,0,0,
-                       0,1,0,0,
-                       0,0,1,0,
-                       0,0,0,1);
-    //store the transformation matrix
-    mat4 transMat = mat4(1,0,0,0,
-                         0,1,0,0,
-                         0,0,1,0,
-                         0,0,0,1);
     //store the window index the camera is bound to
     unsigned int windowIndex = -1;
+    //store the camera data
+    CameraData camData;
+    //store the ubo
+    unsigned int ubo;
 
     //store the location of the exposure
     unsigned int expLoc;
     //store the exposure
     float exposure = 0.1;
-
-    //store the view matrix
-    mat4 viewMatrix;
-    //store the projection matrix
-    mat4 projectionMatrix;
 
     //calculate the view matrix
     void calculateViewMatrix();
@@ -755,6 +953,5 @@ void glgeBindCamera(Camera* camera);
  * this function initalises all values to draw 3D things
  */
 void glgeInit3DCore();
-
 
 #endif

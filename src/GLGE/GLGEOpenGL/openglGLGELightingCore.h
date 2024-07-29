@@ -15,23 +15,70 @@
 
 //include the needed math librarys
 #include "../CML/CMLVec3.h"
+//include GLGE
+#include "openglGLGE.h"
 
 //declare the base lighting shaders
 
-//default Lighting, for not so strong devicesred
-#define GLGE_LIGHT_SHADER_LOW std::string("#version 300 es\nprecision mediump float;out vec4 FragColor;in vec4 color;in vec2 texCoord;in vec3 normal;in vec3 currentPosition;uniform sampler2D Texture;uniform vec3 cameraPos;vec3 lightColor = vec3(1,1,1);vec3 lightPos = vec3(2,5,0);float ambient = 0.1;float specLight = 0.5;void main(){vec4 col = texture(Texture, texCoord);vec3 Normal = normalize(normal);vec3 lightDir = normalize(lightPos - currentPosition);vec3 viewDir = normalize(cameraPos - currentPosition);float diffuse = max(dot(normal, lightDir), 0.f);vec3 viewDirection = normalize(cameraPos - currentPosition);vec3 reflectionDirection = reflect(-lightDir, Normal);float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16.f);float specular = specAmount * specLight;FragColor = col * vec4(lightColor,1.f) * (diffuse + ambient + specular);FragColor.w = col.w;}")
+/**
+ * @brief default Lighting, for not so strong devicesred
+ */
+#define GLGE_LIGHT_SHADER_LOW std::string("#version 450 core\nprecision mediump float;out vec4 FragColor;in vec4 color;in vec2 texCoord;in vec3 normal;in vec3 currentPosition;uniform sampler2D Texture;uniform vec3 cameraPos;vec3 lightColor = vec3(1,1,1);vec3 lightPos = vec3(2,5,0);float ambient = 0.1;float specLight = 0.5;void main(){vec4 col = texture(Texture, texCoord);vec3 Normal = normalize(normal);vec3 lightDir = normalize(lightPos - currentPosition);vec3 viewDir = normalize(cameraPos - currentPosition);float diffuse = max(dot(normal, lightDir), 0.f);vec3 viewDirection = normalize(cameraPos - currentPosition);vec3 reflectionDirection = reflect(-lightDir, Normal);float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16.f);float specular = specAmount * specLight;FragColor = col * vec4(lightColor,1.f) * (diffuse + ambient + specular);FragColor.w = col.w;}")
 
-//define the limit an light sources for the defalut shader
+/**
+ * @brief define the limit an light sources for the defalut shader
+ */
 #define GLGE_LIGHT_SOURCE_MAX 128
 
-//define a light as a single point of light
+/**
+ * @brief define a light as a single point of light
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_POINT 0
 
-//define a light as a single point of light in an direction
+/**
+ * @brief define a light as a single point of light in an direction
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_SPOT 1
 
-//define a light as a light that shines in an direction
+/**
+ * @brief define a light as a light that shines in an direction
+ */
 #define GLGE_LIGHT_SOURCE_TYPE_DIRECTIONAL 2
+
+/**
+ * @brief describes how the data looks that is transferd to the GPU
+ */
+struct LightData
+{
+    /**
+     * @brief store the light color (w for intensity)
+     */
+    vec4 color = vec4(0);
+    /**
+     * @brief store the light direction
+     */
+    vec3 dir = vec3(0);
+    /**
+     * @brief store the intense angle
+     */
+    float intAngle = 0;
+    /**
+     * @brief store the light position
+     */
+    vec3 pos = vec3(0);
+    /**
+     * @brief store the angle
+     */
+    float angle = 0;
+    /**
+     * @brief store the light position matrix
+     */
+    mat4 lightSpaceMat;
+    /**
+     * @brief store the light source type
+     */
+    int type = 0;
+};
 
 /**
  * @brief store a light in the scene
@@ -65,7 +112,7 @@ public:
      * @param angle the angle for a spot light in degrees
      * @param intensity the strength of the light source
      */
-    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float angle = 45, float intensity = 1.f);
+    Light(vec3 pos, vec3 dir, unsigned int type, vec3 color = vec3(1,1,1), float angle = 0.79, float intensity = 1.f);
 
     /**
      * @brief Construct a new Light source
@@ -203,18 +250,6 @@ public:
     float getInsensity();
 
     /**
-     * @brief bind the shadow map for this light
-     */
-    void bindShadowMap();
-
-    /**
-     * @brief bind the shadow map texture
-     * 
-     * @param samplerID the id of the OpenGL sampler it should be bound to
-     */
-    void bindShadowMapTexture(int samplerID);
-
-    /**
      * @brief Set the type of the light source
      * 
      * @param type the type of the light source
@@ -270,27 +305,89 @@ public:
      */
     float getIntenseAngle();
 
+    /**
+     * @brief encode the data of this object into some data
+     */
+    Data* encode();
+    /**
+     * @brief decode the object from data
+     * 
+     * @param data the data to decode from
+     */
+    void decode(Data data);
+
+    /**
+     * @brief Get the matrix to transform anything into light space
+     * 
+     * @return mat4 the light space matrix
+     */
+    mat4 getLightMat();
+
+    /**
+     * @brief make this the current shadow caster
+     */
+    void makeCurrentShadowCaster();
+
+    /**
+     * @brief Get the Shadow Map handler
+     * 
+     * @return int the shadow map handler
+     */
+    int getShadowMap();
+
+    /**
+     * @brief bind the shadow map texture
+     */
+    void bind();
+
+    /**
+     * @brief unbind the shadow map texture
+     */
+    void unbind();
+
+    /**
+     * @brief Get the data from the light that should be send to the GPU
+     * 
+     * @return LightData the data for the GPU
+     */
+    LightData getLightData();
+
+    /**
+     * @brief get if the light should update
+     * 
+     * @return true : the light data should update | 
+     * @return false : the light data dosn't needs to be updated
+     */
+    bool shouldUpdate();
+
+    /**
+     * @brief say that the update is done
+     */
+    void updateDone();
+
+    /**
+     * @brief say that an update should be done
+     */
+    void queueUpdate();
+
 private:
-    //store the light position
-    vec3 pos;
-    //store the light color
-    vec3 color;
-    //store the light direction
-    vec3 dir = vec3(0);
-    //store the light intensity
-    float lightIntensity;
-    //store the shadow map for the light
+    //store the lights data
+    LightData lightDat;
+    //store the shadow depth map
+    unsigned int shadowDepth;
+    //store the shadow map texture
+    unsigned int shadowMapTex;
+    //store the shadow map FBO
     unsigned int shadowFBO;
-    //store the shadow map cube texture
-    unsigned int shadowMap;
-    //store the light source type
-    int lightType = -1;
-    //store the spot light angle
-    float angle = 0.f;
-    //store the intense angle for the spot light
-    float intAngle = -1.f;
-    //setup the shadow map
+    //store the shadow map texture unit
+    unsigned int texUnit;
+    //store if an update is needed
+    bool needsUpdate;
+    /**
+     * @brief initalises the shadow map
+     */
     void setupShadowMap();
+    void updateLightMat();
 };
 
 /**

@@ -8,7 +8,14 @@
 class ivec2
 {
 public:
-    int x,y;
+    /**
+     * @brief the x component of the vector
+     */
+    int x,
+    /**
+     * @brief the y component of the vector
+     */
+    y;
 
     /**
      * @brief default construcotr
