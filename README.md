@@ -22,6 +22,7 @@ Often causes for GL_INVALIDE_OPERATION:
 - Drawing an empty object
 
 ## Installation
+**Run setup.bash for a simple setup, if you just want to start developing with the default settings**
 To install GLGE, download the source code or clone the project. Make sure to install following librarys:
 - OpenGL
    - Linux: `sudo apt install libgl-dev`
@@ -39,10 +40,10 @@ To install all librarys on linux, just run `make install` in the project directo
 
 **Superuser access is requred to install the librarys, but not to compile and run any GLGE applications**
    
-also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise
+also make sure that you have C++ 17 or newer installed and that you have a C++ compiler of your choise (the makefile is configured to work with gcc)
 
 ## Compiling
-In the moment there is only a makefile set up for the GNU C/C++ Compiler. To set up your compiler of choise, see [this Section](https://github.com/DM8AT/GLGE/tree/dev?tab=readme-ov-file#seting-up-an-own-compiler)
+In the moment there is only a makefile set up for the GNU C/C++ Compiler. 
 ### Using the makefile
 The makefile in the root directory of this project is set up for the GNU C/C++ under Linux. You can try compiling with the same compiler under another operating system, but I'm not sure if it will work. It defenetly dosn't work with another compiler. You must create **two new directorys** when using the makefile. The first is called **"bin"**. There, the output files like static librarys and executables will be stored. The other is **"build"**. There, all the intermediate object files will be stored. 
 #### Compiling the library
