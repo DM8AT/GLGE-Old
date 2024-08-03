@@ -2,7 +2,12 @@
 
 precision mediump float;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 Albedo;
+layout(location = 1) out vec4 Normal;
+layout(location = 2) out vec4 Position;
+layout(location = 3) out vec4 Roughness;
+layout(location = 5) out vec4 DepthAndAlpha;
+
 in vec4 fColor;
 in vec2 fTexCoord;
 
@@ -15,5 +20,9 @@ void main()
     col.rgb += fColor.rgb;
     col.w *= fColor.w;
 
-    FragColor = col;
+    Albedo = col;
+    Normal = vec4(0,0,0,1);
+    Position = vec4(0,0,0,1);
+    Roughness = vec4(0,0,0,1);
+    DepthAndAlpha = vec4(0,0,0,1);
 }

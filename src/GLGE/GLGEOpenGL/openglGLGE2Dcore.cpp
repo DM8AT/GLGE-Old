@@ -601,8 +601,8 @@ void Object2D::draw()
         //if not, return
         return;
     }
-    //disable depth testing
-    glDisable(GL_DEPTH_TEST);
+    //enable depth testing
+    glEnable(GL_DEPTH_TEST);
     //enable color blending
     glEnable(GL_BLEND);
     //setup the blending
