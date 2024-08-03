@@ -69,10 +69,6 @@ Object2D* speedIndicator;
 void mainDraw()
 {
     /**
-     * @brief draw the speed indicator
-     */
-    speedIndicator->draw();
-    /**
      * @brief draw the planet
      */
     planet->draw();
@@ -84,6 +80,10 @@ void mainDraw()
      * @brief draw the planet's core
      */
     core->draw();
+    /**
+     * @brief draw the speed indicator
+     */
+    speedIndicator->draw();
 }
 
 /**
