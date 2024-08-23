@@ -2,7 +2,7 @@
 GLGE is a C++ graphics library for creating 2D and 3D graphics. 
 
 ## Information about the current developement
-I am currently working on a major re-write of the backend and for this purpos I am developing a new Class-Wraper around OpenGL. It may take some time before the update is ready, so please stand patient. The developement is not discontinued. 
+I am currently working on a major re-write of the backend and for this purpos I am developing a new [Class-Wraper around OpenGL](https://github.com/DM8AT/ObjectGL). It may take some time before the update is ready, so please stand patient. The developement is not discontinued. 
 
 ## Examples
 Example code is provided in the files 2DTest.hpp, 2DTest.cpp, 3DTest.hpp, and 3DTest.cpp. 
