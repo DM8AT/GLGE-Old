@@ -1,3 +1,6 @@
+# IMPORTANT NOTE
+This is a old version of GLGE. For the newset version, please see [here](https://github.com/DM8AT/GLGE). 
+
 # GLGE
 GLGE is a C++ graphics library for creating 2D and 3D graphics. 
 
